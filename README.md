@@ -1,4 +1,4 @@
-VirtualPlants.github.io
-=======================
+devel-website
+=============
 
-VirtualPlants Website
+Repository to store development tips
