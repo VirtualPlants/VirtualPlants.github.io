@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.plugins.applet &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.plugins.applet</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===========================</span>
+<span class="sd">Applet plugin documentation</span>
+<span class="sd">===========================</span>
+
+<span class="sd">To define an applet plugin, you must</span>
+<span class="sd">  #. write an AppletPlugin class that respects IPluginApplet interface (see below)</span>
+<span class="sd">  #. add it to group &quot;oalab.applet&quot;</span>
+
+<span class="sd">1. Copy paste this code and fill it with right names and instructions.</span>
+<span class="sd">(replace all xyz, respecting case, with your applet name).</span>
+<span class="sd">For example Xyz -&gt; HelpApplet</span>
+
+
+<span class="sd">.. code-block :: python</span>
+
+<span class="sd">    from openalea.vpltk.plugin import Plugin</span>
+
+<span class="sd">    class PluginXyz(Plugin):</span>
+
+<span class="sd">        name = &#39;Xyz&#39;</span>
+<span class="sd">        alias = &#39;Xyz&#39;</span>
+
+<span class="sd">        def __call__(self, mainwindow):</span>
+<span class="sd">            # Write your code here</span>
+
+<span class="sd">        def instance(self):</span>
+<span class="sd">            # Write your code here</span>
+
+
+<span class="sd">2. Once this class has been written, just register it in the setup.py file of</span>
+<span class="sd">your python package.</span>
+
+<span class="sd">.. code-block :: python</span>
+
+<span class="sd">    entry_points={</span>
+<span class="sd">        &#39;oalab.applet&#39;: [</span>
+<span class="sd">            &#39;Xyz = mypackage.plugins:PluginXyz&#39;,</span>
+<span class="sd">            ]</span>
+<span class="sd">        }</span>
+
+
+<span class="sd">With **mypackage.plugins** python module path (equivalent to &#39;mypackage/plugins.py&#39;) and</span>
+<span class="sd">&#39;PluginXyz&#39; the class name.</span>
+
+<span class="sd">Details</span>
+<span class="sd">=======</span>
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.applet.IPluginApplet</span>
+<span class="sd">    :members: __call__, instance, name, alias</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span>
+<span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="n">IInterface</span>
+
+<span class="k">class</span> <span class="nc">IApplet</span><span class="p">(</span><span class="n">IInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autonomous Graphical component</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optional method, called after instantiation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IPluginApplet"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin.html#openalea.oalab.plugins.applet.IPluginApplet">[docs]</a><span class="k">class</span> <span class="nc">IPluginApplet</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Graphical component displayed in main window.</span>
+<span class="sd">    Component must respect :class:`~openalea.oalab.plugins.applet.IApplet` interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;AppletName&#39;</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;Applet alias&#39;</span>
+
+<div class="viewcode-block" id="IPluginApplet.__call__"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin.html#openalea.oalab.plugins.applet.IPluginApplet.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainwindow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load and instantiate graphical component that actually provide feature.</span>
+<span class="sd">        Then, place it in mainwindow (QMainWindow).</span>
+
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. code-block :: python</span>
+
+<span class="sd">            from mypackage import MyApplet</span>
+
+<span class="sd">            self._applet = MyApplet()</span>
+<span class="sd">            if self._applet.actions():</span>
+<span class="sd">                for action in self._applet.actions():</span>
+<span class="sd">                    # Add actions in PanedMenu</span>
+<span class="sd">                    mainwindow.menu.addBtnByAction(*action)</span>
+
+<span class="sd">                    # add action in classical menu</span>
+<span class="sd">                    pane_name, group_name, act, btn_type = action</span>
+<span class="sd">                    mainwindow.add_action_to_existing_menu(action=act, menu_name=pane_name, sub_menu_name=group_name)</span>
+
+<span class="sd">            mainwindow.add_applet(self._applet, self.alias, area=&#39;inputs&#39;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IPluginApplet.instance"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin.html#openalea.oalab.plugins.applet.IPluginApplet.instance">[docs]</a>    <span class="k">def</span> <span class="nf">instance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns widget instance if plugin has been called, else None.</span>
+
+<span class="sd">        .. code-block :: python</span>
+
+<span class="sd">            return self._applet</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

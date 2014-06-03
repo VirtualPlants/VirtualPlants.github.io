@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.vpltk.control.abstractcontrolmanager &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.vpltk.control.abstractcontrolmanager</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="get_managers"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.get_managers">[docs]</a><span class="k">def</span> <span class="nf">get_managers</span><span class="p">():</span>
+    <span class="n">managers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    <span class="kn">from</span> <span class="nn">openalea.vpltk.control.pythonmanager</span> <span class="kn">import</span> <span class="n">IntManager</span>
+<span class="c">##    from openalea.lpy.gui.plugins.curve2dmanager import Curve2DManager </span>
+<span class="c">##    from openalea.lpy.gui.plugins.functionmanager import FunctionManager</span>
+<span class="c">##    from openalea.lpy.gui.plugins.nurbspatchmanager import NurbsPatchManager</span>
+    
+    <span class="n">managers</span><span class="p">[</span><span class="n">IntManager</span><span class="o">.</span><span class="n">typename</span><span class="p">]</span> <span class="o">=</span> <span class="n">IntManager</span>
+<span class="c">##    managers[Curve2DManager().typename] = Curve2DManager</span>
+<span class="c">##    managers[FunctionManager().typename] = FunctionManager</span>
+<span class="c">##    managers[NurbsPatchManager().typename] = NurbsPatchManager</span>
+    <span class="k">return</span> <span class="n">managers</span>
+
+</div>
+<div class="viewcode-block" id="get_manager"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.get_manager">[docs]</a><span class="k">def</span> <span class="nf">get_manager</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="n">managers</span> <span class="o">=</span> <span class="n">get_managers</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">managers</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    
+<span class="c">##class AbstractControl(object):</span>
+<span class="c">##    def __init__(self):</span>
+<span class="c">##        self.type = None</span>
+<span class="c">##        self.name = None</span>
+<span class="c">##        self.object = None</span>
+<span class="c">##        </span>
+<span class="c">##    def createDefault(self):    </span>
+<span class="c">##        self.type = &quot;int&quot;</span>
+<span class="c">##        self.name = &quot;my_int&quot;</span>
+<span class="c">##        self.object = 42</span>
+<span class="c">##        </span>
+<span class="c">##    def thumbnail(self):</span>
+<span class="c">##        pass</span>
+<span class="c">##        </span>
+<span class="c">##    def editor(self):</span>
+<span class="c">##        pass</span>
+<span class="c">##        </span>
+<span class="c">##    def dblClick(self):</span>
+<span class="c">##        pass</span>
+<span class="c">##        </span>
+<span class="c">##    def reprProtocol(self):</span>
+<span class="c">##        pass</span>
+        
+    </div>
+<div class="viewcode-block" id="AbstractControlManager"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.AbstractControlManager">[docs]</a><span class="k">class</span> <span class="nc">AbstractControlManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &#39;typename&#39; is the type of control that is manage by this control manager.</span>
+<span class="sd">    It can be a python type (ex: &#39;int&#39;) or something else (ex: &#39;Curve2D&#39;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">typename</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param name: of the control</span>
+<span class="sd">        :param object: value of the control</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="nb">object</span>
+        
+<div class="viewcode-block" id="AbstractControlManager.thumbnail"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.AbstractControlManager.thumbnail">[docs]</a>    <span class="k">def</span> <span class="nf">thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Permit to display a thumbnail of the control.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: widget to display</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;thumbnail&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="AbstractControlManager.editor"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.AbstractControlManager.editor">[docs]</a>    <span class="k">def</span> <span class="nf">editor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Permit to edit the control.</span>
+<span class="sd">        </span>
+<span class="sd">        Launch edition (inside the thumbnail or in a new widget)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;editor&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="AbstractControlManager.dblClick"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.AbstractControlManager.dblClick">[docs]</a>    <span class="k">def</span> <span class="nf">dblClick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connect double click with edition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+        </div>
+<div class="viewcode-block" id="AbstractControlManager.repr"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.control.html#openalea.vpltk.control.abstractcontrolmanager.AbstractControlManager.repr">[docs]</a>    <span class="k">def</span> <span class="nf">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: string representation of the control to write it on the disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+        
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+<span class="c">##    &quot;&quot;&quot; Manage a type of data. Make it possible to name it, display it as thumbnail and edit it&quot;&quot;&quot;</span>
+<span class="c">##    def __init__(self, typename = None):</span>
+<span class="c">##        &quot;&quot;&quot;We need the name of the object managed by the editor to link the manager with the right Editor&quot;&quot;&quot;</span>
+<span class="c">##        QtCore.QObject.__init__(self)</span>
+<span class="c">##        self.typename =  typename</span>
+<span class="c">##        </span>
+<span class="c">##    def setName(self,obj,name):</span>
+<span class="c">##        obj.name=name</span>
+<span class="c">##</span>
+<span class="c">##    def getName(self,obj):</span>
+<span class="c">##        return obj.name</span>
+<span class="c">##</span>
+<span class="c">##    def displayThumbnail(self,obj,id,mode,objectthumbwidth):</span>
+<span class="c">##        &quot;&quot;&quot; display of an object in the Lpy main window Panel, </span>
+<span class="c">##            :param obj: the object to display</span>
+<span class="c">##            :param id: id of the object in the list</span>
+<span class="c">##            :param mode: define if object has mode, </span>
+<span class="c">##            :param thumbwidth: width of the thumbnail representing the object in the panel</span>
+<span class="c">##            :param objectthumbwidth: width for the representation of the object in the panel</span>
+<span class="c">##            Should be reimplemented</span>
+<span class="c">##        &quot;&quot;&quot;</span>
+<span class="c">##        raise NotImplementedError(&#39;displayThumbnail&#39;)</span>
+<span class="c">##            </span>
+<span class="c">##    def reset(self,obj):</span>
+<span class="c">##        return self.createDefaultObject()</span>
+<span class="c">##        </span>
+<span class="c">##    def getEditor(self,parent_widget):</span>
+<span class="c">##        &quot;&quot;&quot; ask for creation of editor. Should be reimplemented &quot;&quot;&quot;</span>
+<span class="c">##        raise NotImplementedError(&#39;getEditor&#39;)</span>
+<span class="c">##</span>
+<span class="c">##    def fillEditorMenu(self,menubar,editor):</span>
+<span class="c">##        &quot;&quot;&quot; Function call to fill the menu of the editor &quot;&quot;&quot;</span>
+<span class="c">##        pass</span>
+<span class="c">##        </span>
+<span class="c">##    def setObjectToEditor(self,editor,obj):</span>
+<span class="c">##        &quot;&quot;&quot; ask for edition of obj with editor. Should be reimplemented &quot;&quot;&quot;</span>
+<span class="c">##        raise NotImplementedError(&#39;setObjectToEditor&#39;)</span>
+<span class="c">##</span>
+<span class="c">##    def retrieveObjectFromEditor(self,editor):</span>
+<span class="c">##        &quot;&quot;&quot; ask for current value of object being edited &quot;&quot;&quot;</span>
+<span class="c">##        raise NotImplementedError(&#39;startObjectEdition&#39;)</span>
+<span class="c">##    </span>
+<span class="c">##    def defaultObjectTypes(self):</span>
+<span class="c">##        &quot;&quot;&quot; ask for type of object managed by this manager. Several are possible. None means that typename should be used. &quot;&quot;&quot;</span>
+<span class="c">##        return None</span>
+<span class="c">##        </span>
+<span class="c">##    def createDefaultObject(self, objtype = None):</span>
+<span class="c">##        &quot;&quot;&quot; </span>
+<span class="c">##        create a default object of the type handled by the manager.</span>
+<span class="c">##        requires instanciate a new item in the panel.</span>
+<span class="c">##        Should be reimplemented</span>
+<span class="c">##        &quot;&quot;&quot;</span>
+<span class="c">##        raise NotImplementedError(&#39;createDefaultObject&#39;)</span>
+<span class="c">##        </span>
+<span class="c">##    def initWriting(self,indentation):</span>
+<span class="c">##        return &#39;&#39;</span>
+<span class="c">##        </span>
+<span class="c">##    def writeObject(self,obj,indentation):</span>
+<span class="c">##        &quot;&quot;&quot;</span>
+<span class="c">##        :return: representation of object to write</span>
+<span class="c">##        &quot;&quot;&quot;</span>
+<span class="c">##        raise NotImplementedError(&#39;writeObject&#39;)</span>
+<span class="c">##    </span>
+<span class="c">##    def writeObjectToLsysContext(self,obj):</span>
+<span class="c">##        return obj.name</span>
+<span class="c">##    </span>
+<span class="c">##    def canImportData(self,fname):</span>
+<span class="c">##        return False</span>
+<span class="c">##    </span>
+<span class="c">##    def importData(self,fname):</span>
+<span class="c">##        raise NotImplementedError(&#39;importData&#39;)</span>
+<span class="c">##    </span>
+<span class="c">##    def completeContextMenu(self,menu,obj,widget):</span>
+<span class="c">##        pass</span>
+<span class="c">##    </span>
+<span class="c">##    def managePrimitive(self):</span>
+<span class="c">##        return False</span>
+<span class="c">##    </span>
+<span class="c">##    def getTheme(self):</span>
+<span class="c">##        &quot;&quot;&quot; get the color theme currenlty used &quot;&quot;&quot;</span>
+<span class="c">##        return {}</span>
+<span class="c">##    </span>
+<span class="c">##    def setTheme(self,theme):</span>
+<span class="c">##        &quot;&quot;&quot; get the color theme acccording to the theme dict &quot;&quot;&quot;</span>
+<span class="c">##        pass</span>
+<span class="c">##    </span>
+<span class="c">##    </span>
+<span class="c">##    </span>
+<span class="c">##    </span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

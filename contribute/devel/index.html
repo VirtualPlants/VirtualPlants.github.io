@@ -1,0 +1,530 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Development guidelines &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../index.html" />
+    <link rel="next" title="Development documents" href="../../latest/dev/index.html" />
+    <link rel="prev" title="Enhance documentation" href="../todo/index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../latest/dev/index.html" title="Development documents"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../todo/index.html" title="Enhance documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="development-guidelines">
+<h1>Development guidelines<a class="headerlink" href="#development-guidelines" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="indentation">
+<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline">¶</a></h2>
+<p>Don&#8217;t mix tab and spaces. For new project, use only spaces.</p>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>Add a Doctring for all classes and functions.</p>
+</div>
+<div class="section" id="naming">
+<h2>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h2>
+<p><strong>Modules or packages</strong></p>
+<p>Module names are the same as the file name. Modules should have short, lowercase names, without underscore. Singular is better than plural.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Yes:</span>
+<span class="kn">import</span> <span class="nn">tree</span>
+
+<span class="c"># No:</span>
+<span class="kn">import</span> <span class="nn">Tree</span>
+</pre></div>
+</div>
+<p>For C/C++/Fortran extension modules embedded in a Python package that provide a more Pythonic interface, the C/C++/Fortran module has a leading underscore (e.g. _amlpymodule).</p>
+<p><strong>Class Names</strong></p>
+<p>Class names use the CapsWords convention.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
+   <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Class Methods and Function Names</strong></p>
+<p>Class methods and function names should be lowercase, with words separated by underscores.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">this_is_a_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">ClassName</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">class_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Exception Names</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">VertexError</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Whitespace in Expressions and Statements</strong></p>
+<p>Avoid extraneous whitespace in the following situations:</p>
+<p>Immediately inside parentheses, brackets or braces.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Yes:</span>
+<span class="n">spam</span><span class="p">(</span><span class="n">ham</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">{</span><span class="n">eggs</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+
+<span class="c"># No:</span>
+<span class="n">spam</span><span class="p">(</span> <span class="n">ham</span><span class="p">[</span> <span class="mi">1</span> <span class="p">],</span> <span class="p">{</span> <span class="n">eggs</span><span class="p">:</span> <span class="mi">2</span> <span class="p">}</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Immediately before a comma, semicolon, or colon:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Yes:</span>
+<span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span>
+
+<span class="c"># No:</span>
+<span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">4</span> <span class="p">:</span>
+    <span class="k">print</span> <span class="n">x</span> <span class="p">,</span> <span class="n">y</span>
+    <span class="n">x</span> <span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="p">,</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p>Immediately before the open parenthesis that starts the argument list of a function call:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Yes:</span>
+<span class="n">spam</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="c"># No:</span>
+<span class="n">spam</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Immediately before the open parenthesis that starts an indexing or slicing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Yes:</span>
+<span class="nb">dict</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+<span class="c"># No:</span>
+<span class="nb">dict</span> <span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Use spaces around arithmetic operators:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Yes:</span>
+
+<span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">submitted</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">hypot2</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span>
+<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="c"># No:</span>
+
+<span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+<span class="n">submitted</span> <span class="o">+=</span><span class="mi">1</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">hypot2</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span>
+<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Don&#8217;t use spaces around the &#8216;=&#8217; sign when used to indicate a keyword argument or a default parameter value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#Yes:</span>
+
+<span class="k">def</span> <span class="nf">complex</span><span class="p">(</span><span class="n">real</span><span class="p">,</span> <span class="n">imag</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">magic</span><span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="n">real</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">imag</span><span class="p">)</span>
+
+<span class="c">#No:</span>
+
+<span class="k">def</span> <span class="nf">complex</span><span class="p">(</span><span class="n">real</span><span class="p">,</span> <span class="n">imag</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">magic</span><span class="p">(</span><span class="n">r</span> <span class="o">=</span> <span class="n">real</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">imag</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="property">
+<h3>Property<a class="headerlink" href="#property" title="Permalink to this headline">¶</a></h3>
+<p>Use property instead of get, set methods. Hide get and set methods with a leading underscore. Classes with properties have to inherit from object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Ok, new style</span>
+
+<span class="k">class</span> <span class="nc">Tree</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span>
+
+    <span class="nd">@property.setter</span>
+    <span class="k">def</span> <span class="nf">root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">root</span>
+
+
+<span class="c"># Ok, old style</span>
+
+<span class="k">class</span> <span class="nc">Tree</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span>
+    <span class="k">def</span> <span class="nf">_set_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_root</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">_root</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_root</span><span class="p">,</span> <span class="n">_set_root</span><span class="p">)</span>
+
+
+<span class="c"># No:</span>
+<span class="k">class</span> <span class="nc">Tree</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span>
+    <span class="k">def</span> <span class="nf">set_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_root</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">_root</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_root</span><span class="p">,</span><span class="n">set_root</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="arborescence">
+<h2>Arborescence<a class="headerlink" href="#arborescence" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="plugins">
+<h3>plugins<a class="headerlink" href="#plugins" title="Permalink to this headline">¶</a></h3>
+<p>Plugin classes (factories):</p>
+<div class="highlight-text-only"><div class="highlight"><pre>mypackage/plugins/groupnames/abc.py
+mypackage/plugins/groupnames/xyz.py
+</pre></div>
+</div>
+<p>abc.py contains class PluginAbc.</p>
+<p>For example:</p>
+<div class="highlight-text-only"><div class="highlight"><pre>oalab/plugins/applets/helpwidget.py (class HelpWidget)
+</pre></div>
+</div>
+<p>If your package defines a new group of plugin, just add a &#8220;groupname.py&#8221; module
+to describe it (documentation, interfaces, ...)</p>
+<div class="highlight-text-only"><div class="highlight"><pre>mypackage/plugins/groupname.py
+</pre></div>
+</div>
+<p>For example:</p>
+<div class="highlight-text-only"><div class="highlight"><pre>oalab/plugins/applet.py (contains IPluginApplet)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="c-specific-coding-guidelines">
+<h2>C++ specific Coding Guidelines<a class="headerlink" href="#c-specific-coding-guidelines" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="general-practices">
+<h3>General Practices<a class="headerlink" href="#general-practices" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li>Write warning free code. What generates a warning on one platform will generate errors on another.</li>
+<li>Don&#8217;t use NULL for pointers. Use 0 instead.</li>
+<li>Don&#8217;t compare == &#8216;true&#8217; or &#8216;false&#8217;. Use (x) or (!x) instead.</li>
+<li>Don&#8217;t put an else right after a return.</li>
+<li>Use Doxygen markup language in any new class header files.</li>
+<li>Forward declare classes in your header files instead of including them whenever possible.</li>
+<li>Use smart pointers instead of raw pointers.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="code-layout">
+<h3>Code Layout<a class="headerlink" href="#code-layout" title="Permalink to this headline">¶</a></h3>
+<p><strong>Indentation</strong></p>
+<p>Use 4 spaces per indentation level. Do not use tabs.</p>
+</div>
+<div class="section" id="id1">
+<h3>Naming<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p><strong>Functions</strong></p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="kt">int</span> <span class="n">fct</span><span class="p">(</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span> <span class="p">)</span>
+    <span class="p">{</span>
+    <span class="c1">// ...</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Loops</strong></p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="k">for</span><span class="p">(</span> <span class="kt">int</span> <span class="n">i</span><span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span> <span class="p">)</span>
+    <span class="p">{</span>
+    <span class="c1">// ...</span>
+    <span class="p">}</span>
+
+<span class="k">while</span><span class="p">(</span> <span class="n">cond</span> <span class="p">)</span>
+    <span class="p">{</span>
+    <span class="c1">// ...</span>
+    <span class="p">}</span>
+
+<span class="k">do</span><span class="p">{</span>
+  <span class="c1">//...</span>
+  <span class="p">}</span>
+
+<span class="k">while</span><span class="p">(</span> <span class="n">cond</span> <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="public-development-on-github">
+<h1>Public development on github<a class="headerlink" href="#public-development-on-github" title="Permalink to this headline">¶</a></h1>
+<p>The workflow describe here is mainly inspired from
+IPython development workflow and especially from a
+Fernando Perez message (unfortunatly these links are no more available).</p>
+<p>Steps to follow are :</p>
+<blockquote>
+<div><ul class="simple">
+<li>configure git and github</li>
+<li>fork github project you want to work on</li>
+<li>create a new //branch// with explicit name (ex: //fix_app_crash_mac_os_10_9//)</li>
+<li>work on your new branch</li>
+<li><strong>prepare your work for merging</strong></li>
+<li>submit your pull request</li>
+</ul>
+</div></blockquote>
+<div class="section" id="configure-git">
+<h2>Configure git<a class="headerlink" href="#configure-git" title="Permalink to this headline">¶</a></h2>
+<p>&#8220;&#8211;global&#8221; refer to your username on your computer. <strong>So you need to config only once for you.</strong></p>
+<p>If you want a specific config for a specific project, please use &#8220;&#8211;local&#8221;</p>
+<div class="highlight-bash"><div class="highlight"><pre>git config --global user.name <span class="s2">&quot;my name&quot;</span>
+git config --global user.email myemail@foo.com
+git config --global push.default simple
+git config --global core.editor &lt;your_favorite_editor&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="log-on-github">
+<h2>Log on github<a class="headerlink" href="#log-on-github" title="Permalink to this headline">¶</a></h2>
+<p>To start, you must create a github account and log in.</p>
+</div>
+<div class="section" id="fork-github-project">
+<h2>Fork github project<a class="headerlink" href="#fork-github-project" title="Permalink to this headline">¶</a></h2>
+<p>On git, you <strong>never work directly on official repository</strong> but only on your personal repository.
+Do do that, you must create a clone of the repository (a &#8220;fork&#8221;) on your personal area just by clicking on <strong>fork button</strong>.</p>
+<p>You can see in top-left corner :</p>
+<blockquote>
+<div>yourname/project
+forked from othername/project</div></blockquote>
+<p>Now, clone it on your computer.
+Just copy url displayed on your web browser and pass it to git clone command:</p>
+<div class="highlight-bash"><div class="highlight"><pre>git clone https://github.com/yourname/project
+</pre></div>
+</div>
+<p>Add a reference to official repository.
+.. code-block:: bash</p>
+<blockquote>
+<div>git remote add upstream <a class="reference external" href="https://github.com/official/project">https://github.com/official/project</a></div></blockquote>
+</div>
+<div class="section" id="create-development-branch">
+<h2>Create development branch<a class="headerlink" href="#create-development-branch" title="Permalink to this headline">¶</a></h2>
+<p>You must create a branch for each new feature, bug fix, and so on.
+Development must be short : <strong>one branch = one task</strong></p>
+<p>Please choose an explicit name for your new branch.</p>
+<p><strong>If upstream_master do not exists yet</strong></p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream/master -b upstream_master
+git checkout -b fix_app_crash_mac_os_10_9
+</pre></div>
+</div>
+<p><strong>else</strong></p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream_master
+git pull
+git checkout -b fix_app_crash_mac_os_10_9
+</pre></div>
+</div>
+</div>
+<div class="section" id="work-on-your-development-branch">
+<h2>Work on your development branch<a class="headerlink" href="#work-on-your-development-branch" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file(s)</span>
+git commit
+git add mynewfile.py
+git commit
+<span class="c"># edit file(s)</span>
+git commit
+</pre></div>
+</div>
+<p>Save your branch and commits on your personal repository on github</p>
+<div class="highlight-bash"><div class="highlight"><pre>git push origin fix_app_crash_mac_os_10_9
+</pre></div>
+</div>
+</div>
+<div class="section" id="commit-message">
+<h2>Commit message<a class="headerlink" href="#commit-message" title="Permalink to this headline">¶</a></h2>
+<p>Please write a <a class="reference external" href="http://web-design-weekly.com/blog/2013/09/01/a-better-git-commit/">good commit message</a>:</p>
+<p>Try to limit using the -m commit flag. git commit -m &#8220;A crappy commit message&#8221; and use git commit with <strong>no flags</strong>.</p>
+<p>If using the simpler git commit command it should open up Vim (if it’s your default editor) where you can construct a better commit by following some of these simple steps.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The <strong>first line should be a short summary</strong>. Referencing the bug number or the main accomplishment of the change. e.g “Fixes issue #8976″. This is the title of your commit and should be <strong>less than 50 characters</strong>.</li>
+<li>Then a <strong>line break</strong>.</li>
+<li>Followed by a <strong>longer detailed description about the things that changed</strong>. This section is a really good place to explain what and why. You could cover statistics, performance wins, roadblocks, etc. The text should be wrapped at 72 characters.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="prepare-your-work-for-merging">
+<h2>Prepare your work for merging<a class="headerlink" href="#prepare-your-work-for-merging" title="Permalink to this headline">¶</a></h2>
+<p>Before asking other to integrate your work, you must clean it.
+First get last modifications and work on a new branch created especially for cleaning.</p>
+<div class="highlight-bash"><div class="highlight"><pre>git fetch upstream
+git checkout upstream_master
+git pull
+git checkout fix_app_crash_mac_os_10_9
+git checkout -b rebased-fix_app_crash_mac_os_10_9 <span class="c"># create and checkout new branch</span>
+git rebase --interactive fix_app_crash_mac_os_10_9
+git rebase --interactive upstream_master
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre>git rebase --interactive upstream_master fix_app_crash_mac_os_10_9
+</pre></div>
+</div>
+<p>If master has diverged during your work, conflicts can occur !
+If your shell ask you to fix it directly, you should do it using &#8220;e&#8221; command.
+That works very well if you&#8217;ve defined your favorite editor.</p>
+<p>Else, fix conflicts foreach file and finish rebase :</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file1 and solve conflicts</span>
+git add file1 <span class="c"># say to git that conflict is resolved</span>
+<span class="c"># edit file2 and solve conflicts</span>
+git add file2
+git rebase --continue
+</pre></div>
+</div>
+<p>If rebase has gone wrong, for example you&#8217;ve rebased the wrong branch, you can cancel it with
+.. code-block:: bash</p>
+<blockquote>
+<div>git rebase &#8211;abort</div></blockquote>
+<p>See <a class="reference external" href="https://help.github.com/articles/interactive-rebase">git rebase &#8211;interactive</a> for further information.</p>
+<div class="highlight-bash"><div class="highlight"><pre>git push origin rebased-fix_app_crash_mac_os_10_9
+</pre></div>
+</div>
+</div>
+<div class="section" id="submit-your-pull-request">
+<h2>Submit your pull-request<a class="headerlink" href="#submit-your-pull-request" title="Permalink to this headline">¶</a></h2>
+<p>On github interface, select your branch fix_app_crash_mac_os_10_9 and click on pull-request (or compare &amp; pull-request).</p>
+<p>You must see at right :</p>
+<blockquote>
+<div>Able to merge
+These branches can be automatically merged</div></blockquote>
+<p>If it&#8217;s not the case, master has probably diverged. You must turn back to previous step and do it again.</p>
+<p>Now it is OK !
+As your branch is very clean, other developpers have absolutely nothing to do to integrate your work (except to review your changes) and so they will certainly integrate it.</p>
+</div>
+<div class="section" id="maintainer-merge-pull-request">
+<h2>Maintainer: merge pull-request<a class="headerlink" href="#maintainer-merge-pull-request" title="Permalink to this headline">¶</a></h2>
+<p>This work is done in two steps :</p>
+<blockquote>
+<div><ul class="simple">
+<li>review work (read modifications, test it, ...)</li>
+<li>integrate it (merge)</li>
+</ul>
+</div></blockquote>
+<p>To review work, just checkout pull-request. See github documentation :
+<a class="reference external" href="https://help.github.com/articles/checking-out-pull-requests-locally">Checkout pull request</a>.</p>
+<p>If pull-request is ok, just click on &#8220;merge pull-request&#8221;</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Development guidelines</a><ul>
+<li><a class="reference internal" href="#indentation">Indentation</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#naming">Naming</a><ul>
+<li><a class="reference internal" href="#property">Property</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#arborescence">Arborescence</a><ul>
+<li><a class="reference internal" href="#plugins">plugins</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#c-specific-coding-guidelines">C++ specific Coding Guidelines</a><ul>
+<li><a class="reference internal" href="#general-practices">General Practices</a></li>
+<li><a class="reference internal" href="#code-layout">Code Layout</a></li>
+<li><a class="reference internal" href="#id1">Naming</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#public-development-on-github">Public development on github</a><ul>
+<li><a class="reference internal" href="#configure-git">Configure git</a></li>
+<li><a class="reference internal" href="#log-on-github">Log on github</a></li>
+<li><a class="reference internal" href="#fork-github-project">Fork github project</a></li>
+<li><a class="reference internal" href="#create-development-branch">Create development branch</a></li>
+<li><a class="reference internal" href="#work-on-your-development-branch">Work on your development branch</a></li>
+<li><a class="reference internal" href="#commit-message">Commit message</a></li>
+<li><a class="reference internal" href="#prepare-your-work-for-merging">Prepare your work for merging</a></li>
+<li><a class="reference internal" href="#submit-your-pull-request">Submit your pull-request</a></li>
+<li><a class="reference internal" href="#maintainer-merge-pull-request">Maintainer: merge pull-request</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../todo/index.html"
+                        title="previous chapter">Enhance documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../latest/dev/index.html"
+                        title="next chapter">Development documents</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/contribute/devel/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../latest/dev/index.html" title="Development documents"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../todo/index.html" title="Enhance documentation"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

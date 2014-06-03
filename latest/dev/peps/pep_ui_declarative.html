@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PEP: Declarative Language to Design GUI &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="PEP : OpenAleaLab (Python) Enhancement Proposals" href="index.html" />
+    <link rel="next" title="Plugins" href="../archi/api_plugin.html" />
+    <link rel="prev" title="PEP: Contract Suppliers" href="pep_suppliers.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../archi/api_plugin.html" title="Plugins"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pep_suppliers.html" title="PEP: Contract Suppliers"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pep-declarative-language-to-design-gui">
+<h1>PEP: Declarative Language to Design GUI<a class="headerlink" href="#pep-declarative-language-to-design-gui" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview-of-existing-technologies">
+<h2>Overview of existing technologies<a class="headerlink" href="#overview-of-existing-technologies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="qt-qml">
+<h3>Qt QML<a class="headerlink" href="#qt-qml" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="https://qt-project.org/doc/qt-5/qmlapplications.html">QML Documentation</a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://fr.wikipedia.org/wiki/JSON">JSON like</a></li>
+<li>Wide Qt support</li>
+<li>Works with PyQt4</li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QUrl</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtGui</span> <span class="kn">import</span> <span class="n">QApplication</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtDeclarative</span> <span class="kn">import</span> <span class="n">QDeclarativeView</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+<span class="c"># Create the QML user interface.</span>
+<span class="n">view</span> <span class="o">=</span> <span class="n">QDeclarativeView</span><span class="p">()</span>
+<span class="n">view</span><span class="o">.</span><span class="n">setSource</span><span class="p">(</span><span class="n">QUrl</span><span class="p">(</span><span class="s">&#39;sample_qml.qml&#39;</span><span class="p">))</span>
+<span class="n">view</span><span class="o">.</span><span class="n">setResizeMode</span><span class="p">(</span><span class="n">QDeclarativeView</span><span class="o">.</span><span class="n">SizeRootObjectToView</span><span class="p">)</span>
+<span class="n">view</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-qml"><div class="highlight"><pre><span class="kr">import</span> <span class="nx">QtQuick</span> <span class="mf">1.0</span>
+
+<span class="nx">Item</span> <span class="p">{</span>
+    <span class="k">width:</span> <span class="mi">200</span><span class="p">;</span> <span class="k">height:</span> <span class="mi">200</span>
+
+    <span class="nx">Rectangle</span> <span class="p">{</span>
+        <span class="c1">// Anchored to 20px off the top right corner of the parent</span>
+        <span class="k">anchors.right:</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">right</span>
+        <span class="k">anchors.top:</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">top</span>
+        <span class="k">anchors.margins:</span> <span class="mi">20</span> <span class="c1">// Sets all margins at once</span>
+
+        <span class="k">width:</span> <span class="mi">80</span>
+        <span class="k">height:</span> <span class="mi">80</span>
+        <span class="k">color:</span> <span class="s2">&quot;orange&quot;</span>
+    <span class="p">}</span>
+
+    <span class="nx">Rectangle</span> <span class="p">{</span>
+        <span class="c1">// Anchored to 20px off the top center corner of the parent.</span>
+        <span class="c1">// Notice the different group property syntax for &#39;anchors&#39; compared to</span>
+        <span class="c1">// the previous Rectangle. Both are valid.</span>
+        <span class="nx">anchors</span> <span class="p">{</span> <span class="k">horizontalCenter:</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">horizontalCenter</span><span class="p">;</span> <span class="k">top:</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">top</span><span class="p">;</span> <span class="k">topMargin:</span> <span class="mi">20</span> <span class="p">}</span>
+
+        <span class="k">width:</span> <span class="mi">80</span>
+        <span class="k">height:</span> <span class="mi">80</span>
+        <span class="k">color:</span> <span class="s2">&quot;green&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ets-traitsui">
+<h3>ETS TraitsUi<a class="headerlink" href="#ets-traitsui" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="http://docs.enthought.com/traitsui/traitsui_user_manual/view.html">TraitsUi/View Manual</a>.</p>
+<p>Class View used to describe layout, widget styles and positions.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">comp_view</span> <span class="o">=</span> <span class="n">View</span><span class="p">(</span>
+    <span class="n">Group</span><span class="p">(</span>
+        <span class="n">Group</span><span class="p">(</span>
+            <span class="n">Item</span><span class="p">(</span><span class="s">&#39;h1.address&#39;</span><span class="p">,</span> <span class="n">resizable</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+            <span class="n">Item</span><span class="p">(</span><span class="s">&#39;h1.bedrooms&#39;</span><span class="p">)</span>
+            <span class="n">show_border</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">),</span>
+        <span class="n">Group</span><span class="p">(</span>
+            <span class="n">Item</span><span class="p">(</span><span class="s">&#39;h2.address&#39;</span><span class="p">,</span> <span class="n">resizable</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+            <span class="n">Item</span><span class="p">(</span><span class="s">&#39;h2.bedrooms&#39;</span><span class="p">),</span>
+            <span class="n">show_border</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">),</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="s">&#39;horizontal&#39;</span>
+    <span class="p">),</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;House Comparison&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ets-enaml">
+<h3>ETS Enaml<a class="headerlink" href="#ets-enaml" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="http://docs.enthought.com/enaml">ENAML Documentation</a>
+Idea of TraitsUi + QML.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">enamldef</span> <span class="n">PersonForm</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">attr</span> <span class="n">person</span>
+    <span class="n">Label</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&#39;First Name&#39;</span>
+    <span class="n">Field</span><span class="p">:</span>
+        <span class="n">text</span> <span class="p">:</span><span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">first_name</span>
+    <span class="n">Label</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&#39;Last Name&#39;</span>
+    <span class="n">Field</span><span class="p">:</span>
+        <span class="n">text</span> <span class="p">:</span><span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">last_name</span>
+    <span class="n">Label</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&#39;Age&#39;</span>
+    <span class="n">IntField</span><span class="p">:</span>
+        <span class="n">minimum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">value</span> <span class="p">:</span><span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">age</span>
+
+
+<span class="n">enamldef</span> <span class="n">PersonView</span><span class="p">(</span><span class="n">Window</span><span class="p">):</span>
+    <span class="n">attr</span> <span class="n">person</span>
+    <span class="n">PersonForm</span><span class="p">:</span>
+        <span class="n">person</span> <span class="p">:</span><span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">person</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="proposal">
+<h2>Proposal<a class="headerlink" href="#proposal" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="home-made-syntax">
+<h3>Home made syntax<a class="headerlink" href="#home-made-syntax" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">view</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;top&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;widgets&#39;</span><span class="p">:[</span><span class="s">&#39;Widget1&#39;</span><span class="p">,</span> <span class="s">&#39;Widget2&#39;</span><span class="p">],</span>
+        <span class="s">&#39;orientation&#39;</span><span class="p">:</span><span class="s">&#39;vertical&#39;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>First idea, QML has not been tested</p>
+<blockquote>
+<div><ul class="simple">
+<li>Use QML idea with limited properties to be easily extended to other toolkits (IPython Notebook for example)</li>
+<li>For Qt backend, implementation should be direct</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PEP: Declarative Language to Design GUI</a><ul>
+<li><a class="reference internal" href="#overview-of-existing-technologies">Overview of existing technologies</a><ul>
+<li><a class="reference internal" href="#qt-qml">Qt QML</a></li>
+<li><a class="reference internal" href="#ets-traitsui">ETS TraitsUi</a></li>
+<li><a class="reference internal" href="#ets-enaml">ETS Enaml</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#proposal">Proposal</a><ul>
+<li><a class="reference internal" href="#home-made-syntax">Home made syntax</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pep_suppliers.html"
+                        title="previous chapter">PEP: Contract Suppliers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../archi/api_plugin.html"
+                        title="next chapter">Plugins</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/peps/pep_ui_declarative.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../archi/api_plugin.html" title="Plugins"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pep_suppliers.html" title="PEP: Contract Suppliers"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

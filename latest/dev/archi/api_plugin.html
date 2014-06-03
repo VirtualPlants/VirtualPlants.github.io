@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plugins &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="next" title="Projects" href="api_project.html" />
+    <link rel="prev" title="PEP: Declarative Language to Design GUI" href="../peps/pep_ui_declarative.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api_project.html" title="Projects"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../peps/pep_ui_declarative.html" title="PEP: Declarative Language to Design GUI"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="plugins">
+<span id="label-extending-oalab"></span><h1>Plugins<a class="headerlink" href="#plugins" title="Permalink to this headline">¶</a></h1>
+<p>This document explains how to concretely extend OpenAleaLab.
+For theoretical aspects and future plans, see <a class="reference internal" href="../peps/pep_plugins.html#label-pep-plugins"><em>PEP: Plugin management</em></a>.</p>
+<div class="section" id="openalealab-plugins">
+<h2>OpenAleaLab plugins<a class="headerlink" href="#openalealab-plugins" title="Permalink to this headline">¶</a></h2>
+<p>Idea behind plugins is to extend application without modifying code of this application.
+Another important aspect is that a plugin can be load automatically by application or <strong>only on demand</strong>.
+For the second case, it is very important to keep a plugin light.</p>
+<p>Plugin mechanism can be explained by this scheme:</p>
+<p>Plugin category -&gt; Plugin identifier -&gt; Plugin (factory) -&gt; Class</p>
+<p><strong>Plugin category</strong>:
+A plugin category gather all extension providing <strong>same feature</strong> (for example, an applet in GUI).
+This category is defined using <strong>entry_point group</strong>.
+It defines implicitly that all plugins in this category adhere to a common interface.
+See &#8220;Available entry points&#8221; to know matching between groups and interfaces.</p>
+<p><strong>Plugin identifier</strong>:
+A name and a path to identify and allow to load real plugin.</p>
+<p><strong>Plugin (factory)</strong>:
+A simple class that describe component features.
+But, it is very important, that class must not import module or implement features.
+To get class implementing features, a special method called load can be used.</p>
+<p><strong>Class</strong>
+Class that actually implements features.</p>
+<div class="section" id="gui-special-feature">
+<h3>GUI special feature<a class="headerlink" href="#gui-special-feature" title="Permalink to this headline">¶</a></h3>
+<p>In particular case of graphical components, a plugin generally defines an adapter
+able to connect a graphical component (a widget for example) to a specific
+application.</p>
+<p>Example:</p>
+<p>The module called oalab.gui.help provides this help widget:</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>oalab/gui/help.py</tt></div><div class="highlight"><pre><span class="k">class</span> <span class="nc">HelpWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">openWeb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        displays url</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of 4-uple describing actions:</span>
+<span class="sd">            (&#39;pane name&#39;, &#39;group name&#39;, qaction, button_size).</span>
+
+<span class="sd">        Action currently defined are:</span>
+<span class="sd">            - Open Url</span>
+<span class="sd">            - Home</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>OpenAleaLab is the main application that gather all widgets.
+We want to add HelpWidget in the MainWindow and allow communication between both classes.
+For that purpose, we create a Plugin called HelpWidgetPlugin in helper package:</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/plugins/oalab/helpwidget.py</tt></div><div class="highlight"><pre><span class="k">class</span> <span class="nc">HelpWidgetPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c"># Data that describe plugin</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainwindow</span><span class="p">):</span>
+        <span class="c"># Import widget</span>
+        <span class="c"># Instantiate it</span>
+        <span class="c"># Ask to mainwindow to add it</span>
+</pre></div>
+</div>
+<p>It is very important to notice that adding widget in the right area is done by
+the plugin, not the application. Application does almost nothing, it is just
+a container of widgets. Real application intelligence is delegated to Plugins
+(placing and linking components) and components (doing real treatments).</p>
+<p>Finally, we register this plugin in setup.py of package helper.</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
+    <span class="c"># setup instructions</span>
+
+    <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>
+<span class="hll">        <span class="s">&#39;oalab.applet&#39;</span><span class="p">:</span>                                                  <span class="c"># Plugin category</span>
+</span>            <span class="p">[</span>
+<span class="hll">            <span class="s">&#39;HelpWidgetPlugin = helper.plugins.oalab:HelpWidgetPlugin&#39;</span>   <span class="c"># Plugin name = path to plugin (factory)</span>
+</span>            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="create-a-plugin">
+<h3>Create a plugin<a class="headerlink" href="#create-a-plugin" title="Permalink to this headline">¶</a></h3>
+<p>As we just see, to add a plugin to the application you have to:</p>
+<blockquote>
+<div><ul class="simple">
+<li>create the plugin (factory that point to the good class)</li>
+<li>add it into entry_points in setup.py</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="plugins-on-demand">
+<h3>Plugins on demand<a class="headerlink" href="#plugins-on-demand" title="Permalink to this headline">¶</a></h3>
+<p>Some plugins are loaded automatically by application. For instance, it is the case for interfaces.
+Some other plugins are loaded only if ask for it. For exemple, if user want to edit a curve, interface may
+propose different editors and allow user to choose which one he prefers. In this case, only plugin chosen by
+user is really loaded.</p>
+<p>Finally, in some cases, developer might hard code name of a plugin he want to use to select the right one.
+This case can be seen as a preset of plugin instead of standard plugin approach.</p>
+</div>
+</div>
+<div class="section" id="available-entry-points">
+<h2>Available entry points<a class="headerlink" href="#available-entry-points" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#module-openalea.oalab.plugins.applet" title="openalea.oalab.plugins.applet"><tt class="xref py py-mod docutils literal"><span class="pre">oalab.applet</span></tt></a>: Graphical component displayed in main window.</li>
+<li><a class="reference internal" href="#module-openalea.oalab.plugins.lab" title="openalea.oalab.plugins.lab"><tt class="xref py py-mod docutils literal"><span class="pre">oalab.lab</span></tt></a>: OpenAleaLab extensions</li>
+<li><strong>oalab.qt_control</strong>:</li>
+<li><strong>oalab.notebook_control</strong>:</li>
+<li><strong>oalab.interface</strong>:</li>
+</ul>
+</div></blockquote>
+<span class="target" id="module-openalea.oalab.plugins.applet"></span><div class="section" id="applet-plugin-documentation">
+<h3>Applet plugin documentation<a class="headerlink" href="#applet-plugin-documentation" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>To define an applet plugin, you must</dt>
+<dd><ol class="first last arabic simple">
+<li>write an AppletPlugin class that respects IPluginApplet interface (see below)</li>
+<li>add it to group &#8220;oalab.applet&#8221;</li>
+</ol>
+</dd>
+</dl>
+<p>1. Copy paste this code and fill it with right names and instructions.
+(replace all xyz, respecting case, with your applet name).
+For example Xyz -&gt; HelpApplet</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span>
+
+<span class="k">class</span> <span class="nc">PluginXyz</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Xyz&#39;</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;Xyz&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainwindow</span><span class="p">):</span>
+        <span class="c"># Write your code here</span>
+
+    <span class="k">def</span> <span class="nf">instance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Write your code here</span>
+</pre></div>
+</div>
+<p>2. Once this class has been written, just register it in the setup.py file of
+your python package.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">&#39;oalab.applet&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s">&#39;Xyz = mypackage.plugins:PluginXyz&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>With <strong>mypackage.plugins</strong> python module path (equivalent to &#8216;mypackage/plugins.py&#8217;) and
+&#8216;PluginXyz&#8217; the class name.</p>
+<div class="section" id="details">
+<h4>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h4>
+<dl class="class">
+<dt id="openalea.oalab.plugins.applet.IPluginApplet">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.applet.</tt><tt class="descname">IPluginApplet</tt><span class="sig-paren">(</span><em>epoint</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/applet.html#IPluginApplet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.applet.IPluginApplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graphical component displayed in main window.
+Component must respect <tt class="xref py py-class docutils literal"><span class="pre">IApplet</span></tt> interface.</p>
+<dl class="method">
+<dt id="openalea.oalab.plugins.applet.IPluginApplet.__call__">
+<tt class="descname">__call__</tt><span class="sig-paren">(</span><em>mainwindow</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/applet.html#IPluginApplet.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.applet.IPluginApplet.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load and instantiate graphical component that actually provide feature.
+Then, place it in mainwindow (QMainWindow).</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mypackage</span> <span class="kn">import</span> <span class="n">MyApplet</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">_applet</span> <span class="o">=</span> <span class="n">MyApplet</span><span class="p">()</span>
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applet</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applet</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+        <span class="c"># Add actions in PanedMenu</span>
+        <span class="n">mainwindow</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="o">*</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="c"># add action in classical menu</span>
+        <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">act</span><span class="p">,</span> <span class="n">btn_type</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="n">mainwindow</span><span class="o">.</span><span class="n">add_action_to_existing_menu</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">act</span><span class="p">,</span> <span class="n">menu_name</span><span class="o">=</span><span class="n">pane_name</span><span class="p">,</span> <span class="n">sub_menu_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">)</span>
+
+<span class="n">mainwindow</span><span class="o">.</span><span class="n">add_applet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="s">&#39;inputs&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.applet.IPluginApplet.instance">
+<tt class="descname">instance</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/applet.html#IPluginApplet.instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.applet.IPluginApplet.instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns widget instance if plugin has been called, else None.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applet</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-openalea.oalab.plugins.lab"></span><div class="section" id="lab-plugin-documentation">
+<h3>Lab plugin documentation<a class="headerlink" href="#lab-plugin-documentation" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>To define a new extension for OpenAleaLab, you must</dt>
+<dd><ol class="first last arabic simple">
+<li>write a LabPlugin class that respects IPluginLab interface (see below)</li>
+<li>add it to group &#8220;oalab.lab&#8221;</li>
+</ol>
+</dd>
+</dl>
+<p>1. Copy paste this code and fill it with right names and instructions.
+(replace all xyz, respecting case, with your applet name).
+For example Xyz -&gt; PythonLab</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span>
+
+<span class="k">class</span> <span class="nc">PluginXyz</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Xyz&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainwindow</span><span class="p">):</span>
+        <span class="c"># Write your code here</span>
+</pre></div>
+</div>
+<p>2. Once this class has been written, just register it in the setup.py file of
+your python package.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">&#39;oalab.lab&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s">&#39;Xyz = mypackage.plugins:PluginXyz&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>With <strong>mypackage.plugins</strong> python module path (equivalent to &#8216;mypackage/plugins.py&#8217;) and
+&#8216;PluginXyz&#8217; the class name.</p>
+<div class="section" id="id1">
+<h4>Details<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<dl class="class">
+<dt id="openalea.oalab.plugins.lab.IPluginLab">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.lab.</tt><tt class="descname">IPluginLab</tt><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/lab.html#IPluginLab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.lab.IPluginLab" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="openalea.oalab.plugins.lab.IPluginLab.__call__">
+<tt class="descname">__call__</tt><span class="sig-paren">(</span><em>mainwin</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/lab.html#IPluginLab.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.lab.IPluginLab.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load applet plugins and add its to mainwindow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;AbcApplet&#39;</span><span class="p">:</span>
+        <span class="n">mainwin</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">plugin</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Plugins</a><ul>
+<li><a class="reference internal" href="#openalealab-plugins">OpenAleaLab plugins</a><ul>
+<li><a class="reference internal" href="#gui-special-feature">GUI special feature</a></li>
+<li><a class="reference internal" href="#create-a-plugin">Create a plugin</a></li>
+<li><a class="reference internal" href="#plugins-on-demand">Plugins on demand</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#available-entry-points">Available entry points</a><ul>
+<li><a class="reference internal" href="#applet-plugin-documentation">Applet plugin documentation</a><ul>
+<li><a class="reference internal" href="#details">Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#lab-plugin-documentation">Lab plugin documentation</a><ul>
+<li><a class="reference internal" href="#id1">Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../peps/pep_ui_declarative.html"
+                        title="previous chapter">PEP: Declarative Language to Design GUI</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api_project.html"
+                        title="next chapter">Projects</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api_project.html" title="Projects"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../peps/pep_ui_declarative.html" title="PEP: Declarative Language to Design GUI"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

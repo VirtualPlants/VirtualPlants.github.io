@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.editor.lpy_lexer &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.editor.lpy_lexer</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    pygments.lexers.lpy</span>
+<span class="sd">    ~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">    Lexers for L-Py language.</span>
+
+<span class="sd">    :copyright: Copyright 2006-2013 by the Pygments team, see AUTHORS.</span>
+<span class="sd">    :license: BSD, see LICENSE for details.</span>
+<span class="sd">    :authors: Julien COSTE, Guillaume BATY, Frederic BOUDON, Christophe PRADAL</span>
+<span class="sd">    :homepage: http://openalea.gforge.inria.fr/wiki/doku.php?id=packages:vplants:lpy:main</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pygments.lexers.agile</span> <span class="kn">import</span> <span class="n">PythonLexer</span>
+<span class="kn">from</span> <span class="nn">pygments.lexer</span> <span class="kn">import</span> <span class="n">inherit</span><span class="p">,</span> <span class="n">include</span>
+<span class="kn">from</span> <span class="nn">pygments.token</span> <span class="kn">import</span> <span class="n">Text</span><span class="p">,</span> <span class="n">Keyword</span><span class="p">,</span> <span class="n">Name</span><span class="p">,</span> <span class="n">Generic</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;LPyLexer&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="LPyLexer"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.lpy_lexer.LPyLexer">[docs]</a><span class="k">class</span> <span class="nc">LPyLexer</span><span class="p">(</span><span class="n">PythonLexer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lexer for LPy language.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;LPy&#39;</span>
+    <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;lpy&#39;</span><span class="p">,</span><span class="s">&#39;Lpy&#39;</span><span class="p">,</span><span class="s">&#39;LPy&#39;</span><span class="p">,</span><span class="s">&#39;l-py&#39;</span><span class="p">,</span><span class="s">&#39;L-py&#39;</span><span class="p">,</span><span class="s">&#39;L-Py&#39;</span><span class="p">,]</span>
+    <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;*.lpy&#39;</span><span class="p">]</span>
+    <span class="n">mimetypes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;text/x-python&#39;</span><span class="p">,</span> <span class="s">&#39;application/x-python&#39;</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="LPyLexer.module_callback"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.lpy_lexer.LPyLexer.module_callback">[docs]</a>    <span class="k">def</span> <span class="nf">module_callback</span><span class="p">(</span><span class="n">lexer</span><span class="p">,</span> <span class="n">match</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Permit to detect and stock words after special words &quot;axiom&quot; and &quot;module&quot;.</span>
+<span class="sd">        This words are then colourized like other keywords.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">possible_words</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">possible_word</span> <span class="ow">in</span> <span class="n">possible_words</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">possible_word</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">u&quot;&quot;</span><span class="p">:</span>
+                <span class="c"># Stock &quot;lpy modules&quot;</span>
+                <span class="n">lexer</span><span class="o">.</span><span class="n">lpy_modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="c"># Colourize words after &quot;axiom&quot; and &quot;module&quot; in the same line.</span>
+        <span class="k">yield</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">Keyword</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+    </div>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;root&#39;</span><span class="p">:[</span>
+          <span class="n">include</span><span class="p">(</span><span class="s">&#39;lpykeywords&#39;</span><span class="p">),</span> 
+          <span class="n">inherit</span>
+          <span class="p">],</span>
+        <span class="s">&#39;lpykeywords&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s">r&#39;(^Axiom|^module)&#39;</span><span class="p">,</span> <span class="n">Generic</span><span class="o">.</span><span class="n">Subheading</span><span class="p">,</span> <span class="s">&#39;module&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">r&#39;(^derivation length|--&gt;|-static-&gt;|decomposition|&#39;</span>
+             <span class="s">r&#39;^production|produce|homomorphism|^interpretation|group|&#39;</span>
+             <span class="s">r&#39;^endlsystem|endgroup|maximum depth|nproduce|nsproduce|&#39;</span>
+             <span class="s">r&#39;makestring|consider|ignore|forward|backward|isForward|&#39;</span>
+             <span class="s">r&#39;StartEach|EndEach|Start|End|getGroup|useGroup|getIterationNb|&#39;</span>
+             <span class="s">r&#39;module|@static|lpyimport)&#39;</span><span class="p">,</span> <span class="n">Generic</span><span class="o">.</span><span class="n">Subheading</span><span class="p">),</span>
+            <span class="p">],</span>
+        <span class="s">&#39;module&#39;</span><span class="p">:[</span>
+            <span class="p">(</span><span class="s">r&#39;(\w*)(\(.*\))&#39;</span><span class="p">,</span><span class="n">module_callback</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">r&#39;( )(\w*)( |$)&#39;</span><span class="p">,</span><span class="n">module_callback</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">r&#39;(:| )&#39;</span><span class="p">,</span><span class="n">Text</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="p">}</span>
+        
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LPyLexer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span>
+        <span class="c"># Add list to stock &quot;lpy modules&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lpy_modules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+     
+<div class="viewcode-block" id="LPyLexer.get_tokens_unprocessed"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.lpy_lexer.LPyLexer.get_tokens_unprocessed">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokens_unprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">PythonLexer</span><span class="o">.</span><span class="n">get_tokens_unprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="n">Name</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lpy_modules</span><span class="p">:</span>
+               <span class="c"># Colourize previously detected modules</span>
+               <span class="k">yield</span> <span class="n">index</span><span class="p">,</span> <span class="n">Keyword</span><span class="p">,</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+               <span class="k">yield</span> <span class="n">index</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">value</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.gui.store &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.gui.store</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       Store Class</span>
+<span class="c">#       Use it to install new packages</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;$Id: $&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.deploygui.alea_install_gui</span> <span class="kn">import</span> <span class="n">MainWindow</span> <span class="k">as</span> <span class="n">MainWindowAleaInstall</span>
+<span class="kn">from</span> <span class="nn">openalea.deploygui.alea_install_gui</span> <span class="kn">import</span> <span class="o">*</span> 
+
+
+<div class="viewcode-block" id="Store"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.store.Store">[docs]</a><span class="k">class</span> <span class="nc">Store</span><span class="p">(</span><span class="n">MainWindowAleaInstall</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is used to search, install and upgrade packages.</span>
+<span class="sd">    </span>
+<span class="sd">    Warning!!! Will kill OALab!!!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># Save stdout and stderr because MainWindowAleaInstall try to redirect it.</span>
+        <span class="n">oldstdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="n">oldstderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Store</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAccessibleName</span><span class="p">(</span><span class="s">&quot;Store&quot;</span><span class="p">)</span>
+        <span class="c"># Restore stdout and stderr</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">oldstdout</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">oldstderr</span>
+        <span class="c"># Hide old logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logText</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_3</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="c">#self.actionShowHide = QtGui.QAction(QtGui.QIcon(&quot;:/images/resources/store.png&quot;),&quot;Show/Hide&quot;, self)</span>
+        <span class="c">#QtCore.QObject.connect(self.actionShowHide, QtCore.SIGNAL(&#39;triggered(bool)&#39;),self.showhide)</span>
+        <span class="c">#self._actions = [[&quot;Help&quot;,&quot;Package Store&quot;,self.actionShowHide,0]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    def showhide(self):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Show / Hide this widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        # TODO : do the &quot;setVisible&quot; on the dock widget and not on the widget inside the dock (cf mainwindow._dockwidgets[&quot;Store&quot;])</span>
+<span class="sd">        self.setVisible(self.show)</span>
+<span class="sd">        self.show = not self.show&#39;&#39;&#39;</span>
+            
+<div class="viewcode-block" id="Store.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.store.Store.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: list of actions to set in the menu.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
+</div>
+<div class="viewcode-block" id="Store.mainMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.store.Store.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: Name of menu tab to automatically set current when current widget</span>
+<span class="sd">        begin current.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;Package Store&quot;</span> </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

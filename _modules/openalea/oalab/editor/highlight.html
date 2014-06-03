@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.editor.highlight &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.editor.highlight</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">pygments.formatters.html</span> <span class="kn">import</span> <span class="n">HtmlFormatter</span>
+<span class="kn">from</span> <span class="nn">pygments.lexers</span> <span class="kn">import</span> <span class="n">PythonLexer</span>
+<span class="kn">from</span> <span class="nn">pygments.styles</span> <span class="kn">import</span> <span class="n">get_style_by_name</span>
+
+<div class="viewcode-block" id="Highlighter"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.Highlighter">[docs]</a><span class="k">class</span> <span class="nc">Highlighter</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSyntaxHighlighter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Highlighter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_document</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span> <span class="o">=</span> <span class="n">HtmlFormatter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span> <span class="o">=</span> <span class="n">lexer</span> <span class="k">if</span> <span class="n">lexer</span> <span class="k">else</span> <span class="n">PythonLexer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s">&#39;default&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Highlighter.highlightBlock"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.Highlighter.highlightBlock">[docs]</a>    <span class="k">def</span> <span class="nf">highlightBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Highlight a block of text.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prev_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentBlock</span><span class="p">()</span><span class="o">.</span><span class="n">previous</span><span class="p">()</span><span class="o">.</span><span class="n">userData</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">prev_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="o">.</span><span class="n">_saved_state_stack</span> <span class="o">=</span> <span class="n">prev_data</span><span class="o">.</span><span class="n">syntax_stack</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="p">,</span> <span class="s">&#39;_saved_state_stack&#39;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="o">.</span><span class="n">_saved_state_stack</span>
+
+        <span class="c"># Lex the text using Pygments</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">token</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="o">.</span><span class="n">get_tokens</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFormat</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_format</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="n">length</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="p">,</span> <span class="s">&#39;_saved_state_stack&#39;</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">PygmentsBlockUserData</span><span class="p">(</span>
+                <span class="n">syntax_stack</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="o">.</span><span class="n">_saved_state_stack</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentBlock</span><span class="p">()</span><span class="o">.</span><span class="n">setUserData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="c"># Clean up for the next go-round.</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="o">.</span><span class="n">_saved_state_stack</span>
+</div>
+<div class="viewcode-block" id="Highlighter.set_style"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.Highlighter.set_style">[docs]</a>    <span class="k">def</span> <span class="nf">set_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets the style to the specified Pygments style.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">style</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">style</span> <span class="o">=</span> <span class="n">get_style_by_name</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="n">style</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear_caches</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Highlighter.set_style_sheet"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.Highlighter.set_style_sheet">[docs]</a>    <span class="k">def</span> <span class="nf">set_style_sheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stylesheet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets a CSS stylesheet. The classes in the stylesheet should</span>
+<span class="sd">        correspond to those generated by:</span>
+
+<span class="sd">            pygmentize -S &lt;style&gt; -f html</span>
+
+<span class="sd">        Note that &#39;set_style&#39; and &#39;set_style_sheet&#39; completely override each</span>
+<span class="sd">        other, i.e. they cannot be used in conjunction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_document</span><span class="o">.</span><span class="n">setDefaultStyleSheet</span><span class="p">(</span><span class="n">stylesheet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear_caches</span><span class="p">()</span>
+
+    <span class="c">#---------------------------------------------------------------------------</span>
+    <span class="c"># Protected interface</span>
+    <span class="c">#---------------------------------------------------------------------------</span>
+</div>
+    <span class="k">def</span> <span class="nf">_clear_caches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Clear caches for brushes and formats.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_brushes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formats</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_get_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a QTextCharFormat for token or None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formats</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_format_from_document</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_document</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_format_from_style</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formats</span><span class="p">[</span><span class="n">token</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_get_format_from_document</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">document</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a QTextCharFormat for token by</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">html</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span><span class="o">.</span><span class="n">_format_lines</span><span class="p">([(</span><span class="n">token</span><span class="p">,</span> <span class="s">u&#39;dummy&#39;</span><span class="p">)]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_document</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_document</span><span class="p">)</span><span class="o">.</span><span class="n">charFormat</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_format_from_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a QTextCharFormat for token by reading a Pygments style.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">style</span><span class="o">.</span><span class="n">style_for_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;color&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setForeground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_brush</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;bgcolor&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_brush</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;bold&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setFontWeight</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Bold</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;italic&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setFontItalic</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;underline&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setUnderlineStyle</span><span class="p">(</span>
+                        <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="o">.</span><span class="n">SingleUnderline</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;sans&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setFontStyleHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">SansSerif</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;roman&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setFontStyleHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Times</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;mono&#39;</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">setFontStyleHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">TypeWriter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_get_brush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a brush for the color.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_brushes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">qcolor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">qcolor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_brushes</span><span class="p">[</span><span class="n">color</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_get_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a QColor built from a Pygments color string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qcolor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">()</span>
+        <span class="n">qcolor</span><span class="o">.</span><span class="n">setRgb</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">color</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+                      <span class="nb">int</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+                      <span class="nb">int</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">qcolor</span>
+</div>
+<div class="viewcode-block" id="PygmentsBlockUserData"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.PygmentsBlockUserData">[docs]</a><span class="k">class</span> <span class="nc">PygmentsBlockUserData</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextBlockUserData</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Storage for the user data associated with each line.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">syntax_stack</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;root&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwds</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextBlockUserData</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;syntax_stack&#39;</span><span class="p">]</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                           <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span> <span class="p">])</span>
+        <span class="k">return</span> <span class="s">&#39;PygmentsBlockUserData(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">kwds</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PEP: Configurable application &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="PEP : OpenAleaLab (Python) Enhancement Proposals" href="index.html" />
+    <link rel="next" title="PEP: Plugin management" href="pep_plugins.html" />
+    <link rel="prev" title="PEP : OpenAleaLab (Python) Enhancement Proposals" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pep_plugins.html" title="PEP: Plugin management"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PEP : OpenAleaLab (Python) Enhancement Proposals"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pep-configurable-application">
+<h1>PEP: Configurable application<a class="headerlink" href="#pep-configurable-application" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview-of-existing-technologies">
+<h2>Overview of existing technologies<a class="headerlink" href="#overview-of-existing-technologies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ipython">
+<h3>IPython<a class="headerlink" href="#ipython" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://ipython.org/ipython-doc/dev/config/index.html">IPython Configuration Documentation</a></p>
+<blockquote>
+<div><ul class="simple">
+<li>based on traitlets (<a class="reference external" href="http://docs.enthought.com/traits/index.html">traits</a>)</li>
+<li>auto command line generation</li>
+<li>easy to handle sub class configurations</li>
+<li>methods to generate and read config files</li>
+<li>need to explictly save configuration</li>
+<li>handle automatic namespaces based on class names : MyClass.Param1</li>
+<li>JSON or Python serialization</li>
+<li>support typing based on trait</li>
+<li>NO unique configuration (singleton)</li>
+</ul>
+</div></blockquote>
+<p>Example of code</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">IPython.config.configurable</span> <span class="kn">import</span> <span class="n">Configurable</span>
+<span class="kn">from</span> <span class="nn">IPython.config.application</span> <span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span> <span class="nn">IPython.utils.traitlets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Bool</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Applet1</span><span class="p">(</span><span class="n">Configurable</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Unicode</span><span class="p">(</span><span class="s">u&#39;Guillaume&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;First name.&quot;</span><span class="p">)</span>
+    <span class="n">dry_run</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MyApp</span><span class="p">(</span><span class="n">Application</span><span class="p">):</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">List</span><span class="p">([</span><span class="n">Applet1</span><span class="p">])</span>
+    <span class="n">config_file</span> <span class="o">=</span> <span class="n">Unicode</span><span class="p">(</span><span class="s">u&#39;&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s">&quot;Load this config file&quot;</span><span class="p">)</span>
+
+    <span class="n">aliases</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span><span class="s">&#39;Applet1.name&#39;</span><span class="p">})</span>
+    <span class="c"># config_file is reachable only with --MyApp.config_file=... or --help-all</span>
+
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argv</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_command_line</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_config_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="n">Applet1</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;app.config:&quot;</span>
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="n">config_str</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">generate_config_file</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Default python file generated from this code :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Configuration file for application.</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span>
+
+<span class="c">#------------------------------------------------------------------------------</span>
+<span class="c"># MyApp configuration</span>
+<span class="c">#------------------------------------------------------------------------------</span>
+
+<span class="c"># This is an application.</span>
+
+<span class="c"># MyApp will inherit config from: Application</span>
+
+<span class="c"># Set the log level by value or name.</span>
+<span class="c"># c.MyApp.log_level = 30</span>
+
+<span class="c"># The Logging format template</span>
+<span class="c"># c.MyApp.log_format = &#39;[%(name)s]%(highlevel)s %(message)s&#39;</span>
+
+<span class="c"># Load this config file</span>
+<span class="c"># c.MyApp.config_file = u&#39;&#39;</span>
+
+<span class="c"># The date format used by logging formatters for %(asctime)s</span>
+<span class="c"># c.MyApp.log_datefmt = &#39;%Y-%m-%d %H:%M:%S&#39;</span>
+
+<span class="c">#------------------------------------------------------------------------------</span>
+<span class="c"># Applet1 configuration</span>
+<span class="c">#------------------------------------------------------------------------------</span>
+
+<span class="c"># First name.</span>
+<span class="c"># c.Applet1.name = u&#39;Guillaume&#39;</span>
+
+<span class="c">#</span>
+<span class="c"># c.Applet1.dry_run = True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ets-apptools">
+<h3>ETS AppTools<a class="headerlink" href="#ets-apptools" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://code.enthought.com/projects/app_tools/docs/html/preferences/Preferences.html">ETS AppTools Preference Documentation</a></p>
+<blockquote>
+<div><ul class="simple">
+<li>based on <a class="reference external" href="http://docs.enthought.com/traits/index.html">traits</a> &amp; <a class="reference external" href="http://www.voidspace.org.uk/python/configobj.html">ConfigObj</a>.</li>
+<li>handle configuration inheritance</li>
+<li>all parameters are stored as strings but types can be forced using a PreferenceHelper (HasTraits class) describing types for each parameter.</li>
+</ul>
+</div></blockquote>
+<p>Example of inheritance :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">apptools.preferences.preferences</span> <span class="kn">import</span> <span class="n">Preferences</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pref</span> <span class="o">=</span> <span class="n">Preferences</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pref</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;ui.color&#39;</span><span class="p">,</span> <span class="s">&#39;black&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pref</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ui.editor.color&#39;</span><span class="p">,</span> <span class="n">inherit</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">&#39;black&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="existing-technology-in-openalea">
+<h2>Existing technology in OpenAlea<a class="headerlink" href="#existing-technology-in-openalea" title="Permalink to this headline">¶</a></h2>
+<p>classes in openalea.core.settings :</p>
+<p>Settings: singleton</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Methods</span><span class="p">:</span>  <span class="p">[</span>
+           <span class="s">&#39;add_option&#39;</span><span class="p">,</span> <span class="s">&#39;add_section&#39;</span><span class="p">,</span> <span class="s">&#39;add_section_update_handler&#39;</span><span class="p">,</span> <span class="s">&#39;configfile&#39;</span><span class="p">,</span>
+           <span class="s">&#39;defaults&#39;</span><span class="p">,</span> <span class="s">&#39;exists&#39;</span><span class="p">,</span> <span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;getboolean&#39;</span><span class="p">,</span> <span class="s">&#39;getfloat&#39;</span><span class="p">,</span> <span class="s">&#39;getint&#39;</span><span class="p">,</span> <span class="s">&#39;has_option&#39;</span><span class="p">,</span>
+           <span class="s">&#39;has_section&#39;</span><span class="p">,</span> <span class="s">&#39;instance&#39;</span><span class="p">,</span> <span class="s">&#39;items&#39;</span><span class="p">,</span> <span class="s">&#39;options&#39;</span><span class="p">,</span> <span class="s">&#39;optionxform&#39;</span><span class="p">,</span> <span class="s">&#39;read&#39;</span><span class="p">,</span> <span class="s">&#39;readfp&#39;</span><span class="p">,</span>
+           <span class="s">&#39;remove_option&#39;</span><span class="p">,</span> <span class="s">&#39;remove_section&#39;</span><span class="p">,</span> <span class="s">&#39;sections&#39;</span><span class="p">,</span> <span class="s">&#39;set&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span>
+           <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PEP: Configurable application</a><ul>
+<li><a class="reference internal" href="#overview-of-existing-technologies">Overview of existing technologies</a><ul>
+<li><a class="reference internal" href="#ipython">IPython</a></li>
+<li><a class="reference internal" href="#ets-apptools">ETS AppTools</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#existing-technology-in-openalea">Existing technology in OpenAlea</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">PEP : OpenAleaLab (Python) Enhancement Proposals</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pep_plugins.html"
+                        title="next chapter">PEP: Plugin management</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/peps/pep_configurable_apps.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pep_plugins.html" title="PEP: Plugin management"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PEP : OpenAleaLab (Python) Enhancement Proposals"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

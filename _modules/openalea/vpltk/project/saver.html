@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.vpltk.project.saver &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.vpltk.project.saver</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">discover</span><span class="p">,</span> <span class="n">Plugin</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="get_saver"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.get_saver">[docs]</a><span class="k">def</span> <span class="nf">get_saver</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;GenericSaver&quot;</span><span class="p">):</span>
+    <span class="n">savers</span> <span class="o">=</span> <span class="n">discover</span><span class="p">(</span><span class="s">&#39;vpltk.saver&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">saver</span> <span class="ow">in</span> <span class="n">savers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">Plugin</span><span class="p">(</span><span class="n">saver</span><span class="p">)</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">saver</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">saver</span><span class="o">.</span><span class="n">default_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">saver</span>
+
+</div>
+<div class="viewcode-block" id="ISaver"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.ISaver">[docs]</a><span class="k">class</span> <span class="nc">ISaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic interface class for savers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ISaver.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.ISaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="GenericSaver"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.GenericSaver">[docs]</a><span class="k">class</span> <span class="nc">GenericSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classical saver that write str(obj) into file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;GenericSaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*.py&quot;</span>
+<div class="viewcode-block" id="GenericSaver.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.GenericSaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store str(obj) into filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">,</span><span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="n">file_</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">file_</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="CPickleSaver"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.CPickleSaver">[docs]</a><span class="k">class</span> <span class="nc">CPickleSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific saver that use cPickle.dump</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;CPickleSaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*&quot;</span>
+<div class="viewcode-block" id="CPickleSaver.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.CPickleSaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store obj into filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">cPickle</span>
+            <span class="n">cPickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">file_</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install cPickle.&quot;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BGEOMSaver"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.BGEOMSaver">[docs]</a><span class="k">class</span> <span class="nc">BGEOMSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific loader that is used to manipulate PlantGL objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;BGEOMSaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*.BGEOM&quot;</span>
+<div class="viewcode-block" id="BGEOMSaver.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.BGEOMSaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store obj into filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">Scene</span>
+            <span class="n">sc</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&quot;BGEOM&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install PlantGL if you want to load a BGEOM object.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Impossible to save the scene for object </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">filename</span><span class="p">))</span>        </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.control.controlpanel &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.control.controlpanel</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;$Id: $&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">openalea.lpy.gui.materialeditor</span> <span class="kn">import</span> <span class="n">MaterialEditor</span>
+<span class="kn">from</span> <span class="nn">openalea.lpy.gui.objectpanel</span> <span class="kn">import</span> <span class="n">ObjectPanelManager</span><span class="p">,</span> <span class="n">TriggerParamFunc</span><span class="p">,</span> <span class="n">ObjectListDisplay</span>
+<span class="kn">from</span> <span class="nn">openalea.lpy.gui.scalareditor</span> <span class="kn">import</span> <span class="n">ScalarEditor</span>
+<span class="kn">from</span> <span class="nn">openalea.lpy.gui.objectmanagers</span> <span class="kn">import</span> <span class="n">get_managers</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.control.picklable_curves</span> <span class="kn">import</span> <span class="n">geometry_2_piklable_geometry</span>
+
+
+<div class="viewcode-block" id="ControlPanel"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.ControlPanel">[docs]</a><span class="k">class</span> <span class="nc">ControlPanel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Widget to display control of the current project.</span>
+<span class="sd">    Permit to manage control.</span>
+<span class="sd">    Double-clic permit to edit control.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ControlPanel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+        <span class="c"># Color Map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_editor</span> <span class="o">=</span> <span class="n">MaterialEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_editor</span><span class="p">,</span> <span class="s">&quot;Color Map&quot;</span><span class="p">)</span>
+
+        <span class="c"># Geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control_panel_manager</span> <span class="o">=</span> <span class="n">ControlPanelManager</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span> <span class="o">=</span> <span class="n">LPyPanelWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;Control Panel&quot;</span><span class="p">,</span>
+                                              <span class="n">panelmanager</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">control_panel_manager</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">setTheme</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">WHITE_THEME</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span><span class="p">,</span> <span class="s">&quot;Geometry&quot;</span><span class="p">)</span>
+
+        <span class="c"># Scalars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalars_editor</span> <span class="o">=</span> <span class="n">ScalarEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalars_editor</span><span class="p">,</span> <span class="s">&quot;Scalars&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ControlPanel.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.ControlPanel.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalars_editor</span><span class="o">.</span><span class="n">getScalars</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">scalar</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scalars_editor</span><span class="o">.</span><span class="n">deleteScalars</span><span class="p">()</span>
+        <span class="c">#self.colormap_editor = MaterialEditor(self)</span>
+</div>
+<div class="viewcode-block" id="ControlPanel.update"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.ControlPanel.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get control from widget and put them into project</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colormap_editor</span><span class="o">.</span><span class="n">getTurtle</span><span class="p">()</span><span class="o">.</span><span class="n">getColorList</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s">&quot;color map&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colors</span>
+
+        <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span><span class="o">.</span><span class="n">getObjects</span><span class="p">()</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obj</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">():</span>
+                <span class="n">obj</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">geometry_2_piklable_geometry</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="nb">unicode</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">obj</span>
+
+        <span class="n">scalars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalars_editor</span><span class="o">.</span><span class="n">getScalars</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">scalar</span> <span class="ow">in</span> <span class="n">scalars</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="nb">unicode</span><span class="p">(</span><span class="n">scalar</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">scalar</span>
+</div>
+<div class="viewcode-block" id="ControlPanel.load"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.ControlPanel.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get control from project and put them into widgets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&quot;color map&quot;</span><span class="p">):</span>
+            <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s">&quot;color map&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colormap_editor</span><span class="o">.</span><span class="n">getTurtle</span><span class="p">()</span><span class="o">.</span><span class="n">getColorList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s">&quot;color map&quot;</span><span class="p">]:</span>
+            <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s">&quot;color map&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colormap_editor</span><span class="o">.</span><span class="n">getTurtle</span><span class="p">()</span><span class="o">.</span><span class="n">getColorList</span><span class="p">()</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Load Control color map: </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s">&quot;color map&quot;</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s">&quot;color map&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">colormap_editor</span><span class="o">.</span><span class="n">getTurtle</span><span class="p">()</span><span class="o">.</span><span class="n">setMaterial</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">managers</span> <span class="o">=</span> <span class="n">get_managers</span><span class="p">()</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">scalars</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">],</span> <span class="s">&quot;__module__&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">]</span><span class="o">.</span><span class="n">__module__</span> <span class="o">==</span> <span class="s">&quot;openalea.oalab.control.picklable_curves&quot;</span><span class="p">:</span>
+                    <span class="n">typename</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">]</span><span class="o">.</span><span class="n">typename</span>
+                    <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
+                    <span class="n">manager</span> <span class="o">=</span> <span class="n">managers</span><span class="p">[</span><span class="n">typename</span><span class="p">]</span>
+                    <span class="n">geom</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">manager</span><span class="p">,</span> <span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">control</span><span class="p">)</span> <span class="o">!=</span> <span class="s">&quot;color map&quot;</span><span class="p">:</span>
+                    <span class="n">scalars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">control</span><span class="p">)</span> <span class="o">!=</span> <span class="s">&quot;color map&quot;</span><span class="p">:</span>
+                <span class="n">scalars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="n">control</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Load Control Geom: </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">geom</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_editor</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scalars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Load Control Scalars: </span><span class="si">%s</span><span class="s"> &quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">scalars</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scalars_editor</span><span class="o">.</span><span class="n">setScalars</span><span class="p">(</span><span class="n">scalars</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="LPyPanelWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget">[docs]</a><span class="k">class</span> <span class="nc">LPyPanelWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Geometry editor in control panel.</span>
+
+<span class="sd">    Permit to manage curves, nurbs and functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">panelmanager</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LPyPanelWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panelmanager</span> <span class="o">=</span> <span class="n">panelmanager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot;verticalLayout&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectpanel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="n">ObjectListDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">panelmanager</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">dock</span> <span class="o">=</span> <span class="bp">self</span>  <span class="c"># ?</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectpanel</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectpanel</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectpanel</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot;panelarea&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectpanel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot;NameEdit&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="p">)</span>
+
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;valueChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__updateStatus</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;AutomaticUpdate()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transmit_autoupdate</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;selectionChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">endNameEditing</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;renameRequest(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;editingFinished()&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockNameEdition</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nameEditorAutoHide</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LPyPanelWidget.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.dragEnterEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">acceptProposedAction</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.dropEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasUrls</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fileDropEvent</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">urls</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">toLocalFile</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.fileDropEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.fileDropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">fileDropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">manager</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">manager</span><span class="o">.</span><span class="n">canImportData</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+                <span class="n">objects</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">importData</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">appendObjects</span><span class="p">([(</span><span class="n">manager</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;import &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot; object(s) from &#39;&quot;</span> <span class="o">+</span> <span class="n">fname</span> <span class="o">+</span> <span class="s">&quot;&#39;.&quot;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+                <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.endNameEditing"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.endNameEditing">[docs]</a>    <span class="k">def</span> <span class="nf">endNameEditing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ident</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ident</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.displayName"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.displayName">[docs]</a>    <span class="k">def</span> <span class="nf">displayName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ident</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ident</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameEditorAutoHide</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameEditorAutoHide</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">getSelectedObjectName</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.updateName"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.updateName">[docs]</a>    <span class="k">def</span> <span class="nf">updateName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dockNameEdition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">hasSelection</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">setSelectedObjectName</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameEditorAutoHide</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameEditorAutoHide</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dockNameEdition</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.setObjects"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.setObjects">[docs]</a>    <span class="k">def</span> <span class="nf">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.appendObjects"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.appendObjects">[docs]</a>    <span class="k">def</span> <span class="nf">appendObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">appendObjects</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.getObjects"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.getObjects">[docs]</a>    <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">objects</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.getObjectsCopy"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.getObjectsCopy">[docs]</a>    <span class="k">def</span> <span class="nf">getObjectsCopy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">getObjectsCopy</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.setStatusBar"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.setStatusBar">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">st</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectpanel</span><span class="o">.</span><span class="n">statusBar</span> <span class="o">=</span> <span class="n">st</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">statusBar</span> <span class="o">=</span> <span class="n">st</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.showMessage"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.showMessage">[docs]</a>    <span class="k">def</span> <span class="nf">showMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;statusBar&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__updateStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">objects</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">managePrimitive</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;valueChanged(bool)&#39;</span><span class="p">),</span> <span class="bp">True</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;valueChanged(bool)&#39;</span><span class="p">),</span> <span class="bp">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;valueChanged(bool)&#39;</span><span class="p">),</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;valueChanged(bool)&#39;</span><span class="p">),</span> <span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__transmit_autoupdate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;AutomaticUpdate()&#39;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="LPyPanelWidget.setName"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.setName">[docs]</a>    <span class="k">def</span> <span class="nf">setName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.rename"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockNameEdition</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameEditorAutoHide</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectNameEdit</span><span class="o">.</span><span class="n">setFocus</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.getInfo"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.getInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">visibility</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                <span class="n">visibility</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">visibility</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;previousVisibility&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="s">&#39;active&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">isActive</span><span class="p">()),</span> <span class="s">&#39;visible&#39;</span><span class="p">:</span> <span class="n">visibility</span><span class="p">}</span>
+</div>
+<div class="viewcode-block" id="LPyPanelWidget.setInfo"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.LPyPanelWidget.setInfo">[docs]</a>    <span class="k">def</span> <span class="nf">setInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setName</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;active&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">setActive</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;active&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;visible&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previousVisibility</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s">&#39;visible&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s">&#39;visible&#39;</span><span class="p">])</span>
+
+            <span class="c"># Add a dict interface</span>
+
+</div></div>
+<div class="viewcode-block" id="ControlPanelManager"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.ControlPanelManager">[docs]</a><span class="k">class</span> <span class="nc">ControlPanelManager</span><span class="p">(</span><span class="n">ObjectPanelManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    We need it to works with LPyPanelWidget.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># Create unused menu to fit with original ObjectPanelManager from lpy</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">()</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">vparameterView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ControlPanelManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+<div class="viewcode-block" id="ControlPanelManager.completeMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.control.html#openalea.oalab.control.controlpanel.ControlPanelManager.completeMenu">[docs]</a>    <span class="k">def</span> <span class="nf">completeMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="n">panel</span><span class="p">):</span>
+        <span class="n">panelmenu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;Panel&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="n">panelmenu</span><span class="p">)</span>
+        <span class="n">subpanelmenu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;Theme&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">)</span>
+        <span class="n">panelmenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">panelmenu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="n">subpanelmenu</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">themename</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ObjectListDisplay</span><span class="o">.</span><span class="n">THEMES</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">panelAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">themename</span><span class="p">,</span> <span class="n">subpanelmenu</span><span class="p">)</span>
+
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">panelAction</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span>
+                                   <span class="n">TriggerParamFunc</span><span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">applyTheme</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="n">subpanelmenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">panelAction</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">panelmenu</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

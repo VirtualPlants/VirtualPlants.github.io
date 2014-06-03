@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.scene.view3d &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.scene.view3d</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       3D scene viewer for OALab Scene</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">Sphere</span><span class="p">,</span> <span class="n">Discretizer</span><span class="p">,</span> <span class="n">GLRenderer</span><span class="p">,</span> <span class="n">BoundingBox</span>
+<span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">AbstractListener</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui</span> <span class="kn">import</span> <span class="n">resources_rc</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.world.world</span> <span class="kn">import</span> <span class="n">WorldObject</span>
+<span class="kn">from</span> <span class="nn">PyQGLViewer</span> <span class="kn">import</span> <span class="n">QGLViewer</span><span class="p">,</span> <span class="n">Vec</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.geometry</span> <span class="kn">import</span> <span class="n">to_shape3d</span>
+
+<div class="viewcode-block" id="view3D"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D">[docs]</a><span class="k">class</span> <span class="nc">view3D</span><span class="p">(</span><span class="n">QGLViewer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is used to create and manipulate a 3 dimensions scene.</span>
+<span class="sd">    This scene is based on QGLViewer.</span>
+<span class="sd">    For the moment, we have only one view of this scene.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">statefilename</span><span class="o">=</span><span class="s">&#39;.temp_scene.xml&#39;</span><span class="p">,</span> <span class="n">shareWidget</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">QGLViewer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">shareWidget</span><span class="p">)</span>
+        <span class="c"># set the scene</span>
+        <span class="k">if</span> <span class="n">scene</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultScene</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
+        <span class="c"># set some parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAxisIsDrawn</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="c"># show axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGridIsDrawn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="c"># show grid</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">position</span><span class="p">)</span> <span class="c"># set camera</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">lookAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sceneCenter</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">setSceneRadius</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c"># Size of vectors x,y,z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">showEntireScene</span><span class="p">()</span>
+        <span class="c"># connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;drawNeeded()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation_initiale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">orientation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_initiale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">position</span><span class="p">()</span>
+        <span class="c"># Block &quot;*.xml&quot; save</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStateFileName</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="c"># Disable Quit in clicking on &#39;Escape&#39;</span>
+        <span class="c"># Set &quot;show_axis&quot; instead of &quot;kill_application&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Escape</span><span class="p">)</span>
+
+    <span class="c"># Method for lpy.registerPlotter to &quot;animate&quot;</span>
+<div class="viewcode-block" id="view3D.plot"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">):</span>
+        <span class="n">scenedict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;new&quot;</span><span class="p">:</span> <span class="n">scene</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setScene</span><span class="p">(</span><span class="n">scenedict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+
+        <span class="c"># Method for lpy.registerPlotter to &quot;animate&quot;</span>
+</div>
+<div class="viewcode-block" id="view3D.selection"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.selection">[docs]</a>    <span class="k">def</span> <span class="nf">selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">view3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">selection</span>
+
+    <span class="c"># Method for lpy.registerPlotter to &quot;animate&quot;</span></div>
+<div class="viewcode-block" id="view3D.waitSelection"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.waitSelection">[docs]</a>    <span class="k">def</span> <span class="nf">waitSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">view3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">waitSelection</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+
+    <span class="c"># Method for lpy.registerPlotter to &quot;animate&quot;</span></div>
+<div class="viewcode-block" id="view3D.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">format</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">view3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">frameGL</span><span class="o">.</span><span class="n">saveImage</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="view3D.setScene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.setScene">[docs]</a>    <span class="k">def</span> <span class="nf">setScene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scenes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the scene</span>
+<span class="sd">        (erase old scene if necessary)</span>
+
+<span class="sd">        :param scene: dict with every sub-scenes to add</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scenes</span><span class="p">:</span>
+            <span class="n">world_obj</span> <span class="o">=</span> <span class="n">scenes</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">world_obj</span><span class="p">,</span> <span class="n">WorldObject</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">world_obj</span><span class="o">.</span><span class="n">in_scene</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="n">to_shape3d</span><span class="p">(</span><span class="n">world_obj</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">to_shape3d</span><span class="p">(</span><span class="n">world_obj</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">+=</span> <span class="n">to_shape3d</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="view3D.getScene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.getScene">[docs]</a>    <span class="k">def</span> <span class="nf">getScene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: the scene (orderedDict)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span>
+</div>
+<div class="viewcode-block" id="view3D.addToScene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.addToScene">[docs]</a>    <span class="k">def</span> <span class="nf">addToScene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new object in existing scene</span>
+
+<span class="sd">        :param obj: object to add in the scene</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getScene</span><span class="p">()</span>
+        <span class="n">scene</span> <span class="o">+=</span> <span class="n">obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setScene</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="view3D.draw"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.draw">[docs]</a>    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw the scene</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">Discretizer</span><span class="p">()</span>
+        <span class="n">gl</span> <span class="o">=</span> <span class="n">GLRenderer</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">gl</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="view3D.start"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="view3D.defaultScene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.defaultScene">[docs]</a>    <span class="k">def</span> <span class="nf">defaultScene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a default scene.</span>
+<span class="sd">        Here she is empty.</span>
+
+<span class="sd">        :return: the scene</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">scene</span>
+</div>
+<div class="viewcode-block" id="view3D.update_radius"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.view3D.update_radius">[docs]</a>    <span class="k">def</span> <span class="nf">update_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the scene radius to 110% of the max size in the scene</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bBox</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">)</span>
+            <span class="n">xmax</span> <span class="o">=</span> <span class="n">bBox</span><span class="o">.</span><span class="n">getXMax</span><span class="p">()</span>
+            <span class="n">ymax</span> <span class="o">=</span> <span class="n">bBox</span><span class="o">.</span><span class="n">getYMax</span><span class="p">()</span>
+            <span class="n">zmax</span> <span class="o">=</span> <span class="n">bBox</span><span class="o">.</span><span class="n">getZMax</span><span class="p">()</span>
+
+            <span class="n">xmin</span> <span class="o">=</span> <span class="n">bBox</span><span class="o">.</span><span class="n">getXMin</span><span class="p">()</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="n">bBox</span><span class="o">.</span><span class="n">getYMin</span><span class="p">()</span>
+            <span class="n">zmin</span> <span class="o">=</span> <span class="n">bBox</span><span class="o">.</span><span class="n">getZMin</span><span class="p">()</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">xmin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xmax</span><span class="p">))</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">ymin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ymax</span><span class="p">))</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">zmin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">zmax</span><span class="p">))</span>
+
+            <span class="n">radius</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">setSceneRadius</span><span class="p">(</span><span class="n">radius</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_entire_scene</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div></div>
+<div class="viewcode-block" id="Viewer"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer">[docs]</a><span class="k">class</span> <span class="nc">Viewer</span><span class="p">(</span><span class="n">AbstractListener</span><span class="p">,</span> <span class="n">view3D</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Widget of 3D Viewer to show the scene.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="c">#         super(Viewer, self).__init__()</span>
+        <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">view3D</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAccessibleName</span><span class="p">(</span><span class="s">&quot;3DViewer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">autofocus</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">actionResetZoom</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/resetzoom.png&quot;</span><span class="p">),</span> <span class="s">&quot;Reset Zoom&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionZoomOut</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/zoomout.png&quot;</span><span class="p">),</span> <span class="s">&quot;Zoom Out&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionZoomIn</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/zoomin.png&quot;</span><span class="p">),</span> <span class="s">&quot;Zoom In&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionShowAxis</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/axis.png&quot;</span><span class="p">),</span> <span class="s">&quot;Show Axis&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionShowGrid</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/grid.png&quot;</span><span class="p">),</span> <span class="s">&quot;Show Grid&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionRadius</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/growth2.png&quot;</span><span class="p">),</span> <span class="s">&quot;Focus&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionShowFps</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/fps.png&quot;</span><span class="p">),</span> <span class="s">&quot;Show FPS&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">actionShowAxis</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&quot;MainWindow&quot;</span><span class="p">,</span> <span class="s">&quot;Ctrl+A&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">UnicodeUTF8</span><span class="p">))</span>
+        <span class="n">actionShowGrid</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&quot;MainWindow&quot;</span><span class="p">,</span> <span class="s">&quot;Ctrl+G&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">UnicodeUTF8</span><span class="p">))</span>
+        <span class="n">actionRadius</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&quot;MainWindow&quot;</span><span class="p">,</span> <span class="s">&quot;Ctrl+F&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">UnicodeUTF8</span><span class="p">))</span>
+
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionResetZoom</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">resetzoom</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionZoomOut</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoomout</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionZoomIn</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoomin</span><span class="p">)</span>
+
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionShowAxis</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_hide_axis</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionShowGrid</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_hide_grid</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionRadius</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_radius</span><span class="p">)</span>
+
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionShowFps</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_fps</span><span class="p">)</span>
+
+        <span class="n">session</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="c">#         QtCore.QObject.connect(session.world.signaler, QtCore.SIGNAL(&#39;SceneChanged&#39;), self.setScene)</span>
+<span class="c">#         QtCore.QObject.connect(session.world.signaler, QtCore.SIGNAL(&#39;SceneChanged&#39;), self.updateGL)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Zoom&quot;</span><span class="p">,</span> <span class="n">actionResetZoom</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Zoom&quot;</span><span class="p">,</span> <span class="n">actionZoomOut</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Zoom&quot;</span><span class="p">,</span> <span class="n">actionZoomIn</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Camera&quot;</span><span class="p">,</span> <span class="n">actionShowAxis</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Camera&quot;</span><span class="p">,</span> <span class="n">actionShowGrid</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Camera&quot;</span><span class="p">,</span> <span class="n">actionRadius</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Viewer&quot;</span><span class="p">,</span> <span class="s">&quot;Informations&quot;</span><span class="p">,</span> <span class="n">actionShowFps</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+
+<div class="viewcode-block" id="Viewer.notify"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;WorldChanged&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setScene</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Viewer.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
+</div>
+<div class="viewcode-block" id="Viewer.resetzoom"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.resetzoom">[docs]</a>    <span class="k">def</span> <span class="nf">resetzoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orientation_initiale</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_initiale</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Viewer.zoomout"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.zoomout">[docs]</a>    <span class="k">def</span> <span class="nf">zoomout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span>
+        <span class="n">new_position</span> <span class="o">=</span> <span class="p">(</span><span class="n">cam</span><span class="o">.</span><span class="n">position</span><span class="p">()</span> <span class="o">-</span> <span class="n">cam</span><span class="o">.</span><span class="n">sceneCenter</span><span class="p">())</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">cam</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">new_position</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Viewer.zoomin"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.zoomin">[docs]</a>    <span class="k">def</span> <span class="nf">zoomin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span>
+        <span class="n">new_position</span> <span class="o">=</span> <span class="p">(</span><span class="n">cam</span><span class="o">.</span><span class="n">position</span><span class="p">()</span> <span class="o">-</span> <span class="n">cam</span><span class="o">.</span><span class="n">sceneCenter</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">cam</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">new_position</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Viewer.show_fps"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.show_fps">[docs]</a>    <span class="k">def</span> <span class="nf">show_fps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFPSIsDisplayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fps</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Viewer.mainMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: Name of menu tab to automatically set current when current widget</span>
+<span class="sd">        begin current.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&quot;Viewer&quot;</span>
+</div>
+<div class="viewcode-block" id="Viewer.show_hide_axis"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.show_hide_axis">[docs]</a>    <span class="k">def</span> <span class="nf">show_hide_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setAxisIsDrawn</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="c"># hide axis</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setAxisIsDrawn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="c"># show axis</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="Viewer.show_hide_grid"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.show_hide_grid">[docs]</a>    <span class="k">def</span> <span class="nf">show_hide_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setGridIsDrawn</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="c"># hide grid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setGridIsDrawn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="c"># show grid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="Viewer.show_entire_scene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.show_entire_scene">[docs]</a>    <span class="k">def</span> <span class="nf">show_entire_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="p">()</span><span class="o">.</span><span class="n">showEntireScene</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateGL</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Viewer.setScene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.Viewer.setScene">[docs]</a>    <span class="k">def</span> <span class="nf">setScene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scenes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the scene</span>
+<span class="sd">        (erase old scene if necessary)</span>
+
+<span class="sd">        Class overloaded to use an autofocus if you add a first object in the scene</span>
+
+<span class="sd">        :param scene: dict with every sub-scenes to add</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Viewer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setScene</span><span class="p">(</span><span class="n">scenes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autofocus</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_radius</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autofocus</span> <span class="o">=</span> <span class="bp">False</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.scene.html#openalea.oalab.scene.view3d.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">view3D</span><span class="p">()</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">addToScene</span><span class="p">(</span><span class="n">Sphere</span><span class="p">())</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="p">(</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">):</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

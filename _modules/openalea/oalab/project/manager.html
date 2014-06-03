@@ -1,0 +1,517 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.project.manager &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.project.manager</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;$Id: &quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">path_</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.project.creator</span> <span class="kn">import</span> <span class="n">CreateProjectWidget</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.project.pretty_preview</span> <span class="kn">import</span> <span class="n">ProjectSelectorScroll</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui</span> <span class="kn">import</span> <span class="n">resources_rc</span> <span class="c"># do not remove this import else icon are not drawn</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui.utils</span> <span class="kn">import</span> <span class="n">qicon</span>
+
+<div class="viewcode-block" id="ProjectManagerWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget">[docs]</a><span class="k">class</span> <span class="nc">ProjectManagerWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object which permit to manage projects.</span>
+
+<span class="sd">    :Warning: this QWidget is not used like a widget but like the interface between GUI (buttons &quot;newProj&quot;, &quot;newScript&quot;,...)</span>
+<span class="sd">    and objects (project, control, ...)</span>
+
+<span class="sd">    :TODO: Refactor it</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectManagerWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAccessibleName</span><span class="p">(</span><span class="s">&quot;Project Manager&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectManager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionNewProj</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;new.png&quot;</span><span class="p">),</span> <span class="s">&quot;New&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionNewProj</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&quot;MainWindow&quot;</span><span class="p">,</span> <span class="s">&quot;Ctrl+N&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">UnicodeUTF8</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenProj</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;open.png&quot;</span><span class="p">),</span> <span class="s">&quot;Open&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenProj</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s">&quot;MainWindow&quot;</span><span class="p">,</span> <span class="s">&quot;Ctrl+O&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">UnicodeUTF8</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveProj</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;save.png&quot;</span><span class="p">),</span> <span class="s">&quot;Save&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveProjAs</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;save.png&quot;</span><span class="p">),</span> <span class="s">&quot;Save As&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c"># self.actionSaveProj.setShortcut(QtGui.QApplication.translate(&quot;MainWindow&quot;, &quot;Ctrl+S&quot;, None, QtGui.QApplication.UnicodeUTF8))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseProj</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;closeButton.png&quot;</span><span class="p">),</span> <span class="s">&quot;Close All&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionEditMeta</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;book.png&quot;</span><span class="p">),</span> <span class="s">&quot;Edit Metadata&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionAddFile</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;bool.png&quot;</span><span class="p">),</span> <span class="s">&quot;Add To Proj&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionNewProj</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenProj</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveProjAs</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveAs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveProj</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveCurrent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseProj</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeCurrent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionEditMeta</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionAddFile</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_file_to_project</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionNewProj</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenProj</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveProj</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveProjAs</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseProj</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionEditMeta</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Manage Project&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionAddFile</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                         <span class="p">]</span>
+
+
+        <span class="c"># Menu used to display all available projects.</span>
+        <span class="c"># This menu is filled dynamically each time this menu is opened</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu_available_projects</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">u&#39;Available Projects&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu_available_projects</span><span class="o">.</span><span class="n">aboutToShow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_available_project_menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_available_project</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># Dict used to know what project corresponds to triggered action</span>
+
+<div class="viewcode-block" id="ProjectManagerWidget.initialize"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultProj</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.defaultProj"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.defaultProj">[docs]</a>    <span class="k">def</span> <span class="nf">defaultProj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectManager</span><span class="o">.</span><span class="n">load_default</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">proj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_is_proj</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">models</span><span class="p">():</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&quot;&quot;&quot;</span>
+<span class="s">OpenAlea Lab editor</span>
+
+<span class="s">This temporary script is saved in temporary project in</span>
+<span class="si">%s</span><span class="s"></span>
+
+<span class="s">You can rename/move this project thanks to the button &quot;Save As&quot; in menu.</span>
+<span class="s">&quot;&quot;&quot;&#39;&#39;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">new_model</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;temp.py&quot;</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">txt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_control</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.open"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If name==false, display a widget to choose project to open.</span>
+<span class="sd">        Then open project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+        <span class="n">projects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj_selector</span> <span class="o">=</span> <span class="n">ProjectSelectorScroll</span><span class="p">(</span><span class="n">projects</span><span class="o">=</span><span class="n">projects</span><span class="p">,</span> <span class="n">open_project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">openProject</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj_selector</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c"># if name is False:</span>
+        <span class="c">#     name = showOpenProjectDialog()</span>
+        <span class="c"># if name:</span>
+        <span class="c">#     proj_path = path_(name).abspath()</span>
+        <span class="c">#     proj_name = proj_path.basename()</span>
+        <span class="c">#     proj_path = proj_path.dirname()</span>
+        <span class="c">#     if path:</span>
+        <span class="c">#         proj_path = path_(path)</span>
+        <span class="c">#     logger.debug(&quot;Open Project named &quot; + proj_name)</span>
+        <span class="c">#     if self.session.project:</span>
+        <span class="c">#         if self.session.current_is_project():</span>
+        <span class="c">#             logger.debug(&quot;Close Project named &quot; + self.session.project.name)</span>
+        <span class="c">#             self.projectManager.close(self.session.project.name)</span>
+        <span class="c">#             logger.debug(&quot;Project named &quot; + self.session.project.name + &quot; closed.&quot;)</span>
+        <span class="c">#</span>
+        <span class="c">#     proj = self.projectManager.load(proj_name, proj_path)</span>
+        <span class="c">#</span>
+        <span class="c">#     logger.debug(&quot;Project &quot; + str(proj) + &quot; loaded&quot;)</span>
+        <span class="c">#</span>
+        <span class="c">#     if proj == -1:</span>
+        <span class="c">#         logger.warning(&quot;Project was not loaded...&quot;)</span>
+        <span class="c">#         return -1</span>
+        <span class="c">#     else:</span>
+        <span class="c">#         return self.openProject(proj)</span>
+
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.openProject"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.openProject">[docs]</a>    <span class="k">def</span> <span class="nf">openProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open a project in application from project</span>
+
+<span class="sd">        :param project: opened project from vpltk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;proj_selector&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proj_selector</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeCurrent</span><span class="p">()</span>
+
+        <span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Project &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">project</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; opened&quot;</span><span class="p">)</span>
+
+        <span class="n">project</span><span class="o">.</span><span class="n">world</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">world</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_is_proj</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project_changed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_control</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Project opened: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.new"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an default empty project with a default name.</span>
+
+<span class="sd">        Open a window to define metadata of the project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_creator</span> <span class="o">=</span> <span class="n">CreateProjectWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_creator</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_creator</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;ProjectMetadataSet(PyQt_PyObject)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">openProject</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.edit_metadata"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.edit_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">edit_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_creator</span> <span class="o">=</span> <span class="n">CreateProjectWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_creator</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project_creator</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;ProjectMetadataSet(PyQt_PyObject)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_edited</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.metadata_edited"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.metadata_edited">[docs]</a>    <span class="k">def</span> <span class="nf">metadata_edited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">metadata</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.add_file_to_project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.add_file_to_project">[docs]</a>    <span class="k">def</span> <span class="nf">add_file_to_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an opened file to the current project (in source for the moment).</span>
+
+<span class="sd">        :todo: propose to the user where to add it (not only in source)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">tabText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">())</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;model&quot;</span><span class="p">]</span>
+        <span class="n">categories</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">SelectCategory</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="n">categories</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">ok_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_file</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.add_file"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.add_file">[docs]</a>    <span class="k">def</span> <span class="nf">add_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">combo</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">setTabText</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tree_view_change</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.renameCurrent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.renameCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">renameCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rename current project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_name</span><span class="p">:</span>
+                <span class="n">new_name</span> <span class="o">=</span> <span class="n">showNewProjectDialog</span><span class="p">(</span><span class="n">default_name</span><span class="o">=</span><span class="n">path_</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">/</span> <span class="s">&quot;..&quot;</span><span class="p">,</span>
+                                                <span class="n">text</span><span class="o">=</span><span class="s">&#39;Select new name to save project&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;project&quot;</span><span class="p">,</span> <span class="n">old_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="n">new_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project_changed</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span>
+                <span class="s">&quot;You are not working inside project, so you can&#39;t use &#39;rename project&#39;. Please create or load one first.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.saveAs"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.saveAs">[docs]</a>    <span class="k">def</span> <span class="nf">saveAs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save current project but permit to rename and move it..</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">current_is_project</span><span class="p">():</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">showNewProjectDialog</span><span class="p">(</span><span class="n">default_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&quot;Select name to save project&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;project&quot;</span><span class="p">,</span> <span class="n">old_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tree_view_change</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveCurrent</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;You are not working inside project. Please create or load one first.&quot;</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.saveCurrent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.saveCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">saveCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save current project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">current_is_project</span><span class="p">():</span>
+            <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span>
+            <span class="k">if</span> <span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c"># CPL</span>
+                <span class="k">return</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+                <span class="n">container</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">tabText</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">wid</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">wid</span><span class="p">,</span> <span class="s">&quot;save&quot;</span><span class="p">):</span>
+                    <span class="n">wid</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_control</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project_changed</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;You are not working inside project. Please create or load one first.&quot;</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerWidget.closeCurrent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.closeCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">closeCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close current project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">current_is_project</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Close Project named </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">projectManager</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Close empty Project&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">_is_proj</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clear_control</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">closeAll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project_changed</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;You are not working inside project. Please create or load one first.&quot;</span>
+</div>
+    <span class="k">def</span> <span class="nf">_project_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update what is needed when the current project is changed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Project changed&quot;</span><span class="p">)</span>
+        <span class="c"># CPL: CHECK FIRST IF THE OBJECTS EXISTS.</span>
+        <span class="c"># This wil be not always the case.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scene_change</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_change</span><span class="p">()</span> <span class="c"># do nothing</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_all_scripts_from_project</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tree_view_change</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ProjectManagerWidget.update_from_widgets"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.update_from_widgets">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_control</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_load_control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get control from project and put them into widgets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="s">&quot;_plugins&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="p">[</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Load Controls&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get control from widget and put them into project</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="s">&quot;_plugins&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="p">[</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Update Controls&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_clear_control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="s">&quot;_plugins&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="p">[</span><span class="s">&#39;ControlPanel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Clear Controls&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_control_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_tree_view_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="s">&quot;_plugins&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;ProjectWidget&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="s">&#39;ProjectWidget&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;Project&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="p">[</span><span class="s">&#39;Project&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Tree View changed&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProjectManagerWidget.open_all_scripts_from_project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.ProjectManagerWidget.open_all_scripts_from_project">[docs]</a>    <span class="k">def</span> <span class="nf">open_all_scripts_from_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Script changed&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span>
+            <span class="n">models</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">models</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+                <span class="c"># if self.controller.paradigm_container:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">openTab</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_scene_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Scene changed&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">current_is_project</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">world</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">world</span><span class="p">[</span><span class="n">w</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_update_available_project_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discover all projects and generate an action for each one.</span>
+<span class="sd">        Then connect this action to _on_open_project_triggered</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu_available_projects</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_available_project</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">project</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span><span class="p">:</span>
+            <span class="n">icon_path</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">icon_path</span>
+            <span class="n">icon_name</span> <span class="o">=</span> <span class="n">icon_path</span> <span class="k">if</span> <span class="n">icon_path</span> <span class="k">else</span> <span class="s">&quot;:/images/resources/openalealogo.png&quot;</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">icon_name</span><span class="p">),</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">menu_available_projects</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_open_project_triggered</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">menu_available_projects</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">action_available_project</span><span class="p">[</span><span class="n">action</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span>
+
+    <span class="k">def</span> <span class="nf">_on_open_project_triggered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openProject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_available_project</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()])</span>
+</div>
+<div class="viewcode-block" id="showNewProjectDialog"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.showNewProjectDialog">[docs]</a><span class="k">def</span> <span class="nf">showNewProjectDialog</span><span class="p">(</span><span class="n">default_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">my_path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">default_name</span><span class="p">:</span>
+        <span class="n">my_path</span> <span class="o">=</span> <span class="n">my_path</span> <span class="o">/</span> <span class="n">default_name</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&#39;Select name to create project&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span>
+                                              <span class="n">my_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fname</span>
+
+</div>
+<div class="viewcode-block" id="showOpenProjectDialog"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.showOpenProjectDialog">[docs]</a><span class="k">def</span> <span class="nf">showOpenProjectDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">my_path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;Select Project Directory&#39;</span><span class="p">,</span>
+                                                   <span class="n">my_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fname</span>
+
+</div>
+<div class="viewcode-block" id="SelectCategory"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.manager.SelectCategory">[docs]</a><span class="k">class</span> <span class="nc">SelectCategory</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;model&quot;</span><span class="p">],</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SelectCategory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categories</span> <span class="o">=</span> <span class="n">categories</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;Select in which category you want to add this file: &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;New filename: &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combo</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combo</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">categories</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ok_button</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&quot;Ok&quot;</span><span class="p">)</span>
+
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">combo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ok_button</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

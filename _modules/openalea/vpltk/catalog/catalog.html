@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.vpltk.catalog.catalog &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.vpltk.catalog.catalog</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       Plugin System for vpltk</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.VPLTk: Virtual Plants Lab Toolkit</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">site</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.pkgmanager</span> <span class="kn">import</span> <span class="n">UnknownPackageError</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.catalog.pluginmanager</span> <span class="kn">import</span> <span class="n">PluginManager</span>
+<span class="kn">from</span> <span class="nn">openalea.core.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
+<span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="n">IInterface</span>
+
+<span class="c"># TODO</span>
+<span class="c"># Write a short description of what do methods</span>
+
+<div class="viewcode-block" id="Catalog"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog">[docs]</a><span class="k">class</span> <span class="nc">Catalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_types</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wralea&#39;</span><span class="p">,</span> <span class="s">&#39;plugin&#39;</span><span class="p">,</span> <span class="s">&#39;adapters&#39;</span><span class="p">,</span> <span class="s">&#39;interfaces&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">managers</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_services</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interfaces</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lowername</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># list all path supporting python modules</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">getsitepackages</span><span class="p">()</span>
+        <span class="n">usersite</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">getusersitepackages</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">usersite</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">usersite</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">usersite</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">paths</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">usersite</span><span class="p">)</span>
+        <span class="n">paths</span> <span class="o">+=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+
+        <span class="c"># scan all entry_point and list different groups</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+            <span class="n">distribs</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">find_distributions</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">distrib</span> <span class="ow">in</span> <span class="n">distribs</span> <span class="p">:</span>
+                <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">distrib</span><span class="o">.</span><span class="n">get_entry_map</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_lst</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_interfaces</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_clean_lst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">plugin_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_types</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">plugin_type</span> <span class="ow">in</span> <span class="n">lst</span> <span class="p">:</span>
+                <span class="n">lst</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">plugin_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lst</span>
+
+    <span class="k">def</span> <span class="nf">_load_interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># load all interfaces defined in __plugin__.py files.</span>
+        <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factories</span><span class="p">(</span><span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;plugin&#39;</span><span class="p">,</span> <span class="s">&#39;interfaces&#39;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="n">IInterface</span><span class="p">):</span>
+                <span class="n">interface</span> <span class="o">=</span> <span class="n">pl</span>
+                <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="n">interface</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_interfaces</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_lowername</span><span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]]</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="Catalog.interface"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.interface">[docs]</a>    <span class="k">def</span> <span class="nf">interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">interface_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface_id</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interfaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Catalog.interface_id"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.interface_id">[docs]</a>    <span class="k">def</span> <span class="nf">interface_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">interface</span>
+        <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="n">IInterface</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">interface</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">return</span> <span class="s">&#39;builtin:</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">interface</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">interface</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="Catalog.interfaces"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.interfaces">[docs]</a>    <span class="k">def</span> <span class="nf">interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interfaces</span>
+        <span class="n">all_interfaces</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c"># Check interfaces defined in openalea factories</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__interfaces__&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__interfaces__</span><span class="p">:</span>
+                <span class="c"># Currently, interfaces can be defined as &quot;string identifier&quot; or directly using interface class</span>
+                <span class="c"># If interface class is used, get its &quot;string identifier&quot;.</span>
+                <span class="n">interface_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface_id</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">interface_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interfaces</span><span class="p">:</span> <span class="c"># check if interface_id is yet known by Catalog</span>
+                    <span class="c"># Search parent interfaces</span>
+                    <span class="n">interface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interfaces</span><span class="p">[</span><span class="n">interface_id</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="n">interface</span><span class="p">):</span>
+                        <span class="n">parent_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface_id</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+                        <span class="n">all_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parent_id</span><span class="p">)</span>
+                <span class="k">else</span> <span class="p">:</span>
+                    <span class="c"># Cannot reach real interface class, so add it directly</span>
+                    <span class="n">all_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interface_id</span><span class="p">(</span><span class="n">interface</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span>
+
+        <span class="c"># Check interfaces defined using traits.provides</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__implements__&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__implements__</span><span class="o">.</span><span class="n">getBases</span><span class="p">():</span>
+                <span class="n">all_interfaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interface_id</span><span class="p">(</span><span class="n">interface</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">all_interfaces</span>
+
+</div>
+<div class="viewcode-block" id="Catalog.is_implementation"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.is_implementation">[docs]</a>    <span class="k">def</span> <span class="nf">is_implementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">interface</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">interface</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface_id</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interfaces</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_getplugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_type</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">plugin_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">managers</span> <span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">PluginManager</span><span class="p">(</span><span class="n">plugin_type</span><span class="o">=</span><span class="n">plugin_type</span><span class="p">)</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">managers</span><span class="p">[</span><span class="n">plugin_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">manager</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">managers</span><span class="p">[</span><span class="n">plugin_type</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">pkgname</span> <span class="ow">in</span> <span class="n">manager</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span> <span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">factories</span> <span class="o">=</span> <span class="n">manager</span><span class="p">[</span><span class="n">pkgname</span><span class="p">]</span>
+            <span class="k">except</span> <span class="n">UnknownPackageError</span> <span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">factory</span> <span class="ow">in</span> <span class="n">factories</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">factory</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">name</span> <span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_implementation</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">):</span>
+                        <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lst</span>
+
+<div class="viewcode-block" id="Catalog.factories"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.factories">[docs]</a>    <span class="k">def</span> <span class="nf">factories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interfaces</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param exclude_tags: if tags is not specified, scan all tags except one defined in exclude_tags</span>
+<span class="sd">        :param interfaces: by default do not check interfaces so return all factories</span>
+
+<span class="sd">        TODO: tags and exclude_tags need to be clarified</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="n">exclude_tags</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;tags and exclude_tags are mutually exclusive&#39;</span>
+        <span class="k">if</span> <span class="n">exclude_tags</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">exclude_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;wralea&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">exclude_tags</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span> <span class="p">:</span>
+                    <span class="n">tags</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+        <span class="c"># Scan standard entry_points : 1 entry_point = 1 object</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_lst</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_implementation</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">):</span>
+                    <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ep</span><span class="p">)</span>
+
+        <span class="c"># Scan openalea entry_points : 1 entry_point = n factories (scan)</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span> <span class="p">:</span>
+                <span class="n">lst</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getplugin</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lst</span>
+</div>
+<div class="viewcode-block" id="Catalog.factory"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.factory">[docs]</a>    <span class="k">def</span> <span class="nf">factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interfaces</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get factories matching given criteria (interfaces, name, tags).</span>
+<span class="sd">        criterion=None means criterion is not used.</span>
+<span class="sd">        If all criteria are None (default) it returns all factories.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factories</span><span class="p">(</span><span class="n">interfaces</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lst</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">lst</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Catalog.create_service"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.create_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_factory</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a service from object_factory. If object_factory is None, returns None.</span>
+<span class="sd">        If this factory is called for the first time, instantiate it with args and kargs.</span>
+<span class="sd">        Else, use previous instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">object_factory</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">object_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_services</span> <span class="p">:</span>
+            <span class="n">service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_services</span><span class="p">[</span><span class="n">object_factory</span><span class="p">]</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">service</span> <span class="o">=</span> <span class="n">object_factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_services</span><span class="p">[</span><span class="n">object_factory</span><span class="p">]</span> <span class="o">=</span> <span class="n">service</span>
+        <span class="k">return</span> <span class="n">service</span>
+
+</div>
+<div class="viewcode-block" id="Catalog.service"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.service">[docs]</a>    <span class="k">def</span> <span class="nf">service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interfaces</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        args and kargs are not currently used but defined for future additional filters.</span>
+<span class="sd">        For example &quot;author=&#39;John Doe&#39;&quot;.</span>
+
+<span class="sd">        TODO: tags and exclude_tags need to be clarified</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">kargs</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">kargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">exclude_tags</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">exclude_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;wralea&#39;</span><span class="p">]</span>
+        <span class="n">object_factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">interfaces</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">object_factory</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Catalog.services"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.catalog.html#openalea.vpltk.catalog.catalog.Catalog.services">[docs]</a>    <span class="k">def</span> <span class="nf">services</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interfaces</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        See :meth:`Catalog.service &lt;openalea.vpltk.catalog.Catalog.service&gt;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">kargs</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">kargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">exclude_tags</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">exclude_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;wralea&#39;</span><span class="p">]</span>
+        <span class="n">object_factories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factories</span><span class="p">(</span><span class="n">interfaces</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">exclude_tags</span><span class="p">)</span>
+        <span class="n">services</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">object_factory</span> <span class="ow">in</span> <span class="n">object_factories</span> <span class="p">:</span>
+            <span class="n">services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">object_factory</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">services</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>
