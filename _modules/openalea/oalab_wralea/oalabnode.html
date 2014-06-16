@@ -71,31 +71,31 @@
 <span class="sd">    - observer</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Id: oalabnode.py 16355 2014-04-15 15:28:35Z jcoste $&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Id: oalabnode.py 16738 2014-06-03 09:56:29Z jcoste $&#39;</span>
 
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">Scene</span> <span class="k">as</span> <span class="n">PglScene</span>
-<span class="kn">from</span> <span class="nn">openalea.oalab.scene</span> <span class="kn">import</span> <span class="n">Scene</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.world.world</span> <span class="kn">import</span> <span class="n">World</span>
 
-<span class="c"># Nodes for read/write in scene</span>
+<span class="c"># Nodes for read/write in world</span>
 
-<div class="viewcode-block" id="AbstractScene"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.AbstractScene">[docs]</a><span class="k">class</span> <span class="nc">AbstractScene</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="AbstractWorld"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.AbstractWorld">[docs]</a><span class="k">class</span> <span class="nc">AbstractWorld</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
         <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world</span> <span class="o">=</span> <span class="n">World</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="SceneReader"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.SceneReader">[docs]</a><span class="k">class</span> <span class="nc">SceneReader</span><span class="p">(</span><span class="n">AbstractScene</span><span class="p">):</span>
+<div class="viewcode-block" id="WorldReader"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.WorldReader">[docs]</a><span class="k">class</span> <span class="nc">WorldReader</span><span class="p">(</span><span class="n">AbstractWorld</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; inputs is the list of input values &quot;&quot;&quot;</span>
 
         <span class="n">key</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="SceneWriter"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.SceneWriter">[docs]</a><span class="k">class</span> <span class="nc">SceneWriter</span><span class="p">(</span><span class="n">AbstractScene</span><span class="p">):</span>
+<div class="viewcode-block" id="WorldWriter"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.WorldWriter">[docs]</a><span class="k">class</span> <span class="nc">WorldWriter</span><span class="p">(</span><span class="n">AbstractWorld</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; inputs is the list of input values &quot;&quot;&quot;</span>
@@ -103,22 +103,22 @@
         <span class="n">key</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
 
-<div class="viewcode-block" id="SceneWriter.reset"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.SceneWriter.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="WorldWriter.reset"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.WorldWriter.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;key&#39;</span><span class="p">):</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
 </div></div>
-<div class="viewcode-block" id="SceneDefault"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.SceneDefault">[docs]</a><span class="k">class</span> <span class="nc">SceneDefault</span><span class="p">(</span><span class="n">AbstractScene</span><span class="p">):</span>
+<div class="viewcode-block" id="WorldDefault"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.WorldDefault">[docs]</a><span class="k">class</span> <span class="nc">WorldDefault</span><span class="p">(</span><span class="n">AbstractWorld</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="n">AbstractScene</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">AbstractWorld</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span> <span class="o">=</span> <span class="bp">True</span>
 
-<div class="viewcode-block" id="SceneDefault.reset"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.SceneDefault.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="WorldDefault.reset"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.WorldDefault.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;key&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span> <span class="o">=</span> <span class="bp">True</span>
 </div>
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
@@ -127,9 +127,9 @@
         <span class="n">key</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">default_value</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="p">:</span>
-           <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">default_value</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">default_value</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
 </div>

@@ -87,51 +87,72 @@
 <span class="sd">:use:</span>
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">        project1 = Project(name=&quot;mynewproj&quot;, path=&quot;/path/to/proj&quot;)</span>
+<span class="sd">        project1 = Project(name=&quot;mynewproj&quot;, projectdir=&quot;/path/to/proj&quot;)</span>
 <span class="sd">        project1.start()</span>
-<span class="sd">        project1.add(category=&quot;src&quot;, name=&quot;hello.py&quot;, value=&quot;print &#39;Hello World&#39;&quot;)</span>
+<span class="sd">        project1.add(category=&quot;model&quot;, name=&quot;hello.py&quot;, value=&quot;print &#39;Hello World&#39;&quot;)</span>
 <span class="sd">        project1.author = &quot;John Doe&quot;</span>
 <span class="sd">        project1.description = &quot;This project is used to said hello to everyone&quot;</span>
 <span class="sd">        project1.save()</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">path_</span>
 <span class="kn">from</span> <span class="nn">openalea.vpltk.project.configobj</span> <span class="kn">import</span> <span class="n">ConfigObj</span>
 <span class="kn">from</span> <span class="nn">openalea.vpltk.project.loader</span> <span class="kn">import</span> <span class="n">get_loader</span>
 <span class="kn">from</span> <span class="nn">openalea.vpltk.project.saver</span> <span class="kn">import</span> <span class="n">get_saver</span>
+<span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">Observed</span>
 
+<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
 
 <span class="k">def</span> <span class="nf">_model_factories</span><span class="p">():</span>
     <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">discover</span><span class="p">,</span> <span class="n">Plugin</span>
-    <span class="n">plugins</span> <span class="o">=</span> <span class="n">discover</span><span class="p">(</span><span class="s">&#39;oalab.model&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">Plugin</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;oalab.model&#39;</span><span class="p">):</span>
         <span class="n">models</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">extension</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
     <span class="k">return</span> <span class="n">models</span>
 
 
 <div class="viewcode-block" id="remove_extension"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.remove_extension">[docs]</a><span class="k">def</span> <span class="nf">remove_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">filename_split</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filename_split</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename_split</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">filename_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 </div>
-<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="safe_remove"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.safe_remove">[docs]</a><span class="k">def</span> <span class="nf">safe_remove</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Try to remove directories *dirpath*</span>
+<span class="sd">    :param dirpath: path of directory to remove</span>
+<span class="sd">    :return: True if success, else False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dirpath</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">dirpath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dirpath</span><span class="o">.</span><span class="n">removedirs</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
 
+</div>
+<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">(</span><span class="n">Observed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param name: name of the project to create or load</span>
+<span class="sd">    :param path: path of the project to create or load</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model_klasses</span> <span class="o">=</span> <span class="n">_model_factories</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="p">,</span>
                  <span class="n">icon</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s">&quot;OpenAlea Consortium&quot;</span><span class="p">,</span> <span class="n">author_email</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span>
                  <span class="n">description</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">long_description</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">citation</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[],</span> <span class="n">license</span><span class="o">=</span><span class="s">&quot;CeCILL-C&quot;</span><span class="p">,</span>
                  <span class="n">version</span><span class="o">=</span><span class="s">&quot;0.1&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param name: name of the project to create or load</span>
-<span class="sd">        :param path: path of the project to create or load</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="c"># Metadata</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">projectdir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
             <span class="s">&quot;icon&quot;</span><span class="p">:</span> <span class="n">path_</span><span class="p">(</span><span class="n">icon</span><span class="p">),</span>
@@ -143,13 +164,13 @@
             <span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
             <span class="s">&quot;dependencies&quot;</span><span class="p">:</span> <span class="n">dependencies</span><span class="p">,</span>
             <span class="s">&quot;license&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">license</span><span class="p">),</span>
+
             <span class="s">&quot;version&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">),</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="s">&quot;oaproject.cfg&quot;</span>
 
         <span class="c"># Data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s">&quot;control&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span>
             <span class="s">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span>
             <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span>
             <span class="s">&quot;world&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span>
@@ -159,19 +180,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_name</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;ctrls&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;project&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 
     <span class="c">#----------------------------------------</span>
     <span class="c"># Public API</span>
     <span class="c">#----------------------------------------</span>
-<div class="viewcode-block" id="Project.create"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Do the same thing that import method.</span>
-
-<span class="sd">        .. seealso:: :func:`start` :func:`load` :func:`load_manifest`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;project.create() is deprecated. Please use project.start()&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-</div>
 <div class="viewcode-block" id="Project.start"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        1. :func:`load` objects into project.</span>
@@ -188,6 +204,7 @@
         <span class="c"># Load in shell</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_startup_import</span><span class="p">(</span><span class="n">shell</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_startup_run</span><span class="p">(</span><span class="n">shell</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="Project.load"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -204,6 +221,7 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="Project.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -218,6 +236,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_manifest</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="Project.get"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -227,11 +246,12 @@
 <span class="sd">        :param name: name of object to get</span>
 <span class="sd">        :return: object named *name* in the category *category* if it exists. Else, None.</span>
 
-<span class="sd">        :use: &gt;&gt;&gt; get(category=&quot;src&quot;, name=&quot;myscript.py&quot;)</span>
-
 <span class="sd">        .. seealso:: :func:`add`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s">&quot;model&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
             <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">cat</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">cat</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -242,41 +262,69 @@
 <span class="sd">        Add an object in the project</span>
 
 <span class="sd">        :param category: *type* of object to add (&quot;src&quot;, &quot;control&quot;, &quot;world&quot;, ...)</span>
-<span class="sd">        :param name: filename of the object to add (path or str)</span>
+<span class="sd">        :param name: filename of the object to add with extension (path or str)</span>
 <span class="sd">        :param value: to add (string)</span>
 
 <span class="sd">        .. seealso:: :func:`get` :func:`remove`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
-        <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-        <span class="n">cat</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s">&quot;model&quot;</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_model</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+            <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+            <span class="n">cat</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_manifest</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">success</span>
 </div>
 <div class="viewcode-block" id="Project.add_model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.add_model">[docs]</a>    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add an existing model to the project.</span>
 
 <span class="sd">        :param model: model to add to the project (have to exists)</span>
+
+<span class="sd">        .. seealso:: :func:`get` :func:`new_model`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="Project.new_model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.new_model">[docs]</a>    <span class="k">def</span> <span class="nf">new_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a model and add it to the project</span>
+<span class="sd">        Create a model and add it to the project.</span>
 
+<span class="sd">        :param name: name of model to create with extension</span>
+<span class="sd">        :param code: object that will be manipulated as model</span>
+<span class="sd">        :param filepath: path where model will be saved</span>
+<span class="sd">        :param inputs: list of inputs of the model</span>
+<span class="sd">        :param outputs: list of outputs of the model</span>
+
+<span class="sd">        :return: True if added with success</span>
+
+<span class="sd">        .. seealso:: :func:`get` :func:`add_model`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">[</span><span class="s">&#39;model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">ext</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filepath</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_klasses</span><span class="p">:</span>
             <span class="c"># add model to existing models</span>
             <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_klasses</span><span class="p">[</span><span class="n">ext</span><span class="p">](</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
 </div>
 <div class="viewcode-block" id="Project.remove"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove an object in the project</span>
 
-<span class="sd">        Remove nothing on disk.</span>
+<span class="sd">        Remove on disk too.</span>
 
 <span class="sd">        :param category: category of object to remove (&quot;src&quot;, &quot;control&quot;, &quot;world&quot;, ...) (str)</span>
 <span class="sd">        :param name: filename of the src to remove (path or str)</span>
@@ -284,42 +332,66 @@
         <span class="n">category</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s">&quot;model&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
             <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">cat</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">cat</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+        <span class="c"># Try to remove on disk</span>
+        <span class="n">temp_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">category</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="n">safe_remove</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_manifest</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="Project.rename"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Rename a src, a world or a control in the project.</span>
-<span class="sd">        If category is project, rename the entire project.</span>
+<span class="sd">        Rename a *model*, a *world*, a *control*, ... in the project.</span>
+<span class="sd">        If category is *project*, rename the entire project.</span>
 
-<span class="sd">        :param category: Can be &quot;src&quot;, &quot;control&quot;, &quot;world&quot; or &quot;project&quot; (str)</span>
+
+<span class="sd">        :param category: Can be &quot;model&quot;, &quot;control&quot;, &quot;world&quot; or &quot;project&quot; (str)</span>
 <span class="sd">        :param old_name: current name of thing to rename (str)</span>
 <span class="sd">        :param new_name: future name of thing to rename (str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">category</span> <span class="o">==</span> <span class="s">&quot;project&quot;</span><span class="p">):</span>
+        <span class="n">old_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
+        <span class="n">new_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">old_name</span> <span class="o">==</span> <span class="n">new_name</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="c"># rename project</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s">&quot;project&quot;</span><span class="p">:</span>
+            <span class="n">new_path</span><span class="p">,</span> <span class="n">new_name</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span> <span class="o">=</span> <span class="n">new_path</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">old_name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">old_name</span><span class="p">)</span><span class="o">.</span><span class="n">removedirs</span><span class="p">()</span>
-                <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
-                    <span class="k">pass</span>
+            <span class="n">safe_remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span> <span class="o">/</span> <span class="n">old_name</span><span class="p">)</span>
+
+        <span class="c"># rename a part of project</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-                <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-                <span class="c"># Rename in project</span>
-                <span class="n">cat</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">new_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">cat</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">old_name</span><span class="p">)]</span>
-                <span class="c"># Remove inside project</span>
+            <span class="k">if</span> <span class="n">category</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="s">&quot;models&quot;</span><span class="p">]:</span>
+                <span class="n">old_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span>
+                <span class="n">old_model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
+                <span class="k">if</span> <span class="n">old_model</span><span class="o">.</span><span class="n">extension</span> <span class="p">:</span>
+                    <span class="n">old_model</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="n">old_model</span><span class="o">.</span><span class="n">extension</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">old_model</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_model</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">old_name</span><span class="p">)</span>
-                <span class="c"># TODO: Remove on disk</span>
-                <span class="c"># temp_path = self.path / self.name / category / old_name</span>
-                <span class="c"># if temp_path.exists():</span>
-                <span class="c">#     try:</span>
-                <span class="c">#         path_(temp_path).removedirs()</span>
-                <span class="c">#     except IOError:</span>
-                <span class="c">#         pass</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+                <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+                <span class="n">cat</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">old_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_manifest</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 
     <span class="c">#----------------------------------------</span>
     <span class="c"># Manifest</span>
@@ -333,7 +405,12 @@
 <span class="sd">        .. seealso:: :func:`load_manifest`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObj</span><span class="p">()</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span>
+
+        <span class="n">proj_path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">proj_path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">proj_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">proj_path</span><span class="o">.</span><span class="n">makedirs</span><span class="p">()</span>
 
         <span class="n">config</span><span class="p">[</span><span class="s">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -348,7 +425,13 @@
         <span class="n">modelnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">filepath</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">][</span><span class="s">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modelnames</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="p">:</span>
+            <span class="c"># @GBY</span>
+            <span class="c"># Only used for introspection</span>
+            <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">][</span><span class="s">&quot;control&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_name</span>
+
         <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
 <div class="viewcode-block" id="Project.load_manifest"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.load_manifest">[docs]</a>    <span class="k">def</span> <span class="nf">load_manifest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -363,7 +446,7 @@
 
 <span class="sd">        .. seealso:: :func:`save_manifest` :func:`load`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">)</span>
         <span class="k">if</span> <span class="s">&#39;metadata&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;metadata&#39;</span><span class="p">][</span><span class="n">info</span><span class="p">])</span>
@@ -374,6 +457,10 @@
             <span class="k">for</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;manifest&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">files</span> <span class="o">==</span> <span class="s">&quot;model&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;manifest&quot;</span><span class="p">][</span><span class="s">&quot;model&quot;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">files</span> <span class="o">==</span> <span class="s">&quot;control&quot;</span><span class="p">:</span>
+                    <span class="c"># @GBY</span>
+                    <span class="c"># Only used for introspection</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_control_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;manifest&quot;</span><span class="p">][</span><span class="s">&quot;control&quot;</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c"># Hack to stay backward compatible with first versions of projects</span>
                     <span class="k">if</span> <span class="n">files</span> <span class="o">==</span> <span class="s">&quot;src&quot;</span><span class="p">:</span>
@@ -381,7 +468,7 @@
                             <span class="k">if</span> <span class="n">path_</span><span class="p">(</span><span class="n">mod_name</span><span class="p">)</span><span class="o">.</span><span class="n">isabs</span><span class="p">():</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mod_name</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="n">mod_name</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;src&quot;</span> <span class="o">/</span> <span class="n">mod_name</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">filedict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
                         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">][</span><span class="n">files</span><span class="p">]:</span>
@@ -393,10 +480,16 @@
     <span class="c">#----------------------------------------</span></div>
 <div class="viewcode-block" id="Project.model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get one or various instances of models from this project.</span>
 <span class="sd">        :param name: name of the file in self.src to convert into model. Can pass various names split by spaces. Can pass &quot;*&quot;.</span>
 <span class="sd">        :return: model object corresponding to the source named *name* in self.src. If various values, return a list of models. If failed, return None.</span>
+
+<span class="sd">        .. seealso:: :func:`models`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;split&quot;</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span>
         <span class="n">return_models</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="s">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">names</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -406,100 +499,31 @@
             <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-
+            <span class="n">name2</span> <span class="o">=</span> <span class="n">remove_extension</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
                 <span class="n">return_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name2</span> <span class="o">=</span> <span class="n">remove_extension</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">name2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
-                    <span class="n">return_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">name2</span><span class="p">])</span>
-
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            filepath = self.path/self.name/&quot;src&quot;/name</span>
-<span class="sd">            filenames_without_ext = [&quot;.&quot;.join(src.split(&quot;.&quot;)[:-1]) for src in self.src.keys()]</span>
-
-<span class="sd">            if name in self.src:</span>
-<span class="sd">                filename_without_ext = &quot;.&quot;.join(name.split(&quot;.&quot;)[:-1])</span>
-<span class="sd">                if filename_without_ext in self._model:</span>
-<span class="sd">                    # if model exists yet, with a short name (without extension), return it</span>
-<span class="sd">                    return_models.append(self._model[filename_without_ext])</span>
-<span class="sd">                else:</span>
-<span class="sd">                    # if model doesn&#39;t exists yet, but is in self.src with a complete name (with extension),</span>
-<span class="sd">                    # Create model with src and return it</span>
-<span class="sd">                    code = self.src[name]</span>
-<span class="sd">                    filename = path_(name)</span>
-<span class="sd">                    ext = filename.ext[1:]</span>
-<span class="sd">                    if ext in self.model_klasses:</span>
-<span class="sd">                        # add model to existing models</span>
-<span class="sd">                        self._model[filename_without_ext] = self.model_klasses[ext](name=name, code=code, filepath=filepath)</span>
-<span class="sd">                        return_models.append(self._model[filename_without_ext])</span>
-<span class="sd">            elif name in filenames_without_ext:</span>
-<span class="sd">                if name in self._model:</span>
-<span class="sd">                    # if model exists yet, with a short name (without extension), return it</span>
-<span class="sd">                    return_models.append(self._model[name])</span>
-<span class="sd">                else:</span>
-<span class="sd">                    # if model doesn&#39;t exists yet, but is in self.src with a short name (without extension),</span>
-<span class="sd">                    # Create model with src and return it</span>
-<span class="sd">                    for compete_name in self.src.keys():</span>
-<span class="sd">                        if name == &quot;.&quot;.join(compete_name.split(&quot;.&quot;)[:-1]):</span>
-<span class="sd">                            code = self.src[compete_name]</span>
-<span class="sd">                            filename = path_(compete_name)</span>
-<span class="sd">                            ext = filename.ext[1:]</span>
-<span class="sd">                    if ext in self.model_klasses:</span>
-<span class="sd">                        # add model to existing models</span>
-<span class="sd">                        self._model[name] = self.model_klasses[ext](name=name, code=code, filepath=filepath+&quot;.&quot;+ext)</span>
-<span class="sd">                        return_models.append(self._model[name])&quot;&quot;&quot;</span>
-
+            <span class="k">elif</span> <span class="n">name2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
+                <span class="n">return_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">name2</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span><span class="p">:</span>
+                <span class="c"># if manifest is loaded but not models: load model</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="n">object_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">return_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">name2</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_names</span><span class="p">:</span>
+                <span class="c"># if manifest is loaded but not models: load model</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="n">object_name</span><span class="o">=</span><span class="n">name2</span><span class="p">)</span>
+                <span class="n">return_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">name2</span><span class="p">])</span>
+        <span class="c"># If only one model, don&#39;t return a list</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_models</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">return_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">return_models</span>
 </div>
 <div class="viewcode-block" id="Project.models"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.models">[docs]</a>    <span class="k">def</span> <span class="nf">models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        return all models</span>
+<span class="sd">        :return: all models</span>
+
+<span class="sd">        .. seealso:: :func:`model`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s">&quot;*&quot;</span><span class="p">)</span>
-
-    <span class="c">#----------------------------------------</span>
-    <span class="c"># src</span>
-    <span class="c">#----------------------------------------</span></div>
-<div class="viewcode-block" id="Project.add_script"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.add_script">[docs]</a>    <span class="k">def</span> <span class="nf">add_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">script</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a src in the project</span>
-
-<span class="sd">        :deprecated: replace by :func:`add` method</span>
-<span class="sd">        :param name: filename of the src to add (path or str)</span>
-<span class="sd">        :param script: to add (string)</span>
-
-<span class="sd">        .. seealso:: :func:`add`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s">&quot;project.add_script(name, script) is deprecated. Please use project.add(&#39;src&#39;, name, script) instead.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">script</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="Project.remove_script"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.remove_script">[docs]</a>    <span class="k">def</span> <span class="nf">remove_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a src in the project</span>
-
-<span class="sd">        Remove nothing on disk.</span>
-
-<span class="sd">        :deprecated: replace by :func:`remove` method</span>
-<span class="sd">        :param name: filename of the src to remove (path or str)</span>
-
-<span class="sd">        .. seealso:: :func:`remove`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;project.remove_script(name) is deprecated. Please use project.remove(&#39;src&#39;, name) instead.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="Project.run_src"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.run_src">[docs]</a>    <span class="k">def</span> <span class="nf">run_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{}):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Try to run the source file named *name* into current shell</span>
-
-<span class="sd">        :param name: name of the source to run</span>
-<span class="sd">        :param namespace: dict used to run the sources. Default, empty dict.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">exec</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
 
     <span class="c">#----------------------------------------</span>
     <span class="c"># Protected</span>
@@ -510,6 +534,7 @@
 
 <span class="sd">        :param namespace: dict used to run the sources. Default, empty dict.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO: use service to know how to load objects</span>
         <span class="n">object_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">object_type</span><span class="p">)</span>
         <span class="n">return_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
@@ -517,10 +542,10 @@
             <span class="k">if</span> <span class="n">path_</span><span class="p">(</span><span class="n">object_name</span><span class="p">)</span><span class="o">.</span><span class="n">isabs</span><span class="p">():</span>
                 <span class="n">filepath</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">object_name</span><span class="p">)</span>
 
-                <span class="n">new_filepath</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">relpathto</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                <span class="n">new_filepath</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;src&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">relpathto</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">/</span><span class="s">&quot;model&quot;</span><span class="o">/</span><span class="n">object_name</span>
-                <span class="n">new_filepath</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">/</span><span class="s">&quot;model&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">relpathto</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;model&quot;</span> <span class="o">/</span> <span class="n">object_name</span>
+                <span class="n">new_filepath</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;model&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">relpathto</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -529,11 +554,19 @@
 
             <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_klasses</span><span class="p">:</span>
                 <span class="c"># add model to existing models</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">filename_without_ext</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_klasses</span><span class="p">[</span><span class="n">ext</span><span class="p">](</span><span class="n">name</span><span class="o">=</span><span class="n">filename_without_ext</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">new_filepath</span><span class="p">)</span>
+                <span class="n">mod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_klasses</span><span class="p">[</span><span class="n">ext</span><span class="p">](</span><span class="n">name</span><span class="o">=</span><span class="n">filename_without_ext</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">new_filepath</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">filename_without_ext</span><span class="p">]</span> <span class="o">=</span> <span class="n">mod</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">filename_without_ext</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">object_type</span> <span class="o">==</span> <span class="s">&quot;control&quot;</span><span class="p">:</span>
+            <span class="c"># @GBY: 3 following lines</span>
+            <span class="kn">from</span> <span class="nn">openalea.oalab.service.control</span> <span class="kn">import</span> <span class="n">load_controls</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">object_type</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">load_controls</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_type</span><span class="p">):</span>
-                <span class="n">temp_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">object_type</span>
+                <span class="n">temp_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">object_type</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">temp_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                     <span class="k">return</span> <span class="n">return_object</span>
@@ -542,12 +575,13 @@
                 <span class="n">files</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
                     <span class="n">filename</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-                    <span class="n">pathname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">object_type</span> <span class="o">/</span> <span class="n">filename</span>
+                    <span class="n">pathname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">object_type</span> <span class="o">/</span> <span class="n">filename</span>
                     <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">isabs</span><span class="p">():</span>
                         <span class="c"># Load files that are outside project</span>
                         <span class="n">pathname</span> <span class="o">=</span> <span class="n">filename</span>
                     <span class="n">Loader</span> <span class="o">=</span> <span class="n">get_loader</span><span class="p">(</span><span class="s">&quot;GenericLoader&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">object_type</span> <span class="o">==</span> <span class="s">&quot;control&quot;</span><span class="p">:</span>
+                        <span class="c"># TODO: to remove:</span>
                         <span class="n">Loader</span> <span class="o">=</span> <span class="n">get_loader</span><span class="p">(</span><span class="s">&quot;CPickleLoader&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">object_type</span> <span class="o">==</span> <span class="s">&quot;world&quot;</span><span class="p">:</span>
                         <span class="n">Loader</span> <span class="o">=</span> <span class="n">get_loader</span><span class="p">(</span><span class="s">&quot;BGEOMLoader&quot;</span><span class="p">)</span>
@@ -563,24 +597,27 @@
             <span class="k">return</span> <span class="n">return_object</span>
 
     <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_type</span><span class="p">):</span>
+        <span class="c"># TODO: use service to know how to save objects</span>
         <span class="n">object_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">object_type</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">object_type</span> <span class="o">==</span> <span class="s">&quot;model&quot;</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span>
-                <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span>
-                <span class="n">filepath</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">filepath</span><span class="o">.</span><span class="n">isabs</span><span class="p">():</span>
-                    <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">/</span><span class="s">&quot;model&quot;</span><span class="o">/</span><span class="n">filepath</span>
-                <span class="n">Saver</span> <span class="o">=</span> <span class="n">get_saver</span><span class="p">()</span>
-                <span class="n">saver</span> <span class="o">=</span> <span class="n">Saver</span><span class="p">()</span>
-                <span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">repr_code</span><span class="p">(),</span> <span class="n">filepath</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">object_type</span> <span class="o">==</span> <span class="s">&quot;control&quot;</span><span class="p">:</span>
+            <span class="c"># @GBY: 4 following lines</span>
+            <span class="kn">from</span> <span class="nn">openalea.oalab.service.control</span> <span class="kn">import</span> <span class="n">save_controls</span>
+            <span class="n">ctrls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">object_type</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_name</span>
+            <span class="n">save_controls</span><span class="p">(</span><span class="n">ctrls</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">object_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_type</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">object_</span><span class="p">:</span>
-                <span class="n">temp_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">object_type</span>
+                <span class="n">temp_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">object_type</span>
 
                 <span class="c"># Make default directories if necessary</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">temp_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
 
@@ -595,14 +632,22 @@
                         <span class="c"># Save PlantGL objects</span>
                         <span class="n">Saver</span> <span class="o">=</span> <span class="n">get_saver</span><span class="p">(</span><span class="s">&quot;BGEOMSaver&quot;</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="n">object_type</span> <span class="o">==</span> <span class="s">&quot;control&quot;</span><span class="p">:</span>
+                        <span class="c"># TODO: to remove:</span>
                         <span class="n">Saver</span> <span class="o">=</span> <span class="n">get_saver</span><span class="p">(</span><span class="s">&quot;CPickleSaver&quot;</span><span class="p">)</span>
                     <span class="n">saver</span> <span class="o">=</span> <span class="n">Saver</span><span class="p">()</span>
                     <span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">object_</span><span class="p">[</span><span class="n">sub_object</span><span class="p">],</span> <span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_save_scripts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;project._save_scripts is deprecated. Please use project._save(&#39;src&#39;) instead.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">object_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">[</span><span class="n">object_type</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
 
+<div class="viewcode-block" id="Project.save_model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.save_model">[docs]</a>    <span class="k">def</span> <span class="nf">save_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filepath</span><span class="o">.</span><span class="n">isabs</span><span class="p">():</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;model&quot;</span> <span class="o">/</span> <span class="n">filepath</span>
+        <span class="n">Saver</span> <span class="o">=</span> <span class="n">get_saver</span><span class="p">()</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">Saver</span><span class="p">()</span>
+        <span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">repr_code</span><span class="p">(),</span> <span class="n">filepath</span><span class="p">)</span>
+</div>
     <span class="k">def</span> <span class="nf">_startup_import</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param shell: shell to run startup. Has to have the method &quot;runcode(code)&quot;. Default, None.</span>
@@ -631,22 +676,17 @@
                 <span class="k">if</span> <span class="n">shell</span><span class="p">:</span>
                     <span class="n">shell</span><span class="o">.</span><span class="n">runcode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startup</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;Project named &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; in path &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;.</span>
-
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;Project named &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; in path &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;.</span>
 <span class="s">&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">metada</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">metada</span><span class="p">]:</span>
                 <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span> <span class="o">+</span> <span class="n">metada</span> <span class="o">+</span> <span class="s">&quot; : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">metada</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;. &quot;</span>
-
-        <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span> <span class="o">+</span> <span class="s">&quot;&quot;&quot;</span>
-
-<span class="s">&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="n">file_</span><span class="p">]:</span>
-                <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span> <span class="o">+</span> <span class="n">file_</span> <span class="o">+</span> <span class="s">&quot; : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="n">file_</span><span class="p">])</span>
-
         <span class="k">return</span> <span class="n">txt</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Project.use_ipython"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.use_ipython">[docs]</a>    <span class="k">def</span> <span class="nf">use_ipython</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -694,6 +734,7 @@
     <span class="nd">@name.setter</span>
 <div class="viewcode-block" id="Project.name"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">icon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -702,6 +743,7 @@
     <span class="nd">@icon.setter</span>
 <div class="viewcode-block" id="Project.icon"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.icon">[docs]</a>    <span class="k">def</span> <span class="nf">icon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;icon&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">author</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -710,6 +752,7 @@
     <span class="nd">@author.setter</span>
 <div class="viewcode-block" id="Project.author"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.author">[docs]</a>    <span class="k">def</span> <span class="nf">author</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">author_email</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -718,6 +761,7 @@
     <span class="nd">@author_email.setter</span>
 <div class="viewcode-block" id="Project.author_email"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.author_email">[docs]</a>    <span class="k">def</span> <span class="nf">author_email</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;author_email&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -726,6 +770,7 @@
     <span class="nd">@description.setter</span>
 <div class="viewcode-block" id="Project.description"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.description">[docs]</a>    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">long_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -734,6 +779,7 @@
     <span class="nd">@long_description.setter</span>
 <div class="viewcode-block" id="Project.long_description"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.long_description">[docs]</a>    <span class="k">def</span> <span class="nf">long_description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;long_description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">citation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -742,6 +788,7 @@
     <span class="nd">@citation.setter</span>
 <div class="viewcode-block" id="Project.citation"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.citation">[docs]</a>    <span class="k">def</span> <span class="nf">citation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;citation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -750,6 +797,7 @@
     <span class="nd">@url.setter</span>
 <div class="viewcode-block" id="Project.url"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.url">[docs]</a>    <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -758,6 +806,7 @@
     <span class="nd">@dependencies.setter</span>
 <div class="viewcode-block" id="Project.dependencies"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;dependencies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">license</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -766,6 +815,7 @@
     <span class="nd">@license.setter</span>
 <div class="viewcode-block" id="Project.license"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.license">[docs]</a>    <span class="k">def</span> <span class="nf">license</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;license&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -774,14 +824,16 @@
     <span class="nd">@version.setter</span>
 <div class="viewcode-block" id="Project.version"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.version">[docs]</a>    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;control&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control</span>
 
     <span class="nd">@control.setter</span>
 <div class="viewcode-block" id="Project.control"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.control">[docs]</a>    <span class="k">def</span> <span class="nf">control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;control&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -790,6 +842,7 @@
     <span class="nd">@cache.setter</span>
 <div class="viewcode-block" id="Project.cache"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.cache">[docs]</a>    <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -798,6 +851,7 @@
     <span class="nd">@data.setter</span>
 <div class="viewcode-block" id="Project.data"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">scene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -806,6 +860,7 @@
     <span class="nd">@scene.setter</span>
 <div class="viewcode-block" id="Project.scene"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.scene">[docs]</a>    <span class="k">def</span> <span class="nf">scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;world&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">world</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -814,6 +869,7 @@
     <span class="nd">@world.setter</span>
 <div class="viewcode-block" id="Project.world"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.world">[docs]</a>    <span class="k">def</span> <span class="nf">world</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;world&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">startup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -822,27 +878,46 @@
     <span class="nd">@startup.setter</span>
 <div class="viewcode-block" id="Project.startup"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.startup">[docs]</a>    <span class="k">def</span> <span class="nf">startup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;startup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: the documentation of the project (str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;doc&quot;</span><span class="p">]</span>
 
     <span class="nd">@doc.setter</span>
 <div class="viewcode-block" id="Project.doc"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.doc">[docs]</a>    <span class="k">def</span> <span class="nf">doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s">&quot;doc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Project.path"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.path">[docs]</a>    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 </div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="Project.icon_path"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.icon_path">[docs]</a>    <span class="k">def</span> <span class="nf">icon_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: the complete path of the icon. To modify it, you have to modify the path of project, the name of project and/or the self.icon.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">icon_name</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">icon</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">icon</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">):</span>
                 <span class="c"># local icon</span>
-                <span class="n">icon_name</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">icon</span>
+                <span class="n">icon_name</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectdir</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">icon</span>
         <span class="k">return</span> <span class="n">icon_name</span>
 </div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="Project.src"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.src">[docs]</a>    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Project.dirty"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.dirty">[docs]</a>    <span class="k">def</span> <span class="nf">dirty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">dirty</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dirty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dirty</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">dirty</span>
+        <span class="k">return</span> <span class="bp">False</span></div></div>
 </pre></div>
 
           </div>

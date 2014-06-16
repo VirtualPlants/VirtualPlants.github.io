@@ -48,39 +48,53 @@
             
   <h1>Source code for openalea.oalab.plugins.applet</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">===========================</span>
-<span class="sd">Applet plugin documentation</span>
-<span class="sd">===========================</span>
+<span class="sd">=======</span>
+<span class="sd">Applets</span>
+<span class="sd">=======</span>
 
-<span class="sd">To define an applet plugin, you must</span>
-<span class="sd">  #. write an AppletPlugin class that respects IPluginApplet interface (see below)</span>
-<span class="sd">  #. add it to group &quot;oalab.applet&quot;</span>
+<span class="sd">Overview</span>
+<span class="sd">========</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">    To define an applet plugin, you must</span>
+<span class="sd">      #. write an AppletPlugin class that respects IPluginApplet interface (see below)</span>
+<span class="sd">      #. add it to group :dfn:`oalab.applet`</span>
 
 <span class="sd">1. Copy paste this code and fill it with right names and instructions.</span>
 <span class="sd">(replace all xyz, respecting case, with your applet name).</span>
 <span class="sd">For example Xyz -&gt; HelpApplet</span>
 
 
-<span class="sd">.. code-block :: python</span>
+<span class="sd">.. testcode::</span>
 
-<span class="sd">    from openalea.vpltk.plugin import Plugin</span>
-
-<span class="sd">    class PluginXyz(Plugin):</span>
+<span class="sd">    class PluginXyz(object):</span>
 
 <span class="sd">        name = &#39;Xyz&#39;</span>
 <span class="sd">        alias = &#39;Xyz&#39;</span>
 
 <span class="sd">        def __call__(self, mainwindow):</span>
 <span class="sd">            # Write your code here</span>
+<span class="sd">            pass</span>
 
 <span class="sd">        def instance(self):</span>
 <span class="sd">            # Write your code here</span>
+<span class="sd">            pass</span>
 
+
+<span class="sd">To avoid to rewrite all plugins from scratch, you can derivate your plugin from</span>
+<span class="sd">:class:`~openalea.oalab.plugins.applets.PluginApplet` :</span>
+
+<span class="sd">.. testcode::</span>
+
+<span class="sd">    from openalea.oalab.plugins.applets import PluginApplet</span>
+<span class="sd">    class PluginXyz(PluginApplet):</span>
+<span class="sd">        pass</span>
 
 <span class="sd">2. Once this class has been written, just register it in the setup.py file of</span>
 <span class="sd">your python package.</span>
 
-<span class="sd">.. code-block :: python</span>
+<span class="sd">.. testcode::</span>
 
 <span class="sd">    entry_points={</span>
 <span class="sd">        &#39;oalab.applet&#39;: [</span>
@@ -92,47 +106,57 @@
 <span class="sd">With **mypackage.plugins** python module path (equivalent to &#39;mypackage/plugins.py&#39;) and</span>
 <span class="sd">&#39;PluginXyz&#39; the class name.</span>
 
-<span class="sd">Details</span>
+<span class="sd">Example</span>
 <span class="sd">=======</span>
 
-<span class="sd">.. autoclass:: openalea.oalab.plugins.applet.IPluginApplet</span>
-<span class="sd">    :members: __call__, instance, name, alias</span>
+<span class="sd">The module called oalab.gui.help provides this help widget:</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span>
-<span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="n">IInterface</span>
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    :filename: oalab/gui/help.py</span>
+<span class="sd">    :linenos:</span>
 
-<span class="k">class</span> <span class="nc">IApplet</span><span class="p">(</span><span class="n">IInterface</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Autonomous Graphical component</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Optional method, called after instantiation</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    from openalea.vpltk.qt import QtGui</span>
 
-<div class="viewcode-block" id="IPluginApplet"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin.html#openalea.oalab.plugins.applet.IPluginApplet">[docs]</a><span class="k">class</span> <span class="nc">IPluginApplet</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Graphical component displayed in main window.</span>
-<span class="sd">    Component must respect :class:`~openalea.oalab.plugins.applet.IApplet` interface.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    class HelpWidget(QtGui.QWidget):</span>
+<span class="sd">        def openWeb(self, url):</span>
+<span class="sd">            # Specific to this applet</span>
+<span class="sd">            pass</span>
 
-    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;AppletName&#39;</span>
-    <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;Applet alias&#39;</span>
+<span class="sd">        def actions(self):</span>
+<span class="sd">            # optionnal, common to all applets</span>
+<span class="sd">            pass</span>
 
-<div class="viewcode-block" id="IPluginApplet.__call__"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin.html#openalea.oalab.plugins.applet.IPluginApplet.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainwindow</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load and instantiate graphical component that actually provide feature.</span>
-<span class="sd">        Then, place it in mainwindow (QMainWindow).</span>
+<span class="sd">        def initialize(self):</span>
+<span class="sd">            # optionnal, common to all applets</span>
+<span class="sd">            pass</span>
 
+<span class="sd">OpenAleaLab is the main application that gather all widgets.</span>
+<span class="sd">We want to add HelpWidget in the MainWindow and allow communication between both classes.</span>
+<span class="sd">For that purpose, we create a Plugin called HelpWidgetPlugin in helper package:</span>
 
-<span class="sd">        Example:</span>
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    :filename: helper/plugins/oalab/helpwidget.py</span>
+<span class="sd">    :linenos:</span>
 
-<span class="sd">        .. code-block :: python</span>
+<span class="sd">    class HelpWidgetPlugin(object):</span>
 
+<span class="sd">        data = {</span>
+<span class="sd">        # Data that describe plugin</span>
+<span class="sd">        }</span>
+
+<span class="sd">        def __call__(self, mainwindow):</span>
+<span class="sd">            # 1. Import widget and instantiate it</span>
+<span class="sd">            # 2. Ask to mainwindow to place it</span>
+<span class="sd">            # 3. Fill menus, actions, toolbars, ...</span>
+
+<span class="sd">            # 1.</span>
 <span class="sd">            from mypackage import MyApplet</span>
-
 <span class="sd">            self._applet = MyApplet()</span>
+
+<span class="sd">            # 2</span>
+<span class="sd">            mainwindow.add_applet(self._applet, self.alias, area=&#39;inputs&#39;)</span>
+
+<span class="sd">            # 3.</span>
 <span class="sd">            if self._applet.actions():</span>
 <span class="sd">                for action in self._applet.actions():</span>
 <span class="sd">                    # Add actions in PanedMenu</span>
@@ -142,11 +166,76 @@
 <span class="sd">                    pane_name, group_name, act, btn_type = action</span>
 <span class="sd">                    mainwindow.add_action_to_existing_menu(action=act, menu_name=pane_name, sub_menu_name=group_name)</span>
 
-<span class="sd">            mainwindow.add_applet(self._applet, self.alias, area=&#39;inputs&#39;)</span>
+<span class="sd">It is very important to notice that adding widget in the right area is done by</span>
+<span class="sd">the plugin, not the application. Application does almost nothing, it is just</span>
+<span class="sd">a container of widgets. Real application intelligence is delegated to Plugins</span>
+<span class="sd">(placing and linking components) and components (doing real treatments).</span>
 
+<span class="sd">Finally, we register this plugin in setup.py of package helper.</span>
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    :filename: helper/setup.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :emphasize-lines: 5,7</span>
+
+<span class="sd">    setup(</span>
+<span class="sd">        # setup instructions</span>
+
+<span class="sd">        entry_points = {</span>
+<span class="sd">            &#39;oalab.applet&#39;:                                                  # Plugin category</span>
+<span class="sd">                [</span>
+<span class="sd">                &#39;HelpWidgetPlugin = helper.plugins.oalab:HelpWidgetPlugin&#39;   # Plugin name = path to plugin (factory)</span>
+<span class="sd">                ]</span>
+<span class="sd">            }</span>
+<span class="sd">        )</span>
+
+
+<span class="sd">Details</span>
+<span class="sd">=======</span>
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.applet.IPluginApplet</span>
+<span class="sd">    :members: __call__, instance, name, alias</span>
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.applets.PluginApplet</span>
+<span class="sd">    :members: __call__, instance, _fill_menu</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="n">IInterface</span>
+
+<span class="k">class</span> <span class="nc">IApplet</span><span class="p">(</span><span class="n">IInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autonomous Graphical component</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optional method, called after instantiation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optionnal, common to all applets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+
+<div class="viewcode-block" id="IPluginApplet"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin_applet.html#openalea.oalab.plugins.applet.IPluginApplet">[docs]</a><span class="k">class</span> <span class="nc">IPluginApplet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Graphical component displayed in main window.</span>
+<span class="sd">    Component must respect :class:`~openalea.oalab.plugins.applet.IApplet` interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;AppletName&#39;</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;Applet alias&#39;</span>
+
+<div class="viewcode-block" id="IPluginApplet.__call__"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin_applet.html#openalea.oalab.plugins.applet.IPluginApplet.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainwindow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load and instantiate graphical component that actually provide feature.</span>
+<span class="sd">        Then, place it in mainwindow (QMainWindow).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 </div>
-<div class="viewcode-block" id="IPluginApplet.instance"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin.html#openalea.oalab.plugins.applet.IPluginApplet.instance">[docs]</a>    <span class="k">def</span> <span class="nf">instance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="IPluginApplet.instance"><a class="viewcode-back" href="../../../../latest/dev/archi/api_plugin_applet.html#openalea.oalab.plugins.applet.IPluginApplet.instance">[docs]</a>    <span class="k">def</span> <span class="nf">instance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        returns widget instance if plugin has been called, else None.</span>
 

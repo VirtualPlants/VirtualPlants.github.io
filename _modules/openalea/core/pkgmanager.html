@@ -70,7 +70,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
-<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: pkgmanager.py 3772 2013-04-05 13:46:39Z pradal $ &quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: pkgmanager.py 4250 2014-06-06 12:40:57Z jcoste $ &quot;</span>
 
 <span class="kn">import</span> <span class="nn">openalea</span>
 
@@ -95,7 +95,7 @@
 <span class="kn">from</span> <span class="nn">openalea.core.category</span> <span class="kn">import</span> <span class="n">PackageManagerCategory</span>
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
 
-<span class="kn">from</span> <span class="nn">ConfigParser</span> <span class="kn">import</span> <span class="n">NoSectionError</span><span class="p">,</span><span class="n">NoOptionError</span>
+<span class="kn">from</span> <span class="nn">ConfigParser</span> <span class="kn">import</span> <span class="n">NoSectionError</span><span class="p">,</span> <span class="n">NoOptionError</span>
 
 <span class="c"># Exceptions</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -108,7 +108,7 @@
 <div class="viewcode-block" id="UnknownPackageError"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.UnknownPackageError">[docs]</a><span class="k">class</span> <span class="nc">UnknownPackageError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Cannot find package : </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Cannot find package : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
@@ -116,7 +116,7 @@
 <div class="viewcode-block" id="IllFormedUrlError"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.IllFormedUrlError">[docs]</a><span class="k">class</span> <span class="nc">IllFormedUrlError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Url is ill-formed : </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Url is ill-formed : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
@@ -142,9 +142,9 @@
         <span class="sd">&quot;&quot;&quot; Write to log file &quot;&quot;&quot;</span>
 
         <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_file</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%i</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_index</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%i</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_index</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_index</span> <span class="o">+=</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_index</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">pmanLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Logger.print_log"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.Logger.print_log">[docs]</a>    <span class="k">def</span> <span class="nf">print_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -172,12 +172,12 @@
         <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
-        <span class="c">#make urlparse correctly handle the glorious &quot;oa&quot; protocol :)</span>
+        <span class="c"># make urlparse correctly handle the glorious &quot;oa&quot; protocol :)</span>
         <span class="n">urlparse</span><span class="o">.</span><span class="n">uses_query</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;oa&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="c"># remove namespace option</span>
-        <span class="c">#self.include_namespace = self.get_include_namespace()</span>
+        <span class="c"># self.include_namespace = self.get_include_namespace()</span>
 
         <span class="c"># save system path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[:]</span>
@@ -284,29 +284,29 @@
 
             <span class="c"># Get Deprecated packages</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="n">pmanLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span> <span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
+                <span class="n">pmanLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
             <span class="k">if</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span> <span class="o">==</span> <span class="s">&quot;deprecated&quot;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">deprecated_pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
                 <span class="k">continue</span>
 
-            <span class="c">#base = epoint.dist.location</span>
-            <span class="c">#m = epoint.module_name.split(&#39;.&#39;)</span>
-            <span class="c">#p = os.path.join(base, *m)</span>
+            <span class="c"># base = epoint.dist.location</span>
+            <span class="c"># m = epoint.module_name.split(&#39;.&#39;)</span>
+            <span class="c"># p = os.path.join(base, *m)</span>
 
             <span class="c"># Be careful, this lines will import __init__.py and all its predecessor</span>
             <span class="c"># to find the path.</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">m</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Cannot load </span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
-                <span class="c">#self.log.add(&quot;Cannot load %s : %s&quot;%(epoint.module_name, e))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Cannot load </span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="c"># self.log.add(&quot;Cannot load %s : %s&quot;%(epoint.module_name, e))</span>
                 <span class="k">continue</span>
 
             <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">__path__</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">l</span> <span class="p">:</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Wralea entry point: </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">) &quot;</span><span class="o">%</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
-                <span class="c">#self.log.add(&quot;Wralea entry point: %s (%s) &quot;%(epoint.module_name, p))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Wralea entry point: </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">) &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+                <span class="c"># self.log.add(&quot;Wralea entry point: %s (%s) &quot;%(epoint.module_name, p))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="p">)</span>
 
         <span class="c"># Search the path based on the old method (by hand).</span>
@@ -389,8 +389,8 @@
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">:</span>
             <span class="n">common</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
             <span class="c"># the path is already in wraleapth</span>
-            <span class="k">if</span><span class="p">(</span> <span class="n">common</span> <span class="o">==</span> <span class="n">p</span> <span class="ow">and</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">common</span><span class="p">):])</span> <span class="o">==</span> <span class="n">path</span> <span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">common</span> <span class="o">==</span> <span class="n">p</span> <span class="ow">and</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">common</span><span class="p">):])</span> <span class="o">==</span> <span class="n">path</span><span class="p">):</span>
                 <span class="k">return</span>
             <span class="c"># the new path is more generic, we keep it</span>
             <span class="k">if</span><span class="p">(</span><span class="n">common</span> <span class="o">==</span> <span class="n">path</span> <span class="ow">and</span>
@@ -413,12 +413,12 @@
 
         <span class="c"># Test if the package is deprecated</span>
         <span class="k">if</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deprecated_pkg</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Deprecated : Ignoring </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-            <span class="c">#self.log.add(&quot;Deprecated : Ignoring %s&quot;%(package.name))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Deprecated : Ignoring </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="c"># self.log.add(&quot;Deprecated : Ignoring %s&quot;%(package.name))</span>
             <span class="k">del</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="c">#if( not self.pkgs.has_key(package.get_id())):</span>
+        <span class="c"># if( not self.pkgs.has_key(package.get_id())):</span>
         <span class="bp">self</span><span class="p">[</span><span class="n">package</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span> <span class="o">=</span> <span class="n">package</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_category</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
 
@@ -462,14 +462,14 @@
 
                 <span class="c"># search for the sub category (split by .)</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">c_root</span><span class="p">,</span> <span class="n">c_others</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">except</span><span class="p">:</span> <span class="c">#if there is no &#39;.&#39;, c_others is empty</span>
+                    <span class="n">c_root</span><span class="p">,</span> <span class="n">c_others</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span> <span class="c"># if there is no &#39;.&#39;, c_others is empty</span>
                     <span class="n">c_root</span> <span class="o">=</span> <span class="n">c</span>
                     <span class="n">c_others</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
 
                 <span class="k">if</span> <span class="n">c_root</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_category</span><span class="o">.</span><span class="n">keywords</span><span class="p">:</span>
                     <span class="c"># reconstruct the name of the category</span>
-                    <span class="n">c_temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_category</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="n">c_root</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">c_others</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+                    <span class="n">c_temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_category</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="n">c_root</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">c_others</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">c_temp</span><span class="p">,</span> <span class="n">nf</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> <span class="n">nf</span><span class="p">)</span>
@@ -492,8 +492,8 @@
 
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span> <span class="ow">or</span>
            <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Package directory : </span><span class="si">%s</span><span class="s"> does not exists.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">dirname</span><span class="p">,))</span>
-            <span class="c">#self.log.add(&quot;Package directory : %s does not exists.&quot;%(dirname,))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Package directory : </span><span class="si">%s</span><span class="s"> does not exists.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dirname</span><span class="p">,))</span>
+            <span class="c"># self.log.add(&quot;Package directory : %s does not exists.&quot;%(dirname,))</span>
             <span class="k">return</span> <span class="bp">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_wralea_path</span><span class="p">)</span>
@@ -502,15 +502,15 @@
         <span class="n">readers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_wralea_dir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">readers</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Search Vlab objects.&quot;</span><span class="p">)</span>
-            <span class="c">#self.log.add(&quot;Search Vlab objects.&quot;)</span>
+            <span class="c"># self.log.add(&quot;Search Vlab objects.&quot;)</span>
             <span class="n">readers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_vlab_dir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">readers</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">register_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Unable to load package </span><span class="si">%s</span><span class="s">.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="p">))</span>
-                <span class="c">#self.log.add(&quot;Unable to load package %s.&quot;%(dirname, ))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Unable to load package </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dirname</span><span class="p">,))</span>
+                <span class="c"># self.log.add(&quot;Unable to load package %s.&quot;%(dirname, ))</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="k">if</span><span class="p">(</span><span class="n">readers</span><span class="p">):</span>
@@ -534,20 +534,20 @@
         <span class="n">spec_files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Not a directory&quot;</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">directory</span><span class="p">))</span>
-            <span class="c">#self.log.add(&quot;Not a directory&quot;, directory, repr(directory))</span>
+            <span class="c"># self.log.add(&quot;Not a directory&quot;, directory, repr(directory))</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
         <span class="n">spec_name</span> <span class="o">=</span> <span class="s">&#39;*specifications&#39;</span>
         <span class="c"># search for wralea.py</span>
         <span class="k">if</span><span class="p">(</span><span class="n">recursive</span> <span class="ow">and</span> <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span><span class="p">):</span>
-            <span class="n">spec_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="n">spec_name</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">spec_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="n">spec_name</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">spec_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">spec_name</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">spec_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">spec_name</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">spec_files</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Package Manager : found  VLAB </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">p</span><span class="p">)</span>
-            <span class="c">#self.log.add(&quot;Package Manager : found  VLAB %s&quot; % p)</span>
+            <span class="c"># self.log.add(&quot;Package Manager : found  VLAB %s&quot; % p)</span>
 
         <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">,</span> <span class="n">spec_files</span><span class="p">)</span>
 
@@ -565,8 +565,8 @@
 
         <span class="n">wralea_files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> Not a directory&quot;</span><span class="o">%</span><span class="nb">repr</span><span class="p">(</span><span class="n">directory</span><span class="p">))</span>
-            <span class="c">#self.log.add(&quot;%s Not a directory&quot;%repr(directory))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> Not a directory&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">directory</span><span class="p">))</span>
+            <span class="c"># self.log.add(&quot;%s Not a directory&quot;%repr(directory))</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
@@ -577,23 +577,23 @@
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="s">&quot;*wralea*.py&quot;</span><span class="p">):</span>
                 <span class="n">wralea_files</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">wralea_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&quot;*wralea*.py&quot;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">wralea_files</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&quot;*wralea*.py&quot;</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wralea_files</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Package Manager : found </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">f</span><span class="p">)</span>
-            <span class="c">#self.log.add(&quot;Package Manager : found %s&quot; % f)</span>
+            <span class="c"># self.log.add(&quot;Package Manager : found %s&quot; % f)</span>
 
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="n">dt</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span>
-            <span class="k">print</span> <span class="s">&#39;search wralea files takes </span><span class="si">%f</span><span class="s"> sec&#39;</span><span class="o">%</span><span class="n">dt</span>
+            <span class="k">print</span> <span class="s">&#39;search wralea files takes </span><span class="si">%f</span><span class="s"> sec&#39;</span> <span class="o">%</span> <span class="n">dt</span>
 
         <span class="n">readers</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">,</span> <span class="n">wralea_files</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="n">dt1</span> <span class="o">=</span> <span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span>
-            <span class="k">print</span> <span class="s">&#39;readers takes </span><span class="si">%f</span><span class="s"> sec: &#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">dt1</span><span class="p">,)</span>
+            <span class="k">print</span> <span class="s">&#39;readers takes </span><span class="si">%f</span><span class="s"> sec: &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dt1</span><span class="p">,)</span>
 
         <span class="k">return</span> <span class="n">readers</span>
 
@@ -622,10 +622,10 @@
 
         <span class="n">directories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_wralea_path</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
-            <span class="c">#print &#39;      ~~~~~~~~~~&#39;</span>
+            <span class="c"># print &#39;      ~~~~~~~~~~&#39;</span>
             <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
-            <span class="c">#print &#39;      get_wralea_path %f sec&#39;%(t2-t1)</span>
-            <span class="c">#print &#39;\n&#39;.join(directories)</span>
+            <span class="c"># print &#39;      get_wralea_path %f sec&#39;%(t2-t1)</span>
+            <span class="c"># print &#39;\n&#39;.join(directories)</span>
 
         <span class="n">recursive</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -635,14 +635,14 @@
             <span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                 <span class="n">readers</span> <span class="o">+=</span> <span class="n">ret</span>
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
-                <span class="c">#print &#39;      ~~~~~~~~~~&#39;</span>
+                <span class="c"># print &#39;      ~~~~~~~~~~&#39;</span>
                 <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
-                <span class="c">#print &#39;      find_wralea %s %f sec&#39;%(wp, t1-t0)</span>
+                <span class="c"># print &#39;      find_wralea %s %f sec&#39;%(wp, t1-t0)</span>
 
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
-            <span class="c">#print &#39;      ~~~~~~~~~~&#39;</span>
+            <span class="c"># print &#39;      ~~~~~~~~~~&#39;</span>
             <span class="n">t3</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
-            <span class="c">#print &#39;      find_wralea_dir %f sec&#39;%(t3-t2)</span>
+            <span class="c"># print &#39;      find_wralea_dir %f sec&#39;%(t3-t2)</span>
 
         <span class="k">return</span> <span class="n">readers</span>
 </div>
@@ -657,15 +657,15 @@
         <span class="n">directories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_wralea_path</span><span class="p">()</span>
         <span class="n">recursive</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span><span class="p">:</span>
-            <span class="n">recursive</span> <span class="o">=</span> <span class="bp">False</span> 
+            <span class="n">recursive</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">f</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="s">&#39;*wralea*.py&#39;</span><span class="p">))</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="s">&#39;*wralea*.py&#39;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">f</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&#39;*wralea*.py&#39;</span><span class="p">))</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&#39;*wralea*.py&#39;</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">files</span>
 </div>
 <div class="viewcode-block" id="PackageManager.create_readers"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.create_readers">[docs]</a>    <span class="k">def</span> <span class="nf">create_readers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wralea_files</span><span class="p">):</span>
-        <span class="k">return</span>  <span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wralea_files</span><span class="p">))</span>
+        <span class="k">return</span>  <span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wralea_files</span><span class="p">))</span>
 
 </div>
 <div class="viewcode-block" id="PackageManager.get_pkgreader"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_pkgreader">[docs]</a>    <span class="k">def</span> <span class="nf">get_pkgreader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
@@ -701,23 +701,23 @@
         <span class="n">wralea_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_all_wralea</span><span class="p">()</span>
         <span class="n">readerlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_readers</span><span class="p">(</span><span class="n">wralea_files</span><span class="p">)</span>
 
-        <span class="c">#readerlist = self.find_wralea_files()</span>
+        <span class="c"># readerlist = self.find_wralea_files()</span>
 
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="k">print</span> <span class="s">&#39;-------------------&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;find_wralea_files takes </span><span class="si">%f</span><span class="s"> seconds&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;find_wralea_files takes </span><span class="si">%f</span><span class="s"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">readerlist</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
                 <span class="n">tn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="n">x</span><span class="o">.</span><span class="n">register_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
-                <span class="k">print</span> <span class="s">&#39;register package &#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">get_pkg_name</span><span class="p">(),</span> <span class="s">&#39;in &#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span><span class="n">tn</span>
+                <span class="k">print</span> <span class="s">&#39;register package &#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">get_pkg_name</span><span class="p">(),</span> <span class="s">&#39;in &#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">tn</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">t3</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="k">print</span> <span class="s">&#39;-------------------&#39;</span>
-            <span class="k">print</span> <span class="s">&#39;register_packages takes </span><span class="si">%f</span><span class="s"> seconds&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">t3</span><span class="o">-</span><span class="n">t2</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;register_packages takes </span><span class="si">%f</span><span class="s"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t3</span> <span class="o">-</span> <span class="n">t2</span><span class="p">)</span>
 <span class="c">#        self.save_cache()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_category</span><span class="p">()</span>
@@ -807,7 +807,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
 
         <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">metainfo</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;alias&#39;</span><span class="p">)):</span>
-               <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">metainfo</span><span class="p">[</span><span class="s">&#39;alias&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">metainfo</span><span class="p">[</span><span class="s">&#39;alias&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
         <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">])</span>
@@ -879,7 +879,7 @@
 <span class="sd">        &quot;factoryName&quot; is the of factory</span>
 <span class="sd">        &quot;factoryType&quot; is one of {&quot;CompositeNodeFactory&quot;, &quot;NodeFactory&quot;, &quot;DataFactory&quot;}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pkg</span><span class="p">,</span> <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="c">#url.path.strip(&quot;/&quot;) #the path is preceded by one &quot;/&quot;</span>
+        <span class="n">pkg</span><span class="p">,</span> <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="c"># url.path.strip(&quot;/&quot;) #the path is preceded by one &quot;/&quot;</span>
         <span class="k">if</span> <span class="s">&quot;fac&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">IllFormedUrlError</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">geturl</span><span class="p">())</span>
         <span class="n">factory_id</span> <span class="o">=</span> <span class="n">queries</span><span class="p">[</span><span class="s">&quot;fac&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -890,8 +890,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">ParseResult</span><span class="p">)</span>
-        <span class="n">queries</span>  <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
-        <span class="n">pkg_id</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span> <span class="c">#the path is preceded by one &quot;/&quot;</span>
+        <span class="n">queries</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">pkg_id</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span> <span class="c"># the path is preceded by one &quot;/&quot;</span>
         <span class="n">pkg</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">pkg_id</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">pkg</span><span class="p">,</span> <span class="n">queries</span>
 
@@ -903,7 +903,7 @@
         <span class="k">return</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
 
 </div>
-<div class="viewcode-block" id="PackageManager.search_node"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.search_node">[docs]</a>    <span class="k">def</span> <span class="nf">search_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_str</span><span class="p">,</span> <span class="n">nb_inputs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_outputs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.search_node"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.search_node">[docs]</a>    <span class="k">def</span> <span class="nf">search_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_str</span><span class="p">,</span> <span class="n">nb_inputs</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_outputs</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of Factory corresponding to search_str</span>
 <span class="sd">        If nb_inputs or nb_outputs is specified,</span>
@@ -943,7 +943,7 @@
                 <span class="n">fname</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">search_str</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">:</span>
                     <span class="n">l</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
-                    <span class="n">facNameScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">fname</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span><span class="o">/</span><span class="n">l</span><span class="p">))</span>
+                    <span class="n">facNameScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fname</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span> <span class="o">/</span> <span class="n">l</span><span class="p">))</span>
 
                 <span class="n">facDescScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">search_str</span><span class="p">))</span>
                 <span class="n">facCateScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">search_str</span><span class="p">))</span>
@@ -951,17 +951,17 @@
                 <span class="n">pname</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">search_str</span> <span class="ow">in</span> <span class="n">pname</span><span class="p">:</span>
                     <span class="n">l</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pname</span><span class="p">))</span>
-                    <span class="n">pkgNameScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">pname</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span><span class="o">/</span><span class="n">l</span><span class="p">))</span>
+                    <span class="n">pkgNameScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pname</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span> <span class="o">/</span> <span class="n">l</span><span class="p">))</span>
 
-                <span class="n">score</span> <span class="o">=</span> <span class="n">facNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">facDescScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span> \
-                        <span class="n">facCateScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="o">*</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">pkgNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">facNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">facDescScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> \
+                        <span class="n">facCateScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">pkgNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">match</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">score</span><span class="p">,</span> <span class="n">factory</span><span class="p">))</span>
 
         <span class="c"># Filter ports</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">nb_inputs</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">nb_inputs</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">match</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">inputs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="n">nb_inputs</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">nb_outputs</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">nb_outputs</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">match</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">outputs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span> <span class="o">==</span> <span class="n">nb_outputs</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
@@ -990,11 +990,11 @@
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span><span class="p">]</span>
 
 </div>
-<div class="viewcode-block" id="PackageManager.get_data"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s">&#39;*.*&#39;</span><span class="p">,</span><span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">as_paths</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_data"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s">&#39;*.*&#39;</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">as_paths</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return all data that match the pattern. &quot;&quot;&quot;</span>
         <span class="n">pkgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_packages</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">)</span>
-        <span class="n">datafiles</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pj</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">as_paths</span> <span class="k">else</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> \
-                         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">is_data</span><span class="p">()</span> <span class="ow">and</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">pattern</span><span class="p">)]</span>
+        <span class="n">datafiles</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pj</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">as_paths</span> <span class="k">else</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> \
+                         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">is_data</span><span class="p">()</span> <span class="ow">and</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">datafiles</span>
 </div>
 <div class="viewcode-block" id="PackageManager.get_composite_nodes"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_composite_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_composite_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1012,13 +1012,13 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">():</span>
             <span class="k">return</span>
 
-        <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">elt_factory</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">elt_factory</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">fact</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="c">#print p, n</span>
+                <span class="c"># print p, n</span>
                 <span class="k">continue</span>
             <span class="k">yield</span> <span class="n">fact</span>
 
@@ -1031,7 +1031,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">():</span>
             <span class="k">return</span>
 
-        <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">elt_factory</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">elt_factory</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1041,14 +1041,14 @@
                 <span class="k">continue</span>
             <span class="k">yield</span> <span class="n">fact</span>
 
-            <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_dependencies</span><span class="p">(</span><span class="n">fact</span><span class="p">,</span><span class="n">l</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_dependencies</span><span class="p">(</span><span class="n">fact</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">df</span>
 
     <span class="k">def</span> <span class="nf">_missing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_missing_dependencies</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span><span class="n">l</span><span class="p">))</span>
+        <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_missing_dependencies</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">l</span>
 
-<div class="viewcode-block" id="PackageManager.missing_dependencies"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.missing_dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">missing_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">package_or_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.missing_dependencies"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.missing_dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">missing_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_or_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return all the dependencies of a package or a factory. &quot;&quot;&quot;</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">package_or_factory</span>
         <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -1096,17 +1096,17 @@
         <span class="k">return</span> <span class="n">d</span>
     <span class="k">def</span> <span class="nf">_missing_pkg_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
         <span class="n">cns</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()</span> <span class="p">]</span>
-        <span class="n">l</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">cns</span><span class="p">:</span>
-           <span class="bp">self</span><span class="o">.</span><span class="n">_missing</span><span class="p">(</span><span class="n">cn</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">_missing</span><span class="p">(</span><span class="n">cn</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
         <span class="n">factories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">factories</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">None</span>
 
     <span class="k">def</span> <span class="nf">_missing_cn_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
-        <span class="n">l</span><span class="o">=</span><span class="p">[]</span>
-        <span class="n">factories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_missing</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span><span class="n">l</span><span class="p">))</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">factories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_missing</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">factories</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">None</span>
@@ -1174,7 +1174,7 @@
         <span class="n">splitted</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">splitted</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">splitted</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">remain</span> <span class="o">=</span> <span class="n">splitted</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">remain</span> <span class="o">=</span> <span class="bp">None</span>
@@ -1186,12 +1186,12 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">remain</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;Package </span><span class="si">%s</span><span class="s">[</span><span class="si">%s</span><span class="s">]&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;Package </span><span class="si">%s</span><span class="s">[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">print</span> <span class="n">e</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">key</span><span class="p">))]</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">remain</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">print</span> <span class="s">&#39;Unable to find these nodes: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">value</span>
+                <span class="k">print</span> <span class="s">&#39;Unable to find these nodes: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">value</span>
                 <span class="k">print</span> <span class="n">e</span>
                 <span class="k">pass</span>
 
@@ -1213,7 +1213,7 @@
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
         <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="s">&quot;Sub Package : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;Sub Package : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
 </div>
 <div class="viewcode-block" id="PseudoPackage.get_metainfo"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoPackage.get_metainfo">[docs]</a>    <span class="k">def</span> <span class="nf">get_metainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>

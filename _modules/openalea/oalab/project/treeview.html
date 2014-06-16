@@ -73,30 +73,30 @@
 
 <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
-<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.gui</span> <span class="kn">import</span> <span class="n">resources_rc</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">AbstractListener</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.project</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
 
-<div class="viewcode-block" id="ProjectLayoutWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectLayoutWidget">[docs]</a><span class="k">class</span> <span class="nc">ProjectLayoutWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ProjectLayoutWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectLayoutWidget">[docs]</a><span class="k">class</span> <span class="nc">ProjectLayoutWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Widget to display the name of the current project AND the project</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectLayoutWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">treeview</span> <span class="o">=</span> <span class="n">ProjectTreeView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-        
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectLayoutWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treeview</span> <span class="o">=</span> <span class="n">ProjectTreeView</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
         <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treeview</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
-        
+
 <div class="viewcode-block" id="ProjectLayoutWidget.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectLayoutWidget.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">treeview</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
-        </div>
+</div>
 <div class="viewcode-block" id="ProjectLayoutWidget.update"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectLayoutWidget.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">treeview</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-        </div>
+</div>
 <div class="viewcode-block" id="ProjectLayoutWidget.mainMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectLayoutWidget.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: Name of menu tab to automatically set current when current widget</span>
@@ -105,51 +105,56 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeview</span><span class="o">.</span><span class="n">mainMenu</span><span class="p">()</span>
 
 </div></div>
-<div class="viewcode-block" id="ProjectTreeView"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView">[docs]</a><span class="k">class</span> <span class="nc">ProjectTreeView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectTreeView"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView">[docs]</a><span class="k">class</span> <span class="nc">ProjectTreeView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Widget to display Tree View of project.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectTreeView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span> 
-        <span class="c">#self.setIconSize(QtCore.QSize(30,30))</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="c"># self.setIconSize(QtCore.QSize(30,30))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">current_is_project</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+        <span class="n">project_manager</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">projectview</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
 
         <span class="c"># project tree view</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">proj_model</span> <span class="o">=</span> <span class="n">PrjctModel</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj_model</span> <span class="o">=</span> <span class="n">PrjctModel</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setHeaderHidden</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_model</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;customContextMenuRequested(const QPoint&amp;)&#39;</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">showMenu</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;customContextMenuRequested(const QPoint&amp;)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">showMenu</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setEditTriggers</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">NoEditTriggers</span><span class="p">)</span>
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;doubleClicked(const QModelIndex&amp;)&#39;</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">on_opened_file</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;doubleClicked(const QModelIndex&amp;)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_opened_file</span><span class="p">)</span>
 
+<div class="viewcode-block" id="ProjectTreeView.notify"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;current_project_change&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setDirty</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span><span class="o">.</span><span class="n">dirty</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="ProjectTreeView.update"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
 </div>
+<div class="viewcode-block" id="ProjectTreeView.setDirty"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.setDirty">[docs]</a>    <span class="k">def</span> <span class="nf">setDirty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirty</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dirty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color:rgba(255,255,100,255);&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="ProjectTreeView.reinit_treeview"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.reinit_treeview">[docs]</a>    <span class="k">def</span> <span class="nf">reinit_treeview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reinitialise project view &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">proj_model</span><span class="o">.</span><span class="n">set_proj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj_model</span><span class="o">.</span><span class="n">set_proj</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expandAll</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="ProjectTreeView.create_menu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.create_menu">[docs]</a>    <span class="k">def</span> <span class="nf">create_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -157,36 +162,70 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">applet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">paradigms</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;New </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="n">applet</span><span class="o">.</span><span class="n">default_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;New </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">applet</span><span class="o">.</span><span class="n">default_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
                 <span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">new_file</span><span class="p">)</span>
                 <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+            <span class="n">startupAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;New Startup File&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">startupAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_startup</span><span class="p">)</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">startupAction</span><span class="p">)</span>
             <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
 
             <span class="c"># If a file is selected</span>
             <span class="c"># Permit to open it</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_file_selected</span><span class="p">():</span>
-                <span class="n">editAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Open File&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">editAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Open File&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
                 <span class="n">editAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_file</span><span class="p">)</span>
                 <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">editAction</span><span class="p">)</span>
                 <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="p">:</span>
-            <span class="n">editMetadataAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Edit/Show Metadata&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
-            <span class="n">editMetadataAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">edit_metadata</span><span class="p">)</span>
-            <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">editMetadataAction</span><span class="p">)</span>
-            <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_startup_selected</span><span class="p">():</span>
+                <span class="n">renameStartupAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">renameStartupAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename_startup</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">renameStartupAction</span><span class="p">)</span>
 
-            <span class="c"># importAction = QtGui.QAction(&#39;Import Model&#39;,self)</span>
-            <span class="c"># importAction.triggered.connect(self.controller.paradigm_container.importFile)</span>
-            <span class="c"># menu.addAction(importAction)</span>
-            <span class="c">#removeAction = QtGui.QAction(&#39;Remove Model&#39;,self)</span>
-            <span class="c">#removeAction.triggered.connect(self.controller.project_manager.removeModel)</span>
-            <span class="c">#menu.addAction(removeAction)</span>
-            <span class="c"># menu.addSeparator()</span>
-            <span class="c"># renameAction = QtGui.QAction(&#39;Rename Project&#39;,self)</span>
-            <span class="c"># renameAction.triggered.connect(self.controller.paradigm_container.renameCurrent)</span>
-            <span class="c"># menu.addAction(renameAction)</span>
+                <span class="n">removeStartupAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Remove&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">removeStartupAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_startup</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">removeStartupAction</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_src_selected</span><span class="p">():</span>
+                <span class="n">renameModelAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">renameModelAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename_model</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">renameModelAction</span><span class="p">)</span>
+
+                <span class="n">removeModelAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Remove&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">removeModelAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_model</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">removeModelAction</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_project_selected</span><span class="p">():</span>
+                <span class="n">editMetadataAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Edit/Show Metadata&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">editMetadataAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">edit_metadata</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">editMetadataAction</span><span class="p">)</span>
+
+                <span class="c"># importAction = QtGui.QAction(&#39;Import Model&#39;,self)</span>
+                <span class="c"># importAction.triggered.connect(self.controller.paradigm_container.importFile)</span>
+                <span class="c"># menu.addAction(importAction)</span>
+                <span class="c"># removeAction = QtGui.QAction(&#39;Remove Model&#39;,self)</span>
+                <span class="c"># removeAction.triggered.connect(self.controller.project_manager.removeModel)</span>
+                <span class="c"># menu.addAction(removeAction)</span>
+                <span class="c"># menu.addSeparator()</span>
+                <span class="n">renameAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;Rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">renameAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">renameCurrent</span><span class="p">)</span>
+                <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">renameAction</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">menu</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.new_startup"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.new_startup">[docs]</a>    <span class="k">def</span> <span class="nf">new_startup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a startup file and add it to the project.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">new_startup</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.rename_startup"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.rename_startup">[docs]</a>    <span class="k">def</span> <span class="nf">rename_startup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
+        <span class="n">startup_name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">on_startup_rename</span><span class="p">(</span><span class="n">startup_name</span><span class="o">=</span><span class="n">startup_name</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="ProjectTreeView.on_opened_file"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.on_opened_file">[docs]</a>    <span class="k">def</span> <span class="nf">on_opened_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_file_selected</span><span class="p">():</span>
@@ -194,18 +233,34 @@
 </div>
 <div class="viewcode-block" id="ProjectTreeView.open_file"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.open_file">[docs]</a>    <span class="k">def</span> <span class="nf">open_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="o">/</span><span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">/</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">cproject</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">/</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_src_selected</span><span class="p">():</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">open_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.rename_model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.rename_model">[docs]</a>    <span class="k">def</span> <span class="nf">rename_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">on_model_renamed</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.remove_model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.remove_model">[docs]</a>    <span class="k">def</span> <span class="nf">remove_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">del_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.remove_startup"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.remove_startup">[docs]</a>    <span class="k">def</span> <span class="nf">remove_startup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
+        <span class="n">startup_name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">project_manager</span><span class="o">.</span><span class="n">del_startup</span><span class="p">(</span><span class="n">startup_name</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="ProjectTreeView.is_file_selected"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.is_file_selected">[docs]</a>    <span class="k">def</span> <span class="nf">is_file_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: True if selected object is a file. Else, False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">cproject</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasParent</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">():</span>
@@ -216,13 +271,33 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: True if selected object is a src. Else, False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">cproject</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasParent</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;src&quot;</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">True</span>
                 <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;model&quot;</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.is_startup_selected"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.is_startup_selected">[docs]</a>    <span class="k">def</span> <span class="nf">is_startup_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if selected object is a startup file. Else, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">cproject</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasParent</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;startup&quot;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="ProjectTreeView.is_project_selected"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.is_project_selected">[docs]</a>    <span class="k">def</span> <span class="nf">is_project_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if selected object is the project. Else, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">cproject</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasParent</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">True</span>
         <span class="k">return</span> <span class="bp">False</span>
 </div>
 <div class="viewcode-block" id="ProjectTreeView.showMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.showMenu">[docs]</a>    <span class="k">def</span> <span class="nf">showMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
@@ -261,7 +336,7 @@
 </div>
 <div class="viewcode-block" id="ProjectTreeView.startDrag"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.ProjectTreeView.startDrag">[docs]</a>    <span class="k">def</span> <span class="nf">startDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supportedActions</span><span class="p">):</span>
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
-        <span class="c">#Check item in src</span>
+        <span class="c"># Check item in src</span>
         <span class="c"># TODO move this part in dragEnterEvent with mimetype</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_src_selected</span><span class="p">():</span>
             <span class="n">text</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
@@ -269,6 +344,8 @@
             <span class="c"># name_without_ext = &quot;.&quot;.join(text.split(&quot;.&quot;)[:-1])</span>
             <span class="n">name_without_ext</span> <span class="o">=</span> <span class="n">text</span>
             <span class="n">name_without_space</span> <span class="o">=</span> <span class="s">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_without_ext</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;-&quot;</span><span class="p">,</span> <span class="s">&quot;+&quot;</span><span class="p">,</span> <span class="s">&quot;*&quot;</span><span class="p">,</span> <span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">]:</span>
+                <span class="n">name_without_space</span> <span class="o">=</span> <span class="s">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_without_space</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sym</span><span class="p">))</span>
 
             <span class="n">python_call_string</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = Model(&quot;</span><span class="si">%s</span><span class="s">&quot;)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name_without_space</span><span class="p">,</span> <span class="n">name_without_ext</span><span class="p">)</span>
             <span class="n">icon</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">icon</span><span class="p">()</span>
@@ -286,7 +363,7 @@
 
             <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mimeData</span><span class="p">)</span>
-            <span class="n">drag</span><span class="o">.</span><span class="n">setHotSpot</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">drag</span><span class="o">.</span><span class="n">setHotSpot</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
             <span class="n">drag</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
 
             <span class="n">drag</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
@@ -311,45 +388,41 @@
 <div class="viewcode-block" id="PrjctModel"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctModel">[docs]</a><span class="k">class</span> <span class="nc">PrjctModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Item model to use TreeView with a project.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Use:</span>
-<span class="sd">    </span>
-<span class="sd">    # Project to display</span>
-<span class="sd">    project = ...</span>
 
 <span class="sd">    # Model to transform a project into a tree</span>
-<span class="sd">    proj_model = PrjctModel(project)</span>
+<span class="sd">    proj_model = PrjctModel()</span>
 
 <span class="sd">    # Create tree view and set model</span>
 <span class="sd">    treeView = QtGui.QTreeView()</span>
 <span class="sd">    treeView.setModel(proj_model)</span>
-<span class="sd">    </span>
+
 <span class="sd">    # Display</span>
 <span class="sd">    treeView.show()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PrjctModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-        
-        <span class="c"># Use it to store evrything to compare with new when a change occure</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">old_models</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">old_control</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">old_world</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">icons</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_proj</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>      
 
-        <span class="c">#QtCore.QObject.connect(self,QtCore.SIGNAL(&#39;dataChanged( const QModelIndex &amp;, const QModelIndex &amp;)&#39;),self.renamed)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_proj</span><span class="p">()</span>
+
+        <span class="c"># QtCore.QObject.connect(self,QtCore.SIGNAL(&#39;dataChanged( const QModelIndex &amp;, const QModelIndex &amp;)&#39;),self.renamed)</span>
 
 <div class="viewcode-block" id="PrjctModel.find_icons"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctModel.find_icons">[docs]</a>    <span class="k">def</span> <span class="nf">find_icons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">applet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">paradigms</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">icons</span><span class="p">[</span><span class="n">applet</span><span class="o">.</span><span class="n">extension</span><span class="p">]</span> <span class="o">=</span> <span class="n">applet</span><span class="o">.</span><span class="n">icon</span>
-        </div>
-<div class="viewcode-block" id="PrjctModel.renamed"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctModel.renamed">[docs]</a>    <span class="k">def</span> <span class="nf">renamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="PrjctModel.renamed"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctModel.renamed">[docs]</a>    <span class="k">def</span> <span class="nf">renamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">is_project</span><span class="p">():</span>
                 <span class="c"># Get item and his parent</span>
@@ -357,36 +430,34 @@
                 <span class="c"># Check if you have the right to rename</span>
                 <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
                     <span class="n">item</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
-                
+
                     <span class="c"># List brothers of item</span>
                     <span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
                     <span class="n">raw</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
                         <span class="n">child</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                         <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-                    
+
                     <span class="c"># Search which is the old_item which was changed and rename it</span>
                     <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Models&quot;</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_models</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">old_name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">old_name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
                     <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Control&quot;</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_control</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">old_name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">old_name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
                     <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;World&quot;</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_world</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">old_name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-                                
-                    <span class="c"># Save project</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="n">old_name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 </div>
-<div class="viewcode-block" id="PrjctModel.set_proj"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctModel.set_proj">[docs]</a>    <span class="k">def</span> <span class="nf">set_proj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PrjctModel.set_proj"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctModel.set_proj">[docs]</a>    <span class="k">def</span> <span class="nf">set_proj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">cproject</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        
+
         <span class="k">if</span> <span class="n">proj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">proj</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_levels</span><span class="p">()</span>
@@ -403,7 +474,7 @@
         <span class="n">icon_data</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/fileopen.png&quot;</span><span class="p">)</span>
         <span class="n">icon_doc</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/book.png&quot;</span><span class="p">)</span>
         <span class="n">icon_cache</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/editcopy.png&quot;</span><span class="p">)</span>
-        <span class="n">icon_model</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/run.png&quot;</span><span class="p">)</span>
+        <span class="n">icon_model</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/new.png&quot;</span><span class="p">)</span>
 
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span>
@@ -419,9 +490,9 @@
             <span class="n">icon_name</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">icon</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">icon_name</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">icon_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&quot;:&quot;</span><span class="p">:</span>
-                    <span class="c">#local icon</span>
-                    <span class="n">icon_name</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="n">icon_name</span>
-                    <span class="c">#else native icon from oalab.gui.resources</span>
+                    <span class="c"># local icon</span>
+                    <span class="n">icon_name</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">icon_name</span>
+                    <span class="c"># else native icon from oalab.gui.resources</span>
                 <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">icon_name</span><span class="p">)</span>
         <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
         <span class="n">parentItem</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
@@ -442,19 +513,20 @@
         <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
                 <span class="n">cat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">item2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
-                    <span class="n">item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item2</span><span class="p">)</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">icon</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s">&quot;icon_&quot;</span><span class="o">+</span><span class="n">category</span><span class="p">))</span>
-                    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
-                        <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
-                    <span class="n">item2</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">item2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item2</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">icon</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s">&quot;icon_&quot;</span> <span class="o">+</span> <span class="n">category</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                            <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
+                        <span class="n">item2</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c"># hide name of category if we don&#39;t have object of this category</span>
                     <span class="k">pass</span>
 
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span><span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">l</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
                         <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -474,13 +546,13 @@
 <div class="viewcode-block" id="PrjctManagerModel"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctManagerModel">[docs]</a><span class="k">class</span> <span class="nc">PrjctManagerModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Item model to use TreeView with the project manager.</span>
-<span class="sd">    </span>
-<span class="sd">    Use: </span>
+
+<span class="sd">    Use:</span>
 
 <span class="sd">        from openalea.vpltk.project.manager import ProjectManager</span>
 <span class="sd">        import sys</span>
 <span class="sd">        app = QtGui.QApplication(sys.argv)</span>
-<span class="sd">        </span>
+
 <span class="sd">        project_manager = ProjectManager()</span>
 <span class="sd">        project_manager.discover()</span>
 
@@ -499,7 +571,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_manager</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PrjctManagerModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_proj_manag</span><span class="p">(</span><span class="n">project_manager</span><span class="p">)</span>      
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_proj_manag</span><span class="p">(</span><span class="n">project_manager</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PrjctManagerModel.set_proj_manag"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.PrjctManagerModel.set_proj_manag">[docs]</a>    <span class="k">def</span> <span class="nf">set_proj_manag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_manager</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -523,7 +595,7 @@
             <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">files</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">files</span>
-            
+
             <span class="c"># Propose icon by default.</span>
             <span class="c"># If project have another one, use it</span>
             <span class="n">icon</span> <span class="o">=</span> <span class="n">icon_project</span>
@@ -531,14 +603,14 @@
                 <span class="n">icon_name</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">icon</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">icon_name</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">icon_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&quot;:&quot;</span><span class="p">:</span>
-                        <span class="c">#local icon</span>
-                        <span class="n">icon_name</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="n">icon_name</span>
-                        <span class="c">#else native icon from oalab.gui.resources</span>
+                        <span class="c"># local icon</span>
+                        <span class="n">icon_name</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">icon_name</span>
+                        <span class="c"># else native icon from oalab.gui.resources</span>
                     <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">icon_name</span><span class="p">)</span>
 
             <span class="n">item</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
             <span class="n">parentItem</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-                        
+
             <span class="n">categories</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
@@ -547,16 +619,16 @@
                         <span class="n">item2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
                         <span class="n">item</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item2</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">icon</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s">&quot;icon_&quot;</span><span class="o">+</span><span class="n">category</span><span class="p">))</span>
+                            <span class="n">icon</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s">&quot;icon_&quot;</span> <span class="o">+</span> <span class="n">category</span><span class="p">))</span>
                         <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
                             <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
                         <span class="n">item2</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c"># hide name of category if we don&#39;t have object of this category</span>
                         <span class="k">pass</span>
-                
-                    
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span><span class="nb">dict</span><span class="p">):</span>
+
+
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">cat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                             <span class="n">item3</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
@@ -566,7 +638,7 @@
 
 
                             <span class="n">item2</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item3</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>    
+                    <span class="k">else</span><span class="p">:</span>
                         <span class="c"># Useful for category &quot;localized&quot; which store a bool and not a list</span>
                         <span class="n">item3</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
                         <span class="n">item2</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">item3</span><span class="p">)</span>
@@ -574,7 +646,7 @@
     <span class="k">def</span> <span class="nf">_set_level_0_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use it if you just want to see projects path</span>
-<span class="sd">        &quot;&quot;&quot;</span>                   
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="p">:</span>
             <span class="n">parentItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -582,10 +654,9 @@
 
 </div>
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.treeview.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="kn">from</span> <span class="nn">openalea.vpltk.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
     <span class="kn">import</span> <span class="nn">sys</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
-    
+
     <span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
 
     <span class="c"># Model to transform a project into a tree</span>
@@ -594,7 +665,7 @@
     <span class="c"># Create tree view and set model</span>
     <span class="n">treeView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">()</span>
     <span class="n">treeView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="n">proj_model</span><span class="p">)</span>
-    <span class="c">#treeView.expandAll()</span>
+    <span class="c"># treeView.expandAll()</span>
 
     <span class="c"># Display</span>
     <span class="n">treeView</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>

@@ -52,7 +52,7 @@
 <span class="c">#</span>
 <span class="c">#       Main Window class</span>
 <span class="c">#       VPlantsLab GUI is created here</span>
-<span class="c"># </span>
+<span class="c">#</span>
 <span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
 <span class="c">#</span>
 <span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
@@ -79,25 +79,48 @@
         <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;OALab Command Line&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--extension&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;extension&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;full&quot;</span><span class="p">,</span>
                                  <span class="n">help</span><span class="o">=</span><span class="s">&#39;Lab extension to launch&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--list-interfaces&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span>
-                                 <span class="n">help</span><span class="o">=</span><span class="s">&#39;List available interfaces&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--list-implementations&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span>
-                                 <span class="n">help</span><span class="o">=</span><span class="s">&#39;List available implementations&#39;</span><span class="p">)</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">&#39;Plugin development&#39;</span><span class="p">)</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--list-plugins&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;category&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s">&#39;List available plugin for given category. If all, list all plugins. If summary, list only categories&#39;</span><span class="p">)</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--debug-plugins&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;category&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="s">&#39;Raise error while loading instead of passing it silently. Use &quot;all&quot; to debug all plugins&#39;</span><span class="p">)</span>
+
         <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-        <span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">True</span>
 
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_interfaces</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">openalea.vpltk.catalog.tools</span> <span class="kn">import</span> <span class="n">list_interfaces</span>
-            <span class="n">list_interfaces</span><span class="p">()</span>
-            <span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">False</span>
 
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_implementations</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">openalea.vpltk.catalog.tools</span> <span class="kn">import</span> <span class="n">list_implementations</span>
-            <span class="n">list_implementations</span><span class="p">()</span>
-            <span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="kn">import</span> <span class="nn">pkg_resources</span>
+            <span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">iter_groups</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;summary&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">iter_groups</span><span class="p">()):</span>
+                    <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;oalab&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">category</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;vpltk&#39;</span><span class="p">):</span>
+                        <span class="n">eps</span> <span class="o">=</span> <span class="p">[</span><span class="n">ep</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">category</span><span class="p">)]</span>
+                        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+                            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[91m</span><span class="si">%s</span><span class="se">\033</span><span class="s">[0m&#39;</span> <span class="o">%</span> <span class="n">category</span>
+                            <span class="k">print</span>
+                            <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">eps</span><span class="p">:</span>
+                                <span class="k">print</span> <span class="s">&#39;  -&#39;</span><span class="p">,</span> <span class="n">ep</span>
+                            <span class="k">print</span>
+                            <span class="k">print</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">print</span> <span class="s">&#39;  - </span><span class="se">\033</span><span class="s">[91m</span><span class="si">%s</span><span class="se">\033</span><span class="s">[0m (</span><span class="si">%d</span><span class="s"> plugins)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eps</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;Plugins for category </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span>
+                <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&#39;  -&#39;</span><span class="p">,</span> <span class="n">ep</span>
+
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">debug_plugins</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">debug_plugins</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">debug_plugins</span>
+
 
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">extension</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">extension</span></div>
 </pre></div>

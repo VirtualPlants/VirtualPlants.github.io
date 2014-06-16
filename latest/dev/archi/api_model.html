@@ -52,16 +52,41 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="models">
-<span id="label-model"></span><h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="model-quick-start">
-<h2>Model Quick Start<a class="headerlink" href="#model-quick-start" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="module-openalea.oalab.model">
+<span id="models"></span><span id="label-api-model"></span><h1>Models<a class="headerlink" href="#module-openalea.oalab.model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
 <p>Here we suppose that we have a model named <em>sum_int</em> that do the sum between two integers. The classical use of this model is:</p>
 <blockquote>
 <div><ul>
 <li><dl class="first docutils">
-<dt>First, get the model:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="s">&quot;sum_int&quot;</span><span class="p">)</span>
+<dt>Get an interpreter <strong>(not necessary if you are working inside OpenAleaLab)</strong>:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.vpltk.shell.shell</span> <span class="kn">import</span> <span class="n">get_interpreter_class</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Interpeter</span> <span class="o">=</span> <span class="n">get_interpreter_class</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpeter</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Get the project <strong>(not necessary if you are working inside OpenAleaLab)</strong>:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.vpltk.project</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea</span> <span class="kn">import</span> <span class="n">oalab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oalab_dir</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">oalab</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;sum&quot;</span><span class="p">,</span> <span class="n">oalab_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>First, get the model <strong>(the first line is not necessary if you are working inside OpenAleaLab)</strong>:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Model</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="s">&quot;sum_int&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -69,17 +94,19 @@
 </li>
 <li><dl class="first docutils">
 <dt>Set inputs:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">38</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
 </pre></div>
 </div>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt>Run model:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<dt>Run model (and set interpreter the first time, it is not necessary if you work inside OpenAleaLab):</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">interpreter</span><span class="o">=</span><span class="n">interpreter</span><span class="p">)</span>
+<span class="go">3</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c"># Or simply:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sum_int</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">38</span><span class="p">)</span>
+<span class="go">42</span>
 </pre></div>
 </div>
 </dd>
@@ -87,9 +114,9 @@
 </li>
 <li><dl class="first docutils">
 <dt>Get result:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="p">,</span> <span class="o">=</span> <span class="n">sum_int</span><span class="o">.</span><span class="n">outputs</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">sum_int</span><span class="o">.</span><span class="n">outputs</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;4 + 38 = &quot;</span><span class="p">,</span> <span class="n">result</span>
-<span class="go">[out]: 4 + 38 =  42</span>
+<span class="go">4 + 38 =  42</span>
 </pre></div>
 </div>
 </dd>
@@ -100,6 +127,8 @@
 <dl class="docutils">
 <dt>You can get result in the run function:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">sum_int</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">result</span>
+<span class="go">42</span>
 </pre></div>
 </div>
 </dd>
@@ -112,7 +141,8 @@
 <div><ul>
 <li><dl class="first docutils">
 <dt>Run only one step of the model:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="s">&quot;sum_int&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd>
@@ -120,7 +150,7 @@
 </li>
 <li><dl class="first docutils">
 <dt>Run the model step by step:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd>
@@ -128,7 +158,7 @@
 </li>
 <li><dl class="first docutils">
 <dt>Set state of the model to initial one:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd>
@@ -143,6 +173,7 @@
 <dt>Classical:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="go">3</span>
 </pre></div>
 </div>
 </dd>
@@ -152,6 +183,7 @@
 <dt>Shorter:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="p">()</span>
+<span class="go">3</span>
 </pre></div>
 </div>
 </dd>
@@ -160,6 +192,7 @@
 <li><dl class="first docutils">
 <dt>Even shorter:</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">3</span>
 </pre></div>
 </div>
 </dd>
@@ -168,6 +201,7 @@
 <li><dl class="first docutils">
 <dt>Shortest</dt>
 <dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">3</span>
 </pre></div>
 </div>
 </dd>
@@ -175,12 +209,6 @@
 </li>
 </ul>
 </div></blockquote>
-</div>
-<div class="section" id="drag-and-drop">
-<h2>Drag and Drop<a class="headerlink" href="#drag-and-drop" title="Permalink to this headline">¶</a></h2>
-<p>To access to a model, just drag object from panel &#8220;project&#8221; on the left in the GUI and drop it in an other model.</p>
-<a class="reference internal image-reference" href="../../../_images/drag2.png"><img alt="../../../_images/drag2.png" class="align-center" src="../../../_images/drag2.png" style="height: 200px;" /></a>
-<a class="reference internal image-reference" href="../../../_images/drag3.png"><img alt="../../../_images/drag3.png" class="align-center" src="../../../_images/drag3.png" style="height: 200px;" /></a>
 </div>
 <div class="section" id="module-openalea.oalab.model.model">
 <span id="models-api"></span><h2>Models API<a class="headerlink" href="#module-openalea.oalab.model.model" title="Permalink to this headline">¶</a></h2>
@@ -277,7 +305,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rvalue</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 </td>
@@ -294,8 +322,9 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">model</span><span class="o">.</span><span class="n">outputs</span>
+<tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">outputs</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </td>
@@ -325,6 +354,11 @@
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="openalea.oalab.model.model.ModelFactory.get_id">
+<tt class="descname">get_id</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/model.html#ModelFactory.get_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.model.ModelFactory.get_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="openalea.oalab.model.model.ModelFactory.get_writer">
 <tt class="descname">get_writer</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/model.html#ModelFactory.get_writer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.model.ModelFactory.get_writer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the writer class</p>
@@ -344,6 +378,11 @@
 <dd><p>Return the corresponding widget initialised with node</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="openalea.oalab.model.model.ModelFactory.package">
+<tt class="descname">package</tt><a class="reference internal" href="../../../_modules/openalea/oalab/model/model.html#ModelFactory.package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.model.ModelFactory.package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -357,7 +396,7 @@
 <dd><p>NodeFactory python Writer</p>
 <dl class="attribute">
 <dt id="openalea.oalab.model.model.PyModelNodeFactoryWriter.nodefactory_template">
-<tt class="descname">nodefactory_template</tt><em class="property"> = '\n\n$NAME = ModelFactory(name=$PNAME,\n                filepath=$FILEPATH,\n                authors=$AUTHORS,\n                description=$DESCRIPTION,\n                category=$CATEGORY,\n                nodemodule=$NODEMODULE,\n                nodeclass=$NODECLASS,\n                inputs=$LISTIN,\n                outputs=$LISTOUT,\n                widgetmodule=$WIDGETMODULE,\n                widgetclass=$WIDGETCLASS,\n               )\n\n'</em><a class="headerlink" href="#openalea.oalab.model.model.PyModelNodeFactoryWriter.nodefactory_template" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">nodefactory_template</tt><em class="property"> = '\n\n$NAME = ModelFactory(name=$PNAME,\n                inputs=$LISTIN,\n                outputs=$LISTOUT,\n               )\n\n'</em><a class="headerlink" href="#openalea.oalab.model.model.PyModelNodeFactoryWriter.nodefactory_template" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -464,6 +503,242 @@
 
 </dd></dl>
 
+<span class="target" id="module-openalea.oalab.model.lpy"></span><dl class="class">
+<dt id="openalea.oalab.model.lpy.LPyModel">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.model.lpy.</tt><tt class="descname">LPyModel</tt><span class="sig-paren">(</span><em>name='script.lpy'</em>, <em>code=None</em>, <em>filepath=''</em>, <em>inputs=</em>, <span class="optional">[</span><span class="optional">]</span><em>outputs=</em><span class="optional">[</span><span class="optional">]</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.animate">
+<tt class="descname">animate</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.animate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.animate" title="Permalink to this definition">¶</a></dt>
+<dd><p>run model step by step</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.get_documentation">
+<tt class="descname">get_documentation</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.get_documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.get_documentation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a string with the documentation of the model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.init">
+<tt class="descname">init</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>go back to initial step</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.repr_code">
+<tt class="descname">repr_code</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.repr_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.repr_code" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a string representation of model to save it on disk</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.run">
+<tt class="descname">run</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>execute model thanks to interpreter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.step">
+<tt class="descname">step</tt><span class="sig-paren">(</span><em>i=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>execute only one step of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.lpy.LPyModel.stop">
+<tt class="descname">stop</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>stop execution</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.code">
+<tt class="descname">code</tt><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.default_file_name">
+<tt class="descname">default_file_name</tt><em class="property"> = 'script.lpy'</em><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.default_file_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.default_name">
+<tt class="descname">default_name</tt><em class="property"> = 'LSystem'</em><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.default_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.extension">
+<tt class="descname">extension</tt><em class="property"> = 'lpy'</em><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.extension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.icon">
+<tt class="descname">icon</tt><em class="property"> = ':/images/resources/logo.png'</em><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.icon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.inputs">
+<tt class="descname">inputs</tt><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LPyModel.inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of inputs of the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rvalue</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.lpy.LPyModel.pattern">
+<tt class="descname">pattern</tt><em class="property"> = '*.lpy'</em><a class="headerlink" href="#openalea.oalab.model.lpy.LPyModel.pattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="openalea.oalab.model.lpy.LsysObj">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.model.lpy.</tt><tt class="descname">LsysObj</tt><span class="sig-paren">(</span><em>lsystem</em>, <em>axialtree</em>, <em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#LsysObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.LsysObj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="openalea.oalab.model.lpy.adapt_axialtree">
+<tt class="descclassname">openalea.oalab.model.lpy.</tt><tt class="descname">adapt_axialtree</tt><span class="sig-paren">(</span><em>axialtree</em>, <em>lsystem</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#adapt_axialtree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.adapt_axialtree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adapat an axialtree to be viewable in the world (add a method _repr_geom_)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axialtree</strong> &#8211; axialtree to adapt</li>
+<li><strong>lsystem</strong> &#8211; lsystem that can be used to create the 3d representation of axialtree</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">adapted axialtree</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="openalea.oalab.model.lpy.get_default_text">
+<tt class="descclassname">openalea.oalab.model.lpy.</tt><tt class="descname">get_default_text</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#get_default_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.get_default_text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="openalea.oalab.model.lpy.import_lpy_file">
+<tt class="descclassname">openalea.oalab.model.lpy.</tt><tt class="descname">import_lpy_file</tt><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/lpy.html#import_lpy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.lpy.import_lpy_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract from an &#8220;old style&#8221; LPy file script part (str) and associated control (dict).
+Permit compatibility between LPy and OALab.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body">script to filter (str)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">lpy script (str) without end begining with &#8220;###### INITIALISATION ######&#8221;</td>
+</tr>
+</tbody>
+</table>
+<p>and a dict which contain the control (dict)</p>
+</dd></dl>
+
+<span class="target" id="module-openalea.oalab.model.visualea"></span><dl class="class">
+<dt id="openalea.oalab.model.visualea.VisualeaModel">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.model.visualea.</tt><tt class="descname">VisualeaModel</tt><span class="sig-paren">(</span><em>name='workflow.wpy'</em>, <em>code=''</em>, <em>filepath=''</em>, <em>inputs=</em>, <span class="optional">[</span><span class="optional">]</span><em>outputs=</em><span class="optional">[</span><span class="optional">]</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.animate">
+<tt class="descname">animate</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel.animate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.animate" title="Permalink to this definition">¶</a></dt>
+<dd><p>run model step by step</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.repr_code">
+<tt class="descname">repr_code</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel.repr_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.repr_code" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a string representation of model to save it on disk</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.reset">
+<tt class="descname">reset</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>go back to initial step</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.run">
+<tt class="descname">run</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>execute model thanks to interpreter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.step">
+<tt class="descname">step</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>execute only one step of the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.stop">
+<tt class="descname">stop</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#VisualeaModel.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>stop execution</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.default_file_name">
+<tt class="descname">default_file_name</tt><em class="property"> = 'workflow.wpy'</em><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.default_file_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.default_name">
+<tt class="descname">default_name</tt><em class="property"> = 'Workflow'</em><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.default_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.extension">
+<tt class="descname">extension</tt><em class="property"> = 'wpy'</em><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.extension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.icon">
+<tt class="descname">icon</tt><em class="property"> = ':/images/resources/openalealogo.png'</em><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.icon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.model.visualea.VisualeaModel.pattern">
+<tt class="descname">pattern</tt><em class="property"> = '*.wpy'</em><a class="headerlink" href="#openalea.oalab.model.visualea.VisualeaModel.pattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="openalea.oalab.model.visualea.monkey_patch_instantiate_node">
+<tt class="descclassname">openalea.oalab.model.visualea.</tt><tt class="descname">monkey_patch_instantiate_node</tt><span class="sig-paren">(</span><em>self</em>, <em>vid</em>, <em>call_stack=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/model/visualea.html#monkey_patch_instantiate_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.model.visualea.monkey_patch_instantiate_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 </div>
 
@@ -476,9 +751,8 @@
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Models</a><ul>
-<li><a class="reference internal" href="#model-quick-start">Model Quick Start</a></li>
+<li><a class="reference internal" href="#quick-start">Quick Start</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
-<li><a class="reference internal" href="#drag-and-drop">Drag and Drop</a></li>
 <li><a class="reference internal" href="#module-openalea.oalab.model.model">Models API</a></li>
 </ul>
 </li>

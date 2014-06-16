@@ -49,20 +49,17 @@
   <h1>Source code for openalea.vpltk.project.loader</h1><div class="highlight"><pre>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
-<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">discover</span><span class="p">,</span> <span class="n">Plugin</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
 
 <div class="viewcode-block" id="get_loader"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.loader.get_loader">[docs]</a><span class="k">def</span> <span class="nf">get_loader</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;GenericLoader&quot;</span><span class="p">):</span>
-    <span class="n">loaders</span> <span class="o">=</span> <span class="n">discover</span><span class="p">(</span><span class="s">&#39;vpltk.loader&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">loaders</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">loader</span> <span class="o">=</span> <span class="n">Plugin</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
-        <span class="n">loader</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">loader</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;vpltk.loader&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">loader</span><span class="o">.</span><span class="n">default_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">loader</span>
 </div>
 <div class="viewcode-block" id="ILoader"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.loader.ILoader">[docs]</a><span class="k">class</span> <span class="nc">ILoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic interface class for loaders</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="ILoader.load"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.loader.ILoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param filename: filename to convert into python object</span>
@@ -106,7 +103,7 @@
                 <span class="k">return</span> <span class="n">obj</span>
             <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">obj</span>
-        </div></div>
+</div></div>
 <div class="viewcode-block" id="CPickleLoader"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.loader.CPickleLoader">[docs]</a><span class="k">class</span> <span class="nc">CPickleLoader</span><span class="p">(</span><span class="n">ILoader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Specific loader that use cPickle.loads</span>
@@ -135,7 +132,7 @@
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">print</span> <span class="s">&quot;Can&#39;t load file &quot;</span> <span class="o">+</span> <span class="n">filename</span> <span class="o">+</span> <span class="s">&quot; with loader CPickleLoader. &quot;</span>
                     <span class="k">print</span> <span class="n">e</span>
-        </div></div>
+</div></div>
 <div class="viewcode-block" id="BGEOMLoader"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.loader.BGEOMLoader">[docs]</a><span class="k">class</span> <span class="nc">BGEOMLoader</span><span class="p">(</span><span class="n">ILoader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Specific loader that is used to manipulate PlantGL objects</span>

@@ -82,6 +82,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_run</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PythonModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>  <span class="c"># use it to force to parse doc, functions, inputs and outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="bp">None</span>
 
 <div class="viewcode-block" id="PythonModel.get_documentation"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.python.PythonModel.get_documentation">[docs]</a>    <span class="k">def</span> <span class="nf">get_documentation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -135,6 +137,8 @@
         <span class="c"># if interpreter:</span>
         <span class="n">user_ns</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span>
 
+        <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+
         <span class="c"># put inputs inside namespace</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
             <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
@@ -166,6 +170,8 @@
             <span class="k">if</span> <span class="n">interpreter</span><span class="p">:</span>
                 <span class="n">user_ns</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span>
 
+                <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+
                 <span class="c"># put inputs inside namespace</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
                     <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
@@ -189,6 +195,9 @@
 
             <span class="n">interpreter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_interpreter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">user_ns</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span>
+
+            <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+
             <span class="c"># put inputs inside namespace</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
                 <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
@@ -221,6 +230,8 @@
 
             <span class="n">user_ns</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span>
 
+            <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+
             <span class="c"># put inputs inside namespace</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
                 <span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
@@ -238,15 +249,23 @@
 </div>
     <span class="k">def</span> <span class="nf">_set_interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="s">&quot;interpreter&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">IPython.core.getipython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
-                <span class="n">interpreter</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
-                <span class="n">interpreter</span> <span class="o">=</span> <span class="bp">None</span>
-                <span class="c">#raise(&quot;No interpreter is available to run model %s&quot; % str(self))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;_interpreter&quot;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">IPython.core.getipython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="k">raise</span><span class="p">(</span><span class="s">&quot;No interpreter is available to run model </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">IPython.core.getipython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="k">raise</span><span class="p">(</span><span class="s">&quot;No interpreter is available to run model </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">interpreter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;interpreter&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">interpreter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;interpreter&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpreter</span>
 
 <div class="viewcode-block" id="PythonModel.set_output_from_ns"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.python.PythonModel.set_output_from_ns">[docs]</a>    <span class="k">def</span> <span class="nf">set_output_from_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>
         <span class="c"># get outputs from namespace</span>
@@ -255,9 +274,6 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs_info</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">outp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs_info</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">outp</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">namespace</span><span class="p">:</span>
-                        <span class="c"># print &quot;outp.name: &quot;, outp.name</span>
-                        <span class="c"># print &quot;namespace[outp.name]: &quot;, namespace[outp.name]</span>
-                        <span class="c"># print &quot;self.outputs: &quot;, self.outputs</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">namespace</span><span class="p">[</span><span class="n">outp</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
 </div>
     <span class="nd">@property</span>

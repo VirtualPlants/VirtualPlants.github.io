@@ -70,18 +70,24 @@
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">openalea.vpltk.project.project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">openalea.core.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
+<span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span>
 
 
-<div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Object which manage projects: creation, loading, saving, searching, ...</span>
+<span class="sd">    Object which permit to access to projects: creation, loading, searching, ...</span>
 
 <span class="sd">    It is a singleton.</span>
+
+<span class="sd">    &gt;&gt;&gt; from openalea.vpltk.project import ProjectManager</span>
+<span class="sd">    &gt;&gt;&gt; project_manager = ProjectManager()</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">find_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">path_</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())]</span>
@@ -107,7 +113,7 @@
 
 <span class="sd">        :use:</span>
 <span class="sd">            &gt;&gt;&gt; project_manager.discover()</span>
-<span class="sd">            &gt;&gt;&gt; print project_manager.projects</span>
+<span class="sd">            &gt;&gt;&gt; list_of_projects = project_manager.projects</span>
 
 <span class="sd">        To discover new projects, you can add path into *self.find_links*</span>
 
@@ -116,27 +122,40 @@
 <span class="sd">            project_manager.find_links.append(&#39;path/to/search/projects&#39;)</span>
 <span class="sd">            project_manager.discover()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_links</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
                 <span class="k">if</span> <span class="s">&quot;oaproject.cfg&quot;</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
                     <span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">projectdir</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span>
                         <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">proj</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="p">])):</span>
                         <span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
                         <span class="n">project</span><span class="o">.</span><span class="n">load_manifest</span><span class="p">()</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.search"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.search"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Search a specific project that match filters.</span>
 
 <span class="sd">        :use:</span>
-<span class="sd">            &gt;&gt;&gt; project_manager.search(name=&quot;*mtg*&quot;, author=&quot;*Godin*&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; project = project_manager.search(name=&quot;myproject&quot;)</span>
 
-<span class="sd">        :TODO: not implemented yet</span>
+<span class="sd">        :param name: name of project to search (str)</span>
+<span class="sd">        :return: project if it is found, else None</span>
+
+<span class="sd">        If various projects are find, return the first (arbitrary)</span>
+
+<span class="sd">        :TODO: implement with real filter (ex: name = &quot;*mtg*&quot;, authors = &quot;*OpenAlea*&quot;, ...)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">proj</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="k">if</span> <span class="n">proj</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">proj</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">proj</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">proj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">None</span>
 </div>
 <div class="viewcode-block" id="ProjectManager.get_current"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.get_current">[docs]</a>    <span class="k">def</span> <span class="nf">get_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -152,7 +171,7 @@
 <span class="sd">        :return: a default empty project</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
-        <span class="n">proj</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;temp&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;temp&quot;</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
         <span class="n">proj</span><span class="o">.</span><span class="n">centralized</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">return</span> <span class="n">proj</span>
 </div>
@@ -170,7 +189,7 @@
 
         <span class="k">return</span> <span class="n">proj</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.create"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.create"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create new project and return it.</span>
 
@@ -182,10 +201,10 @@
 <span class="sd">        :param path: path where project will be saved. By default, path is the user path of all projects ($HOME/.openalea/projects/).</span>
 <span class="sd">        :return: Project</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">projectdir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">projectdir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
 </div>
@@ -198,38 +217,38 @@
 <span class="sd">            &gt;&gt;&gt; project2 = project_manager.load(&#39;project2&#39;, &#39;/path/to/project&#39;)</span>
 
 <span class="sd">        :param name: name of project to load. Must be a string.</span>
-<span class="sd">        :param path: path of project to load. Must be a path (see module path.py). By default, the path is the openaelea.core.settings.get_project_dir() ($HOME/.openalea/projects/).</span>
+<span class="sd">        :param path: path of project to load. Must be a path (see module path.py). By default, try to guess with name only. If there are various projects with the same name, return the first.</span>
 <span class="sd">        :return: Project</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
-
-        <span class="n">full_path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">/</span> <span class="n">name</span>
-
-        <span class="k">if</span> <span class="n">full_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">project</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">project</span>
+                    <span class="n">project</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c">#raise IOError(&#39;Project %s in repository %s does not exist&#39; %(name,path))</span>
-            <span class="c">#print &#39;Project %s in repository %s does not exist&#39; %(name,path)</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="n">path_</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">/</span> <span class="n">name</span>
+
+            <span class="k">if</span> <span class="n">full_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
+        <span class="c">#raise IOError(&#39;Project %s in repository %s does not exist&#39; %(name,path))</span>
+        <span class="c">#print &#39;Project %s in repository %s does not exist&#39; %(name,path)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 </div>
 <div class="viewcode-block" id="ProjectManager.close"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close current project.</span>
+
 <span class="sd">        :TODO: not yet implemented</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span>
-        <span class="c"># self.cproject = self.default()</span>
+        <span class="c"># TODO: cleaner!</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
 </div>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    def __getitem__(self, name):</span>
-<span class="sd">        try:</span>
-<span class="sd">            self.cproject = self.load(name)</span>
-<span class="sd">            return self.get_current()</span>
-<span class="sd">        except:</span>
-<span class="sd">            return self.default()&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ProjectManager.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -237,6 +256,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.notify"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;project_change&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;current_project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
+
+    <span class="nd">@cproject.setter</span>
+<div class="viewcode-block" id="ProjectManager.cproject"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.ProjectManager.cproject">[docs]</a>    <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;current_project_change&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 
 </div></div>
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.manager.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>

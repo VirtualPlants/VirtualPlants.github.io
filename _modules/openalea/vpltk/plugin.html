@@ -50,7 +50,7 @@
 <span class="c"># -*- python -*-</span>
 <span class="c">#</span>
 <span class="c">#       Plugin System for vpltk</span>
-<span class="c"># </span>
+<span class="c">#</span>
 <span class="c">#       OpenAlea.VPLTk: Virtual Plants Lab Toolkit</span>
 <span class="c">#</span>
 <span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
@@ -78,6 +78,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">site</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <div class="viewcode-block" id="discover"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.discover">[docs]</a><span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -89,18 +91,40 @@
 <span class="sd">    :Returns:</span>
 <span class="sd">        - plugins : dict of name:plugin</span>
 
-<span class="sd">    :todo: check that the same name is not used by several plugins </span>
-<span class="sd">    &quot;&quot;&quot;</span>	
+<span class="sd">    :todo: check that the same name is not used by several plugins</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">plugin_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">ep</span><span class="o">.</span><span class="n">name</span><span class="p">:</span><span class="n">ep</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">group</span><span class="p">,</span><span class="n">name</span><span class="p">)}</span> 
+    <span class="n">plugin_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">ep</span><span class="o">.</span><span class="n">name</span><span class="p">:</span><span class="n">ep</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="p">)}</span>
     <span class="k">return</span> <span class="n">plugin_map</span>
 </div>
-<div class="viewcode-block" id="iter_plugins"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.iter_plugins">[docs]</a><span class="k">def</span> <span class="nf">iter_plugins</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="iter_groups"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.iter_groups">[docs]</a><span class="k">def</span> <span class="nf">iter_groups</span><span class="p">():</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">getsitepackages</span><span class="p">()</span>
+    <span class="n">usersite</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">getusersitepackages</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">usersite</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">usersite</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">usersite</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="n">paths</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">usersite</span><span class="p">)</span>
+    <span class="n">paths</span> <span class="o">+=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+    <span class="c"># scan all entry_point and list different groups</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
+        <span class="n">distribs</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">find_distributions</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">distrib</span> <span class="ow">in</span> <span class="n">distribs</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">distrib</span><span class="o">.</span><span class="n">get_entry_map</span><span class="p">():</span>
+                <span class="n">groups</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">group</span>
+
+</div>
+<div class="viewcode-block" id="iter_plugins"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.iter_plugins">[docs]</a><span class="k">def</span> <span class="nf">iter_plugins</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="n">debug</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span> <span class="ow">or</span> <span class="n">debug</span> <span class="o">==</span> <span class="n">group</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">err</span><span class="p">:</span>
-            <span class="k">print</span> <span class="n">err</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">err</span>
 </div>
 <div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Define a Plugin from an entry point. &quot;&quot;&quot;</span>
@@ -121,7 +145,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">dist</span>
 </div>
 <div class="viewcode-block" id="Plugin.load"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.Plugin.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 </pre></div></div></div>
 
           </div>

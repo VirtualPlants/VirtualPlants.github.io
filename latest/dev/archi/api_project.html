@@ -56,63 +56,96 @@
 <span id="label-api-project"></span><h1>Projects<a class="headerlink" href="#projects" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-openalea.vpltk.project">
 <span id="project-quick-start"></span><h2>Project Quick Start<a class="headerlink" href="#module-openalea.vpltk.project" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="project-and-project-manager-quick-start">
-<h3>Project and Project Manager Quick Start<a class="headerlink" href="#project-and-project-manager-quick-start" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="working-with-project-class">
+<h3>Working with Project class<a class="headerlink" href="#working-with-project-class" title="Permalink to this headline">¶</a></h3>
 <p>You can work directly on project:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">project1</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mynewproj&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&quot;/path/to/proj&quot;</span><span class="p">)</span>
-
-<span class="n">project1</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&quot;project&quot;</span><span class="p">,</span> <span class="s">&quot;mynewproj&quot;</span><span class="p">,</span> <span class="s">&quot;hello_project&quot;</span><span class="p">)</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">authors</span> <span class="o">=</span> <span class="s">&quot;OpenAlea Consortium and John Doe&quot;</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&quot;Test project concept with numpy&quot;</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">long_description</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;This project import numpy.</span>
-<span class="s">Then, it create and display a numpy eye.</span>
-<span class="s">We use it to test concept of Project.&#39;&#39;&#39;</span>
-
-<span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="n">name</span><span class="s">&quot;hello.py&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;print &#39;Hello World&#39;&quot;</span><span class="p">)</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&quot;This project is used to said hello to everyone&quot;</span>
-
-<span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;startup&quot;</span><span class="p">,</span> <span class="s">&quot;begin_numpy.py&quot;</span><span class="p">,</span> <span class="s">&quot;import numpy as np&quot;</span><span class="p">)</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="s">&quot;eye.py&quot;</span><span class="p">,</span> <span class="s">&quot;print np.eye(2)&quot;</span><span class="p">)</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&quot;scripts&quot;</span><span class="p">,</span> <span class="s">&quot;eye.py&quot;</span><span class="p">,</span> <span class="s">&quot;eye_numpy.py&quot;</span><span class="p">)</span>
-
-<span class="n">project1</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.vpltk.project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Get the correct path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea</span> <span class="kn">import</span> <span class="n">oalab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path_of_my_proj</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">oalab</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Real work on project:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mynewproj&quot;</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="n">path_of_my_proj</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&quot;project&quot;</span><span class="p">,</span> <span class="s">&quot;mynewproj&quot;</span><span class="p">,</span> <span class="s">&quot;hello_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Or, you can create or load a <em>project</em> thanks to the <em>project manager</em>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.vpltk.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
-<span class="c"># Instanciate ProjectManager</span>
-<span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
-<span class="c"># Discover available projects</span>
-<span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
-<span class="k">print</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
-
-<span class="c"># Create project in default directory or in specific one</span>
-<span class="n">p1</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s">&#39;project1&#39;</span><span class="p">)</span>
-<span class="n">p2</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s">&#39;project2&#39;</span><span class="p">,</span> <span class="s">&#39;/path/to/project&#39;</span><span class="p">)</span>
-<span class="c"># Load project from default directory or in specific one</span>
-<span class="n">p3</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;project3&#39;</span><span class="p">)</span>
-<span class="n">p4</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;project4&#39;</span><span class="p">,</span> <span class="s">&#39;/path/to/project&#39;</span><span class="p">)</span>
-
-<span class="c"># Load</span>
-<span class="n">project2</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;numpy_project&quot;</span><span class="p">)</span>
-<span class="c"># Run startup</span>
-<span class="n">project2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<span class="c"># Run script</span>
-<span class="n">project2</span><span class="o">.</span><span class="n">run_script</span><span class="p">(</span><span class="s">&quot;eye_numpy.py&quot;</span><span class="p">)</span>
+<p>Change metadata:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">authors</span> <span class="o">=</span> <span class="s">&quot;OpenAlea Consortium and John Doe&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&quot;Test project concept with numpy&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">long_description</span> <span class="o">=</span> <span class="s">&#39;This project import numpy. Then, it create and display a numpy eye. We use it to test concept of Project.&#39;</span>
 </pre></div>
 </div>
-<p>To search projects that are not located inside default directories:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">project_manager</span><span class="o">.</span><span class="n">find_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;path/to/search/projects&#39;</span><span class="p">)</span>
-<span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
-<span class="k">print</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
+<p>... project file, models, ... :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">success</span> <span class="o">=</span> <span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;hello.py&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;print(&#39;Hello World&#39;)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&quot;This project is used to said hello to everyone&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">success</span> <span class="o">=</span> <span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;startup&quot;</span><span class="p">,</span> <span class="s">&quot;begin_numpy&quot;</span><span class="p">,</span> <span class="s">&quot;import numpy as np&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">success</span> <span class="o">=</span> <span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="s">&quot;eye.py&quot;</span><span class="p">,</span> <span class="s">&quot;print np.eye(2)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="s">&quot;eye&quot;</span><span class="p">,</span> <span class="s">&quot;eye_numpy&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="section" id="creation-and-manipulation-with-project-manager">
+<h3>Creation and Manipulation with Project Manager<a class="headerlink" href="#creation-and-manipulation-with-project-manager" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>Or, you can create or load a <em>project</em> thanks to the <em>project manager</em>.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.vpltk.project</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+</pre></div>
 </div>
-<div class="section" id="various-views-on-project-manager-and-project">
-<span id="label-project-screenshot"></span><h2>Various Views on Project Manager and Project<a class="headerlink" href="#various-views-on-project-manager-and-project" title="Permalink to this headline">¶</a></h2>
-<a class="reference internal image-reference" href="../../../_images/project.png"><img alt="../../../_images/project.png" class="align-center" src="../../../_images/project.png" style="height: 200px;" /></a>
+</dd>
+<dt>Discover available projects</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_of_projects</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
+</pre></div>
+</div>
+</dd>
+<dt>Create project in default directory or in specific one</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s">&#39;project1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p2</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;project2&#39;</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Load project from default directory</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">p3</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;sum&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Load project from a specific directory</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">oalab_dir</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">oalab</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p4</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;sum&#39;</span><span class="p">,</span> <span class="n">oalab_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Load</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project2</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;sum&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Run startup</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project2</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+<dt>Get model</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">project2</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s">&quot;sum_int&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="section" id="search-other-projects">
+<h3>Search other projects<a class="headerlink" href="#search-other-projects" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>To search projects that are not located inside default directories:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">find_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;/path/to/search/projects&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_of_projects</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="module-openalea.vpltk.project.project">
 <span id="project-api"></span><h2>Project API<a class="headerlink" href="#module-openalea.vpltk.project.project" title="Permalink to this headline">¶</a></h2>
@@ -145,9 +178,9 @@ stored in your computer.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="n">project1</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mynewproj&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&quot;/path/to/proj&quot;</span><span class="p">)</span>
+<tr class="field-odd field"><th class="field-name">use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="n">project1</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;mynewproj&quot;</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="s">&quot;/path/to/proj&quot;</span><span class="p">)</span>
 <span class="n">project1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-<span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;hello.py&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;print &#39;Hello World&#39;&quot;</span><span class="p">)</span>
+<span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;hello.py&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;print &#39;Hello World&#39;&quot;</span><span class="p">)</span>
 <span class="n">project1</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s">&quot;John Doe&quot;</span>
 <span class="n">project1</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&quot;This project is used to said hello to everyone&quot;</span>
 <span class="n">project1</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -159,8 +192,20 @@ stored in your computer.</p>
 </table>
 <dl class="class">
 <dt id="openalea.vpltk.project.project.Project">
-<em class="property">class </em><tt class="descclassname">openalea.vpltk.project.project.</tt><tt class="descname">Project</tt><span class="sig-paren">(</span><em>name</em>, <em>path</em>, <em>icon=''</em>, <em>author='OpenAlea Consortium'</em>, <em>author_email=''</em>, <em>description=''</em>, <em>long_description=''</em>, <em>citation=''</em>, <em>url=''</em>, <em>dependencies=</em>, <span class="optional">[</span><span class="optional">]</span><em>license='CeCILL-C'</em>, <em>version='0.1'</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><tt class="descclassname">openalea.vpltk.project.project.</tt><tt class="descname">Project</tt><span class="sig-paren">(</span><em>name</em>, <em>projectdir</em>, <em>icon=''</em>, <em>author='OpenAlea Consortium'</em>, <em>author_email=''</em>, <em>description=''</em>, <em>long_description=''</em>, <em>citation=''</em>, <em>url=''</em>, <em>dependencies=</em>, <span class="optional">[</span><span class="optional">]</span><em>license='CeCILL-C'</em>, <em>version='0.1'</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; name of the project to create or load</li>
+<li><strong>path</strong> &#8211; path of the project to create or load</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
 <dt id="openalea.vpltk.project.project.Project.add">
 <tt class="descname">add</tt><span class="sig-paren">(</span><em>category</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an object in the project</p>
@@ -170,7 +215,7 @@ stored in your computer.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>category</strong> &#8211; <em>type</em> of object to add (&#8220;src&#8221;, &#8220;control&#8221;, &#8220;world&#8221;, ...)</li>
-<li><strong>name</strong> &#8211; filename of the object to add (path or str)</li>
+<li><strong>name</strong> &#8211; filename of the object to add with extension (path or str)</li>
 <li><strong>value</strong> &#8211; to add (string)</li>
 </ul>
 </td>
@@ -195,40 +240,9 @@ stored in your computer.</p>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="method">
-<dt id="openalea.vpltk.project.project.Project.add_script">
-<tt class="descname">add_script</tt><span class="sig-paren">(</span><em>name</em>, <em>script</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.add_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.add_script" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a src in the project</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Deprecated:</th><td class="field-body"><p class="first">replace by <a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.add" title="openalea.vpltk.project.project.Project.add"><tt class="xref py py-func docutils literal"><span class="pre">add()</span></tt></a> method</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> &#8211; filename of the src to add (path or str)</li>
-<li><strong>script</strong> &#8211; to add (string)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.add" title="openalea.vpltk.project.project.Project.add"><tt class="xref py py-func docutils literal"><span class="pre">add()</span></tt></a></p>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="openalea.vpltk.project.project.Project.create">
-<tt class="descname">create</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Do the same thing that import method.</p>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.start" title="openalea.vpltk.project.project.Project.start"><tt class="xref py py-func docutils literal"><span class="pre">start()</span></tt></a> <a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.load" title="openalea.vpltk.project.project.Project.load"><tt class="xref py py-func docutils literal"><span class="pre">load()</span></tt></a> <a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.load_manifest" title="openalea.vpltk.project.project.Project.load_manifest"><tt class="xref py py-func docutils literal"><span class="pre">load_manifest()</span></tt></a></p>
+<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.get" title="openalea.vpltk.project.project.Project.get"><tt class="xref py py-func docutils literal"><span class="pre">get()</span></tt></a> <a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.new_model" title="openalea.vpltk.project.project.Project.new_model"><tt class="xref py py-func docutils literal"><span class="pre">new_model()</span></tt></a></p>
 </div>
 </dd></dl>
 
@@ -246,12 +260,7 @@ stored in your computer.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">object named <em>name</em> in the category <em>category</em> if it exists. Else, None.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">get</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;src&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;myscript.py&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object named <em>name</em> in the category <em>category</em> if it exists. Else, None.</p>
 </td>
 </tr>
 </tbody>
@@ -355,35 +364,65 @@ stored in your computer.</p>
 <dl class="method">
 <dt id="openalea.vpltk.project.project.Project.model">
 <tt class="descname">model</tt><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.model" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the file in self.src to convert into model. Can pass various names split by spaces. Can pass &#8220;*&#8221;.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">model object corresponding to the source named <em>name</em> in self.src. If various values, return a list of models. If failed, return None.</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Get one or various instances of models from this project.
+:param name: name of the file in self.src to convert into model. Can pass various names split by spaces. Can pass &#8220;*&#8221;.
+:return: model object corresponding to the source named <em>name</em> in self.src. If various values, return a list of models. If failed, return None.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.models" title="openalea.vpltk.project.project.Project.models"><tt class="xref py py-func docutils literal"><span class="pre">models()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="openalea.vpltk.project.project.Project.models">
 <tt class="descname">models</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.models" title="Permalink to this definition">¶</a></dt>
-<dd><p>return all models</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">all models</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.model" title="openalea.vpltk.project.project.Project.model"><tt class="xref py py-func docutils literal"><span class="pre">model()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="openalea.vpltk.project.project.Project.new_model">
 <tt class="descname">new_model</tt><span class="sig-paren">(</span><em>name</em>, <em>code=''</em>, <em>filepath=''</em>, <em>inputs=</em>, <span class="optional">[</span><span class="optional">]</span><em>outputs=</em><span class="optional">[</span><span class="optional">]</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.new_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.new_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a model and add it to the project</p>
+<dd><p>Create a model and add it to the project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; name of model to create with extension</li>
+<li><strong>code</strong> &#8211; object that will be manipulated as model</li>
+<li><strong>filepath</strong> &#8211; path where model will be saved</li>
+<li><strong>inputs</strong> &#8211; list of inputs of the model</li>
+<li><strong>outputs</strong> &#8211; list of outputs of the model</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if added with success</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.get" title="openalea.vpltk.project.project.Project.get"><tt class="xref py py-func docutils literal"><span class="pre">get()</span></tt></a> <a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.add_model" title="openalea.vpltk.project.project.Project.add_model"><tt class="xref py py-func docutils literal"><span class="pre">add_model()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="openalea.vpltk.project.project.Project.remove">
 <tt class="descname">remove</tt><span class="sig-paren">(</span><em>category</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove an object in the project</p>
-<p>Remove nothing on disk.</p>
+<p>Remove on disk too.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -399,57 +438,18 @@ stored in your computer.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="openalea.vpltk.project.project.Project.remove_script">
-<tt class="descname">remove_script</tt><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.remove_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.remove_script" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a src in the project</p>
-<p>Remove nothing on disk.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Deprecated:</th><td class="field-body">replace by <a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.remove" title="openalea.vpltk.project.project.Project.remove"><tt class="xref py py-func docutils literal"><span class="pre">remove()</span></tt></a> method</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; filename of the src to remove (path or str)</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.project.Project.remove" title="openalea.vpltk.project.project.Project.remove"><tt class="xref py py-func docutils literal"><span class="pre">remove()</span></tt></a></p>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="openalea.vpltk.project.project.Project.rename">
 <tt class="descname">rename</tt><span class="sig-paren">(</span><em>category</em>, <em>old_name</em>, <em>new_name</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename a src, a world or a control in the project.
-If category is project, rename the entire project.</p>
+<dd><p>Rename a <em>model</em>, a <em>world</em>, a <em>control</em>, ... in the project.
+If category is <em>project</em>, rename the entire project.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>category</strong> &#8211; Can be &#8220;src&#8221;, &#8220;control&#8221;, &#8220;world&#8221; or &#8220;project&#8221; (str)</li>
+<li><strong>category</strong> &#8211; Can be &#8220;model&#8221;, &#8220;control&#8221;, &#8220;world&#8221; or &#8220;project&#8221; (str)</li>
 <li><strong>old_name</strong> &#8211; current name of thing to rename (str)</li>
 <li><strong>new_name</strong> &#8211; future name of thing to rename (str)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="openalea.vpltk.project.project.Project.run_src">
-<tt class="descname">run_src</tt><span class="sig-paren">(</span><em>name</em>, <em>namespace={}</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.run_src"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.run_src" title="Permalink to this definition">¶</a></dt>
-<dd><p>Try to run the source file named <em>name</em> into current shell</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> &#8211; name of the source to run</li>
-<li><strong>namespace</strong> &#8211; dict used to run the sources. Default, empty dict.</li>
 </ul>
 </td>
 </tr>
@@ -522,122 +522,50 @@ If category is project, rename the entire project.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.author">
-<tt class="descname">author</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.author"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.author" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.author_email">
-<tt class="descname">author_email</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.author_email"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.author_email" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.cache">
-<tt class="descname">cache</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.cache" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.citation">
-<tt class="descname">citation</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.citation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.citation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.control">
-<tt class="descname">control</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.control"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.control" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.data">
-<tt class="descname">data</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.dependencies">
-<tt class="descname">dependencies</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.dependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.dependencies" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.description">
-<tt class="descname">description</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.description" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
 <dt id="openalea.vpltk.project.project.Project.doc">
 <tt class="descname">doc</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.doc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.doc" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.icon">
-<tt class="descname">icon</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.icon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.icon" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the documentation of the project (str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="openalea.vpltk.project.project.Project.icon_path">
 <tt class="descname">icon_path</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.icon_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.icon_path" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.license">
-<tt class="descname">license</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.license"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.license" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.long_description">
-<tt class="descname">long_description</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.long_description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.long_description" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.model_klasses">
-<tt class="descname">model_klasses</tt><em class="property"> = {'r': &lt;class 'openalea.oalab.model.r.RModel'&gt;, 'py': &lt;class 'openalea.oalab.model.python.PythonModel'&gt;, 'wpy': &lt;class 'openalea.oalab.model.visualea.VisualeaModel'&gt;, 'lpy': &lt;class 'openalea.oalab.model.lpy.LPyModel'&gt;}</em><a class="headerlink" href="#openalea.vpltk.project.project.Project.model_klasses" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.name">
-<tt class="descname">name</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.scene">
-<tt class="descname">scene</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.scene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.scene" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.src">
-<tt class="descname">src</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.src"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.src" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.startup">
-<tt class="descname">startup</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.startup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.startup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.url">
-<tt class="descname">url</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.url" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.version">
-<tt class="descname">version</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.version" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="openalea.vpltk.project.project.Project.world">
-<tt class="descname">world</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#Project.world"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.Project.world" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the complete path of the icon. To modify it, you have to modify the path of project, the name of project and/or the self.icon.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="function">
-<dt id="openalea.vpltk.project.project.remove_extension">
-<tt class="descclassname">openalea.vpltk.project.project.</tt><tt class="descname">remove_extension</tt><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#remove_extension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.remove_extension" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="openalea.vpltk.project.project.safe_remove">
+<tt class="descclassname">openalea.vpltk.project.project.</tt><tt class="descname">safe_remove</tt><span class="sig-paren">(</span><em>dirpath</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/project.html#safe_remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.project.safe_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to remove directories <em>dirpath</em>
+:param dirpath: path of directory to remove
+:return: True if success, else False</p>
+</dd></dl>
 
 <span class="target" id="module-openalea.vpltk.project.manager"></span><dl class="class">
 <dt id="openalea.vpltk.project.manager.ProjectManager">
 <em class="property">class </em><tt class="descclassname">openalea.vpltk.project.manager.</tt><tt class="descname">ProjectManager</tt><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Object which manage projects: creation, loading, saving, searching, ...</p>
+<dd><p>Object which permit to access to projects: creation, loading, searching, ...</p>
 <p>It is a singleton.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.vpltk.project</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="openalea.vpltk.project.manager.ProjectManager.clear">
 <tt class="descname">clear</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.clear" title="Permalink to this definition">¶</a></dt>
@@ -647,7 +575,8 @@ If category is project, rename the entire project.</p>
 <dl class="method">
 <dt id="openalea.vpltk.project.manager.ProjectManager.close">
 <tt class="descname">close</tt><span class="sig-paren">(</span><em>name=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.close" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Close current project.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -659,7 +588,7 @@ If category is project, rename the entire project.</p>
 
 <dl class="method">
 <dt id="openalea.vpltk.project.manager.ProjectManager.create">
-<tt class="descname">create</tt><span class="sig-paren">(</span><em>name</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.create" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create</tt><span class="sig-paren">(</span><em>name</em>, <em>projectdir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new project and return it.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -707,7 +636,7 @@ If category is project, rename the entire project.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_of_projects</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
 </pre></div>
 </div>
 </td>
@@ -756,7 +685,7 @@ If category is project, rename the entire project.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>name</strong> &#8211; name of project to load. Must be a string.</li>
-<li><strong>path</strong> &#8211; path of project to load. Must be a path (see module path.py). By default, the path is the openaelea.core.settings.get_project_dir() ($HOME/.openalea/projects/).</li>
+<li><strong>path</strong> &#8211; path of project to load. Must be a path (see module path.py). By default, try to guess with name only. If there are various projects with the same name, return the first.</li>
 </ul>
 </td>
 </tr>
@@ -783,35 +712,37 @@ If category is project, rename the entire project.</p>
 
 <dl class="method">
 <dt id="openalea.vpltk.project.manager.ProjectManager.search">
-<tt class="descname">search</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.search" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">search</tt><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#ProjectManager.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search a specific project that match filters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;*mtg*&quot;</span><span class="p">,</span> <span class="n">author</span><span class="o">=</span><span class="s">&quot;*Godin*&quot;</span><span class="p">)</span>
+<tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;myproject&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">TODO:</th><td class="field-body"><p class="first last">not implemented yet</p>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>name</strong> &#8211; name of project to search (str)</p>
 </td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">project if it is found, else None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If various projects are find, return the first (arbitrary)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">TODO:</th><td class="field-body">implement with real filter (ex: name = &#8220;<em>mtg</em>&#8221;, authors = &#8220;<em>OpenAlea</em>&#8221;, ...)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="openalea.vpltk.project.manager.ProjectManager.instance">
-<tt class="descname">instance</tt><em class="property"> = None</em><a class="headerlink" href="#openalea.vpltk.project.manager.ProjectManager.instance" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
-
-<dl class="function">
-<dt id="openalea.vpltk.project.manager.main">
-<tt class="descclassname">openalea.vpltk.project.manager.</tt><tt class="descname">main</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/vpltk/project/manager.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.vpltk.project.manager.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 </div>
@@ -826,10 +757,11 @@ If category is project, rename the entire project.</p>
   <ul>
 <li><a class="reference internal" href="#">Projects</a><ul>
 <li><a class="reference internal" href="#module-openalea.vpltk.project">Project Quick Start</a><ul>
-<li><a class="reference internal" href="#project-and-project-manager-quick-start">Project and Project Manager Quick Start</a></li>
+<li><a class="reference internal" href="#working-with-project-class">Working with Project class</a></li>
+<li><a class="reference internal" href="#creation-and-manipulation-with-project-manager">Creation and Manipulation with Project Manager</a></li>
+<li><a class="reference internal" href="#search-other-projects">Search other projects</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#various-views-on-project-manager-and-project">Various Views on Project Manager and Project</a></li>
 <li><a class="reference internal" href="#module-openalea.vpltk.project.project">Project API</a></li>
 </ul>
 </li>

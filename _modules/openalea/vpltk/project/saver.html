@@ -48,16 +48,13 @@
             
   <h1>Source code for openalea.vpltk.project.saver</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
-<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">discover</span><span class="p">,</span> <span class="n">Plugin</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 
 <div class="viewcode-block" id="get_saver"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.project.html#openalea.vpltk.project.saver.get_saver">[docs]</a><span class="k">def</span> <span class="nf">get_saver</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;GenericSaver&quot;</span><span class="p">):</span>
-    <span class="n">savers</span> <span class="o">=</span> <span class="n">discover</span><span class="p">(</span><span class="s">&#39;vpltk.saver&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">saver</span> <span class="ow">in</span> <span class="n">savers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">saver</span> <span class="o">=</span> <span class="n">Plugin</span><span class="p">(</span><span class="n">saver</span><span class="p">)</span>
-        <span class="n">saver</span> <span class="o">=</span> <span class="n">saver</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">saver</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;vpltk.saver&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">saver</span><span class="o">.</span><span class="n">default_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">saver</span>
 
@@ -86,7 +83,7 @@
         <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
-        <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">,</span><span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">,</span> <span class="s">&quot;ignore&quot;</span><span class="p">)</span>
         <span class="n">file_</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
         <span class="n">file_</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -134,7 +131,7 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install PlantGL if you want to load a BGEOM object.&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">print</span> <span class="n">e</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Impossible to save the scene for object </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">filename</span><span class="p">))</span>        </div></div>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Impossible to save the scene for object </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span></div></div>
 </pre></div>
 
           </div>

@@ -1,0 +1,888 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Controls &mdash; OpenAleaLab 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-openalea.oalab.plugins.control"></span><div class="section" id="controls">
+<h1>Controls<a class="headerlink" href="#controls" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>A <tt class="xref py py-class docutils literal"><span class="pre">Control</span></tt> is a data which :</dt>
+<dd><ul class="first last simple">
+<li>provides an identifier, a name, an interface and a value</li>
+<li>is observable, that means that when an attribute change, an event is sent.</li>
+<li>is easily editable or viewable by graphical interfaces called &#8220;Control widgets&#8221;</li>
+<li>may also define optional meta-informations like &#8220;suggested values&#8221; or &#8220;alias&#8221;.</li>
+</ul>
+</dd>
+</dl>
+<p>A control widget is a graphical element that allow user to edit, view or create  <tt class="xref py py-class docutils literal"><span class="pre">Control</span></tt>.</p>
+<p>A Control widget selector is an object able to return the right widget depending on context.
+Context depends on:</p>
+<blockquote>
+<div><ul class="simple">
+<li>shape and place available: small, large, vertical</li>
+<li>kind of use: editing, viewing, creating or painting</li>
+</ul>
+</div></blockquote>
+<p>The widget part (control widget selector) loads and returns widget class.
+The plugin part (control widget selector plugin) describes contexts supported by widget selector and provides preview.</p>
+<p>These two steps (widget / plugin) are necessary because :</p>
+<blockquote>
+<div><ul class="simple">
+<li>in one hand, users want to know all available widget to choose the best for their use.</li>
+<li>in the other hand, widgets can be complex and heavy and cannot be loaded at startup</li>
+</ul>
+</div></blockquote>
+<p>The &#8220;plugin part&#8221;, by only describing widget, can answer to user expectations without loading real class.</p>
+</div>
+</div>
+<div class="section" id="simple-widget-integration">
+<h2>Simple widget integration<a class="headerlink" href="#simple-widget-integration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="control-widget">
+<h3>Control widget<a class="headerlink" href="#control-widget" title="Permalink to this headline">¶</a></h3>
+<p>If your widget fits well to all contexts, the easiest way is to use the widget class as both
+&#8220;Control widget&#8221; and &#8220;Control widget selector&#8221;.</p>
+<blockquote>
+<div>You just need to define the widget part as this widget will be used in all cases described in plugin.</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span>
+<span class="k">class</span> <span class="nc">XyzControlWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="s">&#39;qt signal&#39;</span> <span class="c"># for example &#39;valueChanged()&#39;, &#39;currentTextChanged()&#39;, ...</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">REAL_VALUE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setC1</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;constraint1&#39;</span><span class="p">,</span> <span class="n">DEFAULT_CONSTRAINT1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="register-plugin">
+<h3>register plugin<a class="headerlink" href="#register-plugin" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
+    <span class="c"># setup instructions</span>
+
+    <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>
+<span class="hll">        <span class="s">&#39;oalab.qt_control&#39;</span><span class="p">:</span>                                                         <span class="c"># Plugin category</span>
+</span>            <span class="p">[</span>
+<span class="hll">            <span class="s">&#39;PluginXyzWidgetSelector = mypackage.plugins:PluginXyzWidgetSelector&#39;</span>   <span class="c"># Plugin name = path to plugin (factory)</span>
+</span>            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">See IBool example for real case</p>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-widget-integration">
+<h2>Advanced widget integration<a class="headerlink" href="#advanced-widget-integration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="plugin">
+<h3>Plugin<a class="headerlink" href="#plugin" title="Permalink to this headline">¶</a></h3>
+<p>To create a valid <a class="reference internal" href="#openalea.oalab.plugins.control.ControlWidgetSelectorPlugin" title="openalea.oalab.plugins.control.ControlWidgetSelectorPlugin"><tt class="xref py py-class docutils literal"><span class="pre">ControlWidgetSelectorPlugin</span></tt></a>, you must fill all these attributes :</p>
+<blockquote>
+<div><ul class="simple">
+<li>controls: list of interface name supported. Ex: [&#8216;IInt&#8217;, &#8216;IFloat&#8217;]</li>
+<li>name: widget name (generally widget class name)</li>
+<li>icon_path: path to an image (<a class="reference internal" href="../../glossary.html#term-icon-size"><em class="xref std std-term">icon size</em></a>) representing this widget</li>
+<li>preview_path: path to an image (<a class="reference internal" href="../../glossary.html#term-preview-size"><em class="xref std std-term">preview size</em></a>) representing this widget</li>
+<li>edit_shape: list of <a class="reference internal" href="#term-control-shape"><em class="xref std std-term">control shape</em></a> supported in <a class="reference internal" href="#term-edit-mode"><em class="xref std std-term">edit mode</em></a></li>
+<li>view_shape: list of <a class="reference internal" href="#term-control-shape"><em class="xref std std-term">control shape</em></a> supported in <a class="reference internal" href="#term-view-mode"><em class="xref std std-term">view mode</em></a></li>
+<li>create_shape: list of <a class="reference internal" href="#term-control-shape"><em class="xref std std-term">control shape</em></a> supported in <a class="reference internal" href="#term-create-mode"><em class="xref std std-term">create mode</em></a></li>
+<li>paint: says if control widget is able to paint</li>
+</ul>
+</div></blockquote>
+<p>Class is derivated from ControlWidgetSelectorPlugin that considers that attributes that are not
+explicitly defined are empty (edit_shape, view_shape), null (icon_path=&#8217;&#8216;) or disabled (paint=False).</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/__init__.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">openalea.oalab</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.control</span> <span class="kn">import</span> <span class="n">ControlWidgetSelectorPlugin</span>
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+
+<span class="k">class</span> <span class="nc">PluginXyzWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IXyz&#39;</span><span class="p">]</span> <span class="c"># Interface name like IInt</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;XyzWidgetSelector&#39;</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">icon_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/Xyz_responsive.png&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mypackage.plugins.selectors</span> <span class="kn">import</span> <span class="n">XyzWidgetSelector</span>
+        <span class="k">return</span> <span class="n">XyzWidgetSelector</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="widget">
+<h3>Widget<a class="headerlink" href="#widget" title="Permalink to this headline">¶</a></h3>
+<p>For a complete explanation of code to write for each function, or to create a class
+from scratch, please have a look to <a class="reference internal" href="#openalea.oalab.plugins.control.IControlWidget" title="openalea.oalab.plugins.control.IControlWidget"><tt class="xref py py-class docutils literal"><span class="pre">IControlWidget</span></tt></a> and example after.</p>
+<p>To create a class for standard QWidget, you can copy/paste this code</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/widgets.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span>
+<span class="k">class</span> <span class="nc">XyzControlWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="s">&#39;qt signal&#39;</span> <span class="c"># for example &#39;valueChanged()&#39;, &#39;currentTextChanged()&#39;, ...</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">REAL_VALUE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setC1</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;constraint1&#39;</span><span class="p">,</span> <span class="n">DEFAULT_CONSTRAINT1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="widget-selector">
+<h3>Widget selector<a class="headerlink" href="#widget-selector" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/selectors.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">XyzControlWidgetSelector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;responsive&#39;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">mypackage.plugins.widgets</span> <span class="kn">import</span> <span class="n">XyzControlWidget</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">XyzControlWidget</span><span class="p">()</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">tune</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">widget</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">edit_constraints</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</pre></div>
+</td></tr></table></div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">See IInt example for real case</p>
+</div>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>First example shows how to use QCheckBox to edit an IBool in all cases.
+Second example, a bit more complex, shows how to use all Qt sliders (QSpinBox, QSlider and QDial) to edit an IInt.
+This example also define a constraint widget to set min and max value for sliders.</p>
+<p>Import used in both examples:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+
+<span class="kn">import</span> <span class="nn">openalea.oalab</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.control</span> <span class="kn">import</span> <span class="n">ControlWidgetSelectorPlugin</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span>
+</pre></div>
+</td></tr></table></div>
+<div class="section" id="ibool-control-widget">
+<h3>IBool control widget<a class="headerlink" href="#ibool-control-widget" title="Permalink to this headline">¶</a></h3>
+<p>We define a widget based on QCheckBox.
+This widget will be used for all shapes and will also be used as selector.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BoolCheckBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">,</span> <span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateChanged</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<p>Now, lets define plugin that links to it:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">PluginIntWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;IntWidgetSelector&#39;</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt.min&#39;</span><span class="p">,</span> <span class="s">&#39;IInt.max&#39;</span><span class="p">]</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">icon_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/IntWidgetSelector_hline.png&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.selectors</span> <span class="kn">import</span> <span class="n">IntWidgetSelector</span>
+        <span class="k">return</span> <span class="n">IntWidgetSelector</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="iint-control-widget">
+<h3>IInt control widget<a class="headerlink" href="#iint-control-widget" title="Permalink to this headline">¶</a></h3>
+<p>All Qt sliders define &#8220;value&#8221; and &#8220;setValue&#8221; methods directly compatible with IInt (int),
+so there is almost nothing to do:</p>
+<dl class="docutils">
+<dt>We will use these widgets depending on context:</dt>
+<dd><ul class="first last simple">
+<li>QDial for responsive, large and small shapes</li>
+<li>QSlider for vline</li>
+<li>QSpinBox for hline</li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">AbstractIntWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minimum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">mini</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">min</span>
+        <span class="n">maxi</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="n">mini</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="n">maxi</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IntDial</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDial</span><span class="p">,</span> <span class="n">AbstractIntWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For documentation, see :class:`~openalea.oalab.interfaces.all.IQtControl`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QDial</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractIntWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IntSpinBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="p">,</span> <span class="n">AbstractIntWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For documentation, see :class:`~openalea.oalab.interfaces.all.IQtControl`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractIntWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IntSimpleSlider</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="p">,</span> <span class="n">AbstractIntWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For documentation, see :class:`~openalea.oalab.interfaces.all.IQtControl`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractIntWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
+</pre></div>
+</td></tr></table></div>
+<p>We define also a widget to edit constraints</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IntConstraintWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFormLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_min</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_max</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="s">&#39;100&#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s">&#39;Can be an int (for instance -5) or empty (no limits)&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_min</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_min</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_max</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_max</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="n">layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&#39;Minimum&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_min</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&#39;Maximum&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_max</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dic</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_min</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dic</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e_max</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">dic</span>
+</pre></div>
+</td></tr></table></div>
+<p>Now, lets define widget selector to group all classes together :</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IntWidgetSelector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="s">&#39;hline&#39;</span>
+
+        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;hline&#39;</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">IntSlider</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;vline&#39;</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">IntSimpleSlider</span><span class="p">()</span>
+<span class="hll">            <span class="n">widget</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">)</span>
+</span>        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;large&#39;</span><span class="p">,</span> <span class="s">&#39;small&#39;</span><span class="p">,</span> <span class="s">&#39;responsive&#39;</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">IntDial</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">widget</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">edit_constraints</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">IntConstraintWidget</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">widget</span>
+</pre></div>
+</td></tr></table></div>
+<p>You can notice in line 11, instruction to set widget to fit to vline shape.</p>
+<p>And finally, lets define plugin that links to it.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">PluginIntWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;IntWidgetSelector&#39;</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt.min&#39;</span><span class="p">,</span> <span class="s">&#39;IInt.max&#39;</span><span class="p">]</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">icon_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/IntWidgetSelector_hline.png&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.selectors</span> <span class="kn">import</span> <span class="n">IntWidgetSelector</span>
+        <span class="k">return</span> <span class="n">IntWidgetSelector</span>
+</pre></div>
+</td></tr></table></div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">All classes can be defined in same file <strong>excepted last one</strong>.
+PluginIntWidgetSelector must be defined in a separated file to allow to load only description.</p>
+</div>
+</div>
+</div>
+<div class="section" id="glossary">
+<h2>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h2>
+<dl class="glossary docutils">
+<dt id="term-create-mode">create mode</dt>
+<dd>Users want to create a control from scratch.
+In other words, it can be considered as &#8220;write-only&#8221; widget.</dd>
+<dt id="term-view-mode">view mode</dt>
+<dd>Users want to visualize a control. If control value changes, users may want to see changes.
+In other words, it can be considered as a &#8220;read-only&#8221; with option to enable <a class="reference internal" href="#term-auto-read-mode"><em class="xref std std-term">auto-read mode</em></a>.</dd>
+<dt id="term-edit-mode">edit mode</dt>
+<dd>Users want to edit a control. If control value changes, users may want to reload changes.
+Users may want theirs changes to be applied dynamically or not.
+In other words, it can be considered as a &#8220;read/write&#8221; widget with options to enable both <a class="reference internal" href="#term-auto-read-mode"><em class="xref std std-term">auto-read mode</em></a> mode and <a class="reference internal" href="#term-auto-apply-mode"><em class="xref std std-term">auto-apply mode</em></a>.</dd>
+<dt id="term-auto-read-mode">auto-read mode</dt>
+<dd>If widget has auto-read mode enabled: if value changes, view is automatically refreshed to display new value.</dd>
+<dt id="term-auto-apply-mode">auto-apply mode</dt>
+<dd>If widget has auto-apply mode enabled: each time users modify data in the view, changes are automatically applied to object being edited.</dd>
+<dt id="term-control-shape">control shape</dt>
+<dd>shape supported by a control editor or viewer:
+- hline: widget fits well in an horizontal line for example in a cell in a table or spreadsheet, in a 200x20px widget, ...
+- vline: widget fits well in a vertical line, for example in 20x200px widget
+- small: widget fits well in a small squared widget (100x100 px to 300x300 px)
+- large: widget fits well in large space (&gt; 300x300 px)
+- responsive: widget can fit well in all shapes and sizes. Hardest to create but easiest to use.</dd>
+</dl>
+</div>
+<div class="section" id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="openalea.oalab.plugins.control.IConstraintWidget">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.control.</tt><tt class="descname">IConstraintWidget</tt><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IConstraintWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IConstraintWidget" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="openalea.oalab.plugins.control.IConstraintWidget.constraints">
+<tt class="descname">constraints</tt><span class="sig-paren">(</span><em>interface=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IConstraintWidget.constraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IConstraintWidget.constraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict &#8220;constraint name&#8221; -&gt; &#8220;value&#8221;</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="openalea.oalab.plugins.control.IControlWidget">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.control.</tt><tt class="descname">IControlWidget</tt><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>An IControlWidget is a</p>
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.apply">
+<tt class="descname">apply</tt><span class="sig-paren">(</span><em>control</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update control with widget values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.autoapply">
+<tt class="descname">autoapply</tt><span class="sig-paren">(</span><em>control</em>, <em>auto=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.autoapply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.autoapply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable auto-apply mode on given control</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.autoread">
+<tt class="descname">autoread</tt><span class="sig-paren">(</span><em>control</em>, <em>auto=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.autoread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.autoread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable auto-read mode on given control.
+Important, control passed to autoread and autoapply can be identical or different.
+For example if you want to refresh view if a template changes and apply it automatically to your current control.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.notify">
+<tt class="descname">notify</tt><span class="sig-paren">(</span><em>sender</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method called when Observed control changes.
+Generally, when control send an event &#8220;ValueChanged&#8221;, we want to
+refresh widget with new value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.on_value_changed">
+<tt class="descname">on_value_changed</tt><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.on_value_changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.on_value_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method called when value changed.
+This method generally read control and refresh view if <a class="reference internal" href="#term-auto-read-mode"><em class="xref std std-term">auto-read mode</em></a> is enabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.read">
+<tt class="descname">read</tt><span class="sig-paren">(</span><em>control</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update widget with control values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.reset">
+<tt class="descname">reset</tt><span class="sig-paren">(</span><em>value=None</em>, <em>*kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset widget to default values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.set">
+<tt class="descname">set</tt><span class="sig-paren">(</span><em>control</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use control to preset widget.
+Starts to listen to control events and read control&#8217;s values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.setValue">
+<tt class="descname">setValue</tt><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.setValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change widget value.
+If your class derivates from an third-party widget, it is sometime necessary
+to adapt control value type to widget supported type.
+Example unicode to QString in pyqt API v1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugins.control.IControlWidget.value">
+<tt class="descname">value</tt><span class="sig-paren">(</span><em>interface=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IControlWidget.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IControlWidget.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns widget value.
+If your class derivates from an third-party widget, it is sometime necessary
+to adapt widget value type to control type.
+If widget supports more than one interface, returned value depends on given interface.
+If none, returns widget preferred type.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.control.</tt><tt class="descname">IWidgetSelector</tt><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="classmethod">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector.create">
+<em class="property">classmethod </em><tt class="descname">create</tt><span class="sig-paren">(</span><em>shape=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an instance of IControlWidget that can generate controls.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector.edit">
+<em class="property">classmethod </em><tt class="descname">edit</tt><span class="sig-paren">(</span><em>control</em>, <em>shape=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector.edit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector.edit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an instance of IControlWidget that modifies control in place.
+Control can be updated continuously or on explicit user action
+(click on apply button for instance)</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector.edit_constraints">
+<em class="property">classmethod </em><tt class="descname">edit_constraints</tt><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector.edit_constraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector.edit_constraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a widget to edit constraints.
+This widget must respect <a class="reference internal" href="#openalea.oalab.plugins.control.IConstraintWidget" title="openalea.oalab.plugins.control.IConstraintWidget"><tt class="xref py py-class docutils literal"><span class="pre">IConstraintWidget</span></tt></a> interface.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector.paint">
+<em class="property">classmethod </em><tt class="descname">paint</tt><span class="sig-paren">(</span><em>control</em>, <em>painter</em>, <em>rectangle</em>, <em>option=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector.paint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paints widget using painter.
+This function never modify control.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector.snapshot">
+<em class="property">classmethod </em><tt class="descname">snapshot</tt><span class="sig-paren">(</span><em>control</em>, <em>shape=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector.snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a widget representing control</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="openalea.oalab.plugins.control.IWidgetSelector.view">
+<em class="property">classmethod </em><tt class="descname">view</tt><span class="sig-paren">(</span><em>control</em>, <em>shape=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#IWidgetSelector.view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.IWidgetSelector.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an instance of IControlWidget that view control.
+This function never modify control.
+If you finally want to modify it, you can call &#8220;apply&#8221; explicitly.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="openalea.oalab.plugins.control.ControlWidgetSelectorPlugin">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.control.</tt><tt class="descname">ControlWidgetSelectorPlugin</tt><a class="reference internal" href="../../../_modules/openalea/oalab/plugins/control.html#ControlWidgetSelectorPlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugins.control.ControlWidgetSelectorPlugin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Controls</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#simple-widget-integration">Simple widget integration</a><ul>
+<li><a class="reference internal" href="#control-widget">Control widget</a></li>
+<li><a class="reference internal" href="#register-plugin">register plugin</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-widget-integration">Advanced widget integration</a><ul>
+<li><a class="reference internal" href="#plugin">Plugin</a></li>
+<li><a class="reference internal" href="#widget">Widget</a></li>
+<li><a class="reference internal" href="#widget-selector">Widget selector</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#ibool-control-widget">IBool control widget</a></li>
+<li><a class="reference internal" href="#iint-control-widget">IInt control widget</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#glossary">Glossary</a></li>
+<li><a class="reference internal" href="#details">Details</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin_control.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

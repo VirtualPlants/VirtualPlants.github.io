@@ -65,7 +65,10 @@
 <span class="c">#</span>
 <span class="c">###############################################################################</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">AbstractFactory</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.project.project</span> <span class="kn">import</span> <span class="n">remove_extension</span>
 
 
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -79,9 +82,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param name: name of the model (name of the file?)</span>
 <span class="sd">        :param code: code of the model, can be a string or an other object</span>
+<span class="sd">        :param filepath: path to save the model on disk</span>
 <span class="sd">        :param inputs: list of identifier of inputs that come from outside model (from world for example)</span>
 <span class="sd">        :param outputs: list of objects to return outside model (to world for example)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">remove_extension</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs_info</span> <span class="o">=</span> <span class="n">inputs</span>
@@ -102,40 +107,43 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: a string representation of model to save it on disk</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </div>
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Instance of model &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot; named &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Model.run"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        execute model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </div>
 <div class="viewcode-block" id="Model.init"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        go back to initial step</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </div>
 <div class="viewcode-block" id="Model.step"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        execute only one step of the model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </div>
 <div class="viewcode-block" id="Model.stop"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        stop execution</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </div>
 <div class="viewcode-block" id="Model.animate"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model.animate">[docs]</a>    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        run model step by step</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -144,14 +152,15 @@
 
 <span class="sd">        :use:</span>
 <span class="sd">            &gt;&gt;&gt; model.inputs = 4, 3</span>
-<span class="sd">            &gt;&gt;&gt; model.run()</span>
+<span class="sd">            &gt;&gt;&gt; rvalue = model.run()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span>
 
     <span class="nd">@inputs.setter</span>
 <div class="viewcode-block" id="Model.inputs"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.Model.inputs">[docs]</a>    <span class="k">def</span> <span class="nf">inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">old_inputs</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="c"># inputs = args</span>
             <span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -163,7 +172,9 @@
                     <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">inputs</span><span class="p">]</span>
             <span class="n">inputs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs_info</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">inputs</span> <span class="o">==</span> <span class="p">[]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span> <span class="o">=</span> <span class="n">old_inputs</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs_info</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">input_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs_info</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
                         <span class="n">inp</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
@@ -181,12 +192,13 @@
 <span class="sd">        Return outputs of the model after running it.</span>
 
 <span class="sd">        :use:</span>
-<span class="sd">            &gt;&gt;&gt; model.run()</span>
-<span class="sd">            &gt;&gt;&gt; print model.outputs</span>
+<span class="sd">            &gt;&gt;&gt; outputs = model.run()</span>
+<span class="sd">            &gt;&gt;&gt; outputs == model.outputs</span>
+<span class="sd">            True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c"># if len(self._outputs) == 1:</span>
-        <span class="c">#     return self._outputs[0]</span>
-        <span class="c"># else:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs_info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs_info</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span>
 
     <span class="nd">@outputs.setter</span>
@@ -208,7 +220,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_documentation</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span> <span class="o">=</span> <span class="p">()):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot; Call function. Must be overriden &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
 
@@ -225,6 +237,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">alias</span> <span class="o">=</span> <span class="n">alias</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="bp">None</span>
 
+<div class="viewcode-block" id="ModelFactory.get_id"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.ModelFactory.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ModelFactory.package"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.ModelFactory.package">[docs]</a>    <span class="k">def</span> <span class="nf">package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">class</span> <span class="nc">fake_package</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&quot;:projectmanager.current&quot;</span>
+        <span class="k">return</span> <span class="n">fake_package</span><span class="p">()</span>
+</div>
 <div class="viewcode-block" id="ModelFactory.get_classobj"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.ModelFactory.get_classobj">[docs]</a>    <span class="k">def</span> <span class="nf">get_classobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_module</span><span class="p">()</span>
         <span class="n">classobj</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodeclass_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
@@ -286,19 +308,19 @@
             <span class="k">return</span> <span class="n">node</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&quot;We can&#39;t instanciate node because we don&#39;t have model&quot;</span>
-            <span class="k">print</span> <span class="n">pm</span><span class="o">.</span><span class="n">cproject</span>
+            <span class="k">print</span> <span class="s">&quot;We can&#39;t instanciate node from project </span><span class="si">%s</span><span class="s"> because we don&#39;t have model </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;We only have models : &quot;</span>
+            <span class="k">print</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">models</span><span class="p">()]</span>
 </div>
 <div class="viewcode-block" id="ModelFactory.instantiate_widget"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.ModelFactory.instantiate_widget">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">edit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
         <span class="n">autonomous</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the corresponding widget initialised with node&quot;&quot;&quot;</span>
-        <span class="k">print</span> <span class="s">&quot;instanciate_widget&quot;</span>
+        <span class="k">pass</span>
+        <span class="c"># TODO: open corresponding model</span>
 </div>
 <div class="viewcode-block" id="ModelFactory.get_writer"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.ModelFactory.get_writer">[docs]</a>    <span class="k">def</span> <span class="nf">get_writer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the writer class &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">PyModelNodeFactoryWriter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-
 
 </div></div>
 <div class="viewcode-block" id="PyModelNodeFactoryWriter"><a class="viewcode-back" href="../../../../latest/dev/archi/api_model.html#openalea.oalab.model.model.PyModelNodeFactoryWriter">[docs]</a><span class="k">class</span> <span class="nc">PyModelNodeFactoryWriter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -307,16 +329,8 @@
     <span class="n">nodefactory_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
 
 <span class="s">$NAME = ModelFactory(name=$PNAME,</span>
-<span class="s">                filepath=$FILEPATH,</span>
-<span class="s">                authors=$AUTHORS,</span>
-<span class="s">                description=$DESCRIPTION,</span>
-<span class="s">                category=$CATEGORY,</span>
-<span class="s">                nodemodule=$NODEMODULE,</span>
-<span class="s">                nodeclass=$NODECLASS,</span>
 <span class="s">                inputs=$LISTIN,</span>
 <span class="s">                outputs=$LISTOUT,</span>
-<span class="s">                widgetmodule=$WIDGETMODULE,</span>
-<span class="s">                widgetclass=$WIDGETCLASS,</span>
 <span class="s">               )</span>
 
 <span class="s">&quot;&quot;&quot;</span>
@@ -329,18 +343,9 @@
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
         <span class="n">fstr</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodefactory_template</span><span class="p">)</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="n">fstr</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">NAME</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">get_python_name</span><span class="p">(),</span>
-                                      <span class="n">FILEPATH</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">get_filepath</span><span class="p">(),</span>
-                                      <span class="n">AUTHORS</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get_authors</span><span class="p">()),</span>
-                                      <span class="n">PNAME</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
-                                      <span class="n">DESCRIPTION</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
-                                      <span class="n">CATEGORY</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">category</span><span class="p">),</span>
-                                      <span class="n">NODEMODULE</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">nodemodule_name</span><span class="p">),</span>
-                                      <span class="n">NODECLASS</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">nodeclass_name</span><span class="p">),</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fstr</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">NAME</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
                                       <span class="n">LISTIN</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">inputs</span><span class="p">),</span>
-                                      <span class="n">LISTOUT</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">outputs</span><span class="p">),</span>
-                                      <span class="n">WIDGETMODULE</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">widgetmodule_name</span><span class="p">),</span>
-                                      <span class="n">WIDGETCLASS</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">widgetclass_name</span><span class="p">),</span> <span class="p">)</span>
+                                      <span class="n">LISTOUT</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">outputs</span><span class="p">),)</span>
         <span class="k">return</span> <span class="n">result</span>
 </pre></div></div>
 
