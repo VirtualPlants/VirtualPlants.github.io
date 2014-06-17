@@ -108,37 +108,6 @@ The plugin part (control widget selector plugin) describes contexts supported by
 </pre></div>
 </div>
 </div>
-<div class="section" id="register-plugin">
-<h3>register plugin<a class="headerlink" href="#register-plugin" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="code-block-filename"><tt>helper/setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
-    <span class="c"># setup instructions</span>
-
-    <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>
-<span class="hll">        <span class="s">&#39;oalab.qt_control&#39;</span><span class="p">:</span>                                                         <span class="c"># Plugin category</span>
-</span>            <span class="p">[</span>
-<span class="hll">            <span class="s">&#39;PluginXyzWidgetSelector = mypackage.plugins:PluginXyzWidgetSelector&#39;</span>   <span class="c"># Plugin name = path to plugin (factory)</span>
-</span>            <span class="p">]</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-</pre></div>
-</td></tr></table></div>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last">See IBool example for real case</p>
-</div>
-</div>
-</div>
-<div class="section" id="advanced-widget-integration">
-<h2>Advanced widget integration<a class="headerlink" href="#advanced-widget-integration" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="plugin">
 <h3>Plugin<a class="headerlink" href="#plugin" title="Permalink to this headline">¶</a></h3>
 <p>To create a valid <a class="reference internal" href="#openalea.oalab.plugins.control.ControlWidgetSelectorPlugin" title="openalea.oalab.plugins.control.ControlWidgetSelectorPlugin"><tt class="xref py py-class docutils literal"><span class="pre">ControlWidgetSelectorPlugin</span></tt></a>, you must fill all these attributes :</p>
@@ -177,7 +146,7 @@ explicitly defined are empty (edit_shape, view_shape), null (icon_path=&#8217;&#
 <span class="kn">from</span> <span class="nn">openalea.oalab.plugins.control</span> <span class="kn">import</span> <span class="n">ControlWidgetSelectorPlugin</span>
 <span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
 
-<span class="k">class</span> <span class="nc">PluginXyzWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PluginXyzWidget</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
 
     <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IXyz&#39;</span><span class="p">]</span> <span class="c"># Interface name like IInt</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;XyzWidgetSelector&#39;</span>
@@ -187,11 +156,42 @@ explicitly defined are empty (edit_shape, view_shape), null (icon_path=&#8217;&#
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">mypackage.plugins.selectors</span> <span class="kn">import</span> <span class="n">XyzWidgetSelector</span>
-        <span class="k">return</span> <span class="n">XyzWidgetSelector</span>
+        <span class="kn">from</span> <span class="nn">mypackage.plugins.widgets</span> <span class="kn">import</span> <span class="n">XyzControlWidget</span>
+        <span class="k">return</span> <span class="n">XyzControlWidget</span>
 </pre></div>
 </td></tr></table></div>
 </div>
+<div class="section" id="register-plugin">
+<h3>register plugin<a class="headerlink" href="#register-plugin" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
+    <span class="c"># setup instructions</span>
+
+    <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>
+<span class="hll">        <span class="s">&#39;oalab.qt_control&#39;</span><span class="p">:</span>                                         <span class="c"># Plugin category</span>
+</span>            <span class="p">[</span>
+<span class="hll">            <span class="s">&#39;PluginXyzWidget = mypackage.plugins:PluginXyzWidget&#39;</span>   <span class="c"># Plugin name = path to plugin (factory)</span>
+</span>            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">See IBool example for real case</p>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-widget-integration">
+<h2>Advanced widget integration<a class="headerlink" href="#advanced-widget-integration" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="widget">
 <h3>Widget<a class="headerlink" href="#widget" title="Permalink to this headline">¶</a></h3>
 <p>For a complete explanation of code to write for each function, or to create a class
@@ -233,69 +233,23 @@ from scratch, please have a look to <a class="reference internal" href="#openale
 </div>
 <div class="section" id="widget-selector">
 <h3>Widget selector<a class="headerlink" href="#widget-selector" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/selectors.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">XyzControlWidgetSelector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+<p>Here plugin is exactly the same as simple approach, except that it returns
+XyzControlWidgetSelector instead of XyzControlWidget.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.oalab.plugins.control</span> <span class="kn">import</span> <span class="n">ControlWidgetSelectorPlugin</span>
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+
+<span class="k">class</span> <span class="nc">PluginXyzWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IXyz&#39;</span><span class="p">]</span> <span class="c"># Interface name like IInt</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;XyzWidgetSelector&#39;</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;responsive&#39;</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">mypackage.plugins.widgets</span> <span class="kn">import</span> <span class="n">XyzControlWidget</span>
-            <span class="n">widget</span> <span class="o">=</span> <span class="n">XyzControlWidget</span><span class="p">()</span>
-            <span class="n">widget</span><span class="o">.</span><span class="n">tune</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">widget</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">edit_constraints</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mypackage.plugins.selectors</span> <span class="kn">import</span> <span class="n">XyzControlWidgetSelector</span>
+        <span class="k">return</span> <span class="n">XyzControlWidgetSelector</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">See IInt example for real case</p>
@@ -824,11 +778,11 @@ If you finally want to modify it, you can call &#8220;apply&#8221; explicitly.</
 </li>
 <li><a class="reference internal" href="#simple-widget-integration">Simple widget integration</a><ul>
 <li><a class="reference internal" href="#control-widget">Control widget</a></li>
+<li><a class="reference internal" href="#plugin">Plugin</a></li>
 <li><a class="reference internal" href="#register-plugin">register plugin</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#advanced-widget-integration">Advanced widget integration</a><ul>
-<li><a class="reference internal" href="#plugin">Plugin</a></li>
 <li><a class="reference internal" href="#widget">Widget</a></li>
 <li><a class="reference internal" href="#widget-selector">Widget selector</a></li>
 </ul>

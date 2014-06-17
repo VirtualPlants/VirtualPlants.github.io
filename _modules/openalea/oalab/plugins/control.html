@@ -132,35 +132,6 @@
 <span class="sd">        def value(self):</span>
 <span class="sd">            raise NotImplementedError</span>
 
-
-<span class="sd">register plugin</span>
-<span class="sd">---------------</span>
-
-<span class="sd">.. code-block:: python</span>
-<span class="sd">    :filename: helper/setup.py</span>
-<span class="sd">    :linenos:</span>
-<span class="sd">    :emphasize-lines: 5,7</span>
-
-<span class="sd">    setup(</span>
-<span class="sd">        # setup instructions</span>
-
-<span class="sd">        entry_points = {</span>
-<span class="sd">            &#39;oalab.qt_control&#39;:                                                         # Plugin category</span>
-<span class="sd">                [</span>
-<span class="sd">                &#39;PluginXyzWidgetSelector = mypackage.plugins:PluginXyzWidgetSelector&#39;   # Plugin name = path to plugin (factory)</span>
-<span class="sd">                ]</span>
-<span class="sd">            }</span>
-<span class="sd">        )</span>
-
-
-<span class="sd">.. seealso::</span>
-
-<span class="sd">    See IBool example for real case</span>
-
-
-<span class="sd">Advanced widget integration</span>
-<span class="sd">===========================</span>
-
 <span class="sd">Plugin</span>
 <span class="sd">------</span>
 
@@ -188,7 +159,7 @@
 <span class="sd">    from openalea.oalab.plugins.control import ControlWidgetSelectorPlugin</span>
 <span class="sd">    from openalea.deploy.shared_data import shared_data</span>
 
-<span class="sd">    class PluginXyzWidgetSelector(ControlWidgetSelectorPlugin):</span>
+<span class="sd">    class PluginXyzWidget(ControlWidgetSelectorPlugin):</span>
 
 <span class="sd">        controls = [&#39;IXyz&#39;] # Interface name like IInt</span>
 <span class="sd">        name = &#39;XyzWidgetSelector&#39;</span>
@@ -198,8 +169,36 @@
 
 <span class="sd">        @classmethod</span>
 <span class="sd">        def load(cls):</span>
-<span class="sd">            from mypackage.plugins.selectors import XyzWidgetSelector</span>
-<span class="sd">            return XyzWidgetSelector</span>
+<span class="sd">            from mypackage.plugins.widgets import XyzControlWidget</span>
+<span class="sd">            return XyzControlWidget</span>
+
+<span class="sd">register plugin</span>
+<span class="sd">---------------</span>
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    :filename: helper/setup.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :emphasize-lines: 5,7</span>
+
+<span class="sd">    setup(</span>
+<span class="sd">        # setup instructions</span>
+
+<span class="sd">        entry_points = {</span>
+<span class="sd">            &#39;oalab.qt_control&#39;:                                         # Plugin category</span>
+<span class="sd">                [</span>
+<span class="sd">                &#39;PluginXyzWidget = mypackage.plugins:PluginXyzWidget&#39;   # Plugin name = path to plugin (factory)</span>
+<span class="sd">                ]</span>
+<span class="sd">            }</span>
+<span class="sd">        )</span>
+
+
+<span class="sd">.. seealso::</span>
+
+<span class="sd">    See IBool example for real case</span>
+
+
+<span class="sd">Advanced widget integration</span>
+<span class="sd">===========================</span>
 
 
 <span class="sd">Widget</span>
@@ -270,6 +269,29 @@
 <span class="sd">        def edit_constraints(cls):</span>
 <span class="sd">            return None</span>
 
+
+
+<span class="sd"> Plugin</span>
+<span class="sd"> ------</span>
+
+<span class="sd">Here plugin is exactly the same as simple approach, except that it returns</span>
+<span class="sd">XyzControlWidgetSelector instead of XyzControlWidget.</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">     from openalea.oalab.plugins.control import ControlWidgetSelectorPlugin</span>
+<span class="sd">     from openalea.deploy.shared_data import shared_data</span>
+
+<span class="sd">     class PluginXyzWidgetSelector(ControlWidgetSelectorPlugin):</span>
+
+<span class="sd">         controls = [&#39;IXyz&#39;] # Interface name like IInt</span>
+<span class="sd">         edit_shape = [&#39;responsive&#39;]</span>
+<span class="sd">         name = &#39;XyzWidgetSelector&#39;</span>
+
+<span class="sd">         @classmethod</span>
+<span class="sd">         def load(cls):</span>
+<span class="sd">             from mypackage.plugins.selectors import XyzControlWidgetSelector</span>
+<span class="sd">             return XyzControlWidgetSelector</span>
 
 <span class="sd">.. seealso::</span>
 
