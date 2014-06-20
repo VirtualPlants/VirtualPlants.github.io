@@ -71,11 +71,12 @@
 <span class="sd">    - observer</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Id: oalabnode.py 16738 2014-06-03 09:56:29Z jcoste $&#39;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&#39;$Id: oalabnode.py 16887 2014-06-17 12:19:51Z pradal $&#39;</span>
 
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">Scene</span> <span class="k">as</span> <span class="n">PglScene</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.world.world</span> <span class="kn">import</span> <span class="n">World</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
 
 <span class="c"># Nodes for read/write in world</span>
 
@@ -132,6 +133,22 @@
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Control"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.Control">[docs]</a><span class="k">class</span> <span class="nc">Control</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+        <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="n">ControlManager</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; inputs is the list of input values &quot;&quot;&quot;</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cm</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">control</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="Scene2Geom"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab_wralea.html#openalea.oalab_wralea.oalabnode.Scene2Geom">[docs]</a><span class="k">class</span> <span class="nc">Scene2Geom</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

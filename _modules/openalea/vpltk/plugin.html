@@ -119,12 +119,23 @@
 <div class="viewcode-block" id="iter_plugins"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.iter_plugins">[docs]</a><span class="k">def</span> <span class="nf">iter_plugins</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">debug</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="n">debug</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span> <span class="ow">or</span> <span class="n">debug</span> <span class="o">==</span> <span class="n">group</span><span class="p">:</span>
-            <span class="k">yield</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="n">ep</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ep</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">item</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">ep</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+                <span class="n">ep</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">print</span> <span class="n">err</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ep</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">item</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">ep</span>
 </div>
 <div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/vpltk/openalea.vpltk.html#openalea.vpltk.plugin.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Define a Plugin from an entry point. &quot;&quot;&quot;</span>
