@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Public development on github &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>Public development on github &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,9 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../index.html" /> 
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="next" title="Migrate public gforge/svn to github" href="git-svn.html" />
+    <link rel="prev" title="Development guidelines" href="guidelines.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -35,7 +37,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="git-svn.html" title="Migrate public gforge/svn to github"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="guidelines.html" title="Development guidelines"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -88,25 +96,25 @@ Just copy url displayed on your web browser and pass it to git clone command:</p
 <div class="highlight-bash"><div class="highlight"><pre>git clone https://github.com/yourname/project
 </pre></div>
 </div>
-<p>Add a reference to official repository.
-.. code-block:: bash</p>
-<blockquote>
-<div>git remote add upstream <a class="reference external" href="https://github.com/official/project">https://github.com/official/project</a></div></blockquote>
+<p>Add a reference to official repository.</p>
+<div class="highlight-bash"><div class="highlight"><pre>git remote add upstream https://github.com/official/project
+</pre></div>
+</div>
 </div>
 <div class="section" id="create-development-branch">
 <h2>Create development branch<a class="headerlink" href="#create-development-branch" title="Permalink to this headline">¶</a></h2>
 <p>You must create a branch for each new feature, bug fix, and so on.
 Development must be short : <strong>one branch = one task</strong></p>
-<p>Please choose an explicit name for your new branch.</p>
-<p><strong>If upstream_master do not exists yet</strong></p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream/master -b upstream_master
-git checkout -b fix_app_crash_mac_os_10_9
+<p><strong>NEVER NEVER work on master, always on a branch</strong></p>
+<p>Get last version of upstream/master</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout master <span class="c"># go to your local master branch</span>
+git pull upstream master <span class="c"># update it with upstream master</span>
+git push <span class="c"># push upstream changes to your personal repository</span>
 </pre></div>
 </div>
-<p><strong>else</strong></p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream_master
-git pull
-git checkout -b fix_app_crash_mac_os_10_9
+<p>Now, you can create your new branch.
+Please choose an explicit name.</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout -b fix_app_crash_mac_os_10_9
 </pre></div>
 </div>
 </div>
@@ -121,14 +129,18 @@ git commit
 </pre></div>
 </div>
 <p>Save your branch and commits on your personal repository on github</p>
-<div class="highlight-bash"><div class="highlight"><pre>git push origin fix_app_crash_mac_os_10_9
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># The first time you push your branch, you need to do:</span>
+<span class="c"># git push --set-upstream origin fix_app_crash_mac_os_10_9</span>
+
+<span class="c"># after, just do:</span>
+git push origin fix_app_crash_mac_os_10_9
 </pre></div>
 </div>
 </div>
 <div class="section" id="commit-message">
 <h2>Commit message<a class="headerlink" href="#commit-message" title="Permalink to this headline">¶</a></h2>
 <p>Please write a <a class="reference external" href="http://web-design-weekly.com/blog/2013/09/01/a-better-git-commit/">good commit message</a>:</p>
-<p>Try to limit using the -m commit flag. git commit -m &#8220;A crappy commit message&#8221; and use git commit with <strong>no flags</strong>.</p>
+<p>Try to limit using the -m commit flag.</p>
 <p>If using the simpler git commit command it should open up Vim (if it’s your default editor) where you can construct a better commit by following some of these simple steps.</p>
 <blockquote>
 <div><ul class="simple">
@@ -142,22 +154,20 @@ git commit
 <h2>Prepare your work for merging<a class="headerlink" href="#prepare-your-work-for-merging" title="Permalink to this headline">¶</a></h2>
 <p>Before asking other to integrate your work, you must clean it.
 First get last modifications and work on a new branch created especially for cleaning.</p>
-<div class="highlight-bash"><div class="highlight"><pre>git fetch upstream
-git checkout upstream_master
-git pull
-git checkout fix_app_crash_mac_os_10_9
-git checkout -b rebased-fix_app_crash_mac_os_10_9 <span class="c"># create and checkout new branch</span>
-git rebase --interactive fix_app_crash_mac_os_10_9
-git rebase --interactive upstream_master
+<p>Get last version of upstream/master</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout master <span class="c"># go to your local master branch</span>
+git pull upstream master <span class="c"># update it with upstream master</span>
+git push <span class="c"># push upstream changes to your personal repository</span>
 </pre></div>
 </div>
-<div class="highlight-bash"><div class="highlight"><pre>git rebase --interactive upstream_master fix_app_crash_mac_os_10_9
+<p>It is safer to create a new branch for rebase</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout fix_app_crash_mac_os_10_9 <span class="c"># get your development branch</span>
+git checkout -b rebased-fix_app_crash_mac_os_10_9 <span class="c"># create and checkout new branch</span>
+git rebase master
 </pre></div>
 </div>
 <p>If master has diverged during your work, conflicts can occur !
-If your shell ask you to fix it directly, you should do it using &#8220;e&#8221; command.
-That works very well if you&#8217;ve defined your favorite editor.</p>
-<p>Else, fix conflicts foreach file and finish rebase :</p>
+Fix conflicts for each file and finish rebase :</p>
 <div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file1 and solve conflicts</span>
 git add file1 <span class="c"># say to git that conflict is resolved</span>
 <span class="c"># edit file2 and solve conflicts</span>
@@ -169,14 +179,18 @@ git rebase --continue
 .. code-block:: bash</p>
 <blockquote>
 <div>git rebase &#8211;abort</div></blockquote>
-<p>See <a class="reference external" href="https://help.github.com/articles/interactive-rebase">git rebase &#8211;interactive</a> for further information.</p>
-<div class="highlight-bash"><div class="highlight"><pre>git push origin rebased-fix_app_crash_mac_os_10_9
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For advanced user, you can also use <a class="reference external" href="https://help.github.com/articles/interactive-rebase">git rebase &#8211;interactive</a>.</p>
+</div>
+<p>Finally, you can push rebased branch to github</p>
+<div class="highlight-bash"><div class="highlight"><pre>git push --set-upstream origin rebased-fix_app_crash_mac_os_10_9
 </pre></div>
 </div>
 </div>
 <div class="section" id="submit-your-pull-request">
 <h2>Submit your pull-request<a class="headerlink" href="#submit-your-pull-request" title="Permalink to this headline">¶</a></h2>
-<p>On github interface, select your branch fix_app_crash_mac_os_10_9 and click on pull-request (or compare &amp; pull-request).</p>
+<p>On github interface, select your branch rebased-fix_app_crash_mac_os_10_9 and click on pull-request (or compare &amp; pull-request).</p>
 <p>You must see at right :</p>
 <blockquote>
 <div>Able to merge
@@ -222,6 +236,12 @@ As your branch is very clean, other developpers have absolutely nothing to do to
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="guidelines.html"
+                        title="previous chapter">Development guidelines</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="git-svn.html"
+                        title="next chapter">Migrate public gforge/svn to github</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -255,7 +275,13 @@ As your branch is very clean, other developpers have absolutely nothing to do to
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="git-svn.html" title="Migrate public gforge/svn to github"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="guidelines.html" title="Development guidelines"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

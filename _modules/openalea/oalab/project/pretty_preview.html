@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.oalab.project.pretty_preview &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.oalab.project.pretty_preview &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -51,17 +51,18 @@
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.gui</span> <span class="kn">import</span> <span class="n">resources_rc</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.project.preview</span> <span class="kn">import</span> <span class="n">Preview</span><span class="p">,</span> <span class="n">pretty_print</span>
-<span class="kn">from</span> <span class="nn">openalea.vpltk.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+<span class="kn">from</span> <span class="nn">openalea.core.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
 
-<div class="viewcode-block" id="PrettyPreview"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.PrettyPreview">[docs]</a><span class="k">class</span> <span class="nc">PrettyPreview</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectPushButton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectPushButton">[docs]</a><span class="k">class</span> <span class="nc">ProjectPushButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    PushButton initialized from a project : gets its name, icon and version and displays it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">PrettyPreview</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectPushButton</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="n">wanted_size</span> <span class="o">=</span> <span class="n">size</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">wanted_size</span><span class="p">,</span> <span class="n">wanted_size</span><span class="p">)</span>
@@ -73,7 +74,7 @@
         <span class="n">icon_name</span> <span class="o">=</span> <span class="n">icon_path</span> <span class="k">if</span> <span class="n">icon_path</span> <span class="k">else</span> <span class="s">&quot;:/images/resources/openalealogo.png&quot;</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">pretty_print</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-        <span class="n">pixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">icon_name</span><span class="p">)</span>
+        <span class="n">pixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">icon_name</span><span class="p">)</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
         <span class="n">label</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
         <span class="n">label</span><span class="o">.</span><span class="n">setScaledContents</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
@@ -91,11 +92,11 @@
 
 </div>
 <div class="viewcode-block" id="ProjectSelector"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector">[docs]</a><span class="k">class</span> <span class="nc">ProjectSelector</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projects</span><span class="p">,</span> <span class="n">open_project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projects</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ProjectSelector</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="n">projects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">open_project</span> <span class="o">=</span> <span class="n">open_project</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ProjectSelector.init"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -112,20 +113,18 @@
         <span class="n">actual_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
         <span class="n">maxcolumn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">actual_width</span> <span class="o">/</span> <span class="n">nb_proj</span><span class="p">)</span>
 
-
         <span class="k">if</span> <span class="n">maxcolumn</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
             <span class="n">maxcolumn</span> <span class="o">=</span> <span class="mi">5</span>
 
         <span class="n">refresh_widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&quot;Refresh&quot;</span><span class="p">)</span>
-        <span class="n">refresh_widget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refersh_project_list</span><span class="p">)</span>
+        <span class="n">refresh_widget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refresh_project_list</span><span class="p">)</span>
         <span class="n">add_widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&quot;Search Projects&quot;</span><span class="p">)</span>
         <span class="n">add_widget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_path_to_search_project</span><span class="p">)</span>
 
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">for</span> <span class="n">project</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span><span class="p">:</span>
-            <span class="n">project</span><span class="o">.</span><span class="n">load_manifest</span><span class="p">()</span>
             <span class="c"># Create widget</span>
-            <span class="n">preview_widget</span> <span class="o">=</span> <span class="n">PrettyPreview</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">button_size</span><span class="p">)</span>
+            <span class="n">preview_widget</span> <span class="o">=</span> <span class="n">ProjectPushButton</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">button_size</span><span class="p">)</span>
             <span class="n">preview_widget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showDetails</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">maxcolumn</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -140,10 +139,10 @@
 </div>
 <div class="viewcode-block" id="ProjectSelector.showDetails"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector.showDetails">[docs]</a>    <span class="k">def</span> <span class="nf">showDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_preview</span> <span class="o">=</span> <span class="n">Preview</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">sender</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">open_project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">open_project</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_preview</span> <span class="o">=</span> <span class="n">Preview</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">sender</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_preview</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="ProjectSelector.refersh_project_list"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector.refersh_project_list">[docs]</a>    <span class="k">def</span> <span class="nf">refersh_project_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectSelector.refresh_project_list"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector.refresh_project_list">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_project_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
         <span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
@@ -152,8 +151,10 @@
 <div class="viewcode-block" id="ProjectSelector.add_path_to_search_project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector.add_path_to_search_project">[docs]</a>    <span class="k">def</span> <span class="nf">add_path_to_search_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">showOpenProjectDialog</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
-            <span class="n">ProjectManager</span><span class="p">()</span><span class="o">.</span><span class="n">find_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">refersh_project_list</span><span class="p">()</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">repositories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">write_settings</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refresh_project_list</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="ProjectSelector.showOpenProjectDialog"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelector.showOpenProjectDialog">[docs]</a>    <span class="k">def</span> <span class="nf">showOpenProjectDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">fname</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Select Directory to search Projects&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
@@ -161,9 +162,10 @@
 
 </div></div>
 <div class="viewcode-block" id="ProjectSelectorScroll"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.pretty_preview.ProjectSelectorScroll">[docs]</a><span class="k">class</span> <span class="nc">ProjectSelectorScroll</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projects</span><span class="p">,</span> <span class="n">open_project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projects</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ProjectSelectorScroll</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-        <span class="n">widget</span> <span class="o">=</span> <span class="n">ProjectSelector</span><span class="p">(</span><span class="n">projects</span><span class="p">,</span> <span class="n">open_project</span><span class="o">=</span><span class="n">open_project</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">ProjectSelector</span><span class="p">(</span><span class="n">projects</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
 
 </div>
@@ -214,7 +216,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

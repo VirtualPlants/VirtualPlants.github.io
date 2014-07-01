@@ -224,9 +224,14 @@ Export a project into *python module* could be useful to stay compatible with al
 API
 ###
 
+API v1
+------
+
+This API has not been totally implemented.
+
 .. code-block:: python
 
-    from openalea.vpltk.project.manager import ProjectManager
+    from openalea.core.project.manager import ProjectManager
 
     pm = ProjectManager()
     # Discover projects availables without loading them
@@ -274,6 +279,207 @@ API
     project2.description = 'This project is an "Hello World" project'
     project2.add(category="model", name="hello.py", code="print('hello world')")
     project2.run(category="model", name="hello.py")
+
+
+
+API v2
+------
+
+API v2 is totally redefined here and totally independent from api v1.
+
+
+**Service**
+
+from openalea.vpltk.service import SERVICE
+
+Services:
+
+    - project
+    - active_project
+    - new_project
+    - new_data
+
+.. code-block:: python
+
+    project = active_project()
+    project.add('startup', filename='test.py', content='from numpy import array')
+    project.add('data', path='mydata.dat')
+
+**ProjectManager**
+
+ProjectManager role is to discover, search and load projects.
+It is not the role of the projectmanager to manipulate project data.
+
+.. code-block:: python
+
+
+    from openalea.core.project import Project, ProjectManager
+
+    pm = ProjectManager()
+    # Discover projects availables without loading them
+    pm.discover()
+
+    # Add distant location to find projects
+    pm.repositories.append("https://github.com/openalea/projects/")
+    # Re-discover
+    pm.discover()
+
+    # List projects
+    projects = pm.projects
+
+
+Load project
+
+.. code-block:: python
+
+    from openalea.core.project import Project, ProjectManager
+
+    pm = ProjectManager()
+
+    # Lazy load this project
+    # List only file names in project
+    project = pm.get("sample", projectdir=None)
+
+Create a new project object in default projectdir:
+
+.. code-block:: python
+
+    project = pm.new('test')
+
+
+Manager can define an active project. To do that, you must load it.
+
+.. code-block:: python
+
+    pm.set_active(project) # equivalent to old pm.cproject = project
+
+**Project**
+
+Create project object
+
+.. code-block:: python
+
+    project = Project('test', projectdir='ssh://...')
+
+If project yet exists, load filenames and metadata.
+
+
+Get project data
+
+.. code-block:: python
+
+    # project.get(category, name, filename=None)
+
+    # Example: get model or data ...
+
+    # ... by name (notice that get support model name with our without extension)
+    model = project.get('model', 'model_1')
+    model = project.model['model_1.py']
+
+    data = project.get('data', 'image_1.tiff')
+    data = project.data['image_1.tiff']
+
+Save/close project data
+
+.. code-block:: python
+
+    # Save project
+    project.save()
+
+    # Close
+    project.close()
+
+
+Create project from scratch
+
+.. code-block:: python
+
+    # Create project
+    project = pm.create(name, projectdir=None) # the projectdir path is optionnal
+
+    # Manipulate project metadata
+    project.authors = "Me and my collegue"
+    project.description = 'This project is an "Hello World" project'
+
+
+Add item to project
+
+.. code-block:: python
+
+    # Manual : for developpers only
+    from openalea.vpltk.model import ModelPython
+    data = ModelPython(name, filepath=path)
+    project.add(category, data)
+
+    # Using service
+    from openalea.oalab.service import DataFactory
+    data_obj = DataFactory(**kwargs)
+    new_data_obj = project.add(category, data_obj)
+
+
+    # Convenience signature to add ...
+    # data_obj = project.add(...)
+
+    # You can create a new data with only a name.
+    # You must specify datatype with filename for data, with paradigm for model and startups.
+
+    project.add('data', filename=filename, content=content)
+    project.add('data', path=filepath, [filename or name])
+    project.add('data', name=name, datatype=datatype, content=content)
+
+
+Remove item:
+
+.. code-block:: python
+
+    project.remove(category, name)
+
+
+Rename item:
+
+.. code-block:: python
+
+    project.rename(category, old_name, new_name)
+
+
+Start project
+
+Start run files in startup and define namespace.
+
+.. code-block:: python
+
+    project.start()
+
+
+Link data in project instead of copy it
+
+.. code-block:: python
+
+    data = project.add(category, data, link=True)
+    # here data parent path can differ from project data path
+
+
+
+
+API v2.1
+--------
+
+Services
+
+    - import_data_files([dir1, dir2])
+
+Add tag managment and search features
+
+.. code-block:: python
+
+    from openalea.core.project import Project, ProjectManager
+    pm = ProjectManager()
+
+    # Search projects
+    projects = pm.search(name="*branch*bending*")
+
+    tags = pm.tags
+    projects = pm.search(tags=['tutorial', 'beginner'])
 
 Implementation
 ##############

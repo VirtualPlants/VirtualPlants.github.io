@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.oalab.gui.help &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.oalab.gui.help &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -69,9 +69,12 @@
 <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">import</span> <span class="nn">resources_rc</span> <span class="c"># do not remove this import else icon are not drawn</span>
 <span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui.preferences</span> <span class="kn">import</span> <span class="n">PreferenceWidget</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui.utils</span> <span class="kn">import</span> <span class="n">ModalDialog</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.help</span> <span class="kn">import</span> <span class="n">register_helper</span>
 
 <span class="n">default_text2</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
-<span class="s">&lt;H1&gt;Welcome in OpenAlea Laboratory.&lt;/H1&gt;</span>
+<span class="s">&lt;H1&gt;Welcome in OpenAleaLab.&lt;/H1&gt;</span>
 
 <span class="s">To begin, &lt;b&gt;choose your lab&lt;/b&gt; or open an existing file or project:</span>
 <span class="s">&lt;ul&gt;</span>
@@ -85,7 +88,7 @@
 <span class="s">&quot;&quot;&quot;</span>
 
 <span class="n">default_text</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
-<span class="s">&lt;H1&gt;Welcome in OpenAlea Laboratory.&lt;/H1&gt;</span>
+<span class="s">&lt;H1&gt;Welcome in OpenAleaLab.&lt;/H1&gt;</span>
 
 <span class="s">&lt;p&gt;</span>
 <span class="s">This lab permit to create and execute virtual experiments that use different modelling paradigms.</span>
@@ -110,26 +113,31 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">HelpWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">setAccessibleName</span><span class="p">(</span><span class="s">&quot;HelpWidget&quot;</span><span class="p">)</span>
 
-        <span class="n">actionHelpOpenAlea</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/openalealogo.png&quot;</span><span class="p">),</span><span class="s">&quot;OpenAlea&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="n">actionHelpGForge</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/gforge.png&quot;</span><span class="p">),</span><span class="s">&quot;Submit Bug&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionHelpOpenAlea</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/openalealogo.png&quot;</span><span class="p">),</span><span class="s">&quot;OpenAlea WebSite&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionHelpGForge</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/git.png&quot;</span><span class="p">),</span><span class="s">&quot;Submit Issues&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">actionHelpTasks</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/gforge.png&quot;</span><span class="p">),</span><span class="s">&quot;See Tasks&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">actionEditPref</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;:/images/resources/node.png&quot;</span><span class="p">),</span><span class="s">&quot;Preferences&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionHelpOpenAlea</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">openWebsiteOpenalea</span><span class="p">)</span>
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionHelpGForge</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">openOALabBugs</span><span class="p">)</span>
-        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionHelpTasks</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">openOALabTasks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionHelpOpenAlea</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">openWebsiteOpenalea</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionHelpGForge</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">openOALabIssues</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">actionHelpTasks</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;triggered(bool)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">openOALabTasks</span><span class="p">)</span>
+        <span class="n">actionEditPref</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_preferences</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&quot;Help&quot;</span><span class="p">,</span> <span class="s">&quot;Website&quot;</span><span class="p">,</span> <span class="n">actionHelpOpenAlea</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                         <span class="p">[</span><span class="s">&quot;Help&quot;</span><span class="p">,</span> <span class="s">&quot;Website&quot;</span><span class="p">,</span> <span class="n">actionHelpGForge</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">default_text</span><span class="p">)</span>                
+                         <span class="p">[</span><span class="s">&quot;Help&quot;</span><span class="p">,</span> <span class="s">&quot;Website&quot;</span><span class="p">,</span> <span class="n">actionHelpGForge</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">[</span><span class="s">&quot;Help&quot;</span><span class="p">,</span> <span class="s">&quot;Settings&quot;</span><span class="p">,</span> <span class="n">actionEditPref</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                         <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">default_text</span><span class="p">)</span>
+        <span class="n">register_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HelpWidget.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
 </div>
 <div class="viewcode-block" id="HelpWidget.openWebsiteOpenalea"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.openWebsiteOpenalea">[docs]</a>    <span class="k">def</span> <span class="nf">openWebsiteOpenalea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">openWeb</span><span class="p">(</span><span class="s">&#39;http://openalea.gforge.inria.fr/dokuwiki/doku.php&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openWeb</span><span class="p">(</span><span class="s">&#39;http://openalea.github.io&#39;</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="HelpWidget.openOALabBugs"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.openOALabBugs">[docs]</a>    <span class="k">def</span> <span class="nf">openOALabBugs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">openWeb</span><span class="p">(</span><span class="s">&#39;https://gforge.inria.fr/tracker/?func=add&amp;group_id=79&amp;atid=13823&#39;</span><span class="p">)</span>    
+<div class="viewcode-block" id="HelpWidget.openOALabIssues"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.openOALabIssues">[docs]</a>    <span class="k">def</span> <span class="nf">openOALabIssues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openWeb</span><span class="p">(</span><span class="s">&#39;https://github.com/openalea/openalea/issues/new&#39;</span><span class="p">)</span>    
 </div>
 <div class="viewcode-block" id="HelpWidget.openOALabTasks"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.openOALabTasks">[docs]</a>    <span class="k">def</span> <span class="nf">openOALabTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openWeb</span><span class="p">(</span><span class="s">&#39;https://gforge.inria.fr/pm/task.php?group_project_id=6971&amp;group_id=79&amp;func=browse&#39;</span><span class="p">)</span>
@@ -137,6 +145,13 @@
 <div class="viewcode-block" id="HelpWidget.openWeb"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.openWeb">[docs]</a>    <span class="k">def</span> <span class="nf">openWeb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 </div>
+<div class="viewcode-block" id="HelpWidget.open_preferences"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.open_preferences">[docs]</a>    <span class="k">def</span> <span class="nf">open_preferences</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">preferences</span> <span class="o">=</span> <span class="n">PreferenceWidget</span><span class="p">()</span>
+        <span class="n">dialog</span> <span class="o">=</span> <span class="n">ModalDialog</span><span class="p">(</span><span class="n">preferences</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">():</span>
+            <span class="n">preferences</span><span class="o">.</span><span class="n">update_config</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c"># preferences.close()</span>
+        </div>
 <div class="viewcode-block" id="HelpWidget.mainMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.help.HelpWidget.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: Name of menu tab to automatically set current when current widget</span>
@@ -179,7 +194,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

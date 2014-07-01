@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PEP: Project &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>PEP: Project &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
     <link rel="up" title="PEP : OpenAleaLab (Python) Enhancement Proposals" href="index.html" />
     <link rel="next" title="PEP: Contract Suppliers" href="pep_suppliers.html" />
     <link rel="prev" title="PEP: Plugin management" href="pep_plugins.html" /> 
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="pep_plugins.html" title="PEP: Plugin management"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
       </ul>
     </div>  
@@ -288,7 +288,10 @@ To do this, he will have various possibilities:</p>
 </div>
 <div class="section" id="api">
 <h3>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.vpltk.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+<div class="section" id="api-v1">
+<h4>API v1<a class="headerlink" href="#api-v1" title="Permalink to this headline">¶</a></h4>
+<p>This API has not been totally implemented.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.core.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
 
 <span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
 <span class="c"># Discover projects availables without loading them</span>
@@ -339,6 +342,160 @@ To do this, he will have various possibilities:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="api-v2">
+<h4>API v2<a class="headerlink" href="#api-v2" title="Permalink to this headline">¶</a></h4>
+<p>API v2 is totally redefined here and totally independent from api v1.</p>
+<p><strong>Service</strong></p>
+<p>from openalea.vpltk.service import SERVICE</p>
+<p>Services:</p>
+<blockquote>
+<div><ul class="simple">
+<li>project</li>
+<li>active_project</li>
+<li>new_project</li>
+<li>new_data</li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">project</span> <span class="o">=</span> <span class="n">active_project</span><span class="p">()</span>
+<span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;startup&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&#39;test.py&#39;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s">&#39;from numpy import array&#39;</span><span class="p">)</span>
+<span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;mydata.dat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>ProjectManager</strong></p>
+<p>ProjectManager role is to discover, search and load projects.
+It is not the role of the projectmanager to manipulate project data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.core.project</span> <span class="kn">import</span> <span class="n">Project</span><span class="p">,</span> <span class="n">ProjectManager</span>
+
+<span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+<span class="c"># Discover projects availables without loading them</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+
+<span class="c"># Add distant location to find projects</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">repositories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;https://github.com/openalea/projects/&quot;</span><span class="p">)</span>
+<span class="c"># Re-discover</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+
+<span class="c"># List projects</span>
+<span class="n">projects</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">projects</span>
+</pre></div>
+</div>
+<p>Load project</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.core.project</span> <span class="kn">import</span> <span class="n">Project</span><span class="p">,</span> <span class="n">ProjectManager</span>
+
+<span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+
+<span class="c"># Lazy load this project</span>
+<span class="c"># List only file names in project</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;sample&quot;</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a new project object in default projectdir:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">project</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Manager can define an active project. To do that, you must load it.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pm</span><span class="o">.</span><span class="n">set_active</span><span class="p">(</span><span class="n">project</span><span class="p">)</span> <span class="c"># equivalent to old pm.cproject = project</span>
+</pre></div>
+</div>
+<p><strong>Project</strong></p>
+<p>Create project object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="s">&#39;ssh://...&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If project yet exists, load filenames and metadata.</p>
+<p>Get project data</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># project.get(category, name, filename=None)</span>
+
+<span class="c"># Example: get model or data ...</span>
+
+<span class="c"># ... by name (notice that get support model name with our without extension)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="s">&#39;model_1&#39;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s">&#39;model_1.py&#39;</span><span class="p">]</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;image_1.tiff&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;image_1.tiff&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Save/close project data</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Save project</span>
+<span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="c"># Close</span>
+<span class="n">project</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Create project from scratch</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Create project</span>
+<span class="n">project</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c"># the projectdir path is optionnal</span>
+
+<span class="c"># Manipulate project metadata</span>
+<span class="n">project</span><span class="o">.</span><span class="n">authors</span> <span class="o">=</span> <span class="s">&quot;Me and my collegue&quot;</span>
+<span class="n">project</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&#39;This project is an &quot;Hello World&quot; project&#39;</span>
+</pre></div>
+</div>
+<p>Add item to project</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Manual : for developpers only</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.model</span> <span class="kn">import</span> <span class="n">ModelPython</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ModelPython</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+<span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="c"># Using service</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.service</span> <span class="kn">import</span> <span class="n">DataFactory</span>
+<span class="n">data_obj</span> <span class="o">=</span> <span class="n">DataFactory</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="n">new_data_obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">data_obj</span><span class="p">)</span>
+
+
+<span class="c"># Convenience signature to add ...</span>
+<span class="c"># data_obj = project.add(...)</span>
+
+<span class="c"># You can create a new data with only a name.</span>
+<span class="c"># You must specify datatype with filename for data, with paradigm for model and startups.</span>
+
+<span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+<span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="p">[</span><span class="n">filename</span> <span class="ow">or</span> <span class="n">name</span><span class="p">])</span>
+<span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="n">datatype</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Remove item:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">project</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Rename item:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">project</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Start project</p>
+<p>Start run files in startup and define namespace.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Link data in project instead of copy it</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">data</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">link</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="c"># here data parent path can differ from project data path</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="api-v2-1">
+<h4>API v2.1<a class="headerlink" href="#api-v2-1" title="Permalink to this headline">¶</a></h4>
+<p>Services</p>
+<blockquote>
+<div><ul class="simple">
+<li>import_data_files([dir1, dir2])</li>
+</ul>
+</div></blockquote>
+<p>Add tag managment and search features</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.core.project</span> <span class="kn">import</span> <span class="n">Project</span><span class="p">,</span> <span class="n">ProjectManager</span>
+<span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+
+<span class="c"># Search projects</span>
+<span class="n">projects</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;*branch*bending*&quot;</span><span class="p">)</span>
+
+<span class="n">tags</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">tags</span>
+<span class="n">projects</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s">&#39;beginner&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
 <div class="section" id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h3>
 <p>TODO: Define a set of possible implementation we are or will working on.</p>
@@ -378,7 +535,12 @@ To do this, he will have various possibilities:</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#applify-project">&#8220;Applify&#8221; project</a></li>
-<li><a class="reference internal" href="#api">API</a></li>
+<li><a class="reference internal" href="#api">API</a><ul>
+<li><a class="reference internal" href="#api-v1">API v1</a></li>
+<li><a class="reference internal" href="#api-v2">API v2</a></li>
+<li><a class="reference internal" href="#api-v2-1">API v2.1</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
@@ -431,7 +593,7 @@ To do this, he will have various possibilities:</p>
         <li class="right" >
           <a href="pep_plugins.html" title="PEP: Plugin management"
              >previous</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="index.html" >PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
       </ul>
     </div>

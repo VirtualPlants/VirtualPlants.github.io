@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.oalab.package.widgets &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.oalab.package.widgets &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -74,7 +74,7 @@
 <span class="kn">from</span> <span class="nn">openalea.visualea.node_treeview</span> <span class="kn">import</span> <span class="n">SearchModel</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.package.treeview</span> <span class="kn">import</span> <span class="n">OALabTreeView</span><span class="p">,</span> <span class="n">OALabSearchView</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.package.manager</span> <span class="kn">import</span> <span class="n">package_manager</span>
-
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.applet</span> <span class="kn">import</span> <span class="n">get_applet</span>
 
 
 <div class="viewcode-block" id="PackageManagerTreeView"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageManagerTreeView">[docs]</a><span class="k">class</span> <span class="nc">PackageManagerTreeView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
@@ -93,13 +93,13 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">PackageViewWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
-        
+
         <span class="c"># package tree view</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkg_model</span> <span class="o">=</span> <span class="n">PkgModel</span><span class="p">(</span><span class="n">package_manager</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkg_model</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_package_manager_focus_change</span><span class="p">)</span>
-        
+
 <div class="viewcode-block" id="PackageViewWidget.on_package_manager_focus_change"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageViewWidget.on_package_manager_focus_change">[docs]</a>    <span class="k">def</span> <span class="nf">on_package_manager_focus_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">,</span> <span class="n">mimetype</span> <span class="o">=</span> <span class="n">NodeFactoryView</span><span class="o">.</span><span class="n">get_item_info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkg_id</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">factory_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mimetype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">NodeFactory</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span>
@@ -110,12 +110,9 @@
             <span class="k">if</span> <span class="n">factoryDoc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">txt</span> <span class="o">+=</span> <span class="s">&quot;**Docstring:**</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">factoryDoc</span>
 
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="s">&quot;_plugins&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">_plugins</span><span class="p">[</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">applets</span><span class="p">[</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">applet</span> <span class="o">=</span> <span class="n">get_applet</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">applet</span><span class="p">:</span>
+                <span class="n">applet</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="PackageViewWidget.reinit_treeview"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageViewWidget.reinit_treeview">[docs]</a>    <span class="k">def</span> <span class="nf">reinit_treeview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reinitialise package and category views &quot;&quot;&quot;</span>
@@ -144,8 +141,10 @@
             <span class="n">txt</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">get_tip</span><span class="p">(</span><span class="n">asRst</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">&quot;</span>
             <span class="k">if</span> <span class="n">factoryDoc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">txt</span> <span class="o">+=</span> <span class="s">&quot;**Docstring:**</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">factoryDoc</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>   
-            </div>
+            <span class="n">applet</span> <span class="o">=</span> <span class="n">get_applet</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">applet</span><span class="p">:</span>
+                <span class="n">applet</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="PackageCategorieViewWidget.reinit_treeview"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageCategorieViewWidget.reinit_treeview">[docs]</a>    <span class="k">def</span> <span class="nf">reinit_treeview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reinitialise package and category views &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cat_model</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -229,7 +228,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

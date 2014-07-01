@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Control - Advanced &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-openalea.core.plugin.control"></span><div class="section" id="control-advanced">
+<h1>Control - Advanced<a class="headerlink" href="#control-advanced" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="widget">
+<h2>Widget<a class="headerlink" href="#widget" title="Permalink to this headline">¶</a></h2>
+<p>For a complete explanation of code to write for each function, or to create a class
+from scratch, please have a look to <tt class="xref py py-class docutils literal"><span class="pre">IControlWidget</span></tt> and example after.</p>
+<p>To create a class for standard QWidget, you can copy/paste this code</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/widgets.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span>
+<span class="k">class</span> <span class="nc">XyzControlWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="s">&#39;qt signal&#39;</span> <span class="c"># for example &#39;valueChanged()&#39;, &#39;currentTextChanged()&#39;, ...</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">REAL_VALUE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setC1</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;constraint1&#39;</span><span class="p">,</span> <span class="n">DEFAULT_CONSTRAINT1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="widget-selector">
+<h2>Widget selector<a class="headerlink" href="#widget-selector" title="Permalink to this headline">¶</a></h2>
+<p>Here plugin is exactly the same as simple approach, except that it returns
+XyzControlWidgetSelector instead of XyzControlWidget.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.oalab.plugin.control</span> <span class="kn">import</span> <span class="n">ControlWidgetSelectorPlugin</span>
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+
+<span class="k">class</span> <span class="nc">PluginXyzWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IXyz&#39;</span><span class="p">]</span> <span class="c"># Interface name like IInt</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;XyzWidgetSelector&#39;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mypackage.plugins.selectors</span> <span class="kn">import</span> <span class="n">XyzControlWidgetSelector</span>
+        <span class="k">return</span> <span class="n">XyzControlWidgetSelector</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">See IInt example for real case</p>
+</div>
+</div>
+<div class="section" id="iint-control-widget">
+<h2>IInt control widget<a class="headerlink" href="#iint-control-widget" title="Permalink to this headline">¶</a></h2>
+<p>All Qt sliders define &#8220;value&#8221; and &#8220;setValue&#8221; methods directly compatible with IInt (int),
+so there is almost nothing to do:</p>
+<dl class="docutils">
+<dt>We will use these widgets depending on context:</dt>
+<dd><ul class="first last simple">
+<li>QDial for responsive, large and small shapes</li>
+<li>QSlider for vline</li>
+<li>QSpinBox for hline</li>
+</ul>
+</dd>
+</dl>
+<p>We define also a widget to edit constraints</p>
+<p>Now, lets define widget selector to group all classes together :</p>
+<p>You can notice in line 11, instruction to set widget to fit to vline shape.</p>
+<p>And finally, lets define plugin that links to it.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">All classes can be defined in same file <strong>excepted last one</strong>.
+PluginIntWidgetSelector must be defined in a separated file to allow to load only description.</p>
+</div>
+</div>
+</div>
+<div class="section" id="glossary">
+<h1>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h1>
+<dl class="glossary docutils">
+<dt id="term-create-mode">create mode</dt>
+<dd>Users want to create a control from scratch.
+In other words, it can be considered as &#8220;write-only&#8221; widget.</dd>
+<dt id="term-view-mode">view mode</dt>
+<dd>Users want to visualize a control. If control value changes, users may want to see changes.
+In other words, it can be considered as a &#8220;read-only&#8221; with option to enable <a class="reference internal" href="#term-auto-read-mode"><em class="xref std std-term">auto-read mode</em></a>.</dd>
+<dt id="term-edit-mode">edit mode</dt>
+<dd>Users want to edit a control. If control value changes, users may want to reload changes.
+Users may want theirs changes to be applied dynamically or not.
+In other words, it can be considered as a &#8220;read/write&#8221; widget with options to enable both <a class="reference internal" href="#term-auto-read-mode"><em class="xref std std-term">auto-read mode</em></a> mode and <a class="reference internal" href="#term-auto-apply-mode"><em class="xref std std-term">auto-apply mode</em></a>.</dd>
+<dt id="term-auto-read-mode">auto-read mode</dt>
+<dd>If widget has auto-read mode enabled: if value changes, view is automatically refreshed to display new value.</dd>
+<dt id="term-auto-apply-mode">auto-apply mode</dt>
+<dd>If widget has auto-apply mode enabled: each time users modify data in the view, changes are automatically applied to object being edited.</dd>
+<dt id="term-control-shape">control shape</dt>
+<dd><p class="first">shape supported by a control editor or viewer:</p>
+<ul class="last simple">
+<li>hline: widget fits well in an horizontal line for example in a cell in a table or spreadsheet, in a 200x20px widget, ...</li>
+<li>vline: widget fits well in a vertical line, for example in 20x200px widget</li>
+<li>small: widget fits well in a small squared widget (100x100 px to 300x300 px)</li>
+<li>large: widget fits well in large space (&gt; 300x300 px)</li>
+<li>responsive: widget can fit well in all shapes and sizes. Hardest to create but easiest to use.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="details">
+<h1>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="openalea.oalab.plugins.control.ControlWidgetSelectorPlugin">
+<em class="property">class </em><tt class="descclassname">openalea.oalab.plugins.control.</tt><tt class="descname">ControlWidgetSelectorPlugin</tt><a class="headerlink" href="#openalea.oalab.plugins.control.ControlWidgetSelectorPlugin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Control - Advanced</a><ul>
+<li><a class="reference internal" href="#widget">Widget</a></li>
+<li><a class="reference internal" href="#widget-selector">Widget selector</a></li>
+<li><a class="reference internal" href="#iint-control-widget">IInt control widget</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#glossary">Glossary</a></li>
+<li><a class="reference internal" href="#details">Details</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin_control_advanced.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

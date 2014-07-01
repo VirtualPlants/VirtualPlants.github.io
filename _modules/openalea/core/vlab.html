@@ -1,0 +1,583 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.core.vlab &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.core.vlab</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Christophe Pradal &lt;christophe pradal at cirad fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">############################################################################</span>
+<span class="sd">&quot;&quot;&quot;doc todo&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+
+
+<div class="viewcode-block" id="vlab_object"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.vlab_object">[docs]</a><span class="k">def</span> <span class="nf">vlab_object</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">pkgmanager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create an openalea package from a vlab object.</span>
+<span class="sd">    First, read the specification file and parse it.</span>
+<span class="sd">    Create the list of data, the list of editors,</span>
+<span class="sd">    and the list of programs.</span>
+<span class="sd">    Build the graph of dependencies.</span>
+<span class="sd">    Compute the layout of the graph.</span>
+<span class="sd">    Create a package with data and a composite node.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">VlabObject2</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">pkgmanager</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">obj</span>
+
+<span class="c"># Factories to build nodes from vlab components.</span>
+<span class="c"># A component may be a data, an editor or a program.</span>
+<span class="c"># The difference between an editor and a program is that</span>
+<span class="c"># an editor have the same output value than its input,</span>
+<span class="c"># and a program may have many inputs but unknow outputs.</span>
+
+</div>
+<div class="viewcode-block" id="VlabFile"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabFile">[docs]</a><span class="k">class</span> <span class="nc">VlabFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editors</span> <span class="o">=</span> <span class="p">{}</span>
+
+</div>
+<div class="viewcode-block" id="VlabObject"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject">[docs]</a><span class="k">class</span> <span class="nc">VlabObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A vlab object is a directory containing a specification file,</span>
+<span class="sd">    and a set of data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;TEXT&#39;</span><span class="p">,</span> <span class="s">&#39;HINTS&#39;</span><span class="p">]</span>
+    <span class="n">editors</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;MAP&#39;</span><span class="p">,</span> <span class="s">&#39;loadmap&#39;</span><span class="p">,</span> <span class="s">&#39;savemap&#39;</span><span class="p">,</span> <span class="s">&#39;EDIT&#39;</span><span class="p">,</span> <span class="s">&#39;SURFACE&#39;</span><span class="p">,</span>
+               <span class="s">&#39;bezieredit&#39;</span><span class="p">,</span> <span class="s">&#39;PALETTE&#39;</span><span class="p">,</span> <span class="s">&#39;palette&#39;</span><span class="p">,</span> <span class="s">&#39;MEDIT&#39;</span><span class="p">,</span> <span class="s">&#39;medit&#39;</span><span class="p">,</span>
+               <span class="s">&#39;GALLERY&#39;</span><span class="p">,</span> <span class="s">&#39;gallery&#39;</span><span class="p">,</span> <span class="s">&#39;EDIT&#39;</span><span class="p">,</span> <span class="s">&#39;funcedit&#39;</span><span class="p">,</span> <span class="s">&#39;panel&#39;</span><span class="p">,</span> <span class="s">&#39;CHAR&#39;</span><span class="p">]</span><span class="c">#panel</span>
+    <span class="n">programs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cpfg&#39;</span><span class="p">,</span> <span class="s">&#39;lpfg&#39;</span><span class="p">]</span>
+    <span class="n">ignore</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;;&#39;</span><span class="p">,</span> <span class="s">&#39;#&#39;</span><span class="p">]</span>
+    <span class="n">name2program</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;MAP&#39;</span><span class="p">:</span> <span class="s">&#39;medit&#39;</span><span class="p">,</span>
+                <span class="s">&#39;SURFACE&#39;</span><span class="p">:</span> <span class="s">&#39;bezieredit&#39;</span><span class="p">,</span>
+                <span class="s">&#39;PALETTE&#39;</span><span class="p">:</span> <span class="s">&#39;palette&#39;</span><span class="p">,</span>
+                <span class="s">&#39;MEDIT&#39;</span><span class="p">:</span> <span class="s">&#39;medit&#39;</span><span class="p">,</span>
+                <span class="s">&#39;GALLERY&#39;</span><span class="p">:</span> <span class="s">&#39;gallery&#39;</span><span class="p">,</span>
+                <span class="s">&#39;EDIT&#39;</span><span class="p">:</span> <span class="s">&#39;edit&#39;</span><span class="p">,</span>
+                <span class="s">&#39;CHAR&#39;</span><span class="p">:</span> <span class="s">&#39;edit&#39;</span><span class="p">,</span>
+                <span class="s">&#39;loadmap&#39;</span><span class="p">:</span> <span class="s">&#39;palette&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">pkgmanager</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">directory</span>
+        <span class="k">print</span> <span class="s">&quot;Import into OpenAlea the </span><span class="si">%s</span><span class="s"> directory&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_programs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pm</span> <span class="o">=</span> <span class="n">pkgmanager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sg</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sgfactory</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factories</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_package</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="VlabObject.pkgname"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.pkgname">[docs]</a>    <span class="k">def</span> <span class="nf">pkgname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">search_name</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+            <span class="n">name</span><span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;ext&#39;</span><span class="p">:</span>
+                <span class="n">search_name</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">dirname</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">d</span><span class="o">/</span><span class="s">&#39;.id&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isfile</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">d</span><span class="o">/</span><span class="s">&#39;specifications&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isfile</span><span class="p">():</span>
+                <span class="n">names</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">search_name</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">dirname</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span>
+        <span class="n">search_name</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">_pkgname</span> <span class="o">=</span> <span class="s">&#39;vlab.&#39;</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">_pkgname</span>
+        <span class="k">return</span> <span class="s">&#39;vlab.&#39;</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject.get_package"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.get_package">[docs]</a>    <span class="k">def</span> <span class="nf">get_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_package</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_package</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package</span>
+</div>
+<div class="viewcode-block" id="VlabObject.build_package"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.build_package">[docs]</a>    <span class="k">def</span> <span class="nf">build_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.package</span> <span class="kn">import</span> <span class="n">UserPackage</span>
+        <span class="c"># Build MetaData</span>
+        <span class="n">metainfo</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">license</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">authors</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">institutes</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">icons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&#39;icon.*&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">icons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">metainfo</span><span class="p">[</span><span class="s">&#39;icon&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">icons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgname</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_package</span> <span class="o">=</span> <span class="n">UserPackage</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgfactory</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_specification</span><span class="p">()</span>
+
+        <span class="c"># Add factorie of the dataflow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_package</span><span class="o">.</span><span class="n">add_factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgfactory</span><span class="p">)</span>
+        <span class="c">#  Add data factories there</span>
+        <span class="c">#for f in self.factories:</span>
+        <span class="c">#    self._package.add_factory(f)</span>
+</div>
+<div class="viewcode-block" id="VlabObject.read_specification"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.read_specification">[docs]</a>    <span class="k">def</span> <span class="nf">read_specification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">/</span> <span class="s">&#39;specifications&#39;</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.compositenode</span> <span class="kn">import</span> <span class="n">CompositeNodeFactory</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.compositenode</span> <span class="kn">import</span> <span class="n">CompositeNode</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sg</span> <span class="o">=</span> <span class="n">CompositeNode</span><span class="p">()</span>
+        <span class="c">#name  = self.dir.basename().split(&#39;-&#39;)[-1]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sgfactory</span> <span class="o">=</span> <span class="n">CompositeNodeFactory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_files</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_commands</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_files</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_graph</span><span class="p">()</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VlabObject.read_files"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.read_files">[docs]</a>    <span class="k">def</span> <span class="nf">read_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="n">pattern</span> <span class="o">=</span><span class="s">&#39;\w+\.\w+&#39;</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;ignore:&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="n">l</span> <span class="ow">is</span> <span class="s">&#39;*&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s">&#39;:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fn</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">[</span><span class="n">fn</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="VlabObject.read_commands"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.read_commands">[docs]</a>    <span class="k">def</span> <span class="nf">read_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">*[a-zA-Z0-9_ </span><span class="se">\\</span><span class="s">-]+:</span><span class="se">\\</span><span class="s">s*$&#39;</span>
+        <span class="n">menus</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+                <span class="n">menu</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">menus</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">level</span><span class="p">:</span>
+                    <span class="n">menus</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">menu</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">menus</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="n">menu</span>
+                    <span class="n">menus</span> <span class="o">=</span> <span class="n">menus</span><span class="p">[:</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">continue</span>
+
+            <span class="c"># skip ignore files : logic no menus have been created.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">menus</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">cmd</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">process_command</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">menus</span><span class="p">),</span> <span class="n">cmd</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject.process_command"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.process_command">[docs]</a>    <span class="k">def</span> <span class="nf">process_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name2program</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">prog</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prog</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_program</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">prog</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">editors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_editor</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">prog</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_text</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Do not know how to process this command: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">cmd</span>
+</div>
+<div class="viewcode-block" id="VlabObject.process_program"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.process_program">[docs]</a>    <span class="k">def</span> <span class="nf">process_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Build a process node from the command.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&quot;vlab.bin&quot;</span><span class="p">,</span> <span class="s">&quot;process&quot;</span><span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+        <span class="n">prog_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_programs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prog_node</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject.process_editor"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.process_editor">[docs]</a>    <span class="k">def</span> <span class="nf">process_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the file on which the editor works on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">print</span> <span class="s">&quot;WARNING: the file </span><span class="si">%s</span><span class="s"> used by the editor </span><span class="si">%s</span><span class="s"> in not in the specification file.&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                <span class="k">return</span>
+                <span class="c">#self._files[fn] = []</span>
+
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">prog</span> <span class="o">!=</span> <span class="s">&#39;EDIT&#39;</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&quot;vlab.bin&quot;</span><span class="p">,</span> <span class="s">&quot;editor&quot;</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&quot;vlab.bin&quot;</span><span class="p">,</span> <span class="s">&quot;text editor&quot;</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">fn</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+        <span class="n">edit_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edit_node</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject.process_text"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.process_text">[docs]</a>    <span class="k">def</span> <span class="nf">process_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;catalog.file&#39;</span><span class="p">,</span> <span class="s">&#39;viewfile&#39;</span><span class="p">)</span>
+        <span class="n">text_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_node</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject.process_files"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.data</span> <span class="kn">import</span> <span class="n">DataFactory</span>
+        <span class="n">deps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">deps</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">f</span>
+            <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.map&#39;</span><span class="p">,</span> <span class="s">&#39;.txt&#39;</span><span class="p">,</span> <span class="s">&#39;.s&#39;</span><span class="p">,</span> <span class="s">&#39;.e&#39;</span><span class="p">,</span> <span class="s">&#39;.rgb&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span> <span class="c">#binary file or other</span>
+            <span class="n">deps</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">factory</span> <span class="o">=</span> <span class="n">DataFactory</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">factory</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_package</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&quot;vlab.bin&quot;</span><span class="p">,</span> <span class="s">&quot;vlab file stamp&quot;</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">f</span><span class="p">))</span>
+            <span class="n">fnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">fnode</span>
+</div>
+<div class="viewcode-block" id="VlabObject.build_graph"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject.build_graph">[docs]</a>    <span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Specify connections between nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prog_deps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_programs</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">fdeps</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fdeps</span><span class="p">:</span>
+                <span class="n">fnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fnode</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fdep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">[</span><span class="n">f</span><span class="p">]:</span>
+                <span class="n">depnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">fdep</span><span class="p">]</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">depnode</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="p">:</span> <span class="c"># an editor can act withouot a file</span>
+                <span class="k">continue</span>
+            <span class="n">fnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fnode</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">fnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fnode</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">layout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">to_factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgfactory</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">filenames</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the filenames that are referenced in a file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">fn</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">fn</span> <span class="o">!=</span> <span class="nb">file</span> <span class="ow">and</span> <span class="p">(</span><span class="s">&#39; </span><span class="si">%s</span><span class="s"> &#39;</span><span class="o">%</span><span class="n">fn</span> <span class="ow">in</span> <span class="n">text</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">l</span>
+
+</div>
+<div class="viewcode-block" id="random_layout"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.random_layout">[docs]</a><span class="k">def</span> <span class="nf">random_layout</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="n">sg</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">sg</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">600</span>
+    <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">sg</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">),</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">.</span><span class="n">internal_data</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;posx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;posy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+</div>
+<span class="n">min_dx</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">250</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="layout"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.layout">[docs]</a><span class="k">def</span> <span class="nf">layout</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="c"># compute a layout of the graph</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="n">sg</span><span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">sg</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="mi">250</span>
+    <span class="n">progs</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_programs</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">progs</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="n">size</span> <span class="o">/</span> <span class="n">n</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">progs</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">.</span><span class="n">internal_data</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;posx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;posy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">x</span><span class="o">+=</span> <span class="n">dx</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="o">/</span><span class="n">n</span>
+    <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">_programs</span><span class="p">:</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">in_neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">n1</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="s">&#39;posx&#39;</span><span class="p">],</span> <span class="n">n1</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="s">&#39;posy&#39;</span><span class="p">]</span>
+        <span class="n">dx1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_dx</span><span class="p">,</span> <span class="n">size</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">-</span> <span class="n">dy</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">-</span> <span class="n">size</span><span class="o">/</span><span class="mi">2</span>
+        <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span><span class="o">.</span><span class="n">internal_data</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;posx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x1</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;posy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y1</span>
+            <span class="n">x1</span> <span class="o">+=</span> <span class="n">dx1</span>
+            <span class="n">compute_layout</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">dx1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+
+    <span class="c"># compute layout for nodes which are not connected to a program</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="mi">40</span>
+    <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">_filenodes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">.</span><span class="n">internal_data</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;posx&#39;</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;posx&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;posy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+            <span class="n">x</span><span class="o">+=</span> <span class="n">min_dx</span>
+            <span class="n">compute_layout</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+    <span class="c"># add editor</span>
+
+</div>
+<div class="viewcode-block" id="compute_layout"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.compute_layout">[docs]</a><span class="k">def</span> <span class="nf">compute_layout</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">in_neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">dx</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">dx</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">-=</span> <span class="n">dy</span>
+    <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span><span class="o">.</span><span class="n">internal_data</span>
+        <span class="k">if</span> <span class="s">&#39;posx&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;posx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;posy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="n">compute_layout</span><span class="p">(</span><span class="n">sg</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+
+<span class="c">#--------------------------------------------------------------------</span>
+<span class="c"># new implementation</span>
+<span class="c"># add files as data with editors inside.</span>
+
+</div>
+<div class="viewcode-block" id="VlabObject2"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject2">[docs]</a><span class="k">class</span> <span class="nc">VlabObject2</span><span class="p">(</span><span class="n">VlabObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">VlabObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VlabObject2.read_files"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject2.read_files">[docs]</a>    <span class="k">def</span> <span class="nf">read_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="n">pattern</span> <span class="o">=</span><span class="s">&#39;\w+\.\w+&#39;</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;ignore:&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="n">l</span> <span class="ow">is</span> <span class="s">&#39;*&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;:&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">[</span><span class="n">fn</span><span class="p">]</span> <span class="o">=</span> <span class="n">VlabFile</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject2.process_editor"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject2.process_editor">[docs]</a>    <span class="k">def</span> <span class="nf">process_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the file on which the editor works on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">command</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">print</span> <span class="s">&quot;WARNING: the file </span><span class="si">%s</span><span class="s"> used by the editor </span><span class="si">%s</span><span class="s"> in not in the specification file.&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">prog</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;edit&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fn</span> <span class="ow">and</span> <span class="n">fn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span>
+                <span class="n">vlabfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+                <span class="n">command</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span>
+                <span class="n">vlabfile</span><span class="o">.</span><span class="n">editors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VlabObject2.process_text"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject2.process_text">[docs]</a>    <span class="k">def</span> <span class="nf">process_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="VlabObject2.process_files"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject2.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.data</span> <span class="kn">import</span> <span class="n">DataFactory</span>
+
+        <span class="n">deps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">deps</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">vf</span> <span class="ow">in</span> <span class="n">deps</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;:&#39;</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">f</span>
+            <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.map&#39;</span><span class="p">,</span> <span class="s">&#39;.txt&#39;</span><span class="p">,</span> <span class="s">&#39;.s&#39;</span><span class="p">,</span> <span class="s">&#39;.e&#39;</span><span class="p">,</span> <span class="s">&#39;.rgb&#39;</span><span class="p">]:</span>
+                <span class="k">continue</span> <span class="c">#binary file or other</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">deps</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
+
+        <span class="c"># create the data here</span>
+        <span class="c"># Create vlab data rather than simple data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">vf</span> <span class="ow">in</span> <span class="n">deps</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">factory</span> <span class="o">=</span> <span class="n">DataFactory</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">editors</span><span class="o">=</span><span class="n">vf</span><span class="o">.</span><span class="n">editors</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_package</span><span class="o">.</span><span class="n">add_factory</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
+
+            <span class="c"># TODO: Create data rather than files</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+            <span class="c">#self.pm.get_node(&quot;vlab.bin&quot;, &quot;vlab file stamp&quot;)</span>
+            <span class="c">#node.set_input(1,str(self.dir/f))</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">vf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="n">vf</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+</div>
+<div class="viewcode-block" id="VlabObject2.build_graph"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.VlabObject2.build_graph">[docs]</a>    <span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Specify connections between nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prog_deps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_programs</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">fdeps</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">cmd</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fdeps</span><span class="p">:</span>
+                <span class="n">fnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fnode</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fdep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">deps</span><span class="p">:</span>
+                <span class="n">depnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">fdep</span><span class="p">]</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filenodes</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">depnode</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c">#for f, nodes in self._editors.iteritems():</span>
+        <span class="c">#    if not f: # an editor can act withouot a file</span>
+        <span class="c">#        continue</span>
+        <span class="c">#    fnode = self._filenodes[f]</span>
+        <span class="c">#    for node in nodes:</span>
+        <span class="c">#        self.sg.connect(node,0,fnode,0)</span>
+        <span class="c">#for f, nodes in self._text.iteritems():</span>
+        <span class="c">#    fnode = self._filenodes[f]</span>
+        <span class="c">#    for node in nodes:</span>
+        <span class="c">#        self.sg.connect(fnode, 0, node, 0)</span>
+        <span class="n">layout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sg</span><span class="o">.</span><span class="n">to_factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgfactory</span><span class="p">)</span>
+
+
+<span class="c"># TESTS</span>
+
+</div></div>
+<div class="viewcode-block" id="test1"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.vlab.test1">[docs]</a><span class="k">def</span> <span class="nf">test1</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">openalea.core.pkgmanager</span> <span class="kn">import</span> <span class="n">PackageManager</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">PackageManager</span><span class="p">()</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">vlab_object</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">pm</span><span class="p">)</span>
+    <span class="n">pkg</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_package</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">write</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

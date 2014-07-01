@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.visualea.node_treeview &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.visualea.node_treeview &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -70,7 +70,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;CeCILL v2&quot;</span>
-<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: node_treeview.py 4222 2014-04-23 09:15:04Z gbaty $ &quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">weakref</span> <span class="kn">import</span> <span class="n">ref</span>
@@ -492,13 +492,15 @@
 <span class="sd">    Implements Drag and Drop facilities.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_win</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_win</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        @param main_win : main window</span>
 <span class="sd">        @param parent : parent widget</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="o">=</span> <span class="n">ref</span><span class="p">(</span><span class="n">main_win</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">main_win</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_main_win</span><span class="p">(</span><span class="n">main_win</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
@@ -508,7 +510,9 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
 
-
+<div class="viewcode-block" id="NodeFactoryView.set_main_win"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryView.set_main_win">[docs]</a>    <span class="k">def</span> <span class="nf">set_main_win</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_win</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="o">=</span> <span class="n">ref</span><span class="p">(</span><span class="n">main_win</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="NodeFactoryView.dragEnterEvent"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryView.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="n">mimedata</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">mimedata</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="n">NodeFactory</span><span class="o">.</span><span class="n">mimetype</span><span class="p">)</span> <span class="ow">or</span> <span class="n">mimedata</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="n">CompositeNodeFactory</span><span class="o">.</span><span class="n">mimetype</span><span class="p">):</span>
@@ -746,7 +750,11 @@
         <span class="sd">&quot;&quot;&quot; Set the package icon &quot;&quot;&quot;</span>
 
         <span class="n">pkg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_pkg</span><span class="p">()</span>
-        <span class="n">pix</span> <span class="o">=</span> <span class="n">grab_icon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">()</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="n">grab_icon</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;icon.png&quot;</span><span class="p">)</span>
         <span class="n">pix</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
@@ -769,7 +777,14 @@
         <span class="n">filename</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">get_wralea_path</span><span class="p">()</span>
         <span class="n">widget</span> <span class="o">=</span> <span class="n">get_editor</span><span class="p">()(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">widget</span><span class="o">.</span><span class="n">edit_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">is_widget</span><span class="p">())</span> <span class="p">:</span> <span class="n">open_dialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">(),</span> <span class="n">widget</span><span class="p">,</span> <span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">()</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">is_widget</span><span class="p">())</span> <span class="p">:</span>
+            <span class="n">open_dialog</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="NodeFactoryView.reload_package"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryView.reload_package">[docs]</a>    <span class="k">def</span> <span class="nf">reload_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -846,6 +861,9 @@
 
 </div>
 <div class="viewcode-block" id="NodeFactoryView.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryView.mouseDoubleClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># TODO: emit signal to make widget totally independent</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
         <span class="n">obj</span> <span class="o">=</span>  <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
@@ -877,9 +895,14 @@
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
         <span class="n">obj</span> <span class="o">=</span>  <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">()</span>
+
         <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">AbstractFactory</span><span class="p">)):</span>
             <span class="n">widget</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">instantiate_widget</span><span class="p">(</span><span class="n">autonomous</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="n">open_dialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">(),</span> <span class="n">widget</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
+            <span class="n">open_dialog</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
 
 
         <span class="k">elif</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">PseudoPackage</span><span class="p">)):</span>
@@ -892,6 +915,9 @@
     <span class="nd">@exception_display</span>
 <div class="viewcode-block" id="NodeFactoryView.edit_node"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryView.edit_node">[docs]</a>    <span class="k">def</span> <span class="nf">edit_node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Edit Node in tab workspace&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
         <span class="n">obj</span> <span class="o">=</span>  <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
@@ -946,7 +972,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="NodeFactoryView.reinit_treeview"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryView.reinit_treeview">[docs]</a>    <span class="k">def</span> <span class="nf">reinit_treeview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">()</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_win</span><span class="p">()</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
 
 </div></div>
 <div class="viewcode-block" id="NodeFactoryTreeView"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.node_treeview.NodeFactoryTreeView">[docs]</a><span class="k">class</span> <span class="nc">NodeFactoryTreeView</span><span class="p">(</span><span class="n">NodeFactoryView</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">):</span>
@@ -1145,7 +1172,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

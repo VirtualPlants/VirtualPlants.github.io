@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.oalab.editor.text_editor &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.oalab.editor.text_editor &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -75,13 +75,22 @@
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
 
+<span class="n">has_flake8</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">flake8</span> <span class="kn">import</span> <span class="n">run</span>
+    <span class="n">has_flake8</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;You should install **flake8** (using: pip install flake8)&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="RichTextEditor"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor">[docs]</a><span class="k">class</span> <span class="nc">RichTextEditor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor">[docs]</a><span class="k">class</span> <span class="nc">RichTextEditor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="n">textChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">RichTextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="n">DictionaryCompleter</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
         <span class="c"># self.editor.setCompleter(self.completer)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">goto_widget</span> <span class="o">=</span> <span class="n">GoToWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">)</span>
@@ -95,16 +104,16 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
-<div class="viewcode-block" id="RichTextEditor.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.actions"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: list of actions to set in the menu.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">None</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.mainMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;Simulation&quot;</span>
+<div class="viewcode-block" id="RichTextEditor.mainMenu"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Project&quot;</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.set_text"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.set_text">[docs]</a>    <span class="k">def</span> <span class="nf">set_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.set_text"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.set_text">[docs]</a>    <span class="k">def</span> <span class="nf">set_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set text in the editor</span>
 
@@ -115,10 +124,10 @@
 </div>
     <span class="n">set_script</span> <span class="o">=</span> <span class="n">set_text</span>
 
-<div class="viewcode-block" id="RichTextEditor.get_selected_text"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.get_selected_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.get_selected_text"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.get_selected_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">get_selected_text</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.get_text"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.get_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.get_text"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.get_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a part of the text.</span>
 
@@ -128,25 +137,28 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.get_code"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.get_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.get_code"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.get_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="RichTextEditor.replace_tab"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.replace_tab">[docs]</a>    <span class="k">def</span> <span class="nf">replace_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">replace_tab</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.goto"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.goto">[docs]</a>    <span class="k">def</span> <span class="nf">goto</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.goto"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.goto">[docs]</a>    <span class="k">def</span> <span class="nf">goto</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goto_widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.comment"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.comment">[docs]</a>    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.comment"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.comment">[docs]</a>    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">comment</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.uncomment"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.uncomment">[docs]</a>    <span class="k">def</span> <span class="nf">uncomment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.uncomment"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.uncomment">[docs]</a>    <span class="k">def</span> <span class="nf">uncomment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">uncomment</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.undo"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="RichTextEditor.redo"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RichTextEditor.redo"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="RichTextEditor.search"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.RichTextEditor.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RichTextEditor.search"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span><span class="o">.</span><span class="n">hiden</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
             <span class="c"># self.search_widget.raise_()</span>
@@ -157,17 +169,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">search_widget</span><span class="o">.</span><span class="n">hiden</span> <span class="o">=</span> <span class="bp">True</span>
-
-</div></div>
-<div class="viewcode-block" id="TextEditor"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor">[docs]</a><span class="k">class</span> <span class="nc">TextEditor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="RichTextEditor.undo"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.RichTextEditor.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Unused</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">check_code</span><span class="p">()</span>
+            </div></div>
+<div class="viewcode-block" id="fix_indentation"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.fix_indentation">[docs]</a><span class="k">def</span> <span class="nf">fix_indentation</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace tabs by n spaces&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
+            </div>
+<div class="viewcode-block" id="TextEditor"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor">[docs]</a><span class="k">class</span> <span class="nc">TextEditor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLineWrapMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="o">.</span><span class="n">NoWrap</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">indentation</span> <span class="o">=</span> <span class="s">&quot;    &quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_tab_size</span><span class="p">()</span>
-
+        
         <span class="c"># Line Number Area from LPy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setViewportMargins</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span> <span class="o">=</span> <span class="n">Margin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -175,48 +193,141 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cursorPositionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">display_line_number</span><span class="p">)</span>
         <span class="c"># QtCore.QObject.connect(self, QtCore.SIGNAL(&quot;cursorPositionChanged()&quot;),self.highlightCurrentLine)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_settings</span><span class="p">()</span>
 
-<div class="viewcode-block" id="TextEditor.set_tab_size"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.set_tab_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_tab_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.check_code"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.check_code">[docs]</a>    <span class="k">def</span> <span class="nf">check_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if code follow PEP-8 guide-lines thanks to module flake8.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">has_flake8</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">check_code</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.read_settings"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.read_settings">[docs]</a>    <span class="k">def</span> <span class="nf">read_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span>
+        
+        <span class="n">font</span> <span class="o">=</span> <span class="s">&quot;Courier&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">font</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoSectionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">font</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">font</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_font</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        
+        <span class="n">font_size</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">font_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font Size&quot;</span><span class="p">)</span>
+            <span class="n">font_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoSectionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font Size&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">font_size</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font Size&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">font_size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_font_size</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span>
+        
+        <span class="n">display_tab</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">display_tab</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Display Tab and Spaces&quot;</span><span class="p">)</span>
+            <span class="n">display_tab</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">display_tab</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoSectionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Display Tab and Spaces&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">display_tab</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Display Tab and Spaces&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">display_tab</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_tab_and_spaces</span><span class="p">(</span><span class="n">display_tab</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.write_settings"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.write_settings">[docs]</a>    <span class="k">def</span> <span class="nf">write_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span>
+        
+        <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font&quot;</span><span class="p">,</span> <span class="n">font</span><span class="p">)</span>
+        
+        <span class="n">font_size</span> <span class="o">=</span> <span class="n">font</span><span class="o">.</span><span class="n">pointSize</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;Text Editor&quot;</span><span class="p">,</span> <span class="s">&quot;Font Size&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="p">)</span>
+        
+        <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.show_tab_and_spaces"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.show_tab_and_spaces">[docs]</a>    <span class="k">def</span> <span class="nf">show_tab_and_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display spaces and tabs.</span>
+<span class="sd">        </span>
+<span class="sd">        :param show: if true display tabs and spaces, else hide them</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="p">()</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">defaultTextOption</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">option</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextOption</span><span class="o">.</span><span class="n">ShowTabsAndSpaces</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">option</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextOption</span><span class="o">.</span><span class="n">Flags</span><span class="p">())</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">setDefaultTextOption</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.set_font_size"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.set_font_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the current font size.</span>
+<span class="sd">        </span>
+<span class="sd">        Not used for the moment!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">()</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_tab_size</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.set_font"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.set_font">[docs]</a>    <span class="k">def</span> <span class="nf">set_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the current font by name.</span>
+<span class="sd">        </span>
+<span class="sd">        :use: self.set_font(&quot;Courier&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">()</span><span class="o">.</span><span class="n">pointSize</span><span class="p">()</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="n">font_name</span><span class="p">)</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setStyleHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Monospace</span><span class="p">)</span>  
+        <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setFixedPitch</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.set_tab_size"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.set_tab_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_tab_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c"># Set tab size : to fix</span>
+        <span class="n">tabStop</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indentation</span><span class="p">)</span>
         <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFont</span><span class="p">()</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetrics</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indentation</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setTabStopWidth</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">setTabStopWidth</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTabStopWidth</span><span class="p">(</span><span class="n">tabStop</span> <span class="o">*</span> <span class="n">metrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">))</span>
 </div>
-<div class="viewcode-block" id="TextEditor.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.actions"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: list of actions to set in the menu.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">None</span>
 </div>
-<div class="viewcode-block" id="TextEditor.mainMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;Simulation&quot;</span>
+<div class="viewcode-block" id="TextEditor.mainMenu"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.mainMenu">[docs]</a>    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Project&quot;</span>
 </div>
-<div class="viewcode-block" id="TextEditor.setText"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.setText"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
         <span class="c"># TODO: move to EditorContainer</span>
 <span class="c">#         self.editor_container.setTabBlack()</span>
 </div>
-<div class="viewcode-block" id="TextEditor.set_text"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.set_text">[docs]</a>    <span class="k">def</span> <span class="nf">set_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.set_text"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.set_text">[docs]</a>    <span class="k">def</span> <span class="nf">set_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set text in the editor</span>
 
 <span class="sd">        :param text: text you want to set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
-
 </div>
     <span class="n">set_script</span> <span class="o">=</span> <span class="n">set_text</span>
 
-<div class="viewcode-block" id="TextEditor.get_selected_text"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.get_selected_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.get_selected_text"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.get_selected_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">txt</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectedText</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">txt</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\u2029</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  <span class="c"># replace paragraph separators by new lines</span>
 </div>
-<div class="viewcode-block" id="TextEditor.get_text"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.get_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.get_text"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.get_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a part of the text.</span>
 
@@ -227,19 +338,33 @@
         <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">txt</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">txt</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\u2029</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  <span class="c"># replace paragraph separators by new lines</span>
+        </div>
+<div class="viewcode-block" id="TextEditor.replace_tab"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.replace_tab">[docs]</a>    <span class="k">def</span> <span class="nf">replace_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        replace tab by spaces</span>
+<span class="sd">        </span>
+<span class="sd">        TODO: test it</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">fix_indentation</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indentation</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.canInsertFromMimeData"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.canInsertFromMimeData">[docs]</a>    <span class="k">def</span> <span class="nf">canInsertFromMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.canInsertFromMimeData"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.canInsertFromMimeData">[docs]</a>    <span class="k">def</span> <span class="nf">canInsertFromMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&#39;openalealab/control&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">source</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&#39;openalealab/data&#39;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="o">.</span><span class="n">canInsertFromMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.insertFromMimeData"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.insertFromMimeData">[docs]</a>    <span class="k">def</span> <span class="nf">insertFromMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.insertFromMimeData"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.insertFromMimeData">[docs]</a>    <span class="k">def</span> <span class="nf">insertFromMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&#39;openalealab/control&#39;</span><span class="p">):</span>
             <span class="c"># TODO: move outside TextEditor</span>
-            <span class="kn">from</span> <span class="nn">openalea.oalab.service.mimetype</span> <span class="kn">import</span> <span class="n">decode</span>
+            <span class="kn">from</span> <span class="nn">openalea.core.service.mimetype</span> <span class="kn">import</span> <span class="n">decode</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="s">&#39;openalealab/control&#39;</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s">&#39;openalealab/control&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span>
             <span class="n">varname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
             <span class="n">pycode</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = get_control(</span><span class="si">%r</span><span class="s">) #</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">interface</span><span class="p">)</span>
             <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
@@ -247,9 +372,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="o">.</span><span class="n">insertFromMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.keyPressEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.keyPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.keyPressEvent"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.keyPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c"># Auto-indent</span>
-        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Return</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Tab</span><span class="p">:</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indentation</span><span class="p">)</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">insertText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indentation</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Return</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">returnEvent</span><span class="p">()</span>
             <span class="k">return</span>
@@ -314,7 +445,7 @@
     <span class="c">####################################################################</span>
     <span class="c">#### Auto Indent (cf lpycodeeditor)</span>
     <span class="c">####################################################################</span></div>
-<div class="viewcode-block" id="TextEditor.returnEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.returnEvent">[docs]</a>    <span class="k">def</span> <span class="nf">returnEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.returnEvent"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.returnEvent">[docs]</a>    <span class="k">def</span> <span class="nf">returnEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">beg</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectionStart</span><span class="p">()</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectionEnd</span><span class="p">()</span>
@@ -404,7 +535,7 @@
     <span class="c">####################################################################</span>
     <span class="c">#### (Un)Comment (cf lpycodeeditor)</span>
     <span class="c">####################################################################</span></div>
-<div class="viewcode-block" id="TextEditor.comment"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.comment">[docs]</a>    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.comment"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.comment">[docs]</a>    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">beg</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectionStart</span><span class="p">()</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectionEnd</span><span class="p">()</span>
@@ -422,7 +553,7 @@
         <span class="n">cursor</span><span class="o">.</span><span class="n">endEditBlock</span><span class="p">()</span>
         <span class="n">cursor</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">MoveAnchor</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.uncomment"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.uncomment">[docs]</a>    <span class="k">def</span> <span class="nf">uncomment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.uncomment"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.uncomment">[docs]</a>    <span class="k">def</span> <span class="nf">uncomment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">beg</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectionStart</span><span class="p">()</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectionEnd</span><span class="p">()</span>
@@ -441,7 +572,7 @@
     <span class="c">####################################################################</span>
     <span class="c">#### Completer</span>
     <span class="c">####################################################################</span></div>
-<div class="viewcode-block" id="TextEditor.setCompleter"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.setCompleter">[docs]</a>    <span class="k">def</span> <span class="nf">setCompleter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completer</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.setCompleter"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.setCompleter">[docs]</a>    <span class="k">def</span> <span class="nf">setCompleter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completer</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;set completer &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">completer</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">completer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">completer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -454,7 +585,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">completer</span> <span class="o">=</span> <span class="n">completer</span>
         <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">completer</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;activated(const QString&amp;)&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">insertCompletion</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.insertCompletion"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.insertCompletion">[docs]</a>    <span class="k">def</span> <span class="nf">insertCompletion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completion</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.insertCompletion"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.insertCompletion">[docs]</a>    <span class="k">def</span> <span class="nf">insertCompletion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completion</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;insert completion&quot;</span><span class="p">)</span>
         <span class="n">tc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span> <span class="o">-</span>
@@ -465,12 +596,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setTextCursor</span><span class="p">(</span><span class="n">tc</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;inserted completion&quot;</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.textUnderCursor"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.textUnderCursor">[docs]</a>    <span class="k">def</span> <span class="nf">textUnderCursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.textUnderCursor"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.textUnderCursor">[docs]</a>    <span class="k">def</span> <span class="nf">textUnderCursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">tc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">tc</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">WordUnderCursor</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tc</span><span class="o">.</span><span class="n">selectedText</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="TextEditor.focusInEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.focusInEvent">[docs]</a>    <span class="k">def</span> <span class="nf">focusInEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.focusInEvent"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.focusInEvent">[docs]</a>    <span class="k">def</span> <span class="nf">focusInEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">completer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">completer</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">);</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">focusInEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
@@ -478,30 +609,59 @@
     <span class="c">####################################################################</span>
     <span class="c">#### Line Number Area</span>
     <span class="c">####################################################################</span></div>
-<div class="viewcode-block" id="TextEditor.resizeEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.resizeEvent"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.scrollContentsBy"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.scrollContentsBy">[docs]</a>    <span class="k">def</span> <span class="nf">scrollContentsBy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.scrollContentsBy"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.scrollContentsBy">[docs]</a>    <span class="k">def</span> <span class="nf">scrollContentsBy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFont</span><span class="p">()))</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TextEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">scrollContentsBy</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="TextEditor.display_line_number"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.display_line_number">[docs]</a>    <span class="k">def</span> <span class="nf">display_line_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">lineno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span><span class="o">.</span><span class="n">blockNumber</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">columnno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span><span class="o">.</span><span class="n">columnNumber</span><span class="p">()</span>
-        <span class="c"># todo</span>
-        <span class="c"># statusBar.showMessage(&quot;Cursor at line %s, column %s&quot; % (lineno, columnno), 2000)</span>
+<div class="viewcode-block" id="TextEditor.display_line_number"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.display_line_number">[docs]</a>    <span class="k">def</span> <span class="nf">display_line_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">repaint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">rect</span><span class="p">())</span>
 
     <span class="c">####################################################################</span>
     <span class="c">#### Line Number Area</span>
     <span class="c">####################################################################</span></div>
-<div class="viewcode-block" id="TextEditor.go_to_line"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.text_editor.TextEditor.go_to_line">[docs]</a>    <span class="k">def</span> <span class="nf">go_to_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lineno</span><span class="p">):</span>
+<div class="viewcode-block" id="TextEditor.go_to_line"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.TextEditor.go_to_line">[docs]</a>    <span class="k">def</span> <span class="nf">go_to_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lineno</span><span class="p">):</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
         <span class="n">cursor</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">cursor</span><span class="o">.</span><span class="n">movePosition</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">NextBlock</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">MoveAnchor</span><span class="p">,</span> <span class="n">lineno</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setTextCursor</span><span class="p">(</span><span class="n">cursor</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensureCursorVisible</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensureCursorVisible</span><span class="p">()</span>
+
+        </div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.editor.text_editor.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">openalea.oalab.shell</span> <span class="kn">import</span> <span class="n">get_shell_class</span>
+    <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
+    <span class="kn">from</span> <span class="nn">openalea.oalab.editor.highlight</span> <span class="kn">import</span> <span class="n">Highlighter</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    
+    <span class="n">edit</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">()</span>
+    <span class="n">Highlighter</span><span class="p">(</span><span class="n">edit</span><span class="p">)</span>
+    <span class="n">interp</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
+    <span class="n">shell</span> <span class="o">=</span> <span class="n">get_shell_class</span><span class="p">()(</span><span class="n">interp</span><span class="p">)</span>
+    
+    <span class="n">win</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">edit</span><span class="p">)</span>
+    
+    <span class="n">dock_widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDockWidget</span><span class="p">(</span><span class="s">&quot;IPython&quot;</span><span class="p">,</span> <span class="n">win</span><span class="p">)</span>
+    <span class="n">interp</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;mainwindow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">win</span>
+    <span class="n">interp</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;editor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edit</span>
+    <span class="n">interp</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;shell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shell</span>
+    <span class="n">interp</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;interpreter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp</span>
+    
+    <span class="n">dock_widget</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">shell</span><span class="p">)</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BottomDockWidgetArea</span><span class="p">,</span> <span class="n">dock_widget</span><span class="p">)</span>
+    
+    <span class="n">win</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">win</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    </div>
+<span class="k">if</span><span class="p">(</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">):</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
           </div>
@@ -535,7 +695,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

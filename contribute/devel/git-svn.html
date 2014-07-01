@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Migrate public gforge/svn to github &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="next" title="Test your development" href="testing.html" />
+    <link rel="prev" title="Public development on github" href="git-workflow.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="testing.html" title="Test your development"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="git-workflow.html" title="Public development on github"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="migrate-public-gforge-svn-to-github">
+<h1>Migrate public gforge/svn to github<a class="headerlink" href="#migrate-public-gforge-svn-to-github" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="migrate-whole-svn-repository-to-git">
+<h2>Migrate whole svn repository to git<a class="headerlink" href="#migrate-whole-svn-repository-to-git" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>extract svn author names and save it in a file:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre>svn log --quiet | awk <span class="s1">&#39;/^r/ {print $3}&#39;</span> | sort -u &gt; svn-authors
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>update svn-authors:</li>
+</ol>
+<div class="highlight-text"><div class="highlight"><pre>svnname = Full Name &lt;email&gt;
+</pre></div>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre>git svn clone --authors-file<span class="o">=</span>svn-authors svn+ssh://USER@scm.gforge.inria.fr/svnroot/PROJECT/trunk PROJECT-git-svn
+</pre></div>
+</div>
+<p>If it fails due to an author missing in author file, like
+Author: anonymous not defined in svn-authors file</p>
+<p>Just add it to author file, go to PROJECT-git-svn and continue:
+.. code-block:: bash</p>
+<blockquote>
+<div>cd PROJECT-git-svn
+git svn fetch</div></blockquote>
+<p>To synchronize with last svn changes (done after git svn clone)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd </span>PROJECT-git-svn
+git svn rebase
+</pre></div>
+</div>
+<p>Export tags : git push &#8211;tags</p>
+<dl class="docutils">
+<dt>Useful links:</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="http://stackoverflow.com/questions/19385565/fix-broken-git-history-after-merging-other-repo-into-subdir">fix broken history</a></li>
+<li><a class="reference external" href="http://jasonkarns.com/blog/merge-two-git-repositories-into-one">merge 2 repositories</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="hack-to-migrate-subpart-of-repository-while-keeping-history">
+<h2>Hack to migrate subpart of repository while keeping history<a class="headerlink" href="#hack-to-migrate-subpart-of-repository-while-keeping-history" title="Permalink to this headline">¶</a></h2>
+<p>Hack to extract only commit with modification in a specific directory</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c">#1. Convert a whole repository but keep only one directory (here misc)</span>
+git svn clone --authors-file<span class="o">=</span>../../utilitaires/svn-authors  --include-paths<span class="o">=</span><span class="s2">&quot;^misc&quot;</span> svn://scm.gforge.inria.fr/svnroot/openalea/trunk misc-git-svn
+
+<span class="c">#2. Generate a file with commit information</span>
+<span class="nb">cd </span>misc-git-svn
+git log --name-only --pretty<span class="o">=</span>format:commit:%H &gt; ../commits-misc.txt
+
+<span class="c">#3. Generate a bash script to cherry-pick these commits</span>
+python parse-commits.py ../commits-misc.txt &gt; cherry-pick.sh
+
+<span class="c">#4. Create new empty git repository</span>
+<span class="nb">cd</span> ..
+mkdir misc-git-svn-filtered
+<span class="nb">cd </span>misc-git-svn-filtered
+git init
+git remote add origin ../misc-git-svn
+git fetch origin
+
+<span class="c"># 5. Check cherry-pick script and run it.</span>
+sh ../misc-git-svn/cherry-pick.sh
+
+<span class="c"># 6. Go to your real github repository and import this branch</span>
+<span class="nb">cd</span> ../repo
+git remote add local_misc ../misc-git-svn-filtered
+git fetch local_misc
+git checkout local_misc/master -b misc-git-svn
+
+<span class="c"># 7. Rewrite historic to avoid to appears as commiter in each commit</span>
+
+
+<span class="c"># 8. Merge it</span>
+git checkout master
+git merge misc-git-svn
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Migrate public gforge/svn to github</a><ul>
+<li><a class="reference internal" href="#migrate-whole-svn-repository-to-git">Migrate whole svn repository to git</a></li>
+<li><a class="reference internal" href="#hack-to-migrate-subpart-of-repository-while-keeping-history">Hack to migrate subpart of repository while keeping history</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="git-workflow.html"
+                        title="previous chapter">Public development on github</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="testing.html"
+                        title="next chapter">Test your development</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/contribute/devel/git-svn.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="testing.html" title="Test your development"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="git-workflow.html" title="Public development on github"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

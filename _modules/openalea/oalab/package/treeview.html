@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.oalab.package.treeview &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.oalab.package.treeview &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -71,26 +71,35 @@
 <span class="kn">from</span> <span class="nn">openalea.core.package</span> <span class="kn">import</span> <span class="n">Package</span>
 <span class="kn">from</span> <span class="nn">openalea.visualea.node_treeview</span> <span class="kn">import</span> <span class="n">NodeFactoryTreeView</span>
 <span class="kn">from</span> <span class="nn">openalea.visualea.node_treeview</span> <span class="kn">import</span> <span class="n">SearchListView</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.applet</span> <span class="kn">import</span> <span class="n">get_applet</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.model</span> <span class="kn">import</span> <span class="n">ModelFactory</span>
+
 
 <div class="viewcode-block" id="OALabTreeView"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.package.html#openalea.oalab.package.treeview.OALabTreeView">[docs]</a><span class="k">class</span> <span class="nc">OALabTreeView</span><span class="p">(</span><span class="n">NodeFactoryTreeView</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">OALabTreeView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span> 
+        <span class="nb">super</span><span class="p">(</span><span class="n">OALabTreeView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
 
 <div class="viewcode-block" id="OALabTreeView.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.package.html#openalea.oalab.package.treeview.OALabTreeView.mouseDoubleClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
-        <span class="n">obj</span> <span class="o">=</span>  <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
 
         <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">CompositeNodeFactory</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">newTab</span><span class="p">(</span><span class="s">&#39;Workflow&#39;</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;.wpy&#39;</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
-
+            <span class="n">applet</span> <span class="o">=</span> <span class="n">get_applet</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s">&#39;EditorManager&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">applet</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">ModelFactory</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s">&#39;Workflow&#39;</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&#39;text/x-visualea&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">cat</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">applet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">applet</span><span class="o">.</span><span class="n">project</span><span class="p">(),</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.wpy&#39;</span><span class="p">,</span>
+                                       <span class="n">code</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">repr_code</span><span class="p">(),</span> <span class="n">category</span><span class="o">=</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;Workflow&#39;</span><span class="p">)</span>
+                <span class="n">applet</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Package</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">open_node</span><span class="p">()</span>
 
 </div></div>
 <div class="viewcode-block" id="OALabSearchView"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.package.html#openalea.oalab.package.treeview.OALabSearchView">[docs]</a><span class="k">class</span> <span class="nc">OALabSearchView</span><span class="p">(</span><span class="n">SearchListView</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="n">main_win</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">OALabSearchView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">main_win</span><span class="p">)</span>
@@ -100,10 +109,15 @@
 <div class="viewcode-block" id="OALabSearchView.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.package.html#openalea.oalab.package.treeview.OALabSearchView.mouseDoubleClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
         <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
-        <span class="n">obj</span> <span class="o">=</span>  <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
 
         <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">CompositeNodeFactory</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">newTab</span><span class="p">(</span><span class="s">&#39;Workflow&#39;</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;.wpy&#39;</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">applet</span> <span class="o">=</span> <span class="n">get_applet</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s">&#39;EditorManager&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">applet</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">ModelFactory</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s">&#39;Workflow&#39;</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&#39;text/x-visualea&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">cat</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">applet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">applet</span><span class="o">.</span><span class="n">project</span><span class="p">(),</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.wpy&#39;</span><span class="p">,</span>
+                                       <span class="n">code</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">repr_code</span><span class="p">(),</span> <span class="n">category</span><span class="o">=</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;Workflow&#39;</span><span class="p">)</span>
+                <span class="n">applet</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Package</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">open_node</span><span class="p">()</span></div></div>
@@ -140,7 +154,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

@@ -1,0 +1,467 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.misc.dataflow_directive &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.misc.dataflow_directive</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;A special directive for including a visualea dataflow.</span>
+
+<span class="sd">:Example:</span>
+
+<span class="sd">::</span>
+
+
+<span class="sd">    .. dataflow:: package_name node_name</span>
+<span class="sd">        width: 50%</span>
+
+<span class="sd">        your caption</span>
+
+
+<span class="sd">options are identical to the image/plot/figure directives (width, scale, height, ...)</span>
+
+<span class="sd">An additional caption may be added</span>
+
+<span class="sd">Based on *plot_directive* from matplotlib.</span>
+
+<span class="sd">.. moduleauthor:: Thomas Cokelaer, Daniel Barbeau</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">openalea.core.alea</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.cbook</span> <span class="kn">as</span> <span class="nn">cbook</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">imp</span><span class="o">,</span> <span class="nn">warnings</span><span class="o">,</span> <span class="nn">cStringIO</span><span class="o">,</span> <span class="nn">re</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">md5</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">md5</span> <span class="kn">import</span> <span class="n">md5</span>
+
+<span class="kn">from</span> <span class="nn">docutils.parsers.rst</span> <span class="kn">import</span> <span class="n">directives</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># docutils 0.4</span>
+    <span class="kn">from</span> <span class="nn">docutils.parsers.rst.directives.images</span> <span class="kn">import</span> <span class="n">align</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># docutils 0.5</span>
+    <span class="kn">from</span> <span class="nn">docutils.parsers.rst.directives.images</span> <span class="kn">import</span> <span class="n">Image</span>
+    <span class="n">align</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">align</span>
+<span class="kn">import</span> <span class="nn">sphinx</span>
+
+<span class="n">sphinx_version</span> <span class="o">=</span> <span class="n">sphinx</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+<span class="c"># The split is necessary for sphinx beta versions where the string is</span>
+<span class="c"># &#39;6b1&#39;</span>
+<span class="n">sphinx_version</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;[a-z]&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sphinx_version</span><span class="p">[:</span><span class="mi">2</span><span class="p">]])</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.sphinxext</span> <span class="kn">import</span> <span class="n">only_directives</span>
+
+
+<div class="viewcode-block" id="DataflowWarning"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.DataflowWarning">[docs]</a><span class="k">class</span> <span class="nc">DataflowWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warning category for all warnings generated by this directive.</span>
+
+<span class="sd">    By printing our warnings with this category, it becomes possible to turn</span>
+<span class="sd">    them into errors by using in your conf.py::</span>
+
+<span class="sd">      warnings.simplefilter(&#39;error&#39;, plot_directive.DataflowWarning)</span>
+
+<span class="sd">    This way, you can ensure that your docs only build if all your examples</span>
+<span class="sd">    actually run successfully.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+
+</div>
+<span class="n">template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">.. htmlonly::</span>
+
+<span class="s">   </span><span class="si">%(links)s</span><span class="s"></span>
+
+<span class="s">   .. figure:: </span><span class="si">%(prefix)s%(tmpdir)s</span><span class="s">/</span><span class="si">%(outname)s</span><span class="s">.png</span>
+<span class="si">%(options)s</span><span class="s"></span>
+
+<span class="si">%(caption)s</span><span class="s"></span>
+
+<span class="s">.. latexonly::</span>
+<span class="s">   .. figure:: </span><span class="si">%(prefix)s%(tmpdir)s</span><span class="s">/</span><span class="si">%(outname)s</span><span class="s">.pdf</span>
+<span class="si">%(options)s</span><span class="s"></span>
+
+<span class="si">%(caption)s</span><span class="s"></span>
+
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">exception_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">.. htmlonly::</span>
+
+<span class="s">   [`source code &lt;</span><span class="si">%(linkdir)s</span><span class="s">/</span><span class="si">%(basename)s</span><span class="s">.py&gt;`__]</span>
+
+<span class="s">Exception occurred rendering plot.</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">template_content_indent</span> <span class="o">=</span> <span class="s">&#39;      &#39;</span>
+
+<div class="viewcode-block" id="out_of_date"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.out_of_date">[docs]</a><span class="k">def</span> <span class="nf">out_of_date</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">derived</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns True if derivative is out-of-date wrt original,</span>
+<span class="sd">    both of which are full file paths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">derived</span><span class="p">)</span> <span class="ow">or</span>
+            <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">original</span><span class="p">)</span> <span class="ow">and</span>
+             <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">derived</span><span class="p">)</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&lt;</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">original</span><span class="p">)</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">))</span>
+
+
+
+
+</div>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">openalea.visualea.dataflowview</span> <span class="kn">import</span> <span class="n">GraphicalGraph</span>
+<span class="c"># create the application only once!</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span> <span class="ow">or</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([])</span>
+<span class="c"># start the package manager</span>
+<span class="n">pm</span> <span class="o">=</span> <span class="n">PackageManager</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+<div class="viewcode-block" id="DataflowRenderer"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.DataflowRenderer">[docs]</a><span class="k">class</span> <span class="nc">DataflowRenderer</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> 
+                 <span class="n">basename</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">destdir</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+        <span class="c"># -- fetch the composite node --</span>
+        <span class="n">pkg</span> <span class="o">=</span> <span class="n">pm</span><span class="p">[</span><span class="n">package_name</span><span class="p">]</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">get_factory</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+
+        <span class="n">outname</span> <span class="o">=</span> <span class="s">&#39;dataflow_&#39;</span> <span class="o">+</span> <span class="n">node_name</span>
+        <span class="n">outpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="n">outname</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">outpath</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;width&quot;</span><span class="p">,</span><span class="mi">400</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;scale&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span><span class="o">/</span><span class="mf">100.</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+        
+        <span class="c"># -- we create the view whose content we will </span>
+        <span class="c"># render to file --</span>
+        <span class="c">#self.view  = GraphicalGraph.create_view(node, parent=self, noToolBar=True)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">GraphicalGraph</span><span class="o">.</span><span class="n">__sceneType__</span><span class="o">.</span><span class="n">_make_scene</span><span class="p">(</span><span class="n">GraphicalGraph</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">initialise_from_model</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timerId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startTimer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataflowRenderer.timerEvent"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.DataflowRenderer.timerEvent">[docs]</a>    <span class="k">def</span> <span class="nf">timerEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># -- compute the view rect --</span>
+        <span class="n">rect</span>    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">sceneRect</span><span class="p">()</span>
+        <span class="n">scale</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="ow">or</span> <span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+
+        <span class="n">transfo</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTransform</span><span class="o">.</span><span class="n">fromScale</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span> 
+        <span class="n">rect</span>    <span class="o">=</span> <span class="n">transfo</span><span class="o">.</span><span class="n">mapRect</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span><span class="o">.</span><span class="n">toRect</span><span class="p">()</span>
+        
+        <span class="c"># -- our canvas filled with white --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">rect</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_RGB32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mh">0xFFFFFFFF</span><span class="p">)</span>
+        <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">+</span><span class="s">&#39;.png&#39;</span><span class="p">,</span> <span class="s">&quot;png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">killTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timerId</span><span class="p">)</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="run_code"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.run_code">[docs]</a><span class="k">def</span> <span class="nf">run_code</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">destdir</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Import a Python module from a path, and run the function given by</span>
+<span class="sd">    name, if package_name is not None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">wid</span> <span class="o">=</span> <span class="n">DataflowRenderer</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">destdir</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">sys</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span>
+
+
+</div>
+<div class="viewcode-block" id="render_figures"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.render_figures">[docs]</a><span class="k">def</span> <span class="nf">render_figures</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">destdir</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a pyplot script and save the low and high res PNGs and a PDF</span>
+<span class="sd">    in outdir.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plot_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">plot_path</span><span class="p">)</span>  <span class="c"># todo, why is unicode breaking this</span>
+    <span class="n">basedir</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">plot_path</span><span class="p">)</span>
+    <span class="n">basename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="c">#print  &#39;DATAFLOW plot_path and basename&#39;, plot_path, basename</span>
+    <span class="n">all_exists</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="c"># Look for single-figure output files first</span>
+    <span class="k">for</span> <span class="n">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]:</span>
+        <span class="n">outname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">format</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">out_of_date</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">outname</span><span class="p">):</span>
+            <span class="n">all_exists</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">all_exists</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c"># Then look for multi-figure output files, assuming</span>
+    <span class="c"># if we have some we have all...</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">all_exists</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]:</span>
+            <span class="n">outname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">tmpdir</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">format</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">out_of_date</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">outname</span><span class="p">):</span>
+                <span class="n">all_exists</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">all_exists</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">i</span>
+
+    <span class="c"># We didn&#39;t find the files, so build them</span>
+
+    <span class="n">run_code</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">destdir</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="mi">1</span>
+</div>
+<span class="k">def</span> <span class="nf">_plot_directive</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">basedir</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">caption</span><span class="p">,</span>
+                    <span class="n">options</span><span class="p">,</span> <span class="n">state_machine</span><span class="p">):</span>
+    <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">plot_path</span><span class="p">)</span>
+    <span class="n">basename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+    <span class="c"># Get the directory of the rst file, and determine the relative</span>
+    <span class="c"># path from the resulting html file to the plot_directive links</span>
+    <span class="c"># (linkdir).  This relative path is used for html links *only*,</span>
+    <span class="c"># and not the embedded image.  That is given an absolute path to</span>
+    <span class="c"># the temporary directory, and then sphinx moves the file to</span>
+    <span class="c"># build/html/_images for us later.</span>
+    <span class="n">rstdir</span><span class="p">,</span> <span class="n">rstfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">state_machine</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">])</span>
+    <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;dataflow_directive&#39;</span><span class="p">,</span> <span class="n">basedir</span><span class="p">)</span>
+    <span class="n">reldir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">confdir</span><span class="p">,</span> <span class="n">rstdir</span><span class="p">)</span>
+    <span class="n">linkdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reldir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)</span>
+
+    <span class="c"># tmpdir is where we build all the output files.  This way the</span>
+    <span class="c"># plots won&#39;t have to be redone when generating latex after html.</span>
+
+    <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;build&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)</span>
+    <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+        <span class="n">cbook</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+
+    <span class="c"># destdir is the directory within the output to store files</span>
+    <span class="c"># that we&#39;ll be linking to -- not the embedded images.</span>
+    <span class="n">destdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">destdir</span><span class="p">):</span>
+        <span class="n">cbook</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="n">destdir</span><span class="p">)</span>
+
+    <span class="c"># Properly indent the caption</span>
+    <span class="n">caption</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">template_content_indent</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">caption</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+
+    <span class="c"># Generate the figures, and return the number of them</span>
+    <span class="n">num_figs</span> <span class="o">=</span> <span class="n">render_figures</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">destdir</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+    <span class="c"># Now start generating the lines of output</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">node_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+
+
+    <span class="k">if</span> <span class="n">num_figs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">template_content_indent</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="n">outname</span> <span class="o">=</span> <span class="n">basename</span>
+        <span class="n">outname</span> <span class="o">=</span> <span class="s">&#39;dataflow_&#39;</span><span class="o">+</span><span class="n">node_name</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">node_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;`source code &lt;</span><span class="si">%(linkdir)s</span><span class="s">/</span><span class="si">%(basename)s</span><span class="s">.py&gt;`__&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">):</span>
+            <span class="n">links</span> <span class="o">=</span> <span class="s">&#39;[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">links</span><span class="p">)</span> <span class="o">%</span> <span class="nb">locals</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">links</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">template</span> <span class="o">%</span> <span class="nb">locals</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="n">state_machine</span><span class="o">.</span><span class="n">insert_input</span><span class="p">(</span>
+            <span class="n">lines</span><span class="p">,</span> <span class="n">state_machine</span><span class="o">.</span><span class="n">input_lines</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="plot_directive"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.plot_directive">[docs]</a><span class="k">def</span> <span class="nf">plot_directive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span>
+                   <span class="n">content_offset</span><span class="p">,</span> <span class="n">block_text</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">state_machine</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle the arguments to the plot directive.  The real work happens</span>
+<span class="sd">    in _plot_directive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># The user may provide a filename *or* Python code content, but not both</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arguments</span><span class="p">):</span>
+
+        <span class="n">plot_path</span> <span class="o">=</span> <span class="s">&#39;./build&#39;</span>
+        <span class="c">#plot_path = &#39;&#39;</span>
+        <span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">plot_path</span><span class="p">),</span> <span class="n">setup</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">srcdir</span><span class="p">)</span>
+        <span class="c"># If there is content, it will be passed as a caption.</span>
+
+        <span class="c"># Indent to match expansion below.  XXX - The number of spaces matches</span>
+        <span class="c"># that of the &#39;options&#39; expansion further down.  This should be moved</span>
+        <span class="c"># to common code to prevent them from diverging accidentally.</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="c"># If the optional function name is provided, use it</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">package_name</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">node_name</span> <span class="o">=</span> <span class="n">arguments</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;expect 2 arguments&quot;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;Dataflow extension: processing </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="k">return</span> <span class="n">_plot_directive</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">basedir</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">caption</span><span class="p">,</span>
+                               <span class="n">options</span><span class="p">,</span> <span class="n">state_machine</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="n">DataflowWarning</span><span class="p">(</span><span class="s">&quot;dataflow sphinx extension failed while processing </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">node_name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="mark_plot_labels"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.mark_plot_labels">[docs]</a><span class="k">def</span> <span class="nf">mark_plot_labels</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">document</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To make plots referenceable, we need to move the reference from</span>
+<span class="sd">    the &quot;htmlonly&quot; (or &quot;latexonly&quot;) node to the actual figure node</span>
+<span class="sd">    itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">explicit</span> <span class="ow">in</span> <span class="n">document</span><span class="o">.</span><span class="n">nametypes</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">explicit</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">labelid</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">nameids</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">labelid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">labelid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">tagname</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;html_only&#39;</span><span class="p">,</span> <span class="s">&#39;latex_only&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">tagname</span> <span class="o">==</span> <span class="s">&#39;figure&#39;</span><span class="p">:</span>
+                    <span class="n">sectname</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">tagname</span> <span class="o">==</span> <span class="s">&#39;caption&#39;</span><span class="p">:</span>
+                            <span class="n">sectname</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">astext</span><span class="p">()</span>
+                            <span class="k">break</span>
+
+                    <span class="n">node</span><span class="p">[</span><span class="s">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">labelid</span><span class="p">)</span>
+                    <span class="n">node</span><span class="p">[</span><span class="s">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">n</span><span class="p">[</span><span class="s">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labelid</span><span class="p">)</span>
+                    <span class="n">n</span><span class="p">[</span><span class="s">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">document</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">document</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">docname</span><span class="p">,</span> <span class="n">labelid</span><span class="p">,</span> <span class="n">sectname</span>
+                    <span class="k">break</span>
+</div>
+<div class="viewcode-block" id="setup"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.dataflow_directive.setup">[docs]</a><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">confdir</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">confdir</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="n">directives</span><span class="o">.</span><span class="n">unchanged</span><span class="p">,</span>               
+               <span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="n">directives</span><span class="o">.</span><span class="n">percentage</span><span class="p">,</span>
+               <span class="s">&#39;width&#39;</span><span class="p">:</span> <span class="n">directives</span><span class="o">.</span><span class="n">nonnegative_int</span><span class="p">,</span>
+               <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="n">align</span><span class="p">,</span>
+               <span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="n">directives</span><span class="o">.</span><span class="n">class_option</span><span class="p">,</span>
+               <span class="s">&#39;include-source&#39;</span><span class="p">:</span> <span class="n">directives</span><span class="o">.</span><span class="n">flag</span><span class="p">,</span>
+               <span class="s">&#39;encoding&#39;</span><span class="p">:</span> <span class="n">directives</span><span class="o">.</span><span class="n">encoding</span> <span class="p">}</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">add_directive</span><span class="p">(</span><span class="s">&#39;dataflow&#39;</span><span class="p">,</span> <span class="n">plot_directive</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&#39;doctree-read&#39;</span><span class="p">,</span> <span class="n">mark_plot_labels</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

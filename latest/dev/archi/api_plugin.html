@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Plugins &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>Plugins &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
     <link rel="next" title="Projects" href="api_project.html" />
     <link rel="prev" title="Glossary" href="../../glossary.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="../../glossary.html" title="Glossary"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -68,6 +68,11 @@
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>This document explains how to concretely extend OpenAleaLab.
 For theoretical aspects and future plans, see <a class="reference internal" href="../peps/pep_plugins.html#label-pep-plugins"><em>PEP: Plugin management</em></a>.</p>
+<p>Plugins are used to extend application.
+All plugins are managed in the same way but can do really different tasks and have very different behaviour.
+For example an &#8220;image processing algorithm&#8221;, a &#8220;qt applet&#8221; and an &#8220;OpenAleaLab extension&#8221;
+are all plugins, defined and registered in the same way but with very different logics.
+The logic and expected behaviour are described in an &#8220;interface&#8221; associated to a &#8220;category&#8221;.</p>
 <p>Plugin mechanism can be explained by this scheme:</p>
 <p><em class="menuselection">Plugin category ‣ Plugin identifier ‣ Plugin (factory) ‣ Class</em></p>
 <p><strong>Plugin category</strong>:
@@ -83,22 +88,6 @@ But, it is very important, that class must not import module or implement featur
 To get class implementing features, a special method called load can be used.</p>
 <p><strong>Class</strong>
 Class that actually implements features.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">In particular case of graphical components, a plugin generally defines an adapter
-able to connect a graphical component (a widget for example) to a specific
-application.</p>
-</div>
-<div class="section" id="create-a-plugin">
-<h3>Create a plugin<a class="headerlink" href="#create-a-plugin" title="Permalink to this headline">¶</a></h3>
-<p>To add a plugin to the application you have to:</p>
-<blockquote>
-<div><ul class="simple">
-<li>create the plugin (factory that point to the right class)</li>
-<li>add it into right <a class="reference internal" href="../../glossary.html#term-entry-point-category"><em class="xref std std-term">entry_point category</em></a> in setup.py</li>
-</ul>
-</div></blockquote>
-</div>
 <div class="section" id="plugins-on-demand">
 <h3>Plugins on demand<a class="headerlink" href="#plugins-on-demand" title="Permalink to this headline">¶</a></h3>
 <p>Some plugins are loaded automatically by application. For instance, it is the case for interfaces.
@@ -112,12 +101,54 @@ user is really loaded.</p>
 <h2>Plugin categories<a class="headerlink" href="#plugin-categories" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference internal" href="api_plugin_lab.html#module-openalea.oalab.plugins.lab" title="openalea.oalab.plugins.lab"><tt class="xref py py-mod docutils literal"><span class="pre">Lab</span> <span class="pre">Extensions</span></tt></a> [oalab.lab]: New laboratory based on OpenAleaLab</li>
-<li><a class="reference internal" href="api_plugin_applet.html#module-openalea.oalab.plugins.applet" title="openalea.oalab.plugins.applet"><tt class="xref py py-mod docutils literal"><span class="pre">Applets</span></tt></a> [oalab.applet] : Graphical component displayed in main window.</li>
-<li><a class="reference internal" href="api_plugin_control.html#module-openalea.oalab.plugins.control" title="openalea.oalab.plugins.control"><tt class="xref py py-mod docutils literal"><span class="pre">Controls</span></tt></a> [oalab.qt_control, oalab.notebook_control]: Data editors and viewers</li>
+<li><a class="reference internal" href="api_plugin_lab.html#module-openalea.core.plugin.lab" title="openalea.core.plugin.lab"><tt class="xref py py-mod docutils literal"><span class="pre">Labs</span></tt></a> [oalab.lab] New laboratory based on OpenAleaLab</li>
+<li><a class="reference internal" href="api_plugin_applet.html#module-openalea.core.plugin.applet" title="openalea.core.plugin.applet"><tt class="xref py py-mod docutils literal"><span class="pre">Applets</span></tt></a> [oalab.applet] : Graphical component displayed in main window.</li>
+<li><a class="reference internal" href="api_plugin_control.html#label-plugin-control"><em>Controls</em></a> [oalab.qt_control, oalab.notebook_control]: Data editors and viewers</li>
 <li><tt class="xref py py-mod docutils literal"><span class="pre">Interfaces</span></tt> [oalab.interface]: Description of data types</li>
 </ul>
 </div></blockquote>
+</div>
+<div class="section" id="module-openalea.core.plugin">
+<span id="how-to-define-a-plugin"></span><h2>How to define a plugin<a class="headerlink" href="#module-openalea.core.plugin" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>To define a new extension for OpenAleaLab (ex: MyApplet) corresponding to a category (ex: oalab.applet) , you must</dt>
+<dd><ol class="first last arabic simple">
+<li>write a Plugin class (ex: &#8220;PluginMyApplet&#8221;) that respects a special &#8220;IPlugin&#8221; interface (ex: IPluginApplet)</li>
+<li>write or use a class that actually does the job (ex: MyApplet) that respects a special &#8220;interface&#8221; (ex: IApplet)</li>
+<li>add it to the right &#8220;entry_point&#8221; (ex: oalab.applet)</li>
+</ol>
+</dd>
+</dl>
+<p>Interfaces and entry_points are described in plugin documentation.
+Generally, a plugin code looks like:</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>ex: mypackage/plugin/applet.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">PluginMyApplet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;MyApplet&#39;</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;My Applet&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mypackage.gui.applet.myapplet</span> <span class="kn">import</span> <span class="n">MyApplet</span>
+        <span class="k">return</span> <span class="n">MyApplet</span>
+</pre></div>
+</td></tr></table></div>
+<p>Once this class has been written, just register it in the setup.py file of your python package.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">&#39;oalab.applet&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s">&#39;MyApplet = mypackage.plugin.applet:PluginMyApplet&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>With <strong>mypackage.plugin.applet</strong> python module path (equivalent to &#8216;mypackage/plugin/applet.py&#8217;).</p>
+</div>
+<div class="section" id="advanced">
+<h2>Advanced<a class="headerlink" href="#advanced" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference internal" href="api_pluginmanager.html#label-api-pluginmanager"><em>PluginManager</em></a>.</p>
 </div>
 <div class="section" id="developer-tools">
 <h2>Developer tools<a class="headerlink" href="#developer-tools" title="Permalink to this headline">¶</a></h2>
@@ -141,11 +172,12 @@ user is really loaded.</p>
   <ul>
 <li><a class="reference internal" href="#">Plugins</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a><ul>
-<li><a class="reference internal" href="#create-a-plugin">Create a plugin</a></li>
 <li><a class="reference internal" href="#plugins-on-demand">Plugins on demand</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#plugin-categories">Plugin categories</a></li>
+<li><a class="reference internal" href="#module-openalea.core.plugin">How to define a plugin</a></li>
+<li><a class="reference internal" href="#advanced">Advanced</a></li>
 <li><a class="reference internal" href="#developer-tools">Developer tools</a></li>
 </ul>
 </li>
@@ -196,7 +228,7 @@ user is really loaded.</p>
         <li class="right" >
           <a href="../../glossary.html" title="Glossary"
              >previous</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li> 
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

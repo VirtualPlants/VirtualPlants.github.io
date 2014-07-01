@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>openalea.core.pkgmanager &mdash; OpenAleaLab 1.0 documentation</title>
+    <title>openalea.core.pkgmanager &mdash; OpenAlea community website</title>
     
     <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="OpenAleaLab 1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -63,6 +63,7 @@
 <span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
 <span class="c">#</span>
 <span class="c">###############################################################################</span>
+
 <span class="sd">&quot;&quot;&quot;This module defines the package manager.</span>
 
 <span class="sd">It is able to find installed package and their wralea.py</span>
@@ -70,9 +71,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
-<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: pkgmanager.py 4250 2014-06-06 12:40:57Z jcoste $ &quot;</span>
-
-<span class="kn">import</span> <span class="nn">openalea</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -80,7 +79,6 @@
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
 
 <span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">urlparse</span>
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatch</span>
@@ -89,7 +87,7 @@
 <span class="kn">from</span> <span class="nn">openalea.core.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
 <span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">Observed</span>
 <span class="kn">from</span> <span class="nn">openalea.core.package</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Package</span><span class="p">,</span> <span class="n">UserPackage</span><span class="p">,</span> <span class="n">PyPackageReader</span><span class="p">,</span>
-<span class="n">PyPackageReaderWralea</span><span class="p">,</span> <span class="n">PyPackageReaderVlab</span><span class="p">)</span>
+                                   <span class="n">PyPackageReaderWralea</span><span class="p">,</span> <span class="n">PyPackageReaderVlab</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">get_userpkg_dir</span><span class="p">,</span> <span class="n">Settings</span>
 <span class="kn">from</span> <span class="nn">openalea.core.pkgdict</span> <span class="kn">import</span> <span class="n">PackageDict</span><span class="p">,</span> <span class="n">is_protected</span><span class="p">,</span> <span class="n">protected</span>
 <span class="kn">from</span> <span class="nn">openalea.core.category</span> <span class="kn">import</span> <span class="n">PackageManagerCategory</span>
@@ -97,23 +95,29 @@
 
 <span class="kn">from</span> <span class="nn">ConfigParser</span> <span class="kn">import</span> <span class="n">NoSectionError</span><span class="p">,</span> <span class="n">NoOptionError</span>
 
+<span class="c">###########################################################################</span>
 <span class="c"># Exceptions</span>
+<span class="c">###########################################################################</span>
+
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span> <span class="o">=</span> <span class="bp">True</span>
 
-<div class="viewcode-block" id="UnknowFileType"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.UnknowFileType">[docs]</a><span class="k">class</span> <span class="nc">UnknowFileType</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UnknowFileType"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.UnknowFileType">[docs]</a><span class="k">class</span> <span class="nc">UnknowFileType</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span>
+
 </div>
-<div class="viewcode-block" id="UnknownPackageError"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.UnknownPackageError">[docs]</a><span class="k">class</span> <span class="nc">UnknownPackageError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="UnknownPackageError"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.UnknownPackageError">[docs]</a><span class="k">class</span> <span class="nc">UnknownPackageError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Cannot find package : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
 </div>
-<div class="viewcode-block" id="IllFormedUrlError"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.IllFormedUrlError">[docs]</a><span class="k">class</span> <span class="nc">IllFormedUrlError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="IllFormedUrlError"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.IllFormedUrlError">[docs]</a><span class="k">class</span> <span class="nc">IllFormedUrlError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Url is ill-formed : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">)</span>
@@ -122,11 +126,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
 
 
-<span class="c"># Logging</span></div>
+<span class="c">###############################################################################</span>
+<span class="c"># Logging</span>
+</div>
 <span class="n">pmanLogger</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">connect_loggers_to_handlers</span><span class="p">(</span><span class="n">pmanLogger</span><span class="p">,</span> <span class="n">logger</span><span class="o">.</span><span class="n">get_handler_names</span><span class="p">())</span>
 
-<div class="viewcode-block" id="Logger"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.Logger">[docs]</a><span class="k">class</span> <span class="nc">Logger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.Logger">[docs]</a><span class="k">class</span> <span class="nc">Logger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; OpenAlea logging class &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -137,8 +144,7 @@
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;OpenAlea Log</span><span class="se">\n\n</span><span class="s">&quot;</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="Logger.add"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.Logger.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<div class="viewcode-block" id="Logger.add"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.Logger.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Write to log file &quot;&quot;&quot;</span>
 
         <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_file</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
@@ -147,7 +153,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log_index</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">pmanLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Logger.print_log"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.Logger.print_log">[docs]</a>    <span class="k">def</span> <span class="nf">print_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Logger.print_log"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.Logger.print_log">[docs]</a>    <span class="k">def</span> <span class="nf">print_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Print log file &quot;&quot;&quot;</span>
 
         <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_file</span><span class="p">)</span>
@@ -155,11 +161,9 @@
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
-
-
 <span class="c">###############################################################################</span>
 </div></div>
-<div class="viewcode-block" id="PackageManager"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager">[docs]</a><span class="k">class</span> <span class="nc">PackageManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager">[docs]</a><span class="k">class</span> <span class="nc">PackageManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The PackageManager is a Dictionary of Packages</span>
 <span class="sd">    It can locate OpenAlea packages on the system (with wralea).</span>
@@ -167,7 +171,7 @@
 
     <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Constructor &quot;&quot;&quot;</span>
         <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
@@ -197,40 +201,36 @@
         <span class="c"># for packages that we don&#39;t want to save in the config file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temporary_wralea_paths</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-
+        <span class="c"># Compute system and user PATH to look for packages</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_user_wralea_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_sys_wralea_path</span><span class="p">()</span>
 
-
-
-<div class="viewcode-block" id="PackageManager.emit_update"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.emit_update">[docs]</a>    <span class="k">def</span> <span class="nf">emit_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.emit_update"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.emit_update">[docs]</a>    <span class="k">def</span> <span class="nf">emit_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">(</span><span class="s">&quot;update&quot;</span><span class="p">)</span>
 
+   <span class="c"># def get_include_namespace(self):</span>
+   <span class="c">#     &quot;&quot;&quot; Read user config and return include namespace status &quot;&quot;&quot;</span>
 
-<span class="c">#    def get_include_namespace(self):</span>
-<span class="c">#        &quot;&quot;&quot; Read user config and return include namespace status &quot;&quot;&quot;</span>
-<span class="c">#</span>
-<span class="c">#        config = Settings()</span>
-<span class="c">#</span>
-<span class="c">#        # include namespace</span>
-<span class="c">#        try:</span>
-<span class="c">#            s = config.get(&quot;pkgmanager&quot;, &quot;include_namespace&quot;)</span>
-<span class="c">#            self.include_namespace = bool(eval(s))</span>
-<span class="c">#</span>
-<span class="c">#        except:</span>
-<span class="c">#            self.include_namespace = False</span>
-<span class="c">#</span>
-<span class="c">#        return self.include_namespace</span>
-<span class="c">#</span></div>
-<div class="viewcode-block" id="PackageManager.get_wralea_path"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+   <span class="c">#     config = Settings()</span>
+
+   <span class="c">#     # include namespace</span>
+   <span class="c">#     try:</span>
+   <span class="c">#         s = config.get(&quot;pkgmanager&quot;, &quot;include_namespace&quot;)</span>
+   <span class="c">#         self.include_namespace = bool(eval(s))</span>
+
+   <span class="c">#     except:</span>
+   <span class="c">#         self.include_namespace = False</span>
+
+   <span class="c">#     return self.include_namespace</span>
+</div>
+<div class="viewcode-block" id="PackageManager.get_wralea_path"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; return the list of wralea path (union of user and system)&quot;&quot;&quot;</span>
 
         <span class="n">dirs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temporary_wralea_paths</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_wralea_path</span><span class="p">)))</span>
         <span class="n">dirs</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="n">isdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dirs</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.set_user_wralea_path"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.set_user_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_user_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.set_user_wralea_path"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.set_user_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_user_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Read user config &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_wralea_path</span><span class="p">:</span>
@@ -245,33 +245,30 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;pkgmanager&quot;</span><span class="p">,</span> <span class="s">&quot;path&quot;</span><span class="p">)</span>
             <span class="n">l</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">NoSectionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">except</span> <span class="n">NoSectionError</span><span class="p">:</span>
             <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&quot;pkgmanager&quot;</span><span class="p">)</span>
             <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;pkgmanager&quot;</span><span class="p">,</span> <span class="s">&quot;path&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([]))</span>
-        <span class="k">except</span> <span class="n">NoOptionError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">except</span> <span class="n">NoOptionError</span><span class="p">:</span>
             <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;pkgmanager&quot;</span><span class="p">,</span> <span class="s">&quot;path&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([]))</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_wralea_path</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.write_config"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.write_config">[docs]</a>    <span class="k">def</span> <span class="nf">write_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.write_config"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.write_config">[docs]</a>    <span class="k">def</span> <span class="nf">write_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Write user config &quot;&quot;&quot;</span>
 
         <span class="n">config</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
         <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;pkgmanager&quot;</span><span class="p">,</span> <span class="s">&quot;path&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_wralea_path</span><span class="p">)))</span>
 <span class="c">#        config.set(&quot;pkgmanager&quot;, &quot;include_namespace&quot;, repr(self.include_namespace))</span>
         <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.set_sys_wralea_path"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.set_sys_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_sys_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Define the default wralea search path</span>
+<div class="viewcode-block" id="PackageManager.set_sys_wralea_path"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.set_sys_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">set_sys_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Define the default wralea search path</span>
+
 <span class="sd">        For that, we look for &quot;wralea&quot; entry points</span>
 <span class="sd">        and deprecated_wralea entry point</span>
 <span class="sd">        if a package is declared as deprecated_wralea,</span>
 <span class="sd">        the module is not load</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="p">:</span>
             <span class="k">return</span>
@@ -281,7 +278,6 @@
 
         <span class="c"># Use setuptools entry_point</span>
         <span class="k">for</span> <span class="n">epoint</span> <span class="ow">in</span> <span class="n">iter_entry_points</span><span class="p">(</span><span class="s">&quot;wralea&quot;</span><span class="p">):</span>
-
             <span class="c"># Get Deprecated packages</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="n">pmanLogger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
@@ -303,7 +299,7 @@
                 <span class="k">continue</span>
 
             <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">__path__</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">l</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Wralea entry point: </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">) &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
                 <span class="c"># self.log.add(&quot;Wralea entry point: %s (%s) &quot;%(epoint.module_name, p))</span>
@@ -319,9 +315,8 @@
         <span class="k">if</span> <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">get_userpkg_dir</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.init"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.init"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Initialize package manager</span>
 
 <span class="sd">        If dirname is None, find wralea files on the system</span>
@@ -338,7 +333,7 @@
 
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">dirname</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">find_and_register_packages</span><span class="p">()</span>
-            <span class="k">else</span> <span class="p">:</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">load_directory</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
 
         <span class="k">finally</span><span class="p">:</span>
@@ -346,11 +341,13 @@
             <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">verbose</span><span class="p">):</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sysout</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.reload"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.reload">[docs]</a>    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Reload all packages if pkg is None</span>
-<span class="sd">        else reload only pkg&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PackageManager.reload"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.reload">[docs]</a>    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reload one or all packages.</span>
+
+<span class="sd">        If the package `pkg` is None reloa all the packages.</span>
+<span class="sd">        Else reload only `pkg`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">pkg</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -361,9 +358,8 @@
             <span class="n">pkg</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load_directory</span><span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">(</span><span class="s">&quot;update&quot;</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.clear"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.clear"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Remove all packages &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">user_wralea_path</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -373,9 +369,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">recover_syspath</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">PseudoGroup</span><span class="p">(</span><span class="s">&#39;Root&#39;</span><span class="p">)</span>
 
-
     <span class="c"># Path Functions</span></div>
-<div class="viewcode-block" id="PackageManager.add_wralea_path"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.add_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">add_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">container</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.add_wralea_path"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.add_wralea_path">[docs]</a>    <span class="k">def</span> <span class="nf">add_wralea_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">container</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a search path for wralea files</span>
 
@@ -383,14 +378,14 @@
 <span class="sd">        :param container: set containing the path</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span> <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="c"># Ensure to add a non existing path</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">:</span>
             <span class="n">common</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
             <span class="c"># the path is already in wraleapth</span>
-            <span class="k">if</span><span class="p">(</span><span class="n">common</span> <span class="o">==</span> <span class="n">p</span> <span class="ow">and</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">common</span><span class="p">):])</span> <span class="o">==</span> <span class="n">path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">common</span> <span class="o">==</span> <span class="n">p</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">common</span><span class="p">):])</span> <span class="o">==</span> <span class="n">path</span><span class="p">):</span>
                 <span class="k">return</span>
             <span class="c"># the new path is more generic, we keep it</span>
             <span class="k">if</span><span class="p">(</span><span class="n">common</span> <span class="o">==</span> <span class="n">path</span> <span class="ow">and</span>
@@ -400,50 +395,42 @@
                 <span class="k">return</span>
         <span class="c"># the path is absent</span>
         <span class="n">container</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.recover_syspath"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.recover_syspath">[docs]</a>    <span class="k">def</span> <span class="nf">recover_syspath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.recover_syspath"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.recover_syspath">[docs]</a>    <span class="k">def</span> <span class="nf">recover_syspath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Restore the initial sys path &quot;&quot;&quot;</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span><span class="p">[:]</span>
 
-
     <span class="c"># Accessors</span></div>
-<div class="viewcode-block" id="PackageManager.add_package"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.add_package">[docs]</a>    <span class="k">def</span> <span class="nf">add_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.add_package"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.add_package">[docs]</a>    <span class="k">def</span> <span class="nf">add_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add a package to the pkg manager &quot;&quot;&quot;</span>
 
         <span class="c"># Test if the package is deprecated</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deprecated_pkg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deprecated_pkg</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Deprecated : Ignoring </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-            <span class="c"># self.log.add(&quot;Deprecated : Ignoring %s&quot;%(package.name))</span>
             <span class="k">del</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="c"># if( not self.pkgs.has_key(package.get_id())):</span>
         <span class="bp">self</span><span class="p">[</span><span class="n">package</span><span class="o">.</span><span class="n">get_id</span><span class="p">()]</span> <span class="o">=</span> <span class="n">package</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_category</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.get_pseudo_pkg"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_pseudo_pkg">[docs]</a>    <span class="k">def</span> <span class="nf">get_pseudo_pkg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_pseudo_pkg"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_pseudo_pkg">[docs]</a>    <span class="k">def</span> <span class="nf">get_pseudo_pkg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return a pseudopackage structure &quot;&quot;&quot;</span>
 
         <span class="n">pt</span> <span class="o">=</span> <span class="n">PseudoPackage</span><span class="p">(</span><span class="s">&#39;Root&#39;</span><span class="p">)</span>
 
         <span class="c"># Build the name tree (on uniq objects)</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
             <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">k</span><span class="p">)):</span>
                 <span class="n">pt</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pt</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.get_pseudo_cat"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_pseudo_cat">[docs]</a>    <span class="k">def</span> <span class="nf">get_pseudo_cat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_pseudo_cat"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_pseudo_cat">[docs]</a>    <span class="k">def</span> <span class="nf">get_pseudo_cat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return a pseudo category structure &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span>
 
-
     <span class="c"># Category management</span></div>
-<div class="viewcode-block" id="PackageManager.update_category"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.update_category">[docs]</a>    <span class="k">def</span> <span class="nf">update_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.update_category"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.update_category">[docs]</a>    <span class="k">def</span> <span class="nf">update_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Update the category dictionary with package contents &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">nf</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
@@ -463,7 +450,7 @@
                 <span class="c"># search for the sub category (split by .)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">c_root</span><span class="p">,</span> <span class="n">c_others</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="k">except</span><span class="p">:</span> <span class="c"># if there is no &#39;.&#39;, c_others is empty</span>
+                <span class="k">except</span><span class="p">:</span>  <span class="c"># if there is no &#39;.&#39;, c_others is empty</span>
                     <span class="n">c_root</span> <span class="o">=</span> <span class="n">c</span>
                     <span class="n">c_others</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
 
@@ -473,19 +460,16 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">c_temp</span><span class="p">,</span> <span class="n">nf</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">add_name</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> <span class="n">nf</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.rebuild_category"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.rebuild_category">[docs]</a>    <span class="k">def</span> <span class="nf">rebuild_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.rebuild_category"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.rebuild_category">[docs]</a>    <span class="k">def</span> <span class="nf">rebuild_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Rebuild all the category &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">PseudoGroup</span><span class="p">(</span><span class="s">&#39;Root&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_category</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 
-
-
     <span class="c"># Wralea functions</span></div>
-<div class="viewcode-block" id="PackageManager.load_directory"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.load_directory">[docs]</a>    <span class="k">def</span> <span class="nf">load_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.load_directory"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.load_directory">[docs]</a>    <span class="k">def</span> <span class="nf">load_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Load a directory containing wraleas&quot;&quot;&quot;</span>
 
         <span class="n">dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
@@ -518,9 +502,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_category</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">ret</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.find_vlab_dir"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.find_vlab_dir">[docs]</a>    <span class="k">def</span> <span class="nf">find_vlab_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.find_vlab_dir"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.find_vlab_dir">[docs]</a>    <span class="k">def</span> <span class="nf">find_vlab_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find in a directory vlab specification file.</span>
 
@@ -528,8 +511,6 @@
 
 <span class="sd">        :return: a list of pkgreader instances</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="kn">from</span> <span class="nn">path</span> <span class="kn">import</span> <span class="n">path</span>
 
         <span class="n">spec_files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)):</span>
@@ -550,9 +531,8 @@
             <span class="c"># self.log.add(&quot;Package Manager : found  VLAB %s&quot; % p)</span>
 
         <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">,</span> <span class="n">spec_files</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.find_wralea_dir"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.find_wralea_dir">[docs]</a>    <span class="k">def</span> <span class="nf">find_wralea_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.find_wralea_dir"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.find_wralea_dir">[docs]</a>    <span class="k">def</span> <span class="nf">find_wralea_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find in a directory wralea files,</span>
 <span class="sd">        Search recursivly is recursive is True</span>
@@ -571,9 +551,8 @@
 
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
 
-
         <span class="c"># search for wralea.py</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">recursive</span> <span class="ow">and</span> <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">recursive</span> <span class="ow">and</span> <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="s">&quot;*wralea*.py&quot;</span><span class="p">):</span>
                 <span class="n">wralea_files</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -596,10 +575,8 @@
             <span class="k">print</span> <span class="s">&#39;readers takes </span><span class="si">%f</span><span class="s"> sec: &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dt1</span><span class="p">,)</span>
 
         <span class="k">return</span> <span class="n">readers</span>
-
-
 </div>
-<div class="viewcode-block" id="PackageManager.find_wralea_files"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.find_wralea_files">[docs]</a>    <span class="k">def</span> <span class="nf">find_wralea_files</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.find_wralea_files"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.find_wralea_files">[docs]</a>    <span class="k">def</span> <span class="nf">find_wralea_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find on the system all wralea.py files</span>
 
@@ -618,35 +595,41 @@
             <span class="c"># No cache : search recursively on the disk</span>
 
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+            <span class="c"># t1 = time.clock()</span>
+            <span class="k">pass</span> 
 
         <span class="n">directories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_wralea_path</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="c"># print &#39;      ~~~~~~~~~~&#39;</span>
-            <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+            <span class="c"># t2 = time.clock()</span>
             <span class="c"># print &#39;      get_wralea_path %f sec&#39;%(t2-t1)</span>
             <span class="c"># print &#39;\n&#39;.join(directories)</span>
+            <span class="k">pass</span>
 
         <span class="n">recursive</span> <span class="o">=</span> <span class="bp">True</span>
 
         <span class="k">for</span> <span class="n">wp</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span> <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+            <span class="c">#if DEBUG: t0 = time.clock()</span>
+
             <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_wralea_dir</span><span class="p">(</span><span class="n">wp</span><span class="p">,</span> <span class="n">recursive</span><span class="p">)</span>
             <span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                 <span class="n">readers</span> <span class="o">+=</span> <span class="n">ret</span>
+
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
                 <span class="c"># print &#39;      ~~~~~~~~~~&#39;</span>
-                <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+                <span class="c"># t1 = time.clock()</span>
                 <span class="c"># print &#39;      find_wralea %s %f sec&#39;%(wp, t1-t0)</span>
+                <span class="k">pass</span>
 
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="c"># print &#39;      ~~~~~~~~~~&#39;</span>
-            <span class="n">t3</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+            <span class="c"># t3 = time.clock()</span>
             <span class="c"># print &#39;      find_wralea_dir %f sec&#39;%(t3-t2)</span>
+            <span class="k">pass</span>
 
         <span class="k">return</span> <span class="n">readers</span>
 </div>
-<div class="viewcode-block" id="PackageManager.find_all_wralea"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.find_all_wralea">[docs]</a>    <span class="k">def</span> <span class="nf">find_all_wralea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.find_all_wralea"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.find_all_wralea">[docs]</a>    <span class="k">def</span> <span class="nf">find_all_wralea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find on the system all wralea.py files</span>
 
@@ -664,11 +647,10 @@
             <span class="n">files</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">directories</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&#39;*wralea*.py&#39;</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">files</span>
 </div>
-<div class="viewcode-block" id="PackageManager.create_readers"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.create_readers">[docs]</a>    <span class="k">def</span> <span class="nf">create_readers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wralea_files</span><span class="p">):</span>
-        <span class="k">return</span>  <span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wralea_files</span><span class="p">))</span>
-
+<div class="viewcode-block" id="PackageManager.create_readers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.create_readers">[docs]</a>    <span class="k">def</span> <span class="nf">create_readers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wralea_files</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_pkgreader</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wralea_files</span><span class="p">))</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get_pkgreader"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_pkgreader">[docs]</a>    <span class="k">def</span> <span class="nf">get_pkgreader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_pkgreader"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_pkgreader">[docs]</a>    <span class="k">def</span> <span class="nf">get_pkgreader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the pkg reader corresponding to the filename &quot;&quot;&quot;</span>
 
         <span class="n">reader</span> <span class="o">=</span> <span class="bp">None</span>
@@ -679,13 +661,12 @@
         <span class="k">elif</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;specifications&#39;</span><span class="p">)):</span>
             <span class="n">reader</span> <span class="o">=</span> <span class="n">PyPackageReaderVlab</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-        <span class="k">else</span> <span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
 
         <span class="k">return</span> <span class="n">reader</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.find_and_register_packages"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.find_and_register_packages">[docs]</a>    <span class="k">def</span> <span class="nf">find_and_register_packages</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">no_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.find_and_register_packages"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.find_and_register_packages">[docs]</a>    <span class="k">def</span> <span class="nf">find_and_register_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">no_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find all wralea on the system and register them</span>
 <span class="sd">        If no_cache is True, ignore cache file</span>
@@ -722,65 +703,59 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_category</span><span class="p">()</span>
 
-
     <span class="c"># Cache functions</span>
-<span class="c">#    def get_cache_filename(self):</span>
-<span class="c">#        &quot;&quot;&quot; Return the cache filename &quot;&quot;&quot;</span>
-<span class="c">#</span>
-<span class="c">#        return os.path.join(tempfile.gettempdir(), &quot;.alea_pkg_cache&quot;)</span>
+    <span class="c"># def get_cache_filename(self):</span>
+    <span class="c">#     &quot;&quot;&quot; Return the cache filename &quot;&quot;&quot;</span>
 
+    <span class="c">#     return os.path.join(tempfile.gettempdir(), &quot;.alea_pkg_cache&quot;)</span>
 
-<span class="c">#    def save_cache(self):</span>
-<span class="c">#        &quot;&quot;&quot; Save in cache current package manager state &quot;&quot;&quot;</span>
-<span class="c">#</span>
-<span class="c">#        f = open(self.get_cache_filename(),&#39;w&#39;)</span>
-<span class="c">#        s = set([pkg.path + &quot;\n&quot; for pkg in self.pkgs.itervalues()])</span>
-<span class="c">#        f.writelines(list(s))</span>
-<span class="c">#        f.close()</span>
-<span class="c">#</span>
-<span class="c">#</span>
-<span class="c">#    def delete_cache(self):</span>
-<span class="c">#        &quot;&quot;&quot; Remove cache &quot;&quot;&quot;</span>
-<span class="c">#</span>
-<span class="c">#        n = self.get_cache_filename()</span>
-<span class="c">#</span>
-<span class="c">#        if(os.path.exists(n)):</span>
-<span class="c">#            os.remove(n)</span>
-<span class="c">#</span>
-<span class="c">#</span>
-<span class="c">#    def get_cache(self):</span>
-<span class="c">#        &quot;&quot;&quot; Return cache contents &quot;&quot;&quot;</span>
-<span class="c">#</span>
-<span class="c">#        f = open(self.get_cache_filename(), &quot;r&quot;)</span>
-<span class="c">#</span>
-<span class="c">#        for d in f:</span>
-<span class="c">#            d = d.strip()</span>
-<span class="c">#            yield d</span>
-<span class="c">#</span>
-<span class="c">#        f.close()</span>
+    <span class="c"># def save_cache(self):</span>
+    <span class="c">#     &quot;&quot;&quot; Save in cache current package manager state &quot;&quot;&quot;</span>
 
+    <span class="c">#     f = open(self.get_cache_filename(),&#39;w&#39;)</span>
+    <span class="c">#     s = set([pkg.path + &quot;\n&quot; for pkg in self.pkgs.itervalues()])</span>
+    <span class="c">#     f.writelines(list(s))</span>
+    <span class="c">#     f.close()</span>
 
+    <span class="c"># def delete_cache(self):</span>
+    <span class="c">#     &quot;&quot;&quot; Remove cache &quot;&quot;&quot;</span>
+
+    <span class="c">#     n = self.get_cache_filename()</span>
+
+    <span class="c">#     if(os.path.exists(n)):</span>
+    <span class="c">#         os.remove(n)</span>
+
+    <span class="c"># def get_cache(self):</span>
+    <span class="c">#     &quot;&quot;&quot; Return cache contents &quot;&quot;&quot;</span>
+    <span class="c">#     f = open(self.get_cache_filename(), &quot;r&quot;)</span>
+    <span class="c">#     for d in f:</span>
+    <span class="c">#         d = d.strip()</span>
+    <span class="c">#         yield d</span>
+    <span class="c">#     f.close()</span>
+
+    <span class="c">###############################################################################</span>
     <span class="c"># Package creation</span>
+    <span class="c">###############################################################################</span>
 </div>
-<div class="viewcode-block" id="PackageManager.create_user_package"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.create_user_package">[docs]</a>    <span class="k">def</span> <span class="nf">create_user_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.create_user_package"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.create_user_package">[docs]</a>    <span class="k">def</span> <span class="nf">create_user_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new package in the user space and register it</span>
 <span class="sd">        Return the created package</span>
 <span class="sd">        :param path : the directory where to create the package</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
         <span class="c"># Create directory</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">get_userpkg_dir</span><span class="p">()</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;__wralea__.py&quot;</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;__wralea__.py&quot;</span><span class="p">)):</span>
             <span class="c"># Create new Package and its wralea</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">UserPackage</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
@@ -791,31 +766,28 @@
 
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.get_user_packages"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_user_packages">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_user_packages"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_user_packages">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the list of user packages &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">UserPackage</span><span class="p">)]</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.rename_package"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.rename_package">[docs]</a>    <span class="k">def</span> <span class="nf">rename_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.rename_package"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.rename_package">[docs]</a>    <span class="k">def</span> <span class="nf">rename_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Rename package &#39;old_name&#39; to &#39;new_name&#39; &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">protected</span><span class="p">(</span><span class="n">old_name</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">metainfo</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;alias&#39;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="s">&#39;alias&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">metainfo</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">metainfo</span><span class="p">[</span><span class="s">&#39;alias&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
         <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">old_name</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">(</span><span class="s">&quot;update&quot;</span><span class="p">)</span>
 
-
-    <span class="c"># Dictionnary behaviour</span>
-</div>
+    <span class="c">###############################################################################</span>
+    <span class="c"># Dictionnary behaviour</span></div>
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -838,36 +810,36 @@
     <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PackageManager.keys"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.keys"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.items"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.items"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.values"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.values"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.iterkeys"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.iterkeys">[docs]</a>    <span class="k">def</span> <span class="nf">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.iterkeys"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.iterkeys">[docs]</a>    <span class="k">def</span> <span class="nf">iterkeys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.iteritems"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.iteritems">[docs]</a>    <span class="k">def</span> <span class="nf">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.iteritems"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.iteritems">[docs]</a>    <span class="k">def</span> <span class="nf">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.itervalues"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.itervalues">[docs]</a>    <span class="k">def</span> <span class="nf">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.itervalues"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.itervalues">[docs]</a>    <span class="k">def</span> <span class="nf">itervalues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.has_key"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.has_key">[docs]</a>    <span class="k">def</span> <span class="nf">has_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.has_key"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.has_key">[docs]</a>    <span class="k">def</span> <span class="nf">has_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
     <span class="c"># Convenience functions</span></div>
-<div class="viewcode-block" id="PackageManager.get_node_from_url"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_node_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_node_from_url"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_node_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="n">fac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_factory_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fac</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get_factory_from_url"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_factory_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_factory_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_factory_from_url"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_factory_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_factory_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a node instance from the given url.</span>
 
 <span class="sd">        :Parameters:</span>
@@ -879,31 +851,29 @@
 <span class="sd">        &quot;factoryName&quot; is the of factory</span>
 <span class="sd">        &quot;factoryType&quot; is one of {&quot;CompositeNodeFactory&quot;, &quot;NodeFactory&quot;, &quot;DataFactory&quot;}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pkg</span><span class="p">,</span> <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="c"># url.path.strip(&quot;/&quot;) #the path is preceded by one &quot;/&quot;</span>
+        <span class="n">pkg</span><span class="p">,</span> <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>  <span class="c"># url.path.strip(&quot;/&quot;) #the path is preceded by one &quot;/&quot;</span>
         <span class="k">if</span> <span class="s">&quot;fac&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">IllFormedUrlError</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">geturl</span><span class="p">())</span>
         <span class="n">factory_id</span> <span class="o">=</span> <span class="n">queries</span><span class="p">[</span><span class="s">&quot;fac&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">factory</span> <span class="o">=</span> <span class="n">pkg</span><span class="p">[</span><span class="n">factory_id</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">factory</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get_package_from_url"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_package_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_package_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_package_from_url"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_package_from_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_package_from_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">ParseResult</span><span class="p">)</span>
         <span class="n">queries</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
-        <span class="n">pkg_id</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span> <span class="c"># the path is preceded by one &quot;/&quot;</span>
+        <span class="n">pkg_id</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>  <span class="c"># the path is preceded by one &quot;/&quot;</span>
         <span class="n">pkg</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">pkg_id</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">pkg</span><span class="p">,</span> <span class="n">queries</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.get_node"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_node">[docs]</a>    <span class="k">def</span> <span class="nf">get_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_node"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_node">[docs]</a>    <span class="k">def</span> <span class="nf">get_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return a node instance giving a pkg_id and a factory_id &quot;&quot;&quot;</span>
         <span class="n">pkg</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">pkg_id</span><span class="p">]</span>
         <span class="n">factory</span> <span class="o">=</span> <span class="n">pkg</span><span class="p">[</span><span class="n">factory_id</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.search_node"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.search_node">[docs]</a>    <span class="k">def</span> <span class="nf">search_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_str</span><span class="p">,</span> <span class="n">nb_inputs</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_outputs</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.search_node"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.search_node">[docs]</a>    <span class="k">def</span> <span class="nf">search_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_str</span><span class="p">,</span> <span class="n">nb_inputs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_outputs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of Factory corresponding to search_str</span>
 <span class="sd">        If nb_inputs or nb_outputs is specified,</span>
@@ -922,15 +892,16 @@
 
         <span class="n">search_str</span> <span class="o">=</span> <span class="n">search_str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-        <span class="n">best</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">match</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">scored</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="c"># Search for each package and for each factory</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="k">if</span><span class="p">(</span><span class="n">is_protected</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span> <span class="k">continue</span> <span class="c"># alias</span>
+            <span class="k">if</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c"># alias</span>
 
             <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">factory</span> <span class="ow">in</span> <span class="n">pkg</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                <span class="k">if</span><span class="p">(</span><span class="n">is_protected</span><span class="p">(</span><span class="n">fname</span><span class="p">)):</span> <span class="k">continue</span> <span class="c"># alias</span>
+                <span class="k">if</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span> 
+                    <span class="k">continue</span>  <span class="c"># alias</span>
 
                 <span class="c"># -- The scores for each string that is explored.</span>
                 <span class="c"># They are long ints because we make a 96 bits bitshift</span>
@@ -953,8 +924,8 @@
                     <span class="n">l</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pname</span><span class="p">))</span>
                     <span class="n">pkgNameScore</span> <span class="o">=</span> <span class="nb">long</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pname</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">search_str</span><span class="p">)</span> <span class="o">/</span> <span class="n">l</span><span class="p">))</span>
 
-                <span class="n">score</span> <span class="o">=</span> <span class="n">facNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">facDescScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> \
-                        <span class="n">facCateScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">pkgNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">facNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">facDescScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> 
+                         <span class="n">facCateScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">pkgNameScore</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">match</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">score</span><span class="p">,</span> <span class="n">factory</span><span class="p">))</span>
 
@@ -972,12 +943,11 @@
 
         <span class="k">return</span> <span class="n">match</span>
 
-
     <span class="c">####################################################################################</span>
     <span class="c"># Methods to introspect globally the PkgManager</span>
     <span class="c">####################################################################################</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get_packages"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_packages">[docs]</a>    <span class="k">def</span> <span class="nf">get_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_packages"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_packages">[docs]</a>    <span class="k">def</span> <span class="nf">get_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return all public packages.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -988,23 +958,25 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pkgs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pk</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">pk</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span><span class="p">]</span>
-
 </div>
-<div class="viewcode-block" id="PackageManager.get_data"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s">&#39;*.*&#39;</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">as_paths</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_data"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="s">&#39;*.*&#39;</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">as_paths</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return all data that match the pattern. &quot;&quot;&quot;</span>
         <span class="n">pkgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_packages</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">)</span>
-        <span class="n">datafiles</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pj</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">as_paths</span> <span class="k">else</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> \
-                         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">is_data</span><span class="p">()</span> <span class="ow">and</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)]</span>
+        <span class="n">datafiles</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">pj</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">as_paths</span> <span class="k">else</span> <span class="n">f</span><span class="p">)</span> 
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span><span class="p">(</span> 
+                <span class="ow">not</span> <span class="n">is_protected</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">is_data</span><span class="p">()</span> <span class="ow">and</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">))]</span>
         <span class="k">return</span> <span class="n">datafiles</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get_composite_nodes"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_composite_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_composite_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_composite_nodes"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_composite_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_composite_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="n">pkgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_packages</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">)</span>
-        <span class="n">cn</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()</span> <span class="p">]</span>
+        <span class="n">cn</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()]</span>
         <span class="k">return</span> <span class="n">cn</span>
 </div>
-<div class="viewcode-block" id="PackageManager.get_nodes"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.get_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.get_nodes"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.get_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="n">pkgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_packages</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">)</span>
-        <span class="n">nf</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_node</span><span class="p">()</span> <span class="p">]</span>
+        <span class="n">nf</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pkgs</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_node</span><span class="p">()]</span>
         <span class="k">return</span> <span class="n">nf</span>
 </div>
     <span class="k">def</span> <span class="nf">_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
@@ -1048,7 +1020,7 @@
         <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_missing_dependencies</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">l</span>
 
-<div class="viewcode-block" id="PackageManager.missing_dependencies"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.missing_dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">missing_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_or_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.missing_dependencies"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.missing_dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">missing_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_or_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return all the dependencies of a package or a factory. &quot;&quot;&quot;</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">package_or_factory</span>
         <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -1058,7 +1030,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_cn_dependencies</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PackageManager.dependencies"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_or_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.dependencies"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_or_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return all the dependencies of a package or a factory. &quot;&quot;&quot;</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">package_or_factory</span>
         <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -1077,10 +1049,11 @@
                 <span class="n">d</span><span class="p">[</span><span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
         <span class="k">return</span> <span class="n">d</span>
 
-
     <span class="k">def</span> <span class="nf">_pkg_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
-        <span class="n">cns</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()</span> <span class="p">]</span>
-        <span class="n">factories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">f</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">cn_factory</span> <span class="ow">in</span> <span class="n">cns</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependencies</span><span class="p">(</span><span class="n">cn_factory</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">cns</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()]</span>
+        <span class="n">factories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">cn_factory</span> <span class="ow">in</span> <span class="n">cns</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependencies</span><span class="p">(</span><span class="n">cn_factory</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_cn_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
@@ -1094,11 +1067,12 @@
             <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
         <span class="k">return</span> <span class="n">d</span>
+
     <span class="k">def</span> <span class="nf">_missing_pkg_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
-        <span class="n">cns</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()</span> <span class="p">]</span>
+        <span class="n">cns</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()]</span>
         <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">cns</span><span class="p">:</span>
-           <span class="bp">self</span><span class="o">.</span><span class="n">_missing</span><span class="p">(</span><span class="n">cn</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_missing</span><span class="p">(</span><span class="n">cn</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
         <span class="n">factories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">factories</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span>
@@ -1111,7 +1085,7 @@
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">None</span>
 
-<div class="viewcode-block" id="PackageManager.who_use"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PackageManager.who_use">[docs]</a>    <span class="k">def</span> <span class="nf">who_use</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory_name</span><span class="p">):</span>
+<div class="viewcode-block" id="PackageManager.who_use"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.who_use">[docs]</a>    <span class="k">def</span> <span class="nf">who_use</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Search who use a package or a factory</span>
 
 <span class="sd">        return a list of factory.</span>
@@ -1119,19 +1093,21 @@
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_packages</span><span class="p">():</span>
             <span class="n">cns</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">pkg</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_composite_node</span><span class="p">()]</span>
-            <span class="n">res</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cn</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">cns</span> <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cn_dependencies</span><span class="p">(</span><span class="n">cn</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">factory_name</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cn</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">cns</span> <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cn_dependencies</span><span class="p">(</span><span class="n">cn</span><span class="p">)</span> 
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">factory_name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
+
 </div></div>
-<div class="viewcode-block" id="cmp_name"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.cmp_name">[docs]</a><span class="k">def</span> <span class="nf">cmp_name</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="cmp_name"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.cmp_name">[docs]</a><span class="k">def</span> <span class="nf">cmp_name</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Comparison function &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
 
-
 </div>
-<div class="viewcode-block" id="PseudoGroup"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoGroup">[docs]</a><span class="k">class</span> <span class="nc">PseudoGroup</span><span class="p">(</span><span class="n">PackageDict</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoGroup"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoGroup">[docs]</a><span class="k">class</span> <span class="nc">PseudoGroup</span><span class="p">(</span><span class="n">PackageDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Data structure used to separate dotted naming (packages, category) &quot;&quot;&quot;</span>
 
-    <span class="n">sep</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span> <span class="c"># Separator</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>  <span class="c"># Separator</span>
     <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&quot;openalea/package&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
@@ -1141,23 +1117,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="bp">None</span>
 
-<div class="viewcode-block" id="PseudoGroup.new"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoGroup.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoGroup.new"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoGroup.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">PseudoGroup</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PseudoGroup.get_id"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoGroup.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoGroup.get_id"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoGroup.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 </div>
-<div class="viewcode-block" id="PseudoGroup.get_tip"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoGroup.get_tip">[docs]</a>    <span class="k">def</span> <span class="nf">get_tip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoGroup.get_tip"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoGroup.get_tip">[docs]</a>    <span class="k">def</span> <span class="nf">get_tip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-
 </div>
-<div class="viewcode-block" id="PseudoGroup.add_name"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoGroup.add_name">[docs]</a>    <span class="k">def</span> <span class="nf">add_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoGroup.add_name"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoGroup.add_name">[docs]</a>    <span class="k">def</span> <span class="nf">add_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add a value in the structure with the key name_tuple &quot;&quot;&quot;</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">name</span><span class="p">):</span>
             <span class="c"># if value is a dict we include sub nodes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1195,32 +1170,31 @@
                 <span class="k">print</span> <span class="n">e</span>
                 <span class="k">pass</span>
 
-
 </div></div>
-<div class="viewcode-block" id="PseudoPackage"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoPackage">[docs]</a><span class="k">class</span> <span class="nc">PseudoPackage</span><span class="p">(</span><span class="n">PseudoGroup</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoPackage"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoPackage">[docs]</a><span class="k">class</span> <span class="nc">PseudoPackage</span><span class="p">(</span><span class="n">PseudoGroup</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Package structure used to separate dotted naming (packages, category) &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PseudoPackage.new"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoPackage.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoPackage.new"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoPackage.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">PseudoPackage</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PseudoPackage.is_real_package"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoPackage.is_real_package">[docs]</a>    <span class="k">def</span> <span class="nf">is_real_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoPackage.is_real_package"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoPackage.is_real_package">[docs]</a>    <span class="k">def</span> <span class="nf">is_real_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">!=</span> <span class="bp">None</span>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
 </div>
-<div class="viewcode-block" id="PseudoPackage.get_tip"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoPackage.get_tip">[docs]</a>    <span class="k">def</span> <span class="nf">get_tip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoPackage.get_tip"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoPackage.get_tip">[docs]</a>    <span class="k">def</span> <span class="nf">get_tip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
-        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="s">&quot;Sub Package : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
 </div>
-<div class="viewcode-block" id="PseudoPackage.get_metainfo"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_core.html#openalea.core.pkgmanager.PseudoPackage.get_metainfo">[docs]</a>    <span class="k">def</span> <span class="nf">get_metainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<div class="viewcode-block" id="PseudoPackage.get_metainfo"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PseudoPackage.get_metainfo">[docs]</a>    <span class="k">def</span> <span class="nf">get_metainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
         <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">get_metainfo</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s">&quot;&quot;</span>
-</pre></div></div></div>
+        <span class="k">return</span> <span class="s">&quot;&quot;</span></div></div>
+</pre></div>
 
           </div>
         </div>
@@ -1253,7 +1227,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAleaLab 1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
