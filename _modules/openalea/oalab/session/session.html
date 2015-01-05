@@ -73,9 +73,13 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.run</span> <span class="kn">import</span> <span class="n">get_model</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">PluginInstanceManager</span>
+
 <span class="kn">from</span> <span class="nn">openalea.oalab.package.manager</span> <span class="kn">import</span> <span class="n">package_manager</span>
 <span class="kn">from</span> <span class="nn">openalea.core.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
 <span class="kn">from</span> <span class="nn">openalea.core.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.manager</span> <span class="kn">import</span> <span class="n">PluginManager</span>
+
 <span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">get_openalea_tmp_dir</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.config.main</span> <span class="kn">import</span> <span class="n">MainConfig</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.world.world</span> <span class="kn">import</span> <span class="n">World</span>
@@ -101,7 +105,6 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_proj</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debug_plugins</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -116,10 +119,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span> <span class="o">=</span> <span class="n">package_manager</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">control_manager</span> <span class="o">=</span> <span class="n">ControlManager</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project_manager</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span> <span class="o">=</span> <span class="n">PluginManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_instance_manager</span> <span class="o">=</span> <span class="n">PluginInstanceManager</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="p">[</span><span class="s">&#39;control&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_manager</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="p">[</span><span class="s">&#39;package&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="p">[</span><span class="s">&#39;project&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="p">[</span><span class="s">&#39;plugin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="p">[</span><span class="s">&#39;plugin_instance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_instance_manager</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">world</span> <span class="o">=</span> <span class="n">World</span><span class="p">()</span>
 
@@ -201,6 +208,10 @@
 </div>
     <span class="n">config</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Session.debug_plugins"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.session.html#openalea.oalab.session.session.Session.debug_plugins">[docs]</a>    <span class="k">def</span> <span class="nf">debug_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">debug</span>
+</div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span>

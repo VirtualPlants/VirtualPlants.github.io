@@ -105,6 +105,7 @@
 <span class="kn">from</span> <span class="nn">openalea.core.service.interface</span> <span class="kn">import</span> <span class="n">interface_name</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.model</span> <span class="kn">import</span> <span class="n">to_model</span><span class="p">,</span> <span class="n">ModelFactory</span>
 
+
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 
@@ -465,100 +466,26 @@
 <span class="sd">            please use :meth:`Data.read&lt;openalea.oalab.model.model.Data.read&gt;`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_filename</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s">&#39;metadata&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">info</span> <span class="o">==</span> <span class="s">&#39;name&#39;</span><span class="p">:</span>
-                    <span class="n">info</span> <span class="o">=</span> <span class="s">&#39;alias&#39;</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;metadata&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
-                <span class="k">elif</span> <span class="n">info</span> <span class="o">==</span> <span class="s">&#39;author&#39;</span><span class="p">:</span>
-                    <span class="n">info</span> <span class="o">=</span> <span class="s">&#39;authors&#39;</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;metadata&#39;</span><span class="p">][</span><span class="s">&#39;author&#39;</span><span class="p">]</span>
-                <span class="k">elif</span> <span class="n">info</span> <span class="o">==</span> <span class="s">&#39;author_email&#39;</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&#39;metadata&#39;</span><span class="p">][</span><span class="n">info</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">interface_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_METADATA</span><span class="p">[</span><span class="n">info</span><span class="p">]</span><span class="o">.</span><span class="n">interface</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;ISequence&#39;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
-                        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="s">&#39;manifest&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="c"># Load file names in right place (dict.keys()) but don&#39;t load entire object:</span>
-            <span class="c"># ie. load keys but not values</span>
-            <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;manifest&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-                <span class="c"># Backward compatibility</span>
-                <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s">&#39;src&#39;</span><span class="p">:</span>
-                    <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;model&#39;</span>
-                    <span class="n">old_category</span> <span class="o">=</span> <span class="s">&#39;src&#39;</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">old_category</span> <span class="o">=</span> <span class="n">category</span>
-
-                <span class="k">if</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CATEGORIES</span><span class="p">:</span>
-                    <span class="n">filenames</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;manifest&quot;</span><span class="p">][</span><span class="n">old_category</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">filenames</span><span class="p">]</span>
-                    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
-                        <span class="n">section</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.path&#39;</span> <span class="o">%</span> <span class="n">category</span>
-                        <span class="k">if</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">_add_item</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">filename</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MODE_LINK</span><span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">_add_item</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MODE_COPY</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_add_item</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MODE_COPY</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">.serialization</span> <span class="kn">import</span> <span class="n">ProjectLoader</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">ProjectLoader</span><span class="p">()</span>
+        <span class="n">loader</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;lazy&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_save_manifest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObj</span><span class="p">()</span>
-        <span class="n">config_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_filename</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">config_path</span><span class="o">.</span><span class="n">isfile</span><span class="p">():</span>
-            <span class="k">return</span>
-
-        <span class="n">config</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">config_path</span>
-        <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="n">config</span><span class="p">[</span><span class="s">&#39;metadata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
-
-        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CATEGORIES</span><span class="p">:</span>
-            <span class="n">filenames_dict</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">filenames_dict</span><span class="p">:</span>
-                <span class="n">category_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">category</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">category_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                    <span class="n">category_path</span><span class="o">.</span><span class="n">makedirs</span><span class="p">()</span>
-                <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">filenames_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="n">filenames_dict</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;save&#39;</span><span class="p">):</span>
-                        <span class="n">data</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-                        <span class="n">config</span><span class="p">[</span><span class="s">&#39;manifest&#39;</span><span class="p">][</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-                        <span class="c"># If data is stored outside project, register data.path in section category.path</span>
-                        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">category_path</span><span class="p">:</span>
-                            <span class="n">section</span> <span class="o">=</span> <span class="n">category</span> <span class="o">+</span> <span class="s">&quot;.path&quot;</span>
-                            <span class="n">config</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="p">{})[</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">path</span>
-
-        <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">.serialization</span> <span class="kn">import</span> <span class="n">ProjectSaver</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">ProjectSaver</span><span class="p">()</span>
+        <span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">config_filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;metadata&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Project.save_metadata"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.project.Project.save_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">save_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_manifest</span><span class="p">()</span>
 </div>
-    <span class="k">def</span> <span class="nf">_save_controls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c"># TODO: use saver/loaders instead</span>
-        <span class="kn">from</span> <span class="nn">openalea.core.control.pyserial</span> <span class="kn">import</span> <span class="n">save_controls</span>
-        <span class="kn">from</span> <span class="nn">openalea.core.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
-        <span class="n">cm</span> <span class="o">=</span> <span class="n">ControlManager</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">cm</span><span class="o">.</span><span class="n">controls</span><span class="p">():</span>
-            <span class="n">save_controls</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">controls</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;control.py&#39;</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">_load_controls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c"># TODO: use saver/loaders instead</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.control.serialization</span> <span class="kn">import</span> <span class="n">ControlLoader</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.service.control</span> <span class="kn">import</span> <span class="n">register_control</span>
         <span class="n">control_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;control.py&#39;</span>
-        <span class="k">if</span> <span class="n">control_path</span><span class="o">.</span><span class="n">isfile</span><span class="p">():</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">control_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">exec</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">pass</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">ControlLoader</span><span class="p">()</span>
+        <span class="n">controls</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">control_path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">controls</span><span class="p">:</span>
+            <span class="n">register_control</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Project.save"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.project.Project.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -566,12 +493,9 @@
 
 <span class="sd">        It contains **list of files** that are inside project (*manifest*) and **metadata** (author, version, ...).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">makedirs</span><span class="p">()</span>
-        <span class="n">config_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_filename</span>
-        <span class="n">config_path</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_controls</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_manifest</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">.serialization</span> <span class="kn">import</span> <span class="n">ProjectSaver</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">ProjectSaver</span><span class="p">()</span>
+        <span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">config_filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_filename</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_saved&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div></div>
 </pre></div>
 

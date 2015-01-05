@@ -77,9 +77,10 @@
 <span class="kn">from</span> <span class="nn">openalea.oalab.service.applet</span> <span class="kn">import</span> <span class="n">get_applets</span><span class="p">,</span> <span class="n">register_applet</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
 
-<span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_instance</span><span class="p">,</span> <span class="n">debug_plugin</span>
 
 <div class="viewcode-block" id="MainWindow"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow">[docs]</a><span class="k">class</span> <span class="nc">MainWindow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class is based on QMainWindow and provide widgets common to all openalea labs.</span>
 <span class="sd">    Some are inherited from QMainWindow:</span>
@@ -112,11 +113,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">areas</span><span class="p">[</span><span class="n">area_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">(</span><span class="s">&quot;Inputs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">areas</span><span class="p">[</span><span class="s">&#39;inputs&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;Inputs&quot;</span><span class="p">,</span>
-                         <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftDockWidgetArea</span><span class="p">)</span>
+                        <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftDockWidgetArea</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">(</span><span class="s">&quot;Outputs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">areas</span><span class="p">[</span><span class="s">&#39;outputs&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;Outputs&quot;</span><span class="p">,</span>
-                         <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightDockWidgetArea</span><span class="p">)</span>
+                        <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightDockWidgetArea</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">(</span><span class="s">&quot;Shell&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">areas</span><span class="p">[</span><span class="s">&#39;shell&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;Shell, log and history&quot;</span><span class="p">,</span>
-                         <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BottomDockWidgetArea</span><span class="p">)</span>
+                        <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BottomDockWidgetArea</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSplitter</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">)</span>
@@ -137,7 +138,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">menu</span> <span class="o">=</span> <span class="n">PanedMenu</span><span class="p">()</span>
 
         <span class="c"># Organize order of tabs</span>
-        <span class="k">for</span> <span class="n">menu_name</span> <span class="ow">in</span> <span class="n">menu_names</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">menu_name</span> <span class="ow">in</span> <span class="n">menu_names</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">menu_paned</span><span class="p">[</span><span class="n">menu_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">addSpecialTab</span><span class="p">(</span><span class="n">menu_name</span><span class="p">)</span>
 
         <span class="n">dock_menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">(</span><span class="s">&quot;Menu&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">TopDockWidgetArea</span><span class="p">)</span>
@@ -155,7 +156,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_applet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span> <span class="s">&#39;Shell&#39;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="s">&#39;shell&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">applets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugins</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c">#self.resize(QtGui.qApp.desktop().size())</span>
+        <span class="c"># self.resize(QtGui.qApp.desktop().size())</span>
 
 <div class="viewcode-block" id="MainWindow.add_action_to_existing_menu"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.add_action_to_existing_menu">[docs]</a>    <span class="k">def</span> <span class="nf">add_action_to_existing_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">menu_name</span><span class="p">,</span> <span class="n">sub_menu_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -194,30 +195,32 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">applet</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="MainWindow.add_plugin"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.add_plugin">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">debug_plugins</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">):</span>
-            <span class="n">plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<div class="viewcode-block" id="MainWindow.add_plugin"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.add_plugin">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">plugin</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_plugin_class</span> <span class="o">=</span> <span class="n">plugin_class</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_plugin_class</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">plugin</span> <span class="o">=</span> <span class="n">_plugin_class</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">plug</span><span class="p">():</span>
+            <span class="n">applet</span> <span class="o">=</span> <span class="n">plugin_instance</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">plugin</span><span class="o">.</span><span class="n">graft</span><span class="p">(</span><span class="n">applet</span><span class="o">=</span><span class="n">applet</span><span class="p">,</span> <span class="n">oa_mainwin</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">applet</span><span class="p">[</span><span class="s">&#39;plugin_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="c"># TODO: log error</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">applet</span><span class="p">[</span><span class="s">&#39;plugin_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">applet</span><span class="p">[</span><span class="n">applet</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">applet</span>
+
+        <span class="c"># Use plugin manager call to handle debug mode automatically</span>
+        <span class="n">debug_plugin</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">plug</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="MainWindow.initialize"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">applet</span> <span class="ow">in</span> <span class="n">get_applets</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">applet</span><span class="p">[</span><span class="n">applet</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">applet</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">applet</span><span class="p">,</span> <span class="s">&#39;initialize&#39;</span><span class="p">):</span>
                 <span class="n">applet</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="MainWindow.dockWidget"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.dockWidget">[docs]</a>    <span class="k">def</span> <span class="nf">dockWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">allowed_area</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+                   <span class="n">allowed_area</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">allowed_area</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -242,14 +245,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dock_widget</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">dock_widget</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.closeEvent"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeSettings</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">closeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
     <span class="c">####################################################################</span>
-    <span class="c"># ## Settings</span>
+    <span class="c"># Settings</span>
     <span class="c">####################################################################</span></div>
 <div class="viewcode-block" id="MainWindow.writeSettings"><a class="viewcode-back" href="../../../../openalea/oalab/doc/user/autosum.html#openalea.oalab.gui.mainwindow.MainWindow.writeSettings">[docs]</a>    <span class="k">def</span> <span class="nf">writeSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -259,7 +261,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
             <span class="n">last_proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
-            
+
             <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">,</span> <span class="n">last_proj</span><span class="p">)</span>
             <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span></div></div>
 </pre></div>
