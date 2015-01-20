@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.model.visualea &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.model.visualea</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2014 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#                       Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#                       Christophe Pradal &lt;christophe.pradal@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.compositenode</span> <span class="kn">import</span> <span class="n">CompositeNodeFactory</span>
+<span class="kn">from</span> <span class="nn">openalea.core.data</span> <span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span> <span class="nn">openalea.core.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">AbstractFactory</span>
+<span class="kn">from</span> <span class="nn">openalea.core.package</span> <span class="kn">import</span> <span class="n">Package</span>
+<span class="kn">from</span> <span class="nn">openalea.core.pkgmanager</span> <span class="kn">import</span> <span class="n">PackageManager</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.model.parse</span> <span class="kn">import</span> <span class="n">InputObj</span><span class="p">,</span> <span class="n">OutputObj</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">string</span>
+
+
+<div class="viewcode-block" id="VisualeaFile"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaFile">[docs]</a><span class="k">class</span> <span class="nc">VisualeaFile</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;Workflow&quot;</span>
+    <span class="n">default_file_name</span> <span class="o">=</span> <span class="s">&quot;workflow.wpy&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="s">&quot;*.wpy&quot;</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="s">&quot;wpy&quot;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s">&quot;:/images/resources/openalealogo.png&quot;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">default_name</span>
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&quot;text/x-visualea&quot;</span>
+
+</div>
+<div class="viewcode-block" id="VisualeaModel"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel">[docs]</a><span class="k">class</span> <span class="nc">VisualeaModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;Workflow&quot;</span>
+    <span class="n">default_file_name</span> <span class="o">=</span> <span class="s">&quot;workflow.wpy&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="s">&quot;*.wpy&quot;</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="s">&quot;wpy&quot;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s">&quot;:/images/resources/openalealogo.png&quot;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">default_name</span>
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&quot;text/x-visualea&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;Workflow&#39;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span> <span class="o">=</span> <span class="n">CompositeNodeFactory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VisualeaModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VisualeaModel.get_documentation"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.get_documentation">[docs]</a>    <span class="k">def</span> <span class="nf">get_documentation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: docstring of current workflow</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="p">,</span> <span class="s">&quot;get_tip&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.repr_code"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.repr_code">[docs]</a>    <span class="k">def</span> <span class="nf">repr_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: a string representation of model to save it on disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="ow">in</span> <span class="s">&#39;.py&#39;</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="ow">in</span> <span class="s">&#39;.wpy&#39;</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="n">cn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span>
+        <span class="n">cnf</span> <span class="o">=</span> <span class="n">CompositeNodeFactory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">cn</span><span class="o">.</span><span class="n">to_factory</span><span class="p">(</span><span class="n">cnf</span><span class="p">)</span>
+
+        <span class="n">repr_wf</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">cnf</span><span class="o">.</span><span class="n">get_writer</span><span class="p">())</span>
+        <span class="c"># hack to allow eval rather than exec...</span>
+        <span class="c"># TODO: change the writer</span>
+
+        <span class="n">repr_wf</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39; = &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repr_wf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; = &#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">return</span> <span class="n">repr_wf</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.eval_value"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.eval_value">[docs]</a>    <span class="k">def</span> <span class="nf">eval_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+    <span class="k">def</span> <span class="nf">_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">outobj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs_info</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="p">[</span><span class="n">outobj</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">outputs</span>
+
+    <span class="k">def</span> <span class="nf">_set_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs_from_ns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs_info</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs_info</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="p">[</span><span class="n">inp</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+<div class="viewcode-block" id="VisualeaModel.run"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        execute entire model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">outputs</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.namespace"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.namespace">[docs]</a>    <span class="k">def</span> <span class="nf">namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.service.run</span> <span class="kn">import</span> <span class="n">namespace</span>
+        <span class="k">return</span> <span class="n">namespace</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.init"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        go back to initial step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">user_ns</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;namespace&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span> <span class="o">=</span> <span class="n">user_ns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">namespace</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_inputs</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.step"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        execute only one step of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_inputs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">eval_as_expression</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.stop"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        stop execution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO : to implement</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.animate"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.animate">[docs]</a>    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        run model step by step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.execute"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        In other paradigms: Execute code (str).</span>
+<span class="sd">        Here this method does not have signification (only for &quot;script-like&quot; paradigm), so, it make a **run**.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VisualeaModel.set_code"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.set_code">[docs]</a>    <span class="k">def</span> <span class="nf">set_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_code</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span> <span class="o">=</span> <span class="n">CompositeNodeFactory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">CompositeNodeFactory</span><span class="p">):</span>
+            <span class="c"># hakishhh</span>
+            <span class="c"># CompositeNodeFactory.instantiate_node = monkey_patch_instantiate_node</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Access to the current project</span>
+            <span class="n">cnf</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">())</span>
+            <span class="c"># hakishhh</span>
+            <span class="n">CompositeNodeFactory</span><span class="o">.</span><span class="n">instantiate_node</span> <span class="o">=</span> <span class="n">monkey_patch_instantiate_node</span>
+<span class="c">#             raise IOError(cnf)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span> <span class="o">=</span> <span class="n">cnf</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inputs_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">input_desc</span><span class="p">:</span>
+            <span class="n">inpobj</span> <span class="o">=</span> <span class="n">InputObj</span><span class="p">()</span>
+            <span class="n">inpobj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">inpobj</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;interface&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">inpobj</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inpobj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">inputs</span>
+
+    <span class="nd">@inputs_info.setter</span>
+<div class="viewcode-block" id="VisualeaModel.inputs_info"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.inputs_info">[docs]</a>    <span class="k">def</span> <span class="nf">inputs_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">clear_inputs</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">add_input</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">interface</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outputs_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">out</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">output_desc</span><span class="p">:</span>
+            <span class="n">outobj</span> <span class="o">=</span> <span class="n">OutputObj</span><span class="p">()</span>
+            <span class="n">outobj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">outobj</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;interface&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">outobj</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outobj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outputs</span>
+
+    <span class="nd">@outputs_info.setter</span>
+<div class="viewcode-block" id="VisualeaModel.outputs_info"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.VisualeaModel.outputs_info">[docs]</a>    <span class="k">def</span> <span class="nf">outputs_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">clear_outputs</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">out</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workflow</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">interface</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ModelNode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNode">[docs]</a><span class="k">class</span> <span class="nc">ModelNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">(),</span> <span class="n">outputs</span><span class="o">=</span><span class="p">()):</span>
+        <span class="kn">import</span> <span class="nn">sys</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModelNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelNode.set_model"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNode.set_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_documentation</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot; Call function. Must be overriden &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.service.run</span> <span class="kn">import</span> <span class="n">namespace</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">outputs</span>
+
+</div>
+<div class="viewcode-block" id="ModelNodeFactory"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory">[docs]</a><span class="k">class</span> <span class="nc">ModelNodeFactory</span><span class="p">(</span><span class="n">AbstractFactory</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">name</span><span class="p">,</span>
+                 <span class="n">lazy</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">delay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModelNodeFactory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="n">delay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alias</span> <span class="o">=</span> <span class="n">alias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="ModelNodeFactory.get_id"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ModelNodeFactory.package"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.package">[docs]</a>    <span class="k">def</span> <span class="nf">package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">class</span> <span class="nc">fake_package</span><span class="p">(</span><span class="n">Package</span><span class="p">):</span>
+
+            <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&quot;:projectmanager.current&quot;</span>
+
+            <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">pass</span>
+                <span class="c"># print 2, &quot;package reload&quot;</span>
+        <span class="k">return</span> <span class="n">fake_package</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;authors&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">})</span>
+</div>
+<div class="viewcode-block" id="ModelNodeFactory.get_classobj"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.get_classobj">[docs]</a>    <span class="k">def</span> <span class="nf">get_classobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_module</span><span class="p">()</span>
+        <span class="n">classobj</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodeclass_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">classobj</span>
+</div>
+<div class="viewcode-block" id="ModelNodeFactory.get_documentation"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.get_documentation">[docs]</a>    <span class="k">def</span> <span class="nf">get_documentation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">get_documentation</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ModelNodeFactory.instantiate"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_stack</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a node instance.</span>
+<span class="sd">        :param call_stack: the list of NodeFactory id already in call stack</span>
+<span class="sd">        (in order to avoir infinite recursion)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.service.run</span> <span class="kn">import</span> <span class="n">get_model</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;error loading model &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+            <span class="c"># print &quot;Available models are &quot;, pm.cproject.model.keys()</span>
+
+        <span class="c"># TODO</span>
+        <span class="k">def</span> <span class="nf">signature</span><span class="p">(</span><span class="n">args_info</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">args_info</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args_info</span><span class="p">:</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">d</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">interface</span><span class="p">:</span>
+                        <span class="n">d</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">interface</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">d</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
+                    <span class="k">if</span> <span class="n">d</span><span class="p">:</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">args</span>
+
+        <span class="c"># If class is not a Node, embed object in a Node class</span>
+        <span class="k">if</span> <span class="n">model</span><span class="p">:</span>
+            <span class="c"># model.read()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">inputs_info</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">outputs_info</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;out&quot;</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">),)</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="n">ModelNode</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+
+            <span class="c"># Properties</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="bp">self</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span>
+                <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">caption</span><span class="p">):</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="n">node</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">return</span> <span class="n">node</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">openalea.core.project.manager</span> <span class="kn">import</span> <span class="n">ProjectManager</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">&quot;We can&#39;t instantiate node from project </span><span class="si">%s</span><span class="s"> because we don&#39;t have model </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;We only have models : &quot;</span>
+            <span class="k">print</span> <span class="s">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="ModelNodeFactory.instantiate_widget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.instantiate_widget">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">edit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                           <span class="n">autonomous</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the corresponding widget initialised with node&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+        <span class="c"># TODO: open corresponding model</span>
+</div>
+<div class="viewcode-block" id="ModelNodeFactory.get_writer"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.ModelNodeFactory.get_writer">[docs]</a>    <span class="k">def</span> <span class="nf">get_writer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the writer class &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">PyModelNodeFactoryWriter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PyModelNodeFactoryWriter"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.PyModelNodeFactoryWriter">[docs]</a><span class="k">class</span> <span class="nc">PyModelNodeFactoryWriter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; NodeFactory python Writer &quot;&quot;&quot;</span>
+
+    <span class="n">nodefactory_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+
+<span class="s">$NAME = ModelFactory(name=$PNAME,</span>
+<span class="s">                inputs=$LISTIN,</span>
+<span class="s">                outputs=$LISTOUT,</span>
+<span class="s">               )</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">factory</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the python string representation &quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
+        <span class="n">fstr</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodefactory_template</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fstr</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">NAME</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                                      <span class="n">LISTIN</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">inputs</span><span class="p">),</span>
+                                      <span class="n">LISTOUT</span><span class="o">=</span><span class="nb">repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">outputs</span><span class="p">),)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<span class="n">DEFAULT_DOC</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">&lt;H1&gt;&lt;IMG SRC=</span><span class="si">%s</span><span class="s"></span>
+<span class="s"> ALT=&quot;icon&quot;</span>
+<span class="s"> HEIGHT=25</span>
+<span class="s"> WIDTH=25</span>
+<span class="s"> TITLE=&quot;Python logo&quot;&gt;Python&lt;/H1&gt;</span>
+
+<span class="s">more informations: http://www.python.org/</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="monkey_patch_instantiate_node"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.visualea.monkey_patch_instantiate_node">[docs]</a><span class="k">def</span> <span class="nf">monkey_patch_instantiate_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">call_stack</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">package_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+    <span class="c"># my temporary patch</span>
+    <span class="k">if</span> <span class="n">package_id</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;:projectmanager.current&quot;</span><span class="p">):</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">ModelNodeFactory</span><span class="p">(</span><span class="n">factory_id</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pkgmanager</span> <span class="o">=</span> <span class="n">PackageManager</span><span class="p">()</span>
+        <span class="n">pkg</span> <span class="o">=</span> <span class="n">pkgmanager</span><span class="p">[</span><span class="n">package_id</span><span class="p">]</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">get_factory</span><span class="p">(</span><span class="n">factory_id</span><span class="p">)</span>
+
+    <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span><span class="n">call_stack</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_fake_node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span>
+
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="n">vid</span><span class="p">])</span>
+    <span class="n">ad_hoc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">load_ad_hoc_data</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">ad_hoc</span><span class="p">)</span>
+
+    <span class="c"># copy node input data if any</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="p">()))</span>
+
+    <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># the two first elements are the historical</span>
+            <span class="c"># values : port Id and port value</span>
+            <span class="c"># the values beyond are not used.</span>
+            <span class="n">port</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vs</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="nb">eval</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">input_desc</span><span class="p">[</span><span class="n">port</span><span class="p">]</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="s">&quot;hide&quot;</span><span class="p">,</span>
+                                                                 <span class="n">node</span><span class="o">.</span><span class="n">is_port_hidden</span><span class="p">(</span><span class="n">port</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+    <span class="k">return</span> <span class="n">node</span>
+
+</div>
+<span class="n">CompositeNodeFactory</span><span class="o">.</span><span class="n">instantiate_node</span> <span class="o">=</span> <span class="n">monkey_patch_instantiate_node</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

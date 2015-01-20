@@ -1,0 +1,1289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.algo.dataflow_evaluation &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="core" href="../../core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for core.algo.dataflow_evaluation</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Samuel Dufour-Kowalski &lt;samuel.dufour@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite: http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="sd">&quot;&quot;&quot;This module provide an algorithm to evaluate a dataflow&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">clock</span>
+<span class="kn">import</span> <span class="nn">traceback</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">ScriptLibrary</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.dataflow</span> <span class="kn">import</span> <span class="n">SubDataflow</span>
+<span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="n">IFunction</span>
+
+
+<span class="n">PROVENANCE</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="c"># Implement provenance in OpenAlea</span>
+<span class="n">db_conn</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
+
+<div class="viewcode-block" id="db_create"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.db_create">[docs]</a><span class="k">def</span> <span class="nf">db_create</span><span class="p">(</span><span class="n">cursor</span><span class="p">):</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">cursor</span>
+    <span class="c">#-prospective provenance-#</span>
+    <span class="c">#User table creation</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS User (userid INTEGER,createtime DATETIME,name varchar (25), firstname varchar (25), email varchar (25), password varchar (25),PRIMARY KEY(userid))&quot;</span><span class="p">)</span>
+
+    <span class="c"># CompositeNode table creation</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS CompositeNode (CompositeNodeid INTEGER, creatime DATETIME, name varchar (25), description varchar (25),userid INTEGER,PRIMARY KEY(CompositeNodeid),FOREIGN KEY(userid) references User)&quot;</span><span class="p">)</span>
+    <span class="c">#Cr?ation de la table Node</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS Node (Nodeid INTEGER, createtime DATETIME, name varchar (25), NodeFactory varchar (25),CompositeNodeid INTEGER,PRIMARY KEY(Nodeid),FOREIGN KEY(CompositeNodeid) references CompsiteNode)&quot;</span><span class="p">)</span>
+    <span class="c">#Cr?ation de la table Input</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS Input (Inputid INTEGER, createtime DATETIME, name varchar (25), typedata varchar (25), InputPort INTEGER,PRIMARY KEY (Inputid))&quot;</span><span class="p">)</span>
+    <span class="c">#Cr?ation de la table Output</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS Output (Outputid INTEGER, createtime DATETIME, name varchar (25), typedata varchar (25), OutputPort INTEGER,PRIMARY KEY (Outputid))&quot;</span><span class="p">)</span>
+    <span class="c">#Cr?ation de la table elt_connection</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS elt_connection (elt_connectionid INTEGER, createtime DATETIME,srcNodeid INTEGER, srcNodeOutputPortid INTEGER, targetNodeid INTEGER, targetNodeInputPortid INTEGER ,PRIMARY KEY (elt_connectionid))&quot;</span><span class="p">)</span>
+
+    <span class="c">#- retrospective provenance -#</span>
+    <span class="c">#- CompositeNodeExec table creation</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS CompositeNodeExec (CompositeNodeExecid INTEGER, createtime DATETIME, endtime DATETIME,userid INTEGER,CompositeNodeid INTEGER,PRIMARY KEY(CompositeNodeExecid),FOREIGN KEY(CompositeNodeid) references CompositeNode,FOREIGN KEY(userid) references User)&quot;</span><span class="p">)</span>
+    <span class="c">#- NodeExec </span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS NodeExec (NodeExecid INTEGER, createtime DATETIME, endtime DATETIME,Nodeid INTEGER,CompositeNodeExecid INTEGER,dataid INTEGER,PRIMARY KEY(NodeExecid),FOREIGN KEY(Nodeid) references Node, FOREIGN KEY (CompositeNodeExecid) references CompositeNodeExec, FOREIGN KEY (dataid) references Data)&quot;</span><span class="p">)</span>
+    <span class="c">#- History</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS Histoire (Histoireid INTEGER, createtime DATETIME, name varchar (25), description varchar (25),userid INTEGER,CompositeNodeExecid INTEGER,PRIMARY KEY (Histoireid), FOREIGN KEY(Userid) references User, FOREIGN KEY(CompositeNodeExecid) references CompositeNodeExec)&quot;</span><span class="p">)</span>
+    <span class="c">#- Data</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS Data (dataid INTEGER, createtime DATETIME,NodeExecid INTEGER, PRIMARY KEY(dataid),FOREIGN KEY(NodeExecid) references NodeExec)&quot;</span><span class="p">)</span>
+    <span class="c">#- Tag</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS Tag (CompositeNodeExecid INTEGER, createtime DATETIME, name varchar(25),userid INTEGER,PRIMARY KEY(CompositeNodeExecid),FOREIGN KEY(userid) references User)&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cur</span>
+</div>
+<div class="viewcode-block" id="get_database_name"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.get_database_name">[docs]</a><span class="k">def</span> <span class="nf">get_database_name</span><span class="p">():</span>
+    <span class="n">db_fn</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_openalea_home_dir</span><span class="p">())</span><span class="o">/</span><span class="s">&#39;provenance.sq3&#39;</span>
+    <span class="k">return</span> <span class="n">db_fn</span>
+</div>
+<div class="viewcode-block" id="db_connexion"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.db_connexion">[docs]</a><span class="k">def</span> <span class="nf">db_connexion</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Return a curso on the database.</span>
+
+<span class="sd">    If the database does not exists, create it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">db_conn</span>
+    <span class="k">if</span> <span class="n">db_conn</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">db_fn</span> <span class="o">=</span> <span class="n">get_database_name</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">db_fn</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">db_conn</span><span class="o">=</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">db_fn</span><span class="p">)</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">cur</span> <span class="o">=</span> <span class="n">db_create</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cur</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cur</span>
+</div>
+<div class="viewcode-block" id="Provenance"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance">[docs]</a><span class="k">class</span> <span class="nc">Provenance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span> <span class="o">=</span> <span class="n">workflow</span>
+
+<div class="viewcode-block" id="Provenance.edges"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.edges">[docs]</a>    <span class="k">def</span> <span class="nf">edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span>
+        <span class="n">edges</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cn</span><span class="o">.</span><span class="n">edges</span><span class="p">())</span>
+        <span class="n">sources</span><span class="o">=</span><span class="nb">map</span><span class="p">(</span><span class="n">cn</span><span class="o">.</span><span class="n">source</span><span class="p">,</span><span class="n">edges</span><span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">cn</span><span class="o">.</span><span class="n">target</span><span class="p">,</span><span class="n">edges</span><span class="p">)</span>
+        <span class="n">source_ports</span><span class="o">=</span><span class="p">[</span><span class="n">cn</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">cn</span><span class="o">.</span><span class="n">source_port</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">]</span>
+        <span class="n">target_ports</span><span class="o">=</span><span class="p">[</span><span class="n">cn</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">cn</span><span class="o">.</span><span class="n">target_port</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">]</span>
+        <span class="n">_edges</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span><span class="nb">zip</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span><span class="n">source_ports</span><span class="p">,</span><span class="n">targets</span><span class="p">,</span> <span class="n">target_ports</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">_edges</span>
+</div>
+<div class="viewcode-block" id="Provenance.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="Provenance.start_time"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.start_time">[docs]</a>    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Provenance.end_time"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.end_time">[docs]</a>    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Provenance.workflow_exec"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.workflow_exec">[docs]</a>    <span class="k">def</span> <span class="nf">workflow_exec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Provenance.node_exec"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.node_exec">[docs]</a>    <span class="k">def</span> <span class="nf">node_exec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Provenance.write"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.Provenance.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write the provenance in db &quot;&quot;&quot;</span>
+</div></div>
+<div class="viewcode-block" id="PrintProvenance"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.PrintProvenance">[docs]</a><span class="k">class</span> <span class="nc">PrintProvenance</span><span class="p">(</span><span class="n">Provenance</span><span class="p">):</span>
+<div class="viewcode-block" id="PrintProvenance.workflow_exec"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.PrintProvenance.workflow_exec">[docs]</a>    <span class="k">def</span> <span class="nf">workflow_exec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;Workflow execution &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span></div>
+<div class="viewcode-block" id="PrintProvenance.node_exec"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.PrintProvenance.node_exec">[docs]</a>    <span class="k">def</span> <span class="nf">node_exec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">provenance</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="provenance"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.provenance">[docs]</a><span class="k">def</span> <span class="nf">provenance</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">):</span>
+    <span class="c">#from service import db</span>
+    <span class="c">#conn = db.connect()</span>
+
+
+    <span class="k">if</span> <span class="n">PROVENANCE</span><span class="p">:</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">db_connexion</span><span class="p">()</span>
+
+        <span class="n">pname</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">print</span> <span class="s">&quot;Provenance Process:&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;instance ID &quot;</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="s">&quot;Package Name: &quot;</span><span class="p">,</span><span class="n">pname</span><span class="p">,</span> <span class="s">&quot;Name: &quot;</span><span class="p">,</span> <span class="n">name</span>
+        <span class="k">print</span> <span class="s">&quot;start time :&quot;</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="s">&quot;end_time: &quot;</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="s">&quot;duration : &quot;</span><span class="p">,</span> <span class="n">end_time</span><span class="o">-</span><span class="n">start_time</span> 
+        <span class="k">print</span> <span class="s">&#39;Inputs : &#39;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">inputs</span>
+        <span class="k">print</span> <span class="s">&#39;outputs : &#39;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="c"># print the evaluation time</span>
+<span class="c"># This variable has to be retrieve by the settings</span></div>
+<span class="n">quantify</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="n">__evaluators__</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="EvaluationException"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.EvaluationException">[docs]</a><span class="k">class</span> <span class="nc">EvaluationException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
+        <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">vid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="n">exception</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exc_info</span> <span class="o">=</span> <span class="n">exc_info</span>
+
+
+<span class="c"># Sort functions</span>
+
+<span class="c"># order function sort by priority</span>
+
+</div>
+<div class="viewcode-block" id="cmp_priority"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.cmp_priority">[docs]</a><span class="k">def</span> <span class="nf">cmp_priority</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">xvid</span><span class="p">,</span> <span class="n">xactor</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="p">(</span><span class="n">yvid</span><span class="p">,</span> <span class="n">yactor</span><span class="p">)</span> <span class="o">=</span> <span class="n">y</span>
+    <span class="n">px</span> <span class="o">=</span> <span class="n">xactor</span><span class="o">.</span><span class="n">internal_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;priority&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">py</span> <span class="o">=</span> <span class="n">yactor</span><span class="o">.</span><span class="n">internal_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;priority&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c"># reverse order</span>
+    <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">py</span><span class="p">,</span> <span class="n">px</span><span class="p">)</span>
+
+
+<span class="c"># order function to sort by pos x</span>
+
+</div>
+<div class="viewcode-block" id="cmp_posx"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.cmp_posx">[docs]</a><span class="k">def</span> <span class="nf">cmp_posx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">xpid</span><span class="p">,</span> <span class="n">xvid</span><span class="p">,</span> <span class="n">xactor</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="p">(</span><span class="n">ypid</span><span class="p">,</span> <span class="n">yvid</span><span class="p">,</span> <span class="n">yactor</span><span class="p">)</span> <span class="o">=</span> <span class="n">y</span>
+    <span class="c">#px = xactor.internal_data.get(&#39;posx&#39;, 0)</span>
+    <span class="c">#py = yactor.internal_data.get(&#39;posx&#39;, 0)</span>
+    <span class="n">px</span> <span class="o">=</span> <span class="n">xactor</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">py</span> <span class="o">=</span> <span class="n">yactor</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">xpid</span><span class="p">,</span> <span class="n">ypid</span><span class="p">)</span>
+    <span class="c"># reverse order</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="c"># Evaluation Algoithm</span>
+</div>
+<span class="sd">&quot;&quot;&quot; Abstract evaluation algorithm &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AbstractEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.AbstractEvaluation">[docs]</a><span class="k">class</span> <span class="nc">AbstractEvaluation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param dataflow: to be done</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span> <span class="o">=</span> <span class="n">dataflow</span>
+        <span class="k">if</span> <span class="n">PROVENANCE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span> <span class="o">=</span> <span class="n">PrintProvenance</span><span class="p">(</span><span class="n">dataflow</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbstractEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.AbstractEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AbstractEvaluation.is_stopped"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.AbstractEvaluation.is_stopped">[docs]</a>    <span class="k">def</span> <span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return True if evaluation must be stop at this vertex. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">actor</span><span class="o">.</span><span class="n">block</span>
+</div>
+<div class="viewcode-block" id="AbstractEvaluation.eval_vertex_code"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.AbstractEvaluation.eval_vertex_code">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the vertex vid.</span>
+<span class="sd">        Can raise an exception if evaluation failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">PROVENANCE</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span><span class="o">.</span><span class="n">node_exec</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span><span class="n">t1</span><span class="p">)</span>
+                <span class="c">#provenance(vid, node, t0,t1)</span>
+            
+            <span class="c"># When an exception is raised, a flag is set.</span>
+            <span class="c"># So we remove it when evaluation is ok.</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">raise_exception</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="c"># if hasattr(node, &#39;raise_exception&#39;):</span>
+            <span class="c">#     del node.raise_exception</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;data_modified&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+        <span class="k">except</span> <span class="n">EvaluationException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">vid</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="c"># When an exception is raised, a flag is set.</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">raise_exception</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;data_modified&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c"># When an exception is raised, a flag is set.</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">raise_exception</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;data_modified&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">EvaluationException</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> \
+                <span class="n">tb</span><span class="o">.</span><span class="n">format_tb</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
+
+</div>
+<div class="viewcode-block" id="AbstractEvaluation.get_parent_nodes"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.AbstractEvaluation.get_parent_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_parent_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the list of parent node connected to pid</span>
+<span class="sd">        The list contains tuples (port_pid, node_pid, actor)</span>
+<span class="sd">        This list is sorted by the x value of the node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+
+        <span class="c"># For each connected node</span>
+        <span class="n">npids</span> <span class="o">=</span> <span class="p">[(</span><span class="n">npid</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">npid</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">npid</span><span class="p">)))</span> \
+                     <span class="k">for</span> <span class="n">npid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">connected_ports</span><span class="p">(</span><span class="n">pid</span><span class="p">)]</span>
+        <span class="n">npids</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="nb">cmp</span><span class="o">=</span><span class="n">cmp_posx</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">npids</span>
+</div>
+<div class="viewcode-block" id="AbstractEvaluation.set_provenance"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.AbstractEvaluation.set_provenance">[docs]</a>    <span class="k">def</span> <span class="nf">set_provenance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provenance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span> <span class="o">=</span> <span class="n">provenance</span>
+</div></div>
+<div class="viewcode-block" id="BrutEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.BrutEvaluation">[docs]</a><span class="k">class</span> <span class="nc">BrutEvaluation</span><span class="p">(</span><span class="n">AbstractEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Basic evaluation algorithm &quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;BrutEvaluation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+
+        <span class="n">AbstractEvaluation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">)</span>
+        <span class="c"># a property to specify if the node has already been evaluated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BrutEvaluation.is_stopped"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.BrutEvaluation.is_stopped">[docs]</a>    <span class="k">def</span> <span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return True if evaluation must be stop at this vertex &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">actor</span><span class="o">.</span><span class="n">block</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()</span>
+                <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">if</span> <span class="n">actor</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">outputs</span><span class="p">:</span>
+                    <span class="n">status</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="n">status</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="BrutEvaluation.eval_vertex"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.BrutEvaluation.eval_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the vertex vid &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c"># For each inputs</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c"># For each connected node</span>
+            <span class="k">for</span> <span class="n">npid</span><span class="p">,</span> <span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_nodes</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">nvid</span><span class="p">)</span>
+
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nactor</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">npid</span><span class="p">)))</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># set input as a list or a simple value</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">actor</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="c"># Eval the node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex_code</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BrutEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.BrutEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the whole dataflow starting from leaves&quot;&quot;&quot;</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+
+        <span class="c"># Unvalidate all the nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c"># Eval from the leaf</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="p">(</span><span class="n">vid</span> <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">nb_out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Evaluation time: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PriorityEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.PriorityEvaluation">[docs]</a><span class="k">class</span> <span class="nc">PriorityEvaluation</span><span class="p">(</span><span class="n">BrutEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Support priority between nodes and selective&quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;PriorityEvaluation&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PriorityEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.PriorityEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+
+        <span class="n">is_subdataflow</span> <span class="o">=</span> <span class="bp">False</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">kwds</span> <span class="k">else</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;is_subdataflow&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="c"># Unvalidate all the nodes</span>
+        <span class="k">if</span> <span class="n">is_subdataflow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_node</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">vtx_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># Select the leaves (list of (vid, actor))</span>
+        <span class="n">leaves</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vid</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+              <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">nb_out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">leaves</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">cmp_priority</span><span class="p">)</span>
+
+        <span class="c"># Excecute</span>
+        <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span> <span class="ow">in</span> <span class="n">leaves</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Evaluation time: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="GeneratorEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.GeneratorEvaluation">[docs]</a><span class="k">class</span> <span class="nc">GeneratorEvaluation</span><span class="p">(</span><span class="n">AbstractEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Evaluation algorithm with generator / priority and selection&quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;GeneratorEvaluation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+
+        <span class="n">AbstractEvaluation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">)</span>
+        <span class="c"># a property to specify if the node has already been evaluated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># Flag to force reevaluation (for generator)</span>
+
+<div class="viewcode-block" id="GeneratorEvaluation.is_stopped"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.GeneratorEvaluation.is_stopped">[docs]</a>    <span class="k">def</span> <span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return True if evaluation must be stop at this vertex &quot;&quot;&quot;</span>
+        <span class="n">stopped</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stopped</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">block</span> <span class="ow">or</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">stopped</span>
+</div>
+<div class="viewcode-block" id="GeneratorEvaluation.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.GeneratorEvaluation.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Clear evaluation variable &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="GeneratorEvaluation.eval_vertex"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.GeneratorEvaluation.eval_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the vertex vid &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c"># For each inputs</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c"># For each connected node</span>
+            <span class="k">for</span> <span class="n">npid</span><span class="p">,</span> <span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_nodes</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+                <span class="c"># Do no reevaluate the same node</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">nvid</span><span class="p">)</span>
+
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nactor</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">npid</span><span class="p">)))</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># set input as a list or a simple value</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">actor</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="c"># Eval the node</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex_code</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c"># Reevaluation flag</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="GeneratorEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.GeneratorEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">vtx_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">leafs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vtx_id</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Select the leafs (list of (vid, actor))</span>
+            <span class="n">leafs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vid</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">nb_out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">leafs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">cmp_priority</span><span class="p">)</span>
+
+        <span class="c"># Execute</span>
+        <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span> <span class="ow">in</span> <span class="n">leafs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">while</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reeval</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Evaluation time: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+</div></div>
+<div class="viewcode-block" id="LambdaEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.LambdaEvaluation">[docs]</a><span class="k">class</span> <span class="nc">LambdaEvaluation</span><span class="p">(</span><span class="n">PriorityEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Evaluation algorithm with support of lambda / priority and selection&quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;LambdaEvaluation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+        <span class="n">PriorityEvaluation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambda_value</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># lambda resolution dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_node</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LambdaEvaluation.eval_vertex"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.LambdaEvaluation.eval_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">lambda_value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the vertex vid</span>
+
+<span class="sd">        This function is called both by the user (eval a node and its parents)</span>
+<span class="sd">        and by the SubDataFlow evaluation.</span>
+
+<span class="sd">        First the graph is traversed by the algorithm in a bottom-up way.</span>
+<span class="sd">        The SubDataflow is stored in the inputs.</span>
+
+
+<span class="sd">        :param context: is a list a value to assign to lambdas</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c"># Do not evaluate a node which is blocked</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="n">use_lambda</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># For each inputs</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+
+            <span class="n">input_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c"># Get input interface</span>
+            <span class="n">interface</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">input_desc</span><span class="p">[</span><span class="n">input_index</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;interface&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="c"># Determine if the context must be transmitted</span>
+            <span class="c"># If interface is IFunction it means that the node is a consumer</span>
+            <span class="c"># We do not propagate the context</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">interface</span> <span class="ow">is</span> <span class="n">IFunction</span><span class="p">):</span>
+                <span class="n">transmit_cxt</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">transmit_lambda</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">transmit_cxt</span> <span class="o">=</span> <span class="n">context</span>
+                <span class="n">transmit_lambda</span> <span class="o">=</span> <span class="n">lambda_value</span>
+
+            <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># parent counter</span>
+
+            <span class="c"># For each connected node</span>
+            <span class="k">for</span> <span class="n">npid</span><span class="p">,</span> <span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_nodes</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+
+                <span class="c"># Do no reevaluate the same node</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">transmit_cxt</span><span class="p">,</span> <span class="n">transmit_lambda</span><span class="p">)</span>
+
+                <span class="n">outval</span> <span class="o">=</span> <span class="n">nactor</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">npid</span><span class="p">))</span>
+                <span class="c"># Lambda</span>
+
+                <span class="c"># We must consider 3 cases</span>
+                <span class="c">#  1) Lambda detection (receive a SubDataflow and</span>
+                <span class="c"># interface != IFunction)</span>
+                <span class="c">#</span>
+                <span class="c">#  2) Resolution mode (context is not None): we</span>
+                <span class="c">#      replace the lambda with value.</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">outval</span><span class="p">,</span> <span class="n">SubDataflow</span><span class="p">)</span>
+                   <span class="ow">and</span> <span class="n">interface</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IFunction</span><span class="p">):</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">context</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lambda_value</span><span class="p">):</span>
+                        <span class="c"># we are not in resolution mode</span>
+                        <span class="n">use_lambda</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_node</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># We set the context value for later use.</span>
+                        <span class="c"># We set resolved values into the dataflow.</span>
+                        <span class="c"># outval is a SubDataFlow. For this object, we have</span>
+                        <span class="c"># now a value.</span>
+                        <span class="c"># E.g. f(x=3). We replace x subdf by 3.</span>
+                        <span class="c"># If x is used elsewhere (f(x,x)), we referenced it</span>
+                        <span class="c"># in a dict.</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">lambda_value</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">outval</span><span class="p">)):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">lambda_value</span><span class="p">[</span><span class="n">outval</span><span class="p">]</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;The number of lambda variables is insuffisant&quot;</span><span class="p">)</span>
+
+                        <span class="c"># We replace the value with a context value</span>
+                        <span class="n">outval</span> <span class="o">=</span> <span class="n">lambda_value</span><span class="p">[</span><span class="n">outval</span><span class="p">]</span>
+
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outval</span><span class="p">)</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># set input as a list or a simple value</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">actor</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">input_index</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="c"># Eval the node</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">use_lambda</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex_code</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># set the node output with subdataflow</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">actor</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()):</span>
+                <span class="n">actor</span><span class="o">.</span><span class="n">set_output</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">SubDataflow</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="LambdaEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.LambdaEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">is_subdataflow</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Eval the dataflow from vtx_id with a particular context</span>
+
+<span class="sd">        :param vtx_id: vertex id to start the evaluation</span>
+<span class="sd">        :param context: list a value to assign to lambda variables</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">PROVENANCE</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_subdataflow</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span><span class="o">.</span><span class="n">workflow_exec</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span><span class="o">.</span><span class="n">start_time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambda_value</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">context</span><span class="p">):</span>
+            <span class="c"># The evaluate, due to the recursion, is done fisrt in last out.</span>
+            <span class="c"># thus, we have to reverse the arguments to evaluate the function (FIFO).</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="n">PriorityEvaluation</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_value</span><span class="p">,</span> <span class="n">is_subdataflow</span><span class="o">=</span><span class="n">is_subdataflow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambda_value</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span> <span class="c"># do not keep context in memory</span>
+        
+        <span class="k">if</span> <span class="n">PROVENANCE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">provenance</span><span class="o">.</span><span class="n">end_time</span><span class="p">()</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Evaluation time: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_subdataflow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resolution_node</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+</div></div>
+<span class="n">DefaultEvaluation</span> <span class="o">=</span> <span class="n">LambdaEvaluation</span>
+<span class="c">#DefaultEvaluation = GeneratorEvaluation</span>
+
+
+<span class="c"># from collections import deque</span>
+
+
+<span class="c"># class LambdaEvaluation (PriorityEvaluation):</span>
+<span class="c"># 	&quot;&quot;&quot; Evaluation algorithm with support of lambda / priority and selection&quot;&quot;&quot;</span>
+
+<span class="c"># 	def __init__ (self, dataflow):</span>
+
+<span class="c"># 		PriorityEvaluation.__init__(self, dataflow)</span>
+
+
+<span class="c">#         def scan_graph(self, vid, context):</span>
+<span class="c">#             &quot;&quot;&quot; Return the list of vextex id in the correct process order</span>
+<span class="c">#             starting from vid</span>
+<span class="c">#             @param vid: starting vertex id</span>
+<span class="c">#             @param context: variable context</span>
+<span class="c">#             &quot;&quot;&quot;</span>
+
+<span class="c">#             df = self._dataflow</span>
+
+<span class="c">#             process_list = deque()</span>
+<span class="c">#             scan_list = deque([(vid, context)])</span>
+
+<span class="c">#             while(scan_list):</span>
+
+<span class="c">#                 (vid, context) = scan_list.popleft()</span>
+<span class="c">#                 process_list.appendleft((vid, context) )</span>
+<span class="c">#                 actor = df.actor(vid)</span>
+
+<span class="c">#                 # For each inputs</span>
+<span class="c">#                 for pid in df.in_ports(vid):</span>
+
+<span class="c">#                     # Determine if the context must be transmitted</span>
+<span class="c">#                     # If interface is IFunction it means that the node is a consumer</span>
+<span class="c">#                     # We do not propagate the context</span>
+<span class="c">#                     input_index = df.local_id(pid)</span>
+<span class="c">#                     interface = actor.input_desc[input_index].get(&#39;interface&#39;, None)</span>
+<span class="c">#                     transmit_cxt = None if (interface is IFunction) else context</span>
+
+<span class="c">#                     # For each connected node</span>
+<span class="c">#                     for npid in df.connected_ports(pid):</span>
+<span class="c">#                         nvid = df.vertex(npid)</span>
+<span class="c">#                         scan_list.append((nvid,  transmit_cxt))</span>
+
+<span class="c">#             return process_list</span>
+
+
+
+<span class="c"># 	def eval_vertex (self, vid, context, *args):</span>
+<span class="c"># 		&quot;&quot;&quot; Evaluate the graph starting at the vertex vid</span>
+<span class="c">#                 @param vid: starting vertex id</span>
+<span class="c">#                 @param context  list of values to assign to variables</span>
+<span class="c">#                 &quot;&quot;&quot;</span>
+
+<span class="c">#                 lambda_value = {}</span>
+
+<span class="c">#                 # Get the node order</span>
+<span class="c">#                 process_list = self.scan_graph(vid, context)</span>
+
+<span class="c">#                 # Eval each node</span>
+<span class="c">#                 scanned = set()</span>
+
+<span class="c">#                 for vid, context in process_list:</span>
+<span class="c">#                     if (vid not in scanned):</span>
+<span class="c">#                         self.eval_one_vertex(vid, context, lambda_value)</span>
+<span class="c">#                     scanned.add(vid)</span>
+
+
+<span class="c">#         def get_output_value(self, nvid, nactor, npid):</span>
+<span class="c">#             &quot;&quot;&quot; Return the value of a node output &quot;&quot;&quot;</span>
+
+<span class="c">#             return nactor.get_output(self._dataflow.local_id(npid))</span>
+
+
+
+<span class="c">#         def eval_one_vertex (self, vid, context, lambda_value):</span>
+<span class="c"># 		&quot;&quot;&quot; Evaluate only one vertex</span>
+<span class="c">#                 @param vid: id of vertex to evalaute</span>
+<span class="c">#                 @param context: list of values to assign to variables</span>
+<span class="c">#                 @param lambda_value: dictionary of previous assigned values</span>
+<span class="c">#                 &quot;&quot;&quot;</span>
+
+<span class="c">#                 df = self._dataflow</span>
+
+<span class="c">#                 actor = df.actor(vid)</span>
+<span class="c">#                 use_lambda = False</span>
+
+<span class="c">#                 # Get inputs</span>
+<span class="c">#                 for pid in df.in_ports(vid):</span>
+
+<span class="c">#                     inputs = []</span>
+<span class="c">#                     cpt = 0 # parent counter</span>
+
+<span class="c">#                     # Get input interface</span>
+<span class="c">#                     input_index = df.local_id(pid)</span>
+<span class="c">#                     interface = actor.input_desc[input_index].get(&#39;interface&#39;, None)</span>
+
+<span class="c">#                     # For each connected node</span>
+<span class="c">#                     for npid, nvid, nactor in self.get_parent_nodes(pid):</span>
+
+<span class="c">#                         outval = self.get_output_value(nvid, nactor, npid)</span>
+
+<span class="c">#                         # Lambda</span>
+
+<span class="c">#                         # We must consider 2 cases</span>
+<span class="c">#                         #  1) Lambda detection (receive a SubDataflow and interface != IFunction)</span>
+<span class="c">#                         #</span>
+<span class="c">#                         #  2) Resolution mode (context is not None): we</span>
+<span class="c">#                         #      replace the lambda with value</span>
+
+<span class="c">#                         if (isinstance(outval, SubDataflow)</span>
+<span class="c">#                            and interface is not IFunction):</span>
+
+<span class="c">#                             if (not context and not lambda_value):</span>
+<span class="c">#                                 # we are not in resolution mode</span>
+<span class="c">#                                 use_lambda = True</span>
+<span class="c">#                             else:</span>
+<span class="c">#                                 # We set the context value for later use</span>
+<span class="c">#                                 if (not lambda_value.has_key(outval)):</span>
+<span class="c">#                                     try:</span>
+<span class="c">#                                         lambda_value[outval] = context.pop()</span>
+<span class="c">#                                     except Exception,e:</span>
+<span class="c">#                                         print e, context, lambda_value</span>
+<span class="c">#                                         raise Exception(&quot;The number of lambda variables is insuffisant&quot;)</span>
+
+<span class="c">#                                 # We replace the value with a context value</span>
+<span class="c">#                                 outval = lambda_value[outval]</span>
+
+
+<span class="c">#                         inputs.append(outval)</span>
+<span class="c">#                         cpt += 1</span>
+
+<span class="c">#                     # set input as a list or a simple value</span>
+<span class="c">#                     if (cpt == 1): inputs = inputs[0]</span>
+<span class="c">#                     if (cpt &gt; 0): actor.set_input(input_index, inputs)</span>
+
+
+<span class="c">#                 # Eval the node</span>
+<span class="c">#                 if (not use_lambda):</span>
+<span class="c">#                     ret = self.eval_vertex_code(vid)</span>
+<span class="c">#                 else:</span>
+<span class="c">#                     # tranmit a SubDataflow to following node</span>
+<span class="c">#                     for i in xrange(actor.get_nb_output()):</span>
+<span class="c">#                         actor.outputs[i] = SubDataflow(df, self, vid, i)</span>
+
+
+
+<span class="c">#         def eval (self, vtx_id=None, context=None):</span>
+<span class="c">#             &quot;&quot;&quot;</span>
+<span class="c">#             Eval the dataflow from vtx_id with a particular context</span>
+<span class="c">#             @param vtx_id: vertex id to start the evaluation</span>
+<span class="c">#             @param context: list a value to assign to lambda variables</span>
+<span class="c">#             &quot;&quot;&quot;</span>
+
+<span class="c">#             PriorityEvaluation.eval(self, vtx_id, context)</span>
+
+
+
+<span class="c"># from openalea.core.threadmanager import ThreadManager</span>
+<span class="c"># import thread</span>
+
+<span class="c"># class ParallelEvaluation(LambdaEvaluation):</span>
+<span class="c">#     &quot;&quot;&quot; Parallel execution of a dataflow &quot;&quot;&quot;</span>
+
+
+<span class="c">#     def get_output_value(self, nvid, nactor, npid):</span>
+<span class="c">#             &quot;&quot;&quot; Return the value of a node output &quot;&quot;&quot;</span>
+
+<span class="c">#             l = self.locks[nvid]</span>
+
+<span class="c">#             l.acquire()</span>
+<span class="c">#             v = nactor.get_output(self._dataflow.local_id(npid))</span>
+<span class="c">#             l.release()</span>
+
+<span class="c">#             return v</span>
+
+
+<span class="c">#     def eval_one_vertex (self, vid, context, lambda_value):</span>
+<span class="c">#         &quot;&quot;&quot; Evaluate only one vertex</span>
+<span class="c">#         @param vid: id of vertex to evalaute</span>
+<span class="c">#         @param context: list of values to assign to variables</span>
+<span class="c">#         @param lambda_value: dictionary of previous assigned values</span>
+<span class="c">#         &quot;&quot;&quot;</span>
+<span class="c">#         LambdaEvaluation.eval_one_vertex(self, vid, context, lambda_value)</span>
+<span class="c">#         self.locks[vid].release()</span>
+
+
+
+<span class="c">#     def eval_vertex (self, vid, context, *args):</span>
+<span class="c">#         &quot;&quot;&quot; Evaluate the graph starting at the vertex vid</span>
+<span class="c">#         @param vid: starting vertex id</span>
+<span class="c">#         @param context list of values to assign to variables</span>
+<span class="c">#         &quot;&quot;&quot;</span>
+
+<span class="c">#         lambda_value = {}</span>
+
+<span class="c">#         tm = ThreadManager()</span>
+<span class="c">#         tm.clear()</span>
+
+<span class="c">#         # Get the node order</span>
+<span class="c">#         process_list = self.scan_graph(vid, context)</span>
+
+<span class="c">#         # Synchronisation locks</span>
+<span class="c">#         self.locks = {}</span>
+
+<span class="c">#         for vid, context in process_list:</span>
+
+<span class="c">#             if (self.locks.has_key(vid)): continue</span>
+<span class="c">#             l = thread.allocate_lock()</span>
+<span class="c">#             l.acquire()</span>
+<span class="c">#             self.locks[vid] = l</span>
+
+
+<span class="c">#         # Eval each node</span>
+<span class="c">#         scanned = set()</span>
+
+<span class="c">#         for vid, context in process_list:</span>
+<span class="c">#             if (vid not in scanned):</span>
+<span class="c">#                 tm.add_task( self.eval_one_vertex, (vid, context, lambda_value))</span>
+<span class="c">#             scanned.add(vid)</span>
+
+
+
+<span class="c"># DefaultEvaluation = ParallelEvaluation</span>
+<span class="c"># #DefaultEvaluation = LambdaEvaluation</span>
+<div class="viewcode-block" id="ToScriptEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.ToScriptEvaluation">[docs]</a><span class="k">class</span> <span class="nc">ToScriptEvaluation</span><span class="p">(</span><span class="n">AbstractEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Basic transformation into script algorithm &quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;ToScriptEvaluation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+
+        <span class="n">AbstractEvaluation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">)</span>
+        <span class="c"># a property to specify if the node has already been evaluated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ToScriptEvaluation.is_stopped"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.ToScriptEvaluation.is_stopped">[docs]</a>    <span class="k">def</span> <span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return True if evaluation must be stop at this vertex &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">actor</span><span class="o">.</span><span class="n">block</span> <span class="ow">or</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span>
+</div>
+<div class="viewcode-block" id="ToScriptEvaluation.eval_vertex"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.ToScriptEvaluation.eval_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the vertex vid &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="n">script</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="c"># For each inputs</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+            <span class="c"># For each connected node</span>
+            <span class="k">for</span> <span class="n">npid</span><span class="p">,</span> <span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_nodes</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span><span class="p">):</span>
+                    <span class="n">script</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">nvid</span><span class="p">)</span>
+
+        <span class="c"># Eval the node</span>
+        <span class="n">script</span> <span class="o">+=</span> <span class="n">actor</span><span class="o">.</span><span class="n">to_script</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">script</span>
+</div>
+<div class="viewcode-block" id="ToScriptEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.ToScriptEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the whole dataflow starting from leaves&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+
+        <span class="c"># Unvalidate all the nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">ScriptLibrary</span><span class="p">()</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c"># Eval from the leaf</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="p">(</span><span class="n">vid</span> <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">nb_out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">script</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">script</span>
+
+<span class="c">############################################################################</span>
+<span class="c"># Evaluation with scheduling</span>
+
+<span class="c"># The objective is to take</span>
+</div></div>
+<div class="viewcode-block" id="DiscreteTimeEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.DiscreteTimeEvaluation">[docs]</a><span class="k">class</span> <span class="nc">DiscreteTimeEvaluation</span><span class="p">(</span><span class="n">AbstractEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Evaluation algorithm with generator / priority and selection&quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;DiscreteTimeEvaluation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+
+        <span class="n">AbstractEvaluation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">)</span>
+        <span class="c"># a property to specify if the node has already been evaluated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># Flag to force reevaluation (for generator)</span>
+
+        <span class="c"># CPL</span>
+        <span class="c"># At each evaluation of the dataflow, increase the current cycle of</span>
+        <span class="c"># one unit.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># timed nodes are a dict with vid, time &gt;0</span>
+        <span class="c"># when time is 0, remove the node from the dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_reset</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="DiscreteTimeEvaluation.is_stopped"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.DiscreteTimeEvaluation.is_stopped">[docs]</a>    <span class="k">def</span> <span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return True if evaluation must be stop at this vertex &quot;&quot;&quot;</span>
+        <span class="n">stopped</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">actor</span><span class="p">,</span><span class="s">&#39;block&#39;</span><span class="p">):</span>
+                <span class="n">stopped</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">block</span>
+            <span class="n">stopped</span> <span class="o">=</span> <span class="n">stopped</span> <span class="ow">or</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">stopped</span>
+</div>
+<div class="viewcode-block" id="DiscreteTimeEvaluation.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.DiscreteTimeEvaluation.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Clear evaluation variable &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_reset</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="DiscreteTimeEvaluation.next_step"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.DiscreteTimeEvaluation.next_step">[docs]</a>    <span class="k">def</span> <span class="nf">next_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the scheduler of one step. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="DiscreteTimeEvaluation.eval_vertex"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.DiscreteTimeEvaluation.eval_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the vertex vid &quot;&quot;&quot;</span>
+
+        <span class="c">#print &quot;Step &quot;, self._current_cycle</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c"># For each inputs</span>
+        <span class="c"># Compute the inputs of the node</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c"># For each connected node</span>
+            <span class="k">for</span> <span class="n">npid</span><span class="p">,</span> <span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_nodes</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+                <span class="c"># Do no reevaluate the same node</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">nvid</span><span class="p">)</span>
+
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nactor</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">npid</span><span class="p">)))</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># set input as a list or a simple value</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">actor</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="c"># Eval the node</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># When a node return no delay, we stopped the simulation</span>
+        <span class="n">stop_when_finished</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">:</span>
+            <span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">delay</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+                <span class="n">stop_when_finished</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">delay</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex_code</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+
+        <span class="c"># Reevaluation flag</span>
+        <span class="c"># TODO: Add the node to the scheduler rather to execute</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">delay</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="n">delay</span>
+        <span class="k">elif</span> <span class="n">stop_when_finished</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_reset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="DiscreteTimeEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.DiscreteTimeEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">vtx_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">leafs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vtx_id</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Select the leafs (list of (vid, actor))</span>
+            <span class="n">leafs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vid</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">nb_out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">leafs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">cmp_priority</span><span class="p">)</span>
+
+        <span class="c"># Execute</span>
+        <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span> <span class="ow">in</span> <span class="n">leafs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">step</span><span class="p">:</span>
+                    <span class="k">while</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">next_step</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reeval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">next_step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_reset</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timed_nodes</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_reset</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="c">#print &#39;Run %d times the dataflow&#39;%(self._current_cycle,)</span>
+
+        <span class="c"># Reset the state</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">step</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Evaluation time: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+<span class="c">###############################################################################</span></div></div>
+<div class="viewcode-block" id="SciFlowareEvaluation"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.SciFlowareEvaluation">[docs]</a><span class="k">class</span> <span class="nc">SciFlowareEvaluation</span><span class="p">(</span><span class="n">AbstractEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Distributed Evaluation algorithm with SciFloware backend&quot;&quot;&quot;</span>
+    <span class="n">__evaluators__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;SciFlowareEvaluation&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">):</span>
+
+        <span class="n">AbstractEvaluation</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">)</span>
+
+        <span class="c"># a property to specify if the node has already been evaluated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scifloware_actors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SciFlowareEvaluation.is_operator"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.SciFlowareEvaluation.is_operator">[docs]</a>    <span class="k">def</span> <span class="nf">is_operator</span><span class="p">(</span><span class="n">actor</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.scifloware.operator</span> <span class="kn">import</span> <span class="n">algebra</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">factory</span>
+        <span class="k">if</span> <span class="n">factory</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="s">&#39;SciFloware&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">factory</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">algebra</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    </div>
+<div class="viewcode-block" id="SciFlowareEvaluation.scifloware_actors"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.SciFlowareEvaluation.scifloware_actors">[docs]</a>    <span class="k">def</span> <span class="nf">scifloware_actors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Compute the scifloware actors.</span>
+
+<span class="sd">        Only those actors will be evaluated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scifloware_actors</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">():</span>
+            <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_operator</span><span class="p">(</span><span class="n">actor</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_scifloware_actors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SciFlowareEvaluation.eval_vertex"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.SciFlowareEvaluation.eval_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">eval_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluate the vertex vid </span>
+
+<span class="sd">        This evaluation is both a kind of compilation and real evaluation.</span>
+<span class="sd">        Algorithm</span>
+<span class="sd">        ---------</span>
+<span class="sd">        For each vertex which is a SciFloware operator (e.g. map, reduce, ...),</span>
+<span class="sd">            - select the vertices connected to each input port</span>
+<span class="sd">            - if the name of the port is Dataflow:</span>
+<span class="sd">                - get its name and send it as input to the operator</span>
+<span class="sd">            - else</span>
+<span class="sd">                - normal evaluation </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c">#print &quot;Step &quot;, self._current_cycle</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="n">is_op</span> <span class="o">=</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scifloware_actors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c">#assert self.is_operator(actor)</span>
+
+        <span class="c"># For each inputs</span>
+        <span class="c"># Compute the nodes</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">is_dataflow</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">is_op</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">get_input_port</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">))[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;dataflow&#39;</span><span class="p">:</span>
+                    <span class="n">is_dataflow</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="k">if</span> <span class="n">is_dataflow</span><span class="p">:</span>
+                <span class="n">out_ports</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">connected_ports</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
+                <span class="n">nb_out</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_ports</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nb_out</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Too many nodes connected to the SciFloware operator.&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">nb_out</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">out_actor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">out_ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="n">dataflow_name</span> <span class="o">=</span> <span class="n">out_actor</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;:&#39;</span><span class="o">+</span><span class="n">out_actor</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">actor</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span> <span class="n">dataflow_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c"># For each connected node</span>
+                <span class="k">for</span> <span class="n">npid</span><span class="p">,</span> <span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_nodes</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+                    <span class="c"># Do no reevaluate the same node</span>
+                    
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">(</span><span class="n">nvid</span><span class="p">,</span> <span class="n">nactor</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">nvid</span><span class="p">)</span>
+
+                    <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nactor</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">npid</span><span class="p">)))</span>
+                    <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c"># set input as a list or a simple value</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">actor</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">),</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex_code</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SciFlowareEvaluation.eval"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.algo.html#core.algo.dataflow_evaluation.SciFlowareEvaluation.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataflow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scifloware_actors</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">vtx_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">leafs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vtx_id</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Select the leafs (list of (vid, actor))</span>
+            <span class="n">leafs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vid</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">nb_out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">leafs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">cmp_priority</span><span class="p">)</span>
+
+        <span class="c"># Execute</span>
+        <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">actor</span> <span class="ow">in</span> <span class="n">leafs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">clock</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Evaluation time: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">False</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

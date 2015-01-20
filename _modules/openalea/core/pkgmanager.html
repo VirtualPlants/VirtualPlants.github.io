@@ -276,6 +276,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deprecated_pkg</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
+        <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c"># Use setuptools entry_point</span>
         <span class="k">for</span> <span class="n">epoint</span> <span class="ow">in</span> <span class="n">iter_entry_points</span><span class="p">(</span><span class="s">&quot;wralea&quot;</span><span class="p">):</span>
             <span class="c"># Get Deprecated packages</span>
@@ -291,12 +293,22 @@
 
             <span class="c"># Be careful, this lines will import __init__.py and all its predecessor</span>
             <span class="c"># to find the path.</span>
+            <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">m</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Cannot load </span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
                 <span class="c"># self.log.add(&quot;Cannot load %s : %s&quot;%(epoint.module_name, e))</span>
                 <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
+                <span class="n">tn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">tn</span><span class="p">]</span> <span class="o">=</span> <span class="n">epoint</span><span class="o">.</span><span class="n">module_name</span>
+
 
             <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">__path__</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
@@ -315,6 +327,9 @@
         <span class="k">if</span> <span class="n">SEARCH_OUTSIDE_ENTRY_POINTS</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">get_userpkg_dir</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_wralea_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">res</span>
 </div>
 <div class="viewcode-block" id="PackageManager.init"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.pkgmanager.PackageManager.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Initialize package manager</span>
@@ -689,12 +704,16 @@
             <span class="k">print</span> <span class="s">&#39;-------------------&#39;</span>
             <span class="k">print</span> <span class="s">&#39;find_wralea_files takes </span><span class="si">%f</span><span class="s"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">readerlist</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
                 <span class="n">tn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="n">x</span><span class="o">.</span><span class="n">register_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+                <span class="n">tt</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">tn</span>
                 <span class="k">print</span> <span class="s">&#39;register package &#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">get_pkg_name</span><span class="p">(),</span> <span class="s">&#39;in &#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">tn</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span><span class="o">=</span><span class="n">tt</span>
         <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">t3</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
             <span class="k">print</span> <span class="s">&#39;-------------------&#39;</span>
@@ -702,6 +721,9 @@
 <span class="c">#        self.save_cache()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_category</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">res</span>
 
     <span class="c"># Cache functions</span>
     <span class="c"># def get_cache_filename(self):</span>

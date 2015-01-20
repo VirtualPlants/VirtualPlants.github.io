@@ -74,6 +74,7 @@
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 <span class="kn">from</span> <span class="nn">openalea.core.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.introspection</span> <span class="kn">import</span> <span class="n">name</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PluginManager&#39;</span><span class="p">]</span>
 
@@ -187,6 +188,16 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">None</span>
 </div>
+    <span class="k">def</span> <span class="nf">_sorted_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugins</span><span class="p">):</span>
+        <span class="n">plugin_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">plugin_class</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">):</span>
+                <span class="n">plugin_dict</span><span class="p">[</span><span class="n">plugin_class</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_class</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plugin_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">)]</span> <span class="o">=</span> <span class="n">plugin_class</span>
+        <span class="n">sorted_plugins</span> <span class="o">=</span> <span class="p">[</span><span class="n">plugin_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plugin_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+        <span class="k">return</span> <span class="n">sorted_plugins</span>
+
 <div class="viewcode-block" id="PluginManager.plugins"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.plugins">[docs]</a>    <span class="k">def</span> <span class="nf">plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of all plugins available for this category.</span>
@@ -196,9 +207,9 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">{})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_plugins</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_plugins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_plugins</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span>
 
 </div></div>
 <span class="k">class</span> <span class="nc">SimpleClassPluginProxy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

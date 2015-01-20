@@ -1,0 +1,1238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.path &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="up" title="core" href="../core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for core.path</h1><div class="highlight"><pre>
+<span class="c">#</span>
+<span class="c"># Copyright (c) 2010 Mikhail Gusarov</span>
+<span class="c">#</span>
+<span class="c"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c"># in the Software without restriction, including without limitation the rights</span>
+<span class="c"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c"># furnished to do so, subject to the following conditions:</span>
+<span class="c">#</span>
+<span class="c"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c"># copies or substantial portions of the Software.</span>
+<span class="c">#</span>
+<span class="c"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c"># SOFTWARE.</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot; path.py - An object representing a path to a file or directory.</span>
+
+<span class="sd">Original author:</span>
+<span class="sd"> Jason Orendorff &lt;jason.orendorff\x40gmail\x2ecom&gt;</span>
+
+<span class="sd">Contributors:</span>
+<span class="sd"> Mikhail Gusarov &lt;dottedmag@dottedmag.net&gt;</span>
+<span class="sd"> Marc Abramowitz &lt;marc@marc-abramowitz.com&gt;</span>
+<span class="sd"> Jason R. Coombs &lt;jaraco@jaraco.com&gt;</span>
+<span class="sd"> Jason Chu &lt;jchu@xentac.net&gt;</span>
+<span class="sd"> Vojislav Stojkovic &lt;vstojkovic@syntertainment.com&gt;</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">from path import path</span>
+<span class="sd">d = path(&#39;/home/guido/bin&#39;)</span>
+<span class="sd">for f in d.files(&#39;*.py&#39;):</span>
+<span class="sd">    f.chmod(0755)</span>
+
+<span class="sd">path.py requires Python 2.5 or later.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">win32security</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pwd</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;3.0&#39;</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;path&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">TreeWalkWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span> <span class="nf">simple_cache</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save results for the &#39;using_module&#39; classmethod.</span>
+<span class="sd">    When Python 3.2 is available, use functools.lru_cache instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">saved_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">saved_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">saved_results</span><span class="p">[</span><span class="n">module</span><span class="p">]</span>
+        <span class="n">saved_results</span><span class="p">[</span><span class="n">module</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">saved_results</span><span class="p">[</span><span class="n">module</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+<span class="k">class</span> <span class="nc">ClassProperty</span><span class="p">(</span><span class="nb">property</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="o">.</span><span class="n">__get__</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">owner</span><span class="p">)()</span>
+
+<span class="k">class</span> <span class="nc">multimethod</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Acts like a classmethod when invoked from the class and like an</span>
+<span class="sd">    instancemethod when invoked from the instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">owner</span><span class="p">)</span> <span class="k">if</span> <span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span>
+            <span class="k">else</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="n">instance</span><span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="path"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path">[docs]</a><span class="k">class</span> <span class="nc">path</span><span class="p">(</span><span class="nb">unicode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Represents a filesystem path.</span>
+
+<span class="sd">    For documentation on individual methods, consult their</span>
+<span class="sd">    counterparts in os.path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;path must be a string&quot;</span><span class="p">)</span>
+
+    <span class="n">module</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span>
+    <span class="s">&quot;The path module to use for path operations.&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="nd">@simple_cache</span>
+<div class="viewcode-block" id="path.using_module"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.using_module">[docs]</a>    <span class="k">def</span> <span class="nf">using_module</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="n">subclass_name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="n">cls</span><span class="p">,)</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;module&#39;</span><span class="p">:</span> <span class="n">module</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">subclass_name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>
+</div>
+    <span class="nd">@ClassProperty</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_next_class</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        What class should be used to construct new instances from this class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span>
+
+    <span class="c"># --- Special Python methods.</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">super</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__repr__</span><span class="p">())</span>
+
+    <span class="c"># Adding a path and a string yields a path.</span>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">more</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span><span class="n">more</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>  <span class="c"># Python bug</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="c"># The / operator joins paths.</span>
+    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; fp.__div__(rel) == fp / rel == fp.joinpath(rel)</span>
+
+<span class="sd">        Join two path components, adding a separator character if</span>
+<span class="sd">        needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel</span><span class="p">))</span>
+
+    <span class="c"># Make the / operator work even when true division is enabled.</span>
+    <span class="n">__truediv__</span> <span class="o">=</span> <span class="n">__div__</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_old_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_old_dir</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="path.getcwd"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.getcwd">[docs]</a>    <span class="k">def</span> <span class="nf">getcwd</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the current working directory as a path object. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwdu</span><span class="p">())</span>
+
+    <span class="c">#</span>
+    <span class="c"># --- Operations on path strings.</span>
+</div>
+<div class="viewcode-block" id="path.abspath"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.abspath">[docs]</a>    <span class="k">def</span> <span class="nf">abspath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.normcase"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.normcase">[docs]</a>    <span class="k">def</span> <span class="nf">normcase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">normcase</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.normpath"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.normpath">[docs]</a>    <span class="k">def</span> <span class="nf">normpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.realpath"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.realpath">[docs]</a>    <span class="k">def</span> <span class="nf">realpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.expanduser"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.expanduser">[docs]</a>    <span class="k">def</span> <span class="nf">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.expandvars"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.expandvars">[docs]</a>    <span class="k">def</span> <span class="nf">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.dirname"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.dirname">[docs]</a>    <span class="k">def</span> <span class="nf">dirname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.basename"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.basename">[docs]</a>    <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.expand"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.expand">[docs]</a>    <span class="k">def</span> <span class="nf">expand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Clean up a filename by calling expandvars(),</span>
+<span class="sd">        expanduser(), and normpath() on it.</span>
+
+<span class="sd">        This is commonly everything needed to clean up a filename</span>
+<span class="sd">        read from a configuration file, for example.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandvars</span><span class="p">()</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">normpath</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_get_namebase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">base</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base</span>
+
+    <span class="k">def</span> <span class="nf">_get_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ext</span>
+
+    <span class="k">def</span> <span class="nf">_get_drive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">drive</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">drive</span><span class="p">)</span>
+
+    <span class="n">parent</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">dirname</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; This path&#39;s parent directory, as a new path object.</span>
+
+<span class="sd">        For example, path(&#39;/usr/local/lib/libpython.so&#39;).parent == path(&#39;/usr/local/lib&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">basename</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; The name of this file or directory without the full path.</span>
+
+<span class="sd">        For example, path(&#39;/usr/local/lib/libpython.so&#39;).name == &#39;libpython.so&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">namebase</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">_get_namebase</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; The same as path.name, but with one file extension stripped off.</span>
+
+<span class="sd">        For example, path(&#39;/home/guido/python.tar.gz&#39;).name     == &#39;python.tar.gz&#39;,</span>
+<span class="sd">        but          path(&#39;/home/guido/python.tar.gz&#39;).namebase == &#39;python.tar&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">ext</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">_get_ext</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; The file extension, for example &#39;.py&#39;. &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">drive</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">_get_drive</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; The drive specifier, for example &#39;C:&#39;.</span>
+<span class="sd">        This is always empty on systems that don&#39;t use drive specifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="path.splitpath"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.splitpath">[docs]</a>    <span class="k">def</span> <span class="nf">splitpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; p.splitpath() -&gt; Return (p.parent, p.name). &quot;&quot;&quot;</span>
+        <span class="n">parent</span><span class="p">,</span> <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">parent</span><span class="p">),</span> <span class="n">child</span>
+</div>
+<div class="viewcode-block" id="path.splitdrive"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.splitdrive">[docs]</a>    <span class="k">def</span> <span class="nf">splitdrive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; p.splitdrive() -&gt; Return (p.drive, &lt;the rest of p&gt;).</span>
+
+<span class="sd">        Split the drive specifier from this path.  If there is</span>
+<span class="sd">        no drive specifier, p.drive is empty, so the return value</span>
+<span class="sd">        is simply (path(&#39;&#39;), p).  This is always the case on Unix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">drive</span><span class="p">,</span> <span class="n">rel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">drive</span><span class="p">),</span> <span class="n">rel</span>
+</div>
+<div class="viewcode-block" id="path.splitext"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.splitext">[docs]</a>    <span class="k">def</span> <span class="nf">splitext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; p.splitext() -&gt; Return (p.stripext(), p.ext).</span>
+
+<span class="sd">        Split the filename extension from this path and return</span>
+<span class="sd">        the two parts.  Either part may be empty.</span>
+
+<span class="sd">        The extension is everything from &#39;.&#39; to the end of the</span>
+<span class="sd">        last path segment.  This has the property that if</span>
+<span class="sd">        (a, b) == p.splitext(), then a + b == p.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="n">ext</span>
+</div>
+<div class="viewcode-block" id="path.stripext"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.stripext">[docs]</a>    <span class="k">def</span> <span class="nf">stripext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; p.stripext() -&gt; Remove one file extension from the path.</span>
+
+<span class="sd">        For example, path(&#39;/home/guido/python.tar.gz&#39;).stripext()</span>
+<span class="sd">        returns path(&#39;/home/guido/python.tar&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitext</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="path.splitunc"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.splitunc">[docs]</a>    <span class="k">def</span> <span class="nf">splitunc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">unc</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitunc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">unc</span><span class="p">),</span> <span class="n">rest</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="path.uncshare"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.uncshare">[docs]</a>    <span class="k">def</span> <span class="nf">uncshare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The UNC mount point for this path.</span>
+<span class="sd">        This is empty for paths on local drives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unc</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">splitunc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">unc</span><span class="p">)</span>
+</div>
+    <span class="nd">@multimethod</span>
+<div class="viewcode-block" id="path.joinpath"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.joinpath">[docs]</a>    <span class="k">def</span> <span class="nf">joinpath</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Join first to zero or more path components, adding a separator</span>
+<span class="sd">        character (first.module.sep) if needed.  Returns a new instance of</span>
+<span class="sd">        first._next_class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">first</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.splitall"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.splitall">[docs]</a>    <span class="k">def</span> <span class="nf">splitall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; Return a list of the path components in this path.</span>
+
+<span class="sd">        The first item in the list will be a path.  Its value will be</span>
+<span class="sd">        either os.curdir, os.pardir, empty, or the root directory of</span>
+<span class="sd">        this path (for example, &#39;/&#39; or &#39;C:\\&#39;).  The other items in</span>
+<span class="sd">        the list will be strings.</span>
+
+<span class="sd">        path.path.joinpath(*result) will yield the original path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">while</span> <span class="n">loc</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">curdir</span> <span class="ow">and</span> <span class="n">loc</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">:</span>
+            <span class="n">prev</span> <span class="o">=</span> <span class="n">loc</span>
+            <span class="n">loc</span><span class="p">,</span> <span class="n">child</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">loc</span> <span class="o">==</span> <span class="n">prev</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">parts</span>
+</div>
+<div class="viewcode-block" id="path.relpath"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.relpath">[docs]</a>    <span class="k">def</span> <span class="nf">relpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return this path as a relative path,</span>
+<span class="sd">        based from the current working directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cwd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">cwd</span><span class="o">.</span><span class="n">relpathto</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.relpathto"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.relpathto">[docs]</a>    <span class="k">def</span> <span class="nf">relpathto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return a relative path from self to dest.</span>
+
+<span class="sd">        If there is no relative path from self to dest, for example if</span>
+<span class="sd">        they reside on different drives in Windows, then this returns</span>
+<span class="sd">        dest.abspath().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+        <span class="n">dest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+
+        <span class="n">orig_list</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">normcase</span><span class="p">()</span><span class="o">.</span><span class="n">splitall</span><span class="p">()</span>
+        <span class="c"># Don&#39;t normcase dest!  We want to preserve the case.</span>
+        <span class="n">dest_list</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">splitall</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">orig_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">normcase</span><span class="p">(</span><span class="n">dest_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="c"># Can&#39;t get here from there.</span>
+            <span class="k">return</span> <span class="n">dest</span>
+
+        <span class="c"># Find the location where the two paths start to differ.</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">start_seg</span><span class="p">,</span> <span class="n">dest_seg</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">orig_list</span><span class="p">,</span> <span class="n">dest_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">start_seg</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">normcase</span><span class="p">(</span><span class="n">dest_seg</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># Now i is the point where the two paths diverge.</span>
+        <span class="c"># Need a certain number of &quot;os.pardir&quot;s to work up</span>
+        <span class="c"># from the origin to the point of divergence.</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orig_list</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span>
+        <span class="c"># Need to add the diverging part of dest_list.</span>
+        <span class="n">segments</span> <span class="o">+=</span> <span class="n">dest_list</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># If they happen to be identical, use os.curdir.</span>
+            <span class="n">relpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">curdir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">relpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">segments</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">relpath</span><span class="p">)</span>
+
+    <span class="c"># --- Listing, searching, walking, and matching</span>
+</div>
+<div class="viewcode-block" id="path.listdir"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.listdir">[docs]</a>    <span class="k">def</span> <span class="nf">listdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; D.listdir() -&gt; List of items in this directory.</span>
+
+<span class="sd">        Use D.files() or D.dirs() instead if you want a listing</span>
+<span class="sd">        of just files or just subdirectories.</span>
+
+<span class="sd">        The elements of the list are path objects.</span>
+
+<span class="sd">        With the optional &#39;pattern&#39; argument, this only lists</span>
+<span class="sd">        items whose names match the given pattern.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pattern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span> <span class="o">/</span> <span class="n">child</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="path.dirs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.dirs">[docs]</a>    <span class="k">def</span> <span class="nf">dirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; D.dirs() -&gt; List of this directory&#39;s subdirectories.</span>
+
+<span class="sd">        The elements of the list are path objects.</span>
+<span class="sd">        This does not walk recursively into subdirectories</span>
+<span class="sd">        (but see path.walkdirs).</span>
+
+<span class="sd">        With the optional &#39;pattern&#39; argument, this only lists</span>
+<span class="sd">        directories whose names match the given pattern.  For</span>
+<span class="sd">        example, d.dirs(&#39;build-*&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isdir</span><span class="p">()]</span>
+</div>
+<div class="viewcode-block" id="path.files"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.files">[docs]</a>    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; D.files() -&gt; List of the files in this directory.</span>
+
+<span class="sd">        The elements of the list are path objects.</span>
+<span class="sd">        This does not walk into subdirectories (see path.walkfiles).</span>
+
+<span class="sd">        With the optional &#39;pattern&#39; argument, this only lists files</span>
+<span class="sd">        whose names match the given pattern.  For example,</span>
+<span class="sd">        d.files(&#39;*.pyc&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isfile</span><span class="p">()]</span>
+</div>
+<div class="viewcode-block" id="path.walk"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.walk">[docs]</a>    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; D.walk() -&gt; iterator over files and subdirs, recursively.</span>
+
+<span class="sd">        The iterator yields path objects naming each child item of</span>
+<span class="sd">        this directory and its descendants.  This requires that</span>
+<span class="sd">        D.isdir().</span>
+
+<span class="sd">        This performs a depth-first traversal of the directory tree.</span>
+<span class="sd">        Each directory is returned just before all its children.</span>
+
+<span class="sd">        The errors= keyword argument controls behavior when an</span>
+<span class="sd">        error occurs.  The default is &#39;strict&#39;, which causes an</span>
+<span class="sd">        exception.  The other allowed values are &#39;warn&#39;, which</span>
+<span class="sd">        reports the error via warnings.warn(), and &#39;ignore&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">errors</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;strict&#39;</span><span class="p">,</span> <span class="s">&#39;warn&#39;</span><span class="p">,</span> <span class="s">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid errors parameter&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">childList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">listdir</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;ignore&#39;</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;warn&#39;</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s">&quot;Unable to list directory &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">TreeWalkWarning</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">childList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">pattern</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">child</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">isdir</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">isdir</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;ignore&#39;</span><span class="p">:</span>
+                    <span class="n">isdir</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">elif</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;warn&#39;</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s">&quot;Unable to access &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="n">TreeWalkWarning</span><span class="p">)</span>
+                    <span class="n">isdir</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span>
+
+            <span class="k">if</span> <span class="n">isdir</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">errors</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">item</span>
+</div>
+<div class="viewcode-block" id="path.walkdirs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.walkdirs">[docs]</a>    <span class="k">def</span> <span class="nf">walkdirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; D.walkdirs() -&gt; iterator over subdirs, recursively.</span>
+
+<span class="sd">        With the optional &#39;pattern&#39; argument, this yields only</span>
+<span class="sd">        directories whose names match the given pattern.  For</span>
+<span class="sd">        example, mydir.walkdirs(&#39;*test&#39;) yields only directories</span>
+<span class="sd">        with names ending in &#39;test&#39;.</span>
+
+<span class="sd">        The errors= keyword argument controls behavior when an</span>
+<span class="sd">        error occurs.  The default is &#39;strict&#39;, which causes an</span>
+<span class="sd">        exception.  The other allowed values are &#39;warn&#39;, which</span>
+<span class="sd">        reports the error via warnings.warn(), and &#39;ignore&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">errors</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;strict&#39;</span><span class="p">,</span> <span class="s">&#39;warn&#39;</span><span class="p">,</span> <span class="s">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid errors parameter&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;ignore&#39;</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;warn&#39;</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s">&quot;Unable to list directory &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">TreeWalkWarning</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">pattern</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">child</span>
+            <span class="k">for</span> <span class="n">subsubdir</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">errors</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">subsubdir</span>
+</div>
+<div class="viewcode-block" id="path.walkfiles"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.walkfiles">[docs]</a>    <span class="k">def</span> <span class="nf">walkfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; D.walkfiles() -&gt; iterator over files in D, recursively.</span>
+
+<span class="sd">        The optional argument, pattern, limits the results to files</span>
+<span class="sd">        with names that match the pattern.  For example,</span>
+<span class="sd">        mydir.walkfiles(&#39;*.tmp&#39;) yields only files with the .tmp</span>
+<span class="sd">        extension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">errors</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;strict&#39;</span><span class="p">,</span> <span class="s">&#39;warn&#39;</span><span class="p">,</span> <span class="s">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid errors parameter&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">childList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">listdir</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;ignore&#39;</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;warn&#39;</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s">&quot;Unable to list directory &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">TreeWalkWarning</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">childList</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">isfile</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">isfile</span><span class="p">()</span>
+                <span class="n">isdir</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">isfile</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">isdir</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;ignore&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="n">errors</span> <span class="o">==</span> <span class="s">&#39;warn&#39;</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s">&quot;Unable to access &#39;</span><span class="si">%s</span><span class="s">&#39;: </span><span class="si">%s</span><span class="s">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="n">TreeWalkWarning</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span>
+
+            <span class="k">if</span> <span class="n">isfile</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pattern</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">pattern</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">child</span>
+            <span class="k">elif</span> <span class="n">isdir</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">errors</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">f</span>
+</div>
+<div class="viewcode-block" id="path.fnmatch"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.fnmatch">[docs]</a>    <span class="k">def</span> <span class="nf">fnmatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return True if self.name matches the given pattern.</span>
+
+<span class="sd">        pattern - A filename pattern with wildcards,</span>
+<span class="sd">            for example &#39;*.py&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.glob"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.glob">[docs]</a>    <span class="k">def</span> <span class="nf">glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return a list of path objects that match the pattern.</span>
+
+<span class="sd">        pattern - a path relative to this directory, with wildcards.</span>
+
+<span class="sd">        For example, path(&#39;/users&#39;).glob(&#39;*/bin/*&#39;) returns a list</span>
+<span class="sd">        of all the files users have in their bin directories.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">cls</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="bp">self</span> <span class="o">/</span> <span class="n">pattern</span><span class="p">)]</span>
+
+    <span class="c">#</span>
+    <span class="c"># --- Reading or writing an entire file at once.</span>
+</div>
+<div class="viewcode-block" id="path.open"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open this file.  Return a file object. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.bytes"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.bytes">[docs]</a>    <span class="k">def</span> <span class="nf">bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open this file, read all bytes, return them as a string. &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="path.write_bytes"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.write_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">write_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open this file and write the given bytes to it.</span>
+
+<span class="sd">        Default behavior is to overwrite any existing file.</span>
+<span class="sd">        Call p.write_bytes(bytes, append=True) to append instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">append</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;ab&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;wb&#39;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.text"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.text">[docs]</a>    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; Open this file, read it in, return the content as a string.</span>
+
+<span class="sd">        This method uses &#39;U&#39; mode, so &#39;\r\n&#39; and &#39;\r&#39; are automatically</span>
+<span class="sd">        translated to &#39;\n&#39;.</span>
+
+<span class="sd">        Optional arguments:</span>
+
+<span class="sd">        encoding - The Unicode encoding (or character set) of</span>
+<span class="sd">            the file.  If present, the content of the file is</span>
+<span class="sd">            decoded and returned as a unicode object; otherwise</span>
+<span class="sd">            it is returned as an 8-bit str.</span>
+<span class="sd">        errors - How to handle Unicode errors; see help(str.decode)</span>
+<span class="sd">            for the options.  Default is &#39;strict&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># 8-bit</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;U&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Unicode</span>
+            <span class="k">with</span> <span class="n">codecs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="c"># (Note - Can&#39;t use &#39;U&#39; mode here, since codecs.open</span>
+                <span class="c"># doesn&#39;t support &#39;U&#39; mode.)</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                     <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\r\x85</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                     <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                     <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\x85</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                     <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\u2028</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.write_text"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.write_text">[docs]</a>    <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">,</span> <span class="n">linesep</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; Write the given text to this file.</span>
+
+<span class="sd">        The default behavior is to overwrite any existing file;</span>
+<span class="sd">        to append instead, use the &#39;append=True&#39; keyword argument.</span>
+
+<span class="sd">        There are two differences between path.write_text() and</span>
+<span class="sd">        path.write_bytes(): newline handling and Unicode handling.</span>
+<span class="sd">        See below.</span>
+
+<span class="sd">        Parameters:</span>
+
+<span class="sd">          - text - str/unicode - The text to be written.</span>
+
+<span class="sd">          - encoding - str - The Unicode encoding that will be used.</span>
+<span class="sd">            This is ignored if &#39;text&#39; isn&#39;t a Unicode string.</span>
+
+<span class="sd">          - errors - str - How to handle Unicode encoding errors.</span>
+<span class="sd">            Default is &#39;strict&#39;.  See help(unicode.encode) for the</span>
+<span class="sd">            options.  This is ignored if &#39;text&#39; isn&#39;t a Unicode</span>
+<span class="sd">            string.</span>
+
+<span class="sd">          - linesep - keyword argument - str/unicode - The sequence of</span>
+<span class="sd">            characters to be used to mark end-of-line.  The default is</span>
+<span class="sd">            os.linesep.  You can also specify None; this means to</span>
+<span class="sd">            leave all newlines as they are in &#39;text&#39;.</span>
+
+<span class="sd">          - append - keyword argument - bool - Specifies what to do if</span>
+<span class="sd">            the file already exists (True: append to the end of it;</span>
+<span class="sd">            False: overwrite it.)  The default is False.</span>
+
+
+<span class="sd">        --- Newline handling.</span>
+
+<span class="sd">        write_text() converts all standard end-of-line sequences</span>
+<span class="sd">        (&#39;\n&#39;, &#39;\r&#39;, and &#39;\r\n&#39;) to your platform&#39;s default end-of-line</span>
+<span class="sd">        sequence (see os.linesep; on Windows, for example, the</span>
+<span class="sd">        end-of-line marker is &#39;\r\n&#39;).</span>
+
+<span class="sd">        If you don&#39;t like your platform&#39;s default, you can override it</span>
+<span class="sd">        using the &#39;linesep=&#39; keyword argument.  If you specifically want</span>
+<span class="sd">        write_text() to preserve the newlines as-is, use &#39;linesep=None&#39;.</span>
+
+<span class="sd">        This applies to Unicode text the same as to 8-bit text, except</span>
+<span class="sd">        there are three additional standard Unicode end-of-line sequences:</span>
+<span class="sd">        u&#39;\x85&#39;, u&#39;\r\x85&#39;, and u&#39;\u2028&#39;.</span>
+
+<span class="sd">        (This is slightly different from when you open a file for</span>
+<span class="sd">        writing with fopen(filename, &quot;w&quot;) in C or open(filename, &#39;w&#39;)</span>
+<span class="sd">        in Python.)</span>
+
+
+<span class="sd">        --- Unicode</span>
+
+<span class="sd">        If &#39;text&#39; isn&#39;t Unicode, then apart from newline handling, the</span>
+<span class="sd">        bytes are written verbatim to the file.  The &#39;encoding&#39; and</span>
+<span class="sd">        &#39;errors&#39; arguments are not used and must be omitted.</span>
+
+<span class="sd">        If &#39;text&#39; is Unicode, it is first converted to bytes using the</span>
+<span class="sd">        specified &#39;encoding&#39; (or the default encoding if &#39;encoding&#39;</span>
+<span class="sd">        isn&#39;t specified).  The &#39;errors&#39; argument applies only to this</span>
+<span class="sd">        conversion.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">linesep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># Convert all standard end-of-line sequences to</span>
+                <span class="c"># ordinary newline characters.</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\r\x85</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\x85</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\u2028</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">linesep</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">encoding</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+            <span class="nb">bytes</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># It is an error to specify an encoding if &#39;text&#39; is</span>
+            <span class="c"># an 8-bit string.</span>
+            <span class="k">assert</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span>
+
+            <span class="k">if</span> <span class="n">linesep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+                <span class="nb">bytes</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">linesep</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">append</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.lines"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.lines">[docs]</a>    <span class="k">def</span> <span class="nf">lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">,</span> <span class="n">retain</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; Open this file, read all lines, return them in a list.</span>
+
+<span class="sd">        Optional arguments:</span>
+<span class="sd">            encoding - The Unicode encoding (or character set) of</span>
+<span class="sd">                the file.  The default is None, meaning the content</span>
+<span class="sd">                of the file is read as 8-bit characters and returned</span>
+<span class="sd">                as a list of (non-Unicode) str objects.</span>
+<span class="sd">            errors - How to handle Unicode errors; see help(str.decode)</span>
+<span class="sd">                for the options.  Default is &#39;strict&#39;</span>
+<span class="sd">            retain - If true, retain newline characters; but all newline</span>
+<span class="sd">                character combinations (&#39;\r&#39;, &#39;\n&#39;, &#39;\r\n&#39;) are</span>
+<span class="sd">                translated to &#39;\n&#39;.  If false, newline characters are</span>
+<span class="sd">                stripped off.  Default is True.</span>
+
+<span class="sd">        This uses &#39;U&#39; mode.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">retain</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;U&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">retain</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.write_lines"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.write_lines">[docs]</a>    <span class="k">def</span> <span class="nf">write_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s">&#39;strict&#39;</span><span class="p">,</span>
+                    <span class="n">linesep</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; Write the given lines of text to this file.</span>
+
+<span class="sd">        By default this overwrites any existing file at this path.</span>
+
+<span class="sd">        This puts a platform-specific newline sequence on every line.</span>
+<span class="sd">        See &#39;linesep&#39; below.</span>
+
+<span class="sd">        lines - A list of strings.</span>
+
+<span class="sd">        encoding - A Unicode encoding to use.  This applies only if</span>
+<span class="sd">            &#39;lines&#39; contains any Unicode strings.</span>
+
+<span class="sd">        errors - How to handle errors in Unicode encoding.  This</span>
+<span class="sd">            also applies only to Unicode strings.</span>
+
+<span class="sd">        linesep - The desired line-ending.  This line-ending is</span>
+<span class="sd">            applied to every line.  If a line already has any</span>
+<span class="sd">            standard line ending (&#39;\r&#39;, &#39;\n&#39;, &#39;\r\n&#39;, u&#39;\x85&#39;,</span>
+<span class="sd">            u&#39;\r\x85&#39;, u&#39;\u2028&#39;), that will be stripped off and</span>
+<span class="sd">            this will be used instead.  The default is os.linesep,</span>
+<span class="sd">            which is platform-dependent (&#39;\r\n&#39; on Windows, &#39;\n&#39; on</span>
+<span class="sd">            Unix, etc.)  Specify None to write the lines as-is,</span>
+<span class="sd">            like file.writelines().</span>
+
+<span class="sd">        Use the keyword argument append=True to append lines to the</span>
+<span class="sd">        file.  The default is to overwrite the file.  Warning:</span>
+<span class="sd">        When you use this with Unicode data, if the encoding of the</span>
+<span class="sd">        existing data in the file is different from the encoding</span>
+<span class="sd">        you specify with the encoding= parameter, the result is</span>
+<span class="sd">        mixed-encoding data, which can really confuse someone trying</span>
+<span class="sd">        to read the file later.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">append</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;ab&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;wb&#39;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="n">isUnicode</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">linesep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># Strip off any existing line-end and add the</span>
+                    <span class="c"># specified linesep string.</span>
+                    <span class="k">if</span> <span class="n">isUnicode</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">u&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\x0d\x85</span><span class="s">&#39;</span><span class="p">):</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">u&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span>
+                                           <span class="s">u&#39;</span><span class="se">\x85</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\u2028</span><span class="s">&#39;</span><span class="p">):</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">:</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="n">linesep</span>
+                <span class="k">if</span> <span class="n">isUnicode</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">encoding</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.read_md5"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.read_md5">[docs]</a>    <span class="k">def</span> <span class="nf">read_md5</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate the md5 hash for this file.</span>
+
+<span class="sd">        This reads through the entire file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_hash</span><span class="p">(</span><span class="s">&#39;md5&#39;</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hash_name</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">hash_name</span><span class="p">)</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8192</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">m</span>
+
+<div class="viewcode-block" id="path.read_hash"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.read_hash">[docs]</a>    <span class="k">def</span> <span class="nf">read_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hash_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate given hash for this file.</span>
+
+<span class="sd">        List of supported hashes can be obtained from hashlib package. This</span>
+<span class="sd">        reads the entire file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span><span class="p">(</span><span class="n">hash_name</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="path.read_hexhash"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.read_hexhash">[docs]</a>    <span class="k">def</span> <span class="nf">read_hexhash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hash_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculate given hash for this file, returning hexdigest.</span>
+
+<span class="sd">        List of supported hashes can be obtained from hashlib package. This</span>
+<span class="sd">        reads the entire file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span><span class="p">(</span><span class="n">hash_name</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+    <span class="c"># --- Methods for querying the filesystem.</span>
+    <span class="c"># N.B. On some platforms, the os.path functions may be implemented in C</span>
+    <span class="c"># (e.g. isdir on Windows, Python 3.2.2), and compiled functions don&#39;t get</span>
+    <span class="c"># bound. Playing it safe and wrapping them all in method calls.</span>
+</div>
+<div class="viewcode-block" id="path.isabs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.isabs">[docs]</a>    <span class="k">def</span> <span class="nf">isabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="path.exists"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.exists">[docs]</a>    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="path.isdir"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.isdir">[docs]</a>    <span class="k">def</span> <span class="nf">isdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="path.isfile"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.isfile">[docs]</a>    <span class="k">def</span> <span class="nf">isfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="path.islink"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.islink">[docs]</a>    <span class="k">def</span> <span class="nf">islink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="path.ismount"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.ismount">[docs]</a>    <span class="k">def</span> <span class="nf">ismount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">ismount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.samefile"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.samefile">[docs]</a>    <span class="k">def</span> <span class="nf">samefile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">samefile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.getatime"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.getatime">[docs]</a>    <span class="k">def</span> <span class="nf">getatime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">getatime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="n">atime</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">getatime</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; Last access time of the file. &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="path.getmtime"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.getmtime">[docs]</a>    <span class="k">def</span> <span class="nf">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="n">mtime</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">getmtime</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; Last-modified time of the file. &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="path.getctime"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.getctime">[docs]</a>    <span class="k">def</span> <span class="nf">getctime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="n">ctime</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">getctime</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; Creation time of the file. &quot;&quot;&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="path.getsize"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.getsize">[docs]</a>    <span class="k">def</span> <span class="nf">getsize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">getsize</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; Size of the file, in bytes. &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;access&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.access"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.access">[docs]</a>        <span class="k">def</span> <span class="nf">access</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Return true if current user has access to this path.</span>
+
+<span class="sd">            mode - One of the constants os.F_OK, os.R_OK, os.W_OK, os.X_OK</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.stat"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.stat">[docs]</a>    <span class="k">def</span> <span class="nf">stat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Perform a stat() system call on this path. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.lstat"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.lstat">[docs]</a>    <span class="k">def</span> <span class="nf">lstat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Like path.stat(), but do not follow symbolic links. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">lstat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__get_owner_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the owner of this file or directory. Follow</span>
+<span class="sd">        symbolic links.</span>
+
+<span class="sd">        Return a name of the form ur&#39;DOMAIN\User Name&#39;; may be a group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">win32security</span><span class="o">.</span><span class="n">GetFileSecurity</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">win32security</span><span class="o">.</span><span class="n">OWNER_SECURITY_INFORMATION</span><span class="p">)</span>
+        <span class="n">sid</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">GetSecurityDescriptorOwner</span><span class="p">()</span>
+        <span class="n">account</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">typecode</span> <span class="o">=</span> <span class="n">win32security</span><span class="o">.</span><span class="n">LookupAccountSid</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">sid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">domain</span> <span class="o">+</span> <span class="s">u&#39;</span><span class="se">\\</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">account</span>
+
+    <span class="k">def</span> <span class="nf">__get_owner_unix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the owner of this file or directory. Follow</span>
+<span class="sd">        symbolic links.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">pwd</span><span class="o">.</span><span class="n">getpwuid</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">st_uid</span><span class="p">)</span><span class="o">.</span><span class="n">pw_name</span>
+
+    <span class="k">def</span> <span class="nf">__get_owner_not_implemented</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Ownership not available on this platform.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s">&#39;win32security&#39;</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">():</span>
+        <span class="n">get_owner</span> <span class="o">=</span> <span class="n">__get_owner_windows</span>
+    <span class="k">elif</span> <span class="s">&#39;pwd&#39;</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">():</span>
+        <span class="n">get_owner</span> <span class="o">=</span> <span class="n">__get_owner_unix</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">get_owner</span> <span class="o">=</span> <span class="n">__get_owner_not_implemented</span>
+
+    <span class="n">owner</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span>
+        <span class="n">get_owner</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sd">&quot;&quot;&quot; Name of the owner of this file or directory. &quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;statvfs&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.statvfs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.statvfs">[docs]</a>        <span class="k">def</span> <span class="nf">statvfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Perform a statvfs() system call on this path. &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">statvfs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;pathconf&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.pathconf"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.pathconf">[docs]</a>        <span class="k">def</span> <span class="nf">pathconf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">pathconf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="c">#</span>
+    <span class="c"># --- Modifying operations on files and directories</span>
+</div>
+<div class="viewcode-block" id="path.utime"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.utime">[docs]</a>    <span class="k">def</span> <span class="nf">utime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the access and modified times of this file. &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">utime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.chmod"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.chmod">[docs]</a>    <span class="k">def</span> <span class="nf">chmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;chown&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.chown"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.chown">[docs]</a>        <span class="k">def</span> <span class="nf">chown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">gid</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">gid</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.rename"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="path.renames"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.renames">[docs]</a>    <span class="k">def</span> <span class="nf">renames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">renames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+
+    <span class="c">#</span>
+    <span class="c"># --- Create/delete operations on directories</span>
+</div>
+<div class="viewcode-block" id="path.mkdir"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.mkdir">[docs]</a>    <span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0777</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.mkdir_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.mkdir_p">[docs]</a>    <span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0777</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.makedirs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.makedirs">[docs]</a>    <span class="k">def</span> <span class="nf">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0777</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.makedirs_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.makedirs_p">[docs]</a>    <span class="k">def</span> <span class="nf">makedirs_p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0777</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.rmdir"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.rmdir">[docs]</a>    <span class="k">def</span> <span class="nf">rmdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.rmdir_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.rmdir_p">[docs]</a>    <span class="k">def</span> <span class="nf">rmdir_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rmdir</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOTEMPTY</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.removedirs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.removedirs">[docs]</a>    <span class="k">def</span> <span class="nf">removedirs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">removedirs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.removedirs_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.removedirs_p">[docs]</a>    <span class="k">def</span> <span class="nf">removedirs_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removedirs</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOTEMPTY</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c"># --- Modifying operations on files</span>
+</div>
+<div class="viewcode-block" id="path.touch"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.touch">[docs]</a>    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the access/modified times of this file to the current time.</span>
+<span class="sd">        Create the file if it does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">O_WRONLY</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_CREAT</span><span class="p">,</span> <span class="mo">0666</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">utime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.remove"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.remove_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.remove_p">[docs]</a>    <span class="k">def</span> <span class="nf">remove_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.unlink"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.unlink">[docs]</a>    <span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="path.unlink_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.unlink_p">[docs]</a>    <span class="k">def</span> <span class="nf">unlink_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_p</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c"># --- Links</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;link&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.link"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.link">[docs]</a>        <span class="k">def</span> <span class="nf">link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newpath</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Create a hard link at &#39;newpath&#39;, pointing to this file. &quot;&quot;&quot;</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newpath</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">newpath</span><span class="p">)</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;symlink&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.symlink"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.symlink">[docs]</a>        <span class="k">def</span> <span class="nf">symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newlink</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Create a symbolic link at &#39;newlink&#39;, pointing here. &quot;&quot;&quot;</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newlink</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">newlink</span><span class="p">)</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;readlink&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.readlink"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.readlink">[docs]</a>        <span class="k">def</span> <span class="nf">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Return the path to which this symbolic link points.</span>
+
+<span class="sd">            The result may be an absolute or a relative path.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_class</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="path.readlinkabs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.readlinkabs">[docs]</a>        <span class="k">def</span> <span class="nf">readlinkabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Return the path to which this symbolic link points.</span>
+
+<span class="sd">            The result is always an absolute path.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readlink</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isabs</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">p</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+
+    <span class="c">#</span>
+    <span class="c"># --- High-level functions from shutil</span>
+</div>
+    <span class="n">copyfile</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span>
+    <span class="n">copymode</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">copymode</span>
+    <span class="n">copystat</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">copystat</span>
+    <span class="n">copy</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span>
+    <span class="n">copy2</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span>
+    <span class="n">copytree</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">shutil</span><span class="p">,</span> <span class="s">&#39;move&#39;</span><span class="p">):</span>
+        <span class="n">move</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">move</span>
+    <span class="n">rmtree</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span>
+
+<div class="viewcode-block" id="path.rmtree_p"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.rmtree_p">[docs]</a>    <span class="k">def</span> <span class="nf">rmtree_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rmtree</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">:</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">#</span>
+    <span class="c"># --- Special stuff from os</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;chroot&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="path.chroot"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.path.path.chroot">[docs]</a>        <span class="k">def</span> <span class="nf">chroot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chroot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;startfile&#39;</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">startfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+</div>
+<span class="k">class</span> <span class="nc">tempdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A temporary directory via tempfile.mkdtemp, and constructed with the</span>
+<span class="sd">    same parameters that you can use as a context manager.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        with tempdir() as d:</span>
+<span class="sd">            # do stuff with the path object &quot;d&quot;</span>
+
+<span class="sd">        # here the directory is deleted automatically</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@ClassProperty</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_next_class</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">path</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">tempdir</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">dirname</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exc_value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rmtree</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

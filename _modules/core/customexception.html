@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.customexception &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="up" title="core" href="../core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for core.customexception</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="c"># This file is part of pyLot library.</span>
+<span class="c">#</span>
+<span class="c"># pyLot is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU Lesser General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># pyLot is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU Lesser General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c"># along with pyLot.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">u&#39;Pierre Puiseux, Guillaume Baty&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">u&quot;Copyright 2011-2012 (C) andheo, Université de Pau et des Pays de l&#39;Adour&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">[</span><span class="s">u&#39;Pierre Puiseux&#39;</span><span class="p">,</span> <span class="s">u&#39;Guillaume Baty&#39;</span><span class="p">]</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;GNU Lesser General Public License&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cast_error&#39;</span><span class="p">,</span> <span class="s">&#39;display_error_color&#39;</span><span class="p">,</span> <span class="s">&#39;CustomException&#39;</span><span class="p">,</span> <span class="s">&#39;UserException&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="cast_error"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.cast_error">[docs]</a><span class="k">def</span> <span class="nf">cast_error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+    <span class="n">new_error</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">CustomException</span><span class="p">):</span>
+        <span class="n">new_error</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">new_error</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="n">error</span><span class="o">.</span><span class="n">title</span>
+        <span class="n">new_error</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_error</span><span class="o">.</span><span class="n">message</span> <span class="k">if</span> <span class="n">message</span> <span class="k">else</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span>
+        <span class="n">new_error</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">new_error</span><span class="o">.</span><span class="n">desc</span> <span class="k">if</span> <span class="n">desc</span> <span class="k">else</span> <span class="n">error</span><span class="o">.</span><span class="n">desc</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_error</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">new_error</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="n">error</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">new_error</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">new_error</span><span class="o">.</span><span class="n">message</span> <span class="k">if</span> <span class="n">message</span> <span class="k">else</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span>
+        <span class="n">new_error</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">new_error</span><span class="o">.</span><span class="n">desc</span> <span class="k">if</span> <span class="n">desc</span> <span class="k">else</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span>
+    <span class="k">return</span> <span class="n">new_error</span>
+</div>
+<div class="viewcode-block" id="display_error_color"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.display_error_color">[docs]</a><span class="k">def</span> <span class="nf">display_error_color</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">CustomException</span><span class="p">):</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">cast_error</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">CustomException</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">getTitle</span><span class="p">())</span>
+    <span class="k">print</span> <span class="n">e</span><span class="o">.</span><span class="n">getTitle</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">getTitle</span><span class="p">())</span>
+    <span class="k">print</span>
+    <span class="k">print</span> <span class="n">e</span><span class="o">.</span><span class="n">getMessage</span><span class="p">()</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">getDesc</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">desc</span><span class="p">:</span>
+        <span class="n">part</span> <span class="o">=</span> <span class="s">u&#39;Details:&#39;</span>
+        <span class="k">print</span>
+        <span class="k">print</span> <span class="n">part</span>
+        <span class="k">print</span> <span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">desc</span>
+
+</div>
+<div class="viewcode-block" id="CustomException"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.CustomException">[docs]</a><span class="k">class</span> <span class="nc">CustomException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">    CustomException is an extension of builtin Exception.</span>
+<span class="sd">    Goal is to provide an unique structure for all kind of exceptions to allow</span>
+<span class="sd">    high-level exception handling.</span>
+
+<span class="sd">    For this reason, CustomException always provides :</span>
+<span class="sd">      - a title (getTitle)</span>
+<span class="sd">      - a message (getMessage)</span>
+<span class="sd">      - a detailed description (getDesc)</span>
+
+<span class="sd">    Typicall use is :</span>
+
+<span class="sd">    def print_error(error):</span>
+<span class="sd">      &quot;number of error arguments has no importance&quot;</span>
+<span class="sd">      print_in_red(error.getTitle())</span>
+<span class="sd">      print_in_blue(error.getMessage())</span>
+
+<span class="sd">    try :</span>
+<span class="sd">      action</span>
+<span class="sd">    except CustomExceptionNumberOne,error :</span>
+<span class="sd">      print_error(error)</span>
+<span class="sd">    except CustomExceptionNumberTwo,error :</span>
+<span class="sd">      print_error(error)</span>
+<span class="sd">    except CustomExceptionNumberThree,error :</span>
+<span class="sd">      fix the problem</span>
+<span class="sd">    # CustomExceptionNumberFour isn&#39;t intercepted here but for example in GUI classes</span>
+<span class="sd">    else :</span>
+<span class="sd">      print &#39;done&#39;</span>
+
+<span class="sd">    If CustomException takes one argument, you can reach it using &quot;%(value)s&quot;.</span>
+<span class="sd">    If it takes more than one, you must reimplement _kargs method.</span>
+
+<span class="sd">    Example :</span>
+
+<span class="sd">    .. code-block :: python</span>
+
+<span class="sd">      class ErrNotMatchingPuzzlePiece(CustomException):</span>
+<span class="sd">        title = u&#39;Error: puzzle pieces do not match&#39;</span>
+<span class="sd">        message = u&#39;%(compass_1)s part of piece %(piece_1)%s do not match %(compass_2)s part of piece %(piece_2)%s&#39;</span>
+<span class="sd">        desc = &quot;This error is raised because ...&quot;</span>
+
+<span class="sd">        def _kargs(self):</span>
+<span class="sd">          return dict(</span>
+<span class="sd">            compass_1=unicode(self._args[0].num),</span>
+<span class="sd">            piece_1=self._args[1],</span>
+<span class="sd">            compass_2=unicode(self._args[2].num),</span>
+<span class="sd">            piece_2=self._args[3],</span>
+<span class="sd">            )</span>
+
+<span class="sd">      #two raise this exception:</span>
+<span class="sd">      raise ErrNotMatchingPuzzlePiece(p1, u&#39;North&#39;, p2, u&#39;South&#39;)</span>
+<span class="sd">      # with p1 and p2 two &quot;Piece&quot; objects containing a &quot;num&quot; attribute.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">u&#39;Unknown Error&#39;</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s">u&#39;An unknown error occurs&#39;</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="s">u&#39;No details available&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__kargs</span> <span class="o">=</span> <span class="n">kargs</span>
+
+<div class="viewcode-block" id="CustomException.kargs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.CustomException.kargs">[docs]</a>    <span class="k">def</span> <span class="nf">kargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__kargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kargs</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__kargs</span>
+</div>
+    <span class="k">def</span> <span class="nf">_kargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="CustomException.rkargs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.CustomException.rkargs">[docs]</a>    <span class="k">def</span> <span class="nf">rkargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="p">():</span>
+            <span class="n">dic</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dic</span>
+</div>
+<div class="viewcode-block" id="CustomException.getMessage"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.CustomException.getMessage">[docs]</a>    <span class="k">def</span> <span class="nf">getMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CustomException.getTitle"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.CustomException.getTitle">[docs]</a>    <span class="k">def</span> <span class="nf">getTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CustomException.getDesc"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.CustomException.getDesc">[docs]</a>    <span class="k">def</span> <span class="nf">getDesc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMessage</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf8&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMessage</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="UserException"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.customexception.UserException">[docs]</a><span class="k">class</span> <span class="nc">UserException</span><span class="p">(</span><span class="n">CustomException</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

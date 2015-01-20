@@ -1,0 +1,905 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.funcsigs &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="up" title="core" href="../core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for core.funcsigs</h1><div class="highlight"><pre>
+<span class="c"># Copyright 2001-2013 Python Software Foundation; All Rights Reserved</span>
+<span class="sd">&quot;&quot;&quot;Function signature objects for callables</span>
+
+<span class="sd">Back port of Python 3.3&#39;s function signature tools from the inspect module,</span>
+<span class="sd">modified to be compatible with Python 2.7 and 3.2+.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#__version__ = &quot;0.3&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&quot;funcsigs require &#39;collections.OrderedDict&#39;&quot;</span><span class="p">)</span>
+    <span class="c">#from funcsigs.odict import OrderedDict</span>
+
+<span class="c">#from funcsigs.version import __version__</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;BoundArguments&#39;</span><span class="p">,</span> <span class="s">&#39;Parameter&#39;</span><span class="p">,</span> <span class="s">&#39;Signature&#39;</span><span class="p">,</span> <span class="s">&#39;signature&#39;</span><span class="p">]</span>
+
+
+<span class="n">_WrapperDescriptor</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="nb">type</span><span class="o">.</span><span class="n">__call__</span><span class="p">)</span>
+<span class="n">_MethodWrapper</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="nb">all</span><span class="o">.</span><span class="n">__call__</span><span class="p">)</span>
+
+<span class="n">_NonUserDefinedCallables</span> <span class="o">=</span> <span class="p">(</span><span class="n">_WrapperDescriptor</span><span class="p">,</span>
+                            <span class="n">_MethodWrapper</span><span class="p">,</span>
+                            <span class="n">types</span><span class="o">.</span><span class="n">BuiltinFunctionType</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">formatannotation</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">base_module</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">annotation</span><span class="o">.</span><span class="n">__module__</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;builtins&#39;</span><span class="p">,</span> <span class="s">&#39;__builtin__&#39;</span><span class="p">,</span> <span class="n">base_module</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">annotation</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">return</span> <span class="n">annotation</span><span class="o">.</span><span class="n">__module__</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="n">annotation</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_user_defined_method</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">nested</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">nested</span><span class="p">:</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="n">_NonUserDefinedCallables</span><span class="p">):</span>
+            <span class="c"># Once &#39;__signature__&#39; will be added to &#39;C&#39;-level</span>
+            <span class="c"># callables, this check won&#39;t be necessary</span>
+            <span class="k">return</span> <span class="n">meth</span>
+
+
+<div class="viewcode-block" id="signature"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.signature">[docs]</a><span class="k">def</span> <span class="nf">signature</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Get a signature object for the passed callable.&#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;{0!r} is not a callable object&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">):</span>
+        <span class="c"># In this case we skip the first parameter of the underlying</span>
+        <span class="c"># function (usually `self` or `cls`).</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__func__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sig</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__signature__</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sig</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># Was this function wrapped by a decorator?</span>
+        <span class="n">wrapped</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__wrapped__</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">signature</span><span class="p">(</span><span class="n">wrapped</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Signature</span><span class="o">.</span><span class="n">from_function</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="n">new_params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="n">partial_args</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="n">partial_keywords</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">keywords</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ba</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">bind_partial</span><span class="p">(</span><span class="o">*</span><span class="n">partial_args</span><span class="p">,</span> <span class="o">**</span><span class="n">partial_keywords</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;partial object {0!r} has incorrect arguments&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span> <span class="ow">in</span> <span class="n">ba</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="n">new_params</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">arg_name</span> <span class="ow">in</span> <span class="n">partial_keywords</span><span class="p">:</span>
+                <span class="c"># We set a new default value, because the following code</span>
+                <span class="c"># is correct:</span>
+                <span class="c">#</span>
+                <span class="c">#   &gt;&gt;&gt; def foo(a): print(a)</span>
+                <span class="c">#   &gt;&gt;&gt; print(partial(partial(foo, a=10), a=20)())</span>
+                <span class="c">#   20</span>
+                <span class="c">#   &gt;&gt;&gt; print(partial(partial(foo, a=10), a=20)(a=30))</span>
+                <span class="c">#   30</span>
+                <span class="c">#</span>
+                <span class="c"># So, with &#39;partial&#39; objects, passing a keyword argument is</span>
+                <span class="c"># like setting a new default value for the corresponding</span>
+                <span class="c"># parameter</span>
+                <span class="c">#</span>
+                <span class="c"># We also mark this parameter with &#39;_partial_kwarg&#39;</span>
+                <span class="c"># flag.  Later, in &#39;_bind&#39;, the &#39;default&#39; value of this</span>
+                <span class="c"># parameter will be added to &#39;kwargs&#39;, to simulate</span>
+                <span class="c"># the &#39;functools.partial&#39; real call.</span>
+                <span class="n">new_params</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">arg_value</span><span class="p">,</span>
+                                                     <span class="n">_partial_kwarg</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_VAR_KEYWORD</span><span class="p">,</span> <span class="n">_VAR_POSITIONAL</span><span class="p">)</span> <span class="ow">and</span>
+                            <span class="ow">not</span> <span class="n">param</span><span class="o">.</span><span class="n">_partial_kwarg</span><span class="p">):</span>
+                <span class="n">new_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">arg_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sig</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">new_params</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="n">sig</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="c"># obj is a class or a metaclass</span>
+
+        <span class="c"># First, let&#39;s see if it has an overloaded __call__ defined</span>
+        <span class="c"># in its metaclass</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">_get_user_defined_method</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="s">&#39;__call__&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">call</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Now we check if the &#39;obj&#39; class has a &#39;__new__&#39; method</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">_get_user_defined_method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__new__&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Finally, we should have at least __init__ implemented</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="n">_get_user_defined_method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__init__&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">_NonUserDefinedCallables</span><span class="p">):</span>
+        <span class="c"># An object with __call__</span>
+        <span class="c"># We also check that the &#39;obj&#39; is not an instance of</span>
+        <span class="c"># _WrapperDescriptor or _MethodWrapper to avoid</span>
+        <span class="c"># infinite recursion (and even potential segfault)</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">_get_user_defined_method</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="s">&#39;__call__&#39;</span><span class="p">,</span> <span class="s">&#39;im_func&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">call</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># For classes and objects we skip the first parameter of their</span>
+        <span class="c"># __call__, __new__, or __init__ methods</span>
+        <span class="k">return</span> <span class="n">sig</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">BuiltinFunctionType</span><span class="p">):</span>
+        <span class="c"># Raise a nicer error message for builtins</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;no signature found for builtin function {0!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;callable {0!r} is not supported by signature&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+</div>
+<span class="k">class</span> <span class="nc">_void</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A private marker - used in Parameter &amp; Signature&#39;&#39;&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">_empty</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_ParameterKind</span><span class="p">(</span><span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;_ParameterKind: {0!r}&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+
+
+<span class="n">_POSITIONAL_ONLY</span>        <span class="o">=</span> <span class="n">_ParameterKind</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;POSITIONAL_ONLY&#39;</span><span class="p">)</span>
+<span class="n">_POSITIONAL_OR_KEYWORD</span>  <span class="o">=</span> <span class="n">_ParameterKind</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;POSITIONAL_OR_KEYWORD&#39;</span><span class="p">)</span>
+<span class="n">_VAR_POSITIONAL</span>         <span class="o">=</span> <span class="n">_ParameterKind</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;VAR_POSITIONAL&#39;</span><span class="p">)</span>
+<span class="n">_KEYWORD_ONLY</span>           <span class="o">=</span> <span class="n">_ParameterKind</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;KEYWORD_ONLY&#39;</span><span class="p">)</span>
+<span class="n">_VAR_KEYWORD</span>            <span class="o">=</span> <span class="n">_ParameterKind</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;VAR_KEYWORD&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Represents a parameter in a function signature.</span>
+
+<span class="sd">    Has the following public attributes:</span>
+
+<span class="sd">    * name : str</span>
+<span class="sd">        The name of the parameter as a string.</span>
+<span class="sd">    * default : object</span>
+<span class="sd">        The default value for the parameter if specified.  If the</span>
+<span class="sd">        parameter has no default value, this attribute is not set.</span>
+<span class="sd">    * annotation</span>
+<span class="sd">        The annotation for the parameter if specified.  If the</span>
+<span class="sd">        parameter has no annotation, this attribute is not set.</span>
+<span class="sd">    * kind : str</span>
+<span class="sd">        Describes how argument values are bound to the parameter.</span>
+<span class="sd">        Possible values: `Parameter.POSITIONAL_ONLY`,</span>
+<span class="sd">        `Parameter.POSITIONAL_OR_KEYWORD`, `Parameter.VAR_POSITIONAL`,</span>
+<span class="sd">        `Parameter.KEYWORD_ONLY`, `Parameter.VAR_KEYWORD`.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;_name&#39;</span><span class="p">,</span> <span class="s">&#39;_kind&#39;</span><span class="p">,</span> <span class="s">&#39;_default&#39;</span><span class="p">,</span> <span class="s">&#39;_annotation&#39;</span><span class="p">,</span> <span class="s">&#39;_partial_kwarg&#39;</span><span class="p">)</span>
+
+    <span class="n">POSITIONAL_ONLY</span>         <span class="o">=</span> <span class="n">_POSITIONAL_ONLY</span>
+    <span class="n">POSITIONAL_OR_KEYWORD</span>   <span class="o">=</span> <span class="n">_POSITIONAL_OR_KEYWORD</span>
+    <span class="n">VAR_POSITIONAL</span>          <span class="o">=</span> <span class="n">_VAR_POSITIONAL</span>
+    <span class="n">KEYWORD_ONLY</span>            <span class="o">=</span> <span class="n">_KEYWORD_ONLY</span>
+    <span class="n">VAR_KEYWORD</span>             <span class="o">=</span> <span class="n">_VAR_KEYWORD</span>
+
+    <span class="n">empty</span> <span class="o">=</span> <span class="n">_empty</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">_empty</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">_empty</span><span class="p">,</span>
+                 <span class="n">_partial_kwarg</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_POSITIONAL_ONLY</span><span class="p">,</span> <span class="n">_POSITIONAL_OR_KEYWORD</span><span class="p">,</span>
+                        <span class="n">_VAR_POSITIONAL</span><span class="p">,</span> <span class="n">_KEYWORD_ONLY</span><span class="p">,</span> <span class="n">_VAR_KEYWORD</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid value for &#39;Parameter.kind&#39; attribute&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span> <span class="o">=</span> <span class="n">kind</span>
+
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_VAR_POSITIONAL</span><span class="p">,</span> <span class="n">_VAR_KEYWORD</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{0} parameters cannot have default values&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotation</span> <span class="o">=</span> <span class="n">annotation</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">!=</span> <span class="n">_POSITIONAL_ONLY</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;None is not a valid name for a &quot;</span>
+                                 <span class="s">&quot;non-positional-only parameter&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">!=</span> <span class="n">_POSITIONAL_ONLY</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;[a-z_]\w*$&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{0!r} is not a valid parameter name&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_partial_kwarg</span> <span class="o">=</span> <span class="n">_partial_kwarg</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Parameter.name"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Parameter.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Parameter.default"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Parameter.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Parameter.annotation"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Parameter.annotation">[docs]</a>    <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotation</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Parameter.kind"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Parameter.kind">[docs]</a>    <span class="k">def</span> <span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span>
+</div>
+<div class="viewcode-block" id="Parameter.replace"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Parameter.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">_void</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">_void</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">_void</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">_void</span><span class="p">,</span> <span class="n">_partial_kwarg</span><span class="o">=</span><span class="n">_void</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates a customized copy of the Parameter.&#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span>
+
+        <span class="k">if</span> <span class="n">annotation</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotation</span>
+
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span>
+
+        <span class="k">if</span> <span class="n">_partial_kwarg</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">_partial_kwarg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partial_kwarg</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">name</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+                          <span class="n">_partial_kwarg</span><span class="o">=</span><span class="n">_partial_kwarg</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span>
+
+        <span class="n">formatted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">_POSITIONAL_ONLY</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">formatted</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">formatted</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="s">&#39;&lt;{0}&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+
+        <span class="c"># Add annotation and default value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_empty</span><span class="p">:</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="s">&#39;{0}:{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatted</span><span class="p">,</span>
+                                       <span class="n">formatannotation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_empty</span><span class="p">:</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="s">&#39;{0}={1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatted</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_POSITIONAL</span><span class="p">:</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span> <span class="o">+</span> <span class="n">formatted</span>
+        <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_KEYWORD</span><span class="p">:</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="s">&#39;**&#39;</span> <span class="o">+</span> <span class="n">formatted</span>
+
+        <span class="k">return</span> <span class="n">formatted</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;{0} at {1:#x} {2!r}&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                                           <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;unhashable type: &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_name</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_kind</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_kind</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_default</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_annotation</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_annotation</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BoundArguments"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.BoundArguments">[docs]</a><span class="k">class</span> <span class="nc">BoundArguments</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Result of `Signature.bind` call.  Holds the mapping of arguments</span>
+<span class="sd">    to the function&#39;s parameters.</span>
+
+<span class="sd">    Has the following public attributes:</span>
+
+<span class="sd">    * arguments : OrderedDict</span>
+<span class="sd">        An ordered mutable mapping of parameters&#39; names to arguments&#39; values.</span>
+<span class="sd">        Does not contain arguments&#39; default values.</span>
+<span class="sd">    * signature : Signature</span>
+<span class="sd">        The Signature object that created this instance.</span>
+<span class="sd">    * args : tuple</span>
+<span class="sd">        Tuple of positional arguments values.</span>
+<span class="sd">    * kwargs : dict</span>
+<span class="sd">        Dict of keyword arguments values.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span> <span class="o">=</span> <span class="n">arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span> <span class="o">=</span> <span class="n">signature</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundArguments.signature"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.BoundArguments.signature">[docs]</a>    <span class="k">def</span> <span class="nf">signature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundArguments.args"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.BoundArguments.args">[docs]</a>    <span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_VAR_KEYWORD</span><span class="p">,</span> <span class="n">_KEYWORD_ONLY</span><span class="p">)</span> <span class="ow">or</span>
+                                                    <span class="n">param</span><span class="o">.</span><span class="n">_partial_kwarg</span><span class="p">):</span>
+                <span class="c"># Keyword arguments mapped by &#39;functools.partial&#39;</span>
+                <span class="c"># (Parameter._partial_kwarg is True) are mapped</span>
+                <span class="c"># in &#39;BoundArguments.kwargs&#39;, along with VAR_KEYWORD &amp;</span>
+                <span class="c"># KEYWORD_ONLY</span>
+                <span class="k">break</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># We&#39;re done here. Other arguments</span>
+                <span class="c"># will be mapped in &#39;BoundArguments.kwargs&#39;</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_POSITIONAL</span><span class="p">:</span>
+                    <span class="c"># *args</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># plain argument</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="BoundArguments.kwargs"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.BoundArguments.kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">kwargs_started</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs_started</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_VAR_KEYWORD</span><span class="p">,</span> <span class="n">_KEYWORD_ONLY</span><span class="p">)</span> <span class="ow">or</span>
+                                                <span class="n">param</span><span class="o">.</span><span class="n">_partial_kwarg</span><span class="p">):</span>
+                    <span class="n">kwargs_started</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">:</span>
+                        <span class="n">kwargs_started</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs_started</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_KEYWORD</span><span class="p">:</span>
+                    <span class="c"># **kwargs</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># plain keyword argument</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
+
+        <span class="k">return</span> <span class="n">kwargs</span>
+</div>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;unhashable type: &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">BoundArguments</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">signature</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">arguments</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Signature"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature">[docs]</a><span class="k">class</span> <span class="nc">Signature</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A Signature object represents the overall signature of a function.</span>
+<span class="sd">    It stores a Parameter object for each parameter accepted by the</span>
+<span class="sd">    function, as well as information specific to the function itself.</span>
+
+<span class="sd">    A Signature object has the following public attributes and methods:</span>
+
+<span class="sd">    * parameters : OrderedDict</span>
+<span class="sd">        An ordered mapping of parameters&#39; names to the corresponding</span>
+<span class="sd">        Parameter objects (keyword-only arguments are in the same order</span>
+<span class="sd">        as listed in `code.co_varnames`).</span>
+<span class="sd">    * return_annotation : object</span>
+<span class="sd">        The annotation for the return type of the function if specified.</span>
+<span class="sd">        If the function has no annotation for its return type, this</span>
+<span class="sd">        attribute is not set.</span>
+<span class="sd">    * bind(*args, **kwargs) -&gt; BoundArguments</span>
+<span class="sd">        Creates a mapping from positional and keyword arguments to</span>
+<span class="sd">        parameters.</span>
+<span class="sd">    * bind_partial(*args, **kwargs) -&gt; BoundArguments</span>
+<span class="sd">        Creates a partial mapping from positional and keyword arguments</span>
+<span class="sd">        to parameters (simulating &#39;functools.partial&#39; behavior.)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;_return_annotation&#39;</span><span class="p">,</span> <span class="s">&#39;_parameters&#39;</span><span class="p">)</span>
+
+    <span class="n">_parameter_cls</span> <span class="o">=</span> <span class="n">Parameter</span>
+    <span class="n">_bound_arguments_cls</span> <span class="o">=</span> <span class="n">BoundArguments</span>
+
+    <span class="n">empty</span> <span class="o">=</span> <span class="n">_empty</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">return_annotation</span><span class="o">=</span><span class="n">_empty</span><span class="p">,</span>
+                 <span class="n">__validate_parameters__</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Constructs Signature from the given list of Parameter</span>
+<span class="sd">        objects and &#39;return_annotation&#39;.  All arguments are optional.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">__validate_parameters__</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+                <span class="n">top_kind</span> <span class="o">=</span> <span class="n">_POSITIONAL_ONLY</span>
+
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parameters</span><span class="p">):</span>
+                    <span class="n">kind</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span>
+                    <span class="k">if</span> <span class="n">kind</span> <span class="o">&lt;</span> <span class="n">top_kind</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;wrong parameter order: {0} before {1}&#39;</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">top_kind</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">top_kind</span> <span class="o">=</span> <span class="n">kind</span>
+
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                        <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;duplicate parameter name: {0!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+                                                <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_return_annotation</span> <span class="o">=</span> <span class="n">return_annotation</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Signature.from_function"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature.from_function">[docs]</a>    <span class="k">def</span> <span class="nf">from_function</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Constructs Signature for the given python function&#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;{0!r} is not a Python function&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+
+        <span class="n">Parameter</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_parameter_cls</span>
+
+        <span class="c"># Parameter information.</span>
+        <span class="n">func_code</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__code__</span>
+        <span class="n">pos_count</span> <span class="o">=</span> <span class="n">func_code</span><span class="o">.</span><span class="n">co_argcount</span>
+        <span class="n">arg_names</span> <span class="o">=</span> <span class="n">func_code</span><span class="o">.</span><span class="n">co_varnames</span>
+        <span class="n">positional</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">arg_names</span><span class="p">[:</span><span class="n">pos_count</span><span class="p">])</span>
+        <span class="n">keyword_only_count</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func_code</span><span class="p">,</span> <span class="s">&#39;co_kwonlyargcount&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">keyword_only</span> <span class="o">=</span> <span class="n">arg_names</span><span class="p">[</span><span class="n">pos_count</span><span class="p">:(</span><span class="n">pos_count</span> <span class="o">+</span> <span class="n">keyword_only_count</span><span class="p">)]</span>
+        <span class="n">annotations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;__annotations__&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__defaults__</span>
+        <span class="n">kwdefaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s">&#39;__kwdefaults__&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">defaults</span><span class="p">:</span>
+            <span class="n">pos_default_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos_default_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># Non-keyword-only parameters w/o defaults.</span>
+        <span class="n">non_default_count</span> <span class="o">=</span> <span class="n">pos_count</span> <span class="o">-</span> <span class="n">pos_default_count</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">positional</span><span class="p">[:</span><span class="n">non_default_count</span><span class="p">]:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_empty</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+                                        <span class="n">kind</span><span class="o">=</span><span class="n">_POSITIONAL_OR_KEYWORD</span><span class="p">))</span>
+
+        <span class="c"># ... w/ defaults.</span>
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">positional</span><span class="p">[</span><span class="n">non_default_count</span><span class="p">:]):</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_empty</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+                                        <span class="n">kind</span><span class="o">=</span><span class="n">_POSITIONAL_OR_KEYWORD</span><span class="p">,</span>
+                                        <span class="n">default</span><span class="o">=</span><span class="n">defaults</span><span class="p">[</span><span class="n">offset</span><span class="p">]))</span>
+
+        <span class="c"># *args</span>
+        <span class="k">if</span> <span class="n">func_code</span><span class="o">.</span><span class="n">co_flags</span> <span class="o">&amp;</span> <span class="mh">0x04</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">arg_names</span><span class="p">[</span><span class="n">pos_count</span> <span class="o">+</span> <span class="n">keyword_only_count</span><span class="p">]</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_empty</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+                                        <span class="n">kind</span><span class="o">=</span><span class="n">_VAR_POSITIONAL</span><span class="p">))</span>
+
+        <span class="c"># Keyword-only parameters.</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">keyword_only</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">_empty</span>
+            <span class="k">if</span> <span class="n">kwdefaults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="n">kwdefaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_empty</span><span class="p">)</span>
+
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_empty</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+                                        <span class="n">kind</span><span class="o">=</span><span class="n">_KEYWORD_ONLY</span><span class="p">,</span>
+                                        <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">))</span>
+        <span class="c"># **kwargs</span>
+        <span class="k">if</span> <span class="n">func_code</span><span class="o">.</span><span class="n">co_flags</span> <span class="o">&amp;</span> <span class="mh">0x08</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">pos_count</span> <span class="o">+</span> <span class="n">keyword_only_count</span>
+            <span class="k">if</span> <span class="n">func_code</span><span class="o">.</span><span class="n">co_flags</span> <span class="o">&amp;</span> <span class="mh">0x04</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="n">arg_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_empty</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+                                        <span class="n">kind</span><span class="o">=</span><span class="n">_VAR_KEYWORD</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span>
+                   <span class="n">return_annotation</span><span class="o">=</span><span class="n">annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;return&#39;</span><span class="p">,</span> <span class="n">_empty</span><span class="p">),</span>
+                   <span class="n">__validate_parameters__</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Signature.parameters"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature.parameters">[docs]</a>    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Signature.return_annotation"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature.return_annotation">[docs]</a>    <span class="k">def</span> <span class="nf">return_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_annotation</span>
+</div>
+<div class="viewcode-block" id="Signature.replace"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">_void</span><span class="p">,</span> <span class="n">return_annotation</span><span class="o">=</span><span class="n">_void</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates a customized copy of the Signature.</span>
+<span class="sd">        Pass &#39;parameters&#39; and/or &#39;return_annotation&#39; arguments</span>
+<span class="sd">        to override them in the new copy.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">return_annotation</span> <span class="ow">is</span> <span class="n">_void</span><span class="p">:</span>
+            <span class="n">return_annotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_annotation</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">parameters</span><span class="p">,</span>
+                          <span class="n">return_annotation</span><span class="o">=</span><span class="n">return_annotation</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;unhashable type: &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">),</span> <span class="n">Signature</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">return_annotation</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">return_annotation</span> <span class="ow">or</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">parameters</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">other_positions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">param</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_KEYWORD_ONLY</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">other_param</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">param</span> <span class="o">!=</span> <span class="n">other_param</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">other_idx</span> <span class="o">=</span> <span class="n">other_positions</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">idx</span> <span class="o">!=</span> <span class="n">other_idx</span> <span class="ow">or</span>
+                                    <span class="n">param</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">param_name</span><span class="p">]):</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">partial</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Private method.  Don&#39;t use directly.&#39;&#39;&#39;</span>
+
+        <span class="n">arguments</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">parameters_ex</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="n">arg_vals</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">partial</span><span class="p">:</span>
+            <span class="c"># Support for binding arguments to &#39;functools.partial&#39; objects.</span>
+            <span class="c"># See &#39;functools.partial&#39; case in &#39;signature()&#39; implementation</span>
+            <span class="c"># for details.</span>
+            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">_partial_kwarg</span> <span class="ow">and</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">):</span>
+                    <span class="c"># Simulating &#39;functools.partial&#39; behavior</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># Let&#39;s iterate through the positional arguments and corresponding</span>
+            <span class="c"># parameters</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">arg_val</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">arg_vals</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="c"># No more positional arguments</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                    <span class="c"># No more parameters. That&#39;s it. Just need to check that</span>
+                    <span class="c"># we have no `kwargs` after this while loop</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_POSITIONAL</span><span class="p">:</span>
+                        <span class="c"># That&#39;s OK, just empty *args.  Let&#39;s start parsing</span>
+                        <span class="c"># kwargs</span>
+                        <span class="k">break</span>
+                    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_POSITIONAL_ONLY</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{arg!r} parameter is positional only, &#39;</span> \
+                                  <span class="s">&#39;but was passed as a keyword&#39;</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">parameters_ex</span> <span class="o">=</span> <span class="p">(</span><span class="n">param</span><span class="p">,)</span>
+                        <span class="k">break</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_KEYWORD</span> <span class="ow">or</span>
+                                                <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_empty</span><span class="p">):</span>
+                        <span class="c"># That&#39;s fine too - we have a default value for this</span>
+                        <span class="c"># parameter.  So, lets start parsing `kwargs`, starting</span>
+                        <span class="c"># with the current parameter</span>
+                        <span class="n">parameters_ex</span> <span class="o">=</span> <span class="p">(</span><span class="n">param</span><span class="p">,)</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">partial</span><span class="p">:</span>
+                            <span class="n">parameters_ex</span> <span class="o">=</span> <span class="p">(</span><span class="n">param</span><span class="p">,)</span>
+                            <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{arg!r} parameter lacking default value&#39;</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># We have a positional argument to process</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;too many positional arguments&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_VAR_KEYWORD</span><span class="p">,</span> <span class="n">_KEYWORD_ONLY</span><span class="p">):</span>
+                        <span class="c"># Looks like we have no parameter for this positional</span>
+                        <span class="c"># argument</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;too many positional arguments&#39;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_POSITIONAL</span><span class="p">:</span>
+                        <span class="c"># We have an &#39;*args&#39;-like argument, let&#39;s fill it with</span>
+                        <span class="c"># all positional arguments we have left and move on to</span>
+                        <span class="c"># the next phase</span>
+                        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg_val</span><span class="p">]</span>
+                        <span class="n">values</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">arg_vals</span><span class="p">)</span>
+                        <span class="n">arguments</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                        <span class="k">break</span>
+
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;multiple values for argument &#39;</span>
+                                        <span class="s">&#39;{arg!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                    <span class="n">arguments</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_val</span>
+
+        <span class="c"># Now, we iterate through the remaining parameters to process</span>
+        <span class="c"># keyword arguments</span>
+        <span class="n">kwargs_param</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">parameters_ex</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_POSITIONAL_ONLY</span><span class="p">:</span>
+                <span class="c"># This should never happen in case of a properly built</span>
+                <span class="c"># Signature object (but let&#39;s have this check here</span>
+                <span class="c"># to ensure correct behaviour just in case)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;{arg!r} parameter is positional only, &#39;</span>
+                                <span class="s">&#39;but was passed as a keyword&#39;</span><span class="o">.</span> \
+                                <span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_KEYWORD</span><span class="p">:</span>
+                <span class="c"># Memorize that we have a &#39;**kwargs&#39;-like parameter</span>
+                <span class="n">kwargs_param</span> <span class="o">=</span> <span class="n">param</span>
+                <span class="k">continue</span>
+
+            <span class="n">param_name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">arg_val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c"># We have no value for this parameter.  It&#39;s fine though,</span>
+                <span class="c"># if it has a default value, or it is an &#39;*args&#39;-like</span>
+                <span class="c"># parameter, left alone by the processing of positional</span>
+                <span class="c"># arguments.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">partial</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">_VAR_POSITIONAL</span> <span class="ow">and</span>
+                                                    <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_empty</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;{arg!r} parameter lacking default value&#39;</span><span class="o">.</span> \
+                                    <span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="o">=</span><span class="n">param_name</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">arguments</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_val</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs_param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># Process our &#39;**kwargs&#39;-like parameter</span>
+                <span class="n">arguments</span><span class="p">[</span><span class="n">kwargs_param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;too many keyword arguments&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bound_arguments_cls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Signature.bind"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get a BoundArguments object, that maps the passed `args`</span>
+<span class="sd">        and `kwargs` to the function&#39;s signature.  Raises `TypeError`</span>
+<span class="sd">        if the passed arguments can not be bound.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bind</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Signature.bind_partial"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.funcsigs.Signature.bind_partial">[docs]</a>    <span class="k">def</span> <span class="nf">bind_partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get a BoundArguments object, that partially maps the</span>
+<span class="sd">        passed `args` and `kwargs` to the function&#39;s signature.</span>
+<span class="sd">        Raises `TypeError` if the passed arguments can not be bound.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bind</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">partial</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">render_kw_only_separator</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">formatted</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">_VAR_POSITIONAL</span><span class="p">:</span>
+                <span class="c"># OK, we have an &#39;*args&#39;-like parameter, so we won&#39;t need</span>
+                <span class="c"># a &#39;*&#39; to separate keyword-only arguments</span>
+                <span class="n">render_kw_only_separator</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">_KEYWORD_ONLY</span> <span class="ow">and</span> <span class="n">render_kw_only_separator</span><span class="p">:</span>
+                <span class="c"># We have a keyword-only parameter to render and we haven&#39;t</span>
+                <span class="c"># rendered an &#39;*args&#39;-like parameter before, so add a &#39;*&#39;</span>
+                <span class="c"># separator to the parameters list (&quot;foo(arg1, *, arg2)&quot; case)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;*&#39;</span><span class="p">)</span>
+                <span class="c"># This condition should be only triggered once, so</span>
+                <span class="c"># reset the flag</span>
+                <span class="n">render_kw_only_separator</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+
+        <span class="n">rendered</span> <span class="o">=</span> <span class="s">&#39;({0})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_annotation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_empty</span><span class="p">:</span>
+            <span class="n">anno</span> <span class="o">=</span> <span class="n">formatannotation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">)</span>
+            <span class="n">rendered</span> <span class="o">+=</span> <span class="s">&#39; -&gt; {0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">anno</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rendered</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.plugin.control &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="core" href="../../core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for core.plugin.control</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2014 INRIA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">Control - Advanced</span>
+<span class="sd">==================</span>
+
+<span class="sd">Widget</span>
+<span class="sd">------</span>
+
+<span class="sd">For a complete explanation of code to write for each function, or to create a class</span>
+<span class="sd">from scratch, please have a look to :class:`~IControlWidget` and example after.</span>
+
+<span class="sd">To create a class for standard QWidget, you can copy/paste this code</span>
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    :filename: mypackage/plugins/widgets.py</span>
+<span class="sd">    :linenos:</span>
+
+<span class="sd">    from openalea.oalab.gui.control.widget import AbstractQtControlWidget</span>
+<span class="sd">    class XyzControlWidget(AbstractQtControlWidget):</span>
+<span class="sd">        def __init__(self):</span>
+<span class="sd">            AbstractQtControlWidget.__init__(self)</span>
+<span class="sd">            self.value_changed_signal = &#39;qt signal&#39; # for example &#39;valueChanged()&#39;, &#39;currentTextChanged()&#39;, ...</span>
+
+<span class="sd">        def reset(self, value=None, **kwargs):</span>
+<span class="sd">            if value is None:</span>
+<span class="sd">                self.setValue(REAL_VALUE)</span>
+<span class="sd">            self.setC1(kwargs.get(&#39;constraint1&#39;, DEFAULT_CONSTRAINT1))</span>
+
+<span class="sd">        def setValue(self, value):</span>
+<span class="sd">            raise NotImplementedError</span>
+
+<span class="sd">        def value(self):</span>
+<span class="sd">            raise NotImplementedError</span>
+
+<span class="sd">Widget selector</span>
+<span class="sd">---------------</span>
+
+<span class="sd">.. code-block:: python</span>
+<span class="sd">    :filename: mypackage/plugins/selectors.py</span>
+<span class="sd">    :linenos:</span>
+
+<span class="sd">    class XyzControlWidgetSelector(object):</span>
+<span class="sd">        def __init__(self):</span>
+<span class="sd">            pass</span>
+
+<span class="sd">        @classmethod</span>
+<span class="sd">        def edit(cls, control, shape=None):</span>
+<span class="sd">            if shape == &#39;responsive&#39;:</span>
+<span class="sd">                from mypackage.plugins.widgets import XyzControlWidget</span>
+<span class="sd">                widget = XyzControlWidget()</span>
+<span class="sd">                widget.tune()</span>
+<span class="sd">                return widget</span>
+
+<span class="sd">        @classmethod</span>
+<span class="sd">        def view(self, control, shape=None):</span>
+<span class="sd">            return None</span>
+
+<span class="sd">        @classmethod</span>
+<span class="sd">        def create(cls, shape=None):</span>
+<span class="sd">            return None</span>
+
+<span class="sd">        @classmethod</span>
+<span class="sd">        def snapshot(cls, control, shape=None):</span>
+<span class="sd">            return None</span>
+
+<span class="sd">        @classmethod</span>
+<span class="sd">        def paint(cls, control, painter, rectangle, option=None):</span>
+<span class="sd">            return None</span>
+
+<span class="sd">        @classmethod</span>
+<span class="sd">        def edit_constraints(cls):</span>
+<span class="sd">            return None</span>
+
+
+
+<span class="sd"> Plugin</span>
+<span class="sd"> ------</span>
+
+<span class="sd">Here plugin is exactly the same as simple approach, except that it returns</span>
+<span class="sd">XyzControlWidgetSelector instead of XyzControlWidget.</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">     from openalea.oalab.plugin.control import ControlWidgetSelectorPlugin</span>
+<span class="sd">     from openalea.deploy.shared_data import shared_data</span>
+
+<span class="sd">     class PluginXyzWidgetSelector(ControlWidgetSelectorPlugin):</span>
+
+<span class="sd">         controls = [&#39;IXyz&#39;] # Interface name like IInt</span>
+<span class="sd">         edit_shape = [&#39;responsive&#39;]</span>
+<span class="sd">         name = &#39;XyzWidgetSelector&#39;</span>
+
+<span class="sd">         @classmethod</span>
+<span class="sd">         def load(cls):</span>
+<span class="sd">             from mypackage.plugins.selectors import XyzControlWidgetSelector</span>
+<span class="sd">             return XyzControlWidgetSelector</span>
+
+<span class="sd">.. seealso::</span>
+
+<span class="sd">    See IInt example for real case</span>
+
+
+
+
+
+<span class="sd">IInt control widget</span>
+<span class="sd">-------------------</span>
+
+<span class="sd">All Qt sliders define &quot;value&quot; and &quot;setValue&quot; methods directly compatible with IInt (int),</span>
+<span class="sd">so there is almost nothing to do:</span>
+
+<span class="sd">We will use these widgets depending on context:</span>
+<span class="sd">    - QDial for responsive, large and small shapes</span>
+<span class="sd">    - QSlider for vline</span>
+<span class="sd">    - QSpinBox for hline</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/widgets.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :pyobject: AbstractIntWidget</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/widgets.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :pyobject: IntDial</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/widgets.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :pyobject: IntSpinBox</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/widgets.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :pyobject: IntSimpleSlider</span>
+
+<span class="sd">We define also a widget to edit constraints</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/constraints.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :pyobject: IntConstraintWidget</span>
+
+<span class="sd">Now, lets define widget selector to group all classes together :</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/selectors.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :emphasize-lines: 11</span>
+<span class="sd">    :pyobject: IntWidgetSelector</span>
+
+<span class="sd">You can notice in line 11, instruction to set widget to fit to vline shape.</span>
+
+<span class="sd">And finally, lets define plugin that links to it.</span>
+
+<span class="sd">.. literalinclude:: ../../../openalea-src/oalab/src/openalea/oalab/plugins/controls/__init__.py</span>
+<span class="sd">    :linenos:</span>
+<span class="sd">    :pyobject: PluginIntWidgetSelector</span>
+
+<span class="sd">.. warning::</span>
+
+<span class="sd">    All classes can be defined in same file **excepted last one**.</span>
+<span class="sd">    PluginIntWidgetSelector must be defined in a separated file to allow to load only description.</span>
+
+<span class="sd">Glossary</span>
+<span class="sd">========</span>
+
+<span class="sd">.. glossary::</span>
+
+<span class="sd">    create mode</span>
+<span class="sd">        Users want to create a control from scratch.</span>
+<span class="sd">        In other words, it can be considered as &quot;write-only&quot; widget.</span>
+
+<span class="sd">    view mode</span>
+<span class="sd">        Users want to visualize a control. If control value changes, users may want to see changes.</span>
+<span class="sd">        In other words, it can be considered as a &quot;read-only&quot; with option to enable :term:`auto-read mode`.</span>
+
+<span class="sd">    edit mode</span>
+<span class="sd">        Users want to edit a control. If control value changes, users may want to reload changes.</span>
+<span class="sd">        Users may want theirs changes to be applied dynamically or not.</span>
+<span class="sd">        In other words, it can be considered as a &quot;read/write&quot; widget with options to enable both :term:`auto-read mode` mode and :term:`auto-apply mode`.</span>
+
+<span class="sd">    auto-read mode</span>
+<span class="sd">        If widget has auto-read mode enabled: if value changes, view is automatically refreshed to display new value.</span>
+
+<span class="sd">    auto-apply mode</span>
+<span class="sd">        If widget has auto-apply mode enabled: each time users modify data in the view, changes are automatically applied to object being edited.</span>
+
+<span class="sd">    control shape</span>
+<span class="sd">        shape supported by a control editor or viewer:</span>
+
+<span class="sd">        - hline: widget fits well in an horizontal line for example in a cell in a table or spreadsheet, in a 200x20px widget, ...</span>
+<span class="sd">        - vline: widget fits well in a vertical line, for example in 20x200px widget</span>
+<span class="sd">        - small: widget fits well in a small squared widget (100x100 px to 300x300 px)</span>
+<span class="sd">        - large: widget fits well in large space (&gt; 300x300 px)</span>
+<span class="sd">        - responsive: widget can fit well in all shapes and sizes. Hardest to create but easiest to use.</span>
+
+
+<span class="sd">Details</span>
+<span class="sd">=======</span>
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.control.IConstraintWidget</span>
+<span class="sd">    :members:</span>
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.control.IControlWidget</span>
+<span class="sd">    :members:</span>
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.control.IWidgetSelector</span>
+<span class="sd">    :members:</span>
+
+
+
+<span class="sd">.. autoclass:: openalea.oalab.plugins.control.ControlWidgetSelectorPlugin</span>
+<span class="sd">    :members:</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="n">IInterface</span>
+
+
+<div class="viewcode-block" id="ControlWidgetSelectorPlugin"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.ControlWidgetSelectorPlugin">[docs]</a><span class="k">class</span> <span class="nc">ControlWidgetSelectorPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;ControlWidget&#39;</span>
+    <span class="n">icon_path</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># [&#39;hline&#39;, &#39;vline&#39;, &#39;small&#39;, &#39;large&#39;, &#39;responsive&#39;]</span>
+    <span class="n">view_shape</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># [&#39;hline&#39;, &#39;vline&#39;, &#39;small&#39;, &#39;large&#39;, &#39;responsive&#39;]</span>
+    <span class="n">create_shape</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># [&#39;hline&#39;, &#39;vline&#39;, &#39;small&#39;, &#39;large&#39;, &#39;responsive&#39;]</span>
+    <span class="n">paint</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ControlWidgetSelectorPlugin.load"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.ControlWidgetSelectorPlugin.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="IControlWidget"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget">[docs]</a><span class="k">class</span> <span class="nc">IControlWidget</span><span class="p">(</span><span class="n">IInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An IControlWidget is a</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IControlWidget.reset"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset widget to default values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.set"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use control to preset widget.</span>
+<span class="sd">        Starts to listen to control events and read control&#39;s values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.apply"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update control with widget values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.read"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update widget with control values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.notify"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method called when Observed control changes.</span>
+<span class="sd">        Generally, when control send an event &quot;ValueChanged&quot;, we want to</span>
+<span class="sd">        refresh widget with new value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.autoread"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.autoread">[docs]</a>    <span class="k">def</span> <span class="nf">autoread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable auto-read mode on given control.</span>
+<span class="sd">        Important, control passed to autoread and autoapply can be identical or different.</span>
+<span class="sd">        For example if you want to refresh view if a template changes and apply it automatically to your current control.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.autoapply"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.autoapply">[docs]</a>    <span class="k">def</span> <span class="nf">autoapply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable auto-apply mode on given control</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.on_value_changed"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.on_value_changed">[docs]</a>    <span class="k">def</span> <span class="nf">on_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method called when value changed.</span>
+<span class="sd">        This method generally read control and refresh view if :term:`auto-read mode` is enabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.setValue"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change widget value.</span>
+<span class="sd">        If your class derivates from an third-party widget, it is sometime necessary</span>
+<span class="sd">        to adapt control value type to widget supported type.</span>
+<span class="sd">        Example unicode to QString in pyqt API v1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IControlWidget.value"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IControlWidget.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns widget value.</span>
+<span class="sd">        If your class derivates from an third-party widget, it is sometime necessary</span>
+<span class="sd">        to adapt widget value type to control type.</span>
+<span class="sd">        If widget supports more than one interface, returned value depends on given interface.</span>
+<span class="sd">        If none, returns widget preferred type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="IWidgetSelector"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector">[docs]</a><span class="k">class</span> <span class="nc">IWidgetSelector</span><span class="p">(</span><span class="n">IInterface</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IWidgetSelector.edit"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector.edit">[docs]</a>    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an instance of IControlWidget that modifies control in place.</span>
+<span class="sd">        Control can be updated continuously or on explicit user action</span>
+<span class="sd">        (click on apply button for instance)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IWidgetSelector.view"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector.view">[docs]</a>    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an instance of IControlWidget that view control.</span>
+<span class="sd">        This function never modify control.</span>
+<span class="sd">        If you finally want to modify it, you can call &quot;apply&quot; explicitly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IWidgetSelector.create"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an instance of IControlWidget that can generate controls.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IWidgetSelector.snapshot"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a widget representing control</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IWidgetSelector.paint"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Paints widget using painter.</span>
+<span class="sd">        This function never modify control.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IWidgetSelector.edit_constraints"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IWidgetSelector.edit_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">edit_constraints</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a widget to edit constraints.</span>
+<span class="sd">        This widget must respect :class:`~IConstraintWidget` interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div></div>
+<div class="viewcode-block" id="IConstraintWidget"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IConstraintWidget">[docs]</a><span class="k">class</span> <span class="nc">IConstraintWidget</span><span class="p">(</span><span class="n">IInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="IConstraintWidget.constraints"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.control.IConstraintWidget.constraints">[docs]</a>    <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dict &quot;constraint name&quot; -&gt; &quot;value&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

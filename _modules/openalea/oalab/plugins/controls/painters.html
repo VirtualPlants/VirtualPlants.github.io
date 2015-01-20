@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.plugins.controls.painters &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../../index.html" />
+    <link rel="up" title="openalea.oalab.plugins.controls" href="../controls.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../controls.html" accesskey="U">openalea.oalab.plugins.controls</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.plugins.controls.painters</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.service.interface</span> <span class="kn">import</span> <span class="n">interface_alias</span>
+<span class="kn">from</span> <span class="nn">openalea.core.control</span> <span class="kn">import</span> <span class="n">Control</span>
+
+<div class="viewcode-block" id="AbstractPainter"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.painters.AbstractPainter">[docs]</a><span class="k">class</span> <span class="nc">AbstractPainter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Control</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paint_control</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paint_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbstractPainter.paint_control"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.painters.AbstractPainter.paint_control">[docs]</a>    <span class="k">def</span> <span class="nf">paint_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paint_data</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AbstractPainter.paint_data"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.painters.AbstractPainter.paint_data">[docs]</a>    <span class="k">def</span> <span class="nf">paint_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="PainterInterfaceObject"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.painters.PainterInterfaceObject">[docs]</a><span class="k">class</span> <span class="nc">PainterInterfaceObject</span><span class="p">(</span><span class="n">AbstractPainter</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PainterInterfaceObject.paint_control"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.painters.PainterInterfaceObject.paint_control">[docs]</a>    <span class="k">def</span> <span class="nf">paint_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paint_data</span><span class="p">(</span><span class="n">interface_alias</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="p">),</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PainterInterfaceObject.paint_data"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.painters.PainterInterfaceObject.paint_data">[docs]</a>    <span class="k">def</span> <span class="nf">paint_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">pen</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">and</span> <span class="n">option</span><span class="o">.</span><span class="n">state</span> <span class="o">&amp;</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStyle</span><span class="o">.</span><span class="n">State_Selected</span><span class="p">:</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">rect</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">palette</span><span class="o">.</span><span class="n">highlight</span><span class="p">())</span>
+            <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">palette</span><span class="o">.</span><span class="n">highlightedText</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">blue</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+
+        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">painter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">text_option</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextOption</span><span class="p">()</span>
+        <span class="n">text_option</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">rectangle</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">text_option</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../controls.html" >openalea.oalab.plugins.controls</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

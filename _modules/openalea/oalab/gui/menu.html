@@ -150,17 +150,27 @@
 <span class="s">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="fill_panedmenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.fill_panedmenu">[docs]</a><span class="k">def</span> <span class="nf">fill_panedmenu</span><span class="p">(</span><span class="n">menu</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">fill_panedmenu</span><span class="p">(</span><span class="n">menu</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">):</span>
-            <span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;Default&#39;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="s">&#39;Default&#39;</span><span class="p">,</span> <span class="s">&#39;Default&#39;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="o">*</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pane&#39;</span><span class="p">,</span> <span class="s">&#39;Default&#39;</span><span class="p">),</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;group&#39;</span><span class="p">,</span> <span class="s">&#39;Default&#39;</span><span class="p">),</span>
+                <span class="n">action</span><span class="p">[</span><span class="s">&#39;action&#39;</span><span class="p">],</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;style&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">):</span>
+            <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">continue</span>
 
-</div>
-<div class="viewcode-block" id="PanedMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.PanedMenu">[docs]</a><span class="k">class</span> <span class="nc">PanedMenu</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PanedMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/api_gui_application.html#openalea.oalab.gui.menu.PanedMenu">[docs]</a><span class="k">class</span> <span class="nc">PanedMenu</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A widget that tries to mimic menu of Microsoft Office 2010.</span>
@@ -179,21 +189,25 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">PanedMenu</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&#39;PanedMenu&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setAccessibleName</span><span class="p">(</span><span class="s">&quot;Menu&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style_paned_menu</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tab_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PanedMenu.addSpecialTab"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.PanedMenu.addSpecialTab">[docs]</a>    <span class="k">def</span> <span class="nf">addSpecialTab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style_paned_menu</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">addSpecialTab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="n">widget</span> <span class="o">=</span> <span class="n">Pane</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tab_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">widget</span>
-</div>
-<div class="viewcode-block" id="PanedMenu.addBtns"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.PanedMenu.addBtns">[docs]</a>    <span class="k">def</span> <span class="nf">addBtns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_names</span><span class="p">,</span> <span class="n">group_names</span><span class="p">,</span> <span class="n">btn_names</span><span class="p">,</span> <span class="n">btn_icons</span><span class="p">,</span> <span class="n">btn_types</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addBtns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_names</span><span class="p">,</span> <span class="n">group_names</span><span class="p">,</span> <span class="n">btn_names</span><span class="p">,</span> <span class="n">btn_icons</span><span class="p">,</span> <span class="n">btn_types</span><span class="p">):</span>
         <span class="c"># TODO</span>
         <span class="k">pass</span>
-</div>
-<div class="viewcode-block" id="PanedMenu.addBtn"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.PanedMenu.addBtn">[docs]</a>    <span class="k">def</span> <span class="nf">addBtn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">btn_name</span><span class="p">,</span> <span class="n">btn_icon</span><span class="p">,</span> <span class="n">btn_type</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addBtn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">btn_name</span><span class="p">,</span> <span class="n">btn_icon</span><span class="p">,</span> <span class="n">btn_type</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param pane_name: name of pane. type:String.</span>
 <span class="sd">        :param group_name: name of group inside the pane. type:String.</span>
@@ -216,8 +230,8 @@
         <span class="n">grp</span> <span class="o">=</span> <span class="n">pane</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
         <span class="c"># Add Btn</span>
         <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">addBtn</span><span class="p">(</span><span class="n">btn_name</span><span class="p">,</span> <span class="n">btn_icon</span><span class="p">,</span> <span class="n">btn_type</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="PanedMenu.addBtnByAction"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.PanedMenu.addBtnByAction">[docs]</a>    <span class="k">def</span> <span class="nf">addBtnByAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PanedMenu.addBtnByAction"><a class="viewcode-back" href="../../../../latest/dev/archi/api_gui_application.html#openalea.oalab.gui.menu.PanedMenu.addBtnByAction">[docs]</a>    <span class="k">def</span> <span class="nf">addBtnByAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param pane_name: name of pane. type:String.</span>
 <span class="sd">        :param group_name: name of group inside the pane. type:String.</span>
@@ -240,7 +254,7 @@
         <span class="c"># Add Btn</span>
         <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PanedMenu.showPane"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.PanedMenu.showPane">[docs]</a>    <span class="k">def</span> <span class="nf">showPane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">showPane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">):</span>
         <span class="c"># Find tab named &#39;name&#39;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tab_name</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pane_name</span><span class="p">)</span>
@@ -249,40 +263,42 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
-</div></div>
-<div class="viewcode-block" id="Pane"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Pane">[docs]</a><span class="k">class</span> <span class="nc">Pane</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+</div>
+<span class="k">class</span> <span class="nc">Pane</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="c"># TODO : scroll doesn&#39;t work yet</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Pane</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-<span class="c">#         self.setWidgetResizable(False)</span>
-<span class="c">#         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&#39;Pane&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># self.setWidgetResizable(False)</span>
+        <span class="c"># self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)</span>
         <span class="c"># ScrollBarAsNeeded</span>
         <span class="c"># ScrollBarAlwaysOn</span>
         <span class="c"># ScrollBarAlwaysOff</span>
-<span class="c">#         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&#39;Pane&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">group_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+        <span class="c"># self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style_pane</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Pane.addGroup"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Pane.addGroup">[docs]</a>    <span class="k">def</span> <span class="nf">addGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">grp</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">group_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-</div></div>
-<div class="viewcode-block" id="Group"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group">[docs]</a><span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">Group</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&#39;Group&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -296,8 +312,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">:</span>
@@ -309,12 +323,16 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_big</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_small</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style_group</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Group.addBtnByAction"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.addBtnByAction">[docs]</a>    <span class="k">def</span> <span class="nf">addBtnByAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">PanedMenu</span><span class="o">.</span><span class="n">BigButton</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addBtnByAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">PanedMenu</span><span class="o">.</span><span class="n">BigButton</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="n">PanedMenu</span><span class="o">.</span><span class="n">BigButton</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">addBigToolButton</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="n">PanedMenu</span><span class="o">.</span><span class="n">SmallButton</span><span class="p">:</span>
@@ -323,8 +341,8 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s">&quot;small&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="n">PanedMenu</span><span class="o">.</span><span class="n">BigWidget</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s">&quot;big&quot;</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="Group.addWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.addWidget">[docs]</a>    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&quot;bigwidget&quot;</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&quot;bigwidget&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Permit to add small widget like if it was a small button</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -332,28 +350,28 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_group_big</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_group_small</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="Group.addBigBtn"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.addBigBtn">[docs]</a>    <span class="k">def</span> <span class="nf">addBigBtn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">icon</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addBigBtn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">icon</span><span class="p">):</span>
         <span class="n">btn</span> <span class="o">=</span> <span class="n">BigToolButton</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_group_big</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">btn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">btn</span>
-</div>
-<div class="viewcode-block" id="Group.addSmallBtn"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.addSmallBtn">[docs]</a>    <span class="k">def</span> <span class="nf">addSmallBtn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">icon</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addSmallBtn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">icon</span><span class="p">):</span>
         <span class="n">btn</span> <span class="o">=</span> <span class="n">SmallToolButton</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_group_small</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">btn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">btn</span>
-</div>
-<div class="viewcode-block" id="Group.addBigToolButton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.addBigToolButton">[docs]</a>    <span class="k">def</span> <span class="nf">addBigToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addBigToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="n">btn</span> <span class="o">=</span> <span class="n">BigToolButton</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_group_big</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">btn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">btn</span>
-</div>
-<div class="viewcode-block" id="Group.addSmallToolButton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.addSmallToolButton">[docs]</a>    <span class="k">def</span> <span class="nf">addSmallToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addSmallToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="n">btn</span> <span class="o">=</span> <span class="n">SmallToolButton</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_group_small</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">btn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">btn</span>
-</div>
-<div class="viewcode-block" id="Group.check_unicity_group"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.check_unicity_group">[docs]</a>    <span class="k">def</span> <span class="nf">check_unicity_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">check_unicity_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hide old button if a new is added with the same name.</span>
 <span class="sd">        Works with groupLayout</span>
@@ -368,8 +386,8 @@
                         <span class="n">widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">pass</span>
-</div>
-<div class="viewcode-block" id="Group.check_unicity_box"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.Group.check_unicity_box">[docs]</a>    <span class="k">def</span> <span class="nf">check_unicity_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">check_unicity_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hide old button if a new is added with the same name</span>
 <span class="sd">        Works with hbox and vbox layout</span>
@@ -379,8 +397,8 @@
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
                 <span class="n">widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
-</div></div>
-<div class="viewcode-block" id="SubGroupH"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SubGroupH">[docs]</a><span class="k">class</span> <span class="nc">SubGroupH</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SubGroupH</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SubGroupH</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
@@ -393,51 +411,57 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SubGroupH.addWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SubGroupH.addWidget">[docs]</a>    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">Policy</span><span class="p">(</span><span class="n">Policy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span> <span class="n">Policy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
 
-</div></div>
-<div class="viewcode-block" id="SubGroupV"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SubGroupV">[docs]</a><span class="k">class</span> <span class="nc">SubGroupV</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SubGroupV</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SubGroupV</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&#39;SubGroupV&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_ysmall</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SubGroupV.addWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SubGroupV.addWidget">[docs]</a>    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
 
-</div></div>
-<div class="viewcode-block" id="SubGroupGrid"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SubGroupGrid">[docs]</a><span class="k">class</span> <span class="nc">SubGroupGrid</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SubGroupGrid</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row_number</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SubGroupGrid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_number</span> <span class="o">=</span> <span class="n">row_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s">&#39;SubGroupGrid&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
-
-<div class="viewcode-block" id="SubGroupGrid.addWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SubGroupGrid.addWidget">[docs]</a>    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_number</span>
         <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
-</div></div>
-<div class="viewcode-block" id="ToolButton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ToolButton">[docs]</a><span class="k">class</span> <span class="nc">ToolButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">ToolButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ToolButton</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
@@ -454,8 +478,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
 
-</div>
-<div class="viewcode-block" id="BigToolButton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.BigToolButton">[docs]</a><span class="k">class</span> <span class="nc">BigToolButton</span><span class="p">(</span><span class="n">ToolButton</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">BigToolButton</span><span class="p">(</span><span class="n">ToolButton</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BigToolButton</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
@@ -464,8 +488,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">big_icon_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">big_btn_size</span><span class="p">)</span>
 
-</div>
-<div class="viewcode-block" id="SmallToolButton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.SmallToolButton">[docs]</a><span class="k">class</span> <span class="nc">SmallToolButton</span><span class="p">(</span><span class="n">ToolButton</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SmallToolButton</span><span class="p">(</span><span class="n">ToolButton</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SmallToolButton</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
@@ -473,61 +497,68 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextBesideIcon</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">small_icon_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">big_btn_size</span><span class="p">)</span>
-</div>
+
 <span class="kn">import</span> <span class="nn">weakref</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
 
-<div class="viewcode-block" id="ContextualMenu"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ContextualMenu">[docs]</a><span class="k">class</span> <span class="nc">ContextualMenu</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ContextualMenu</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">size_policy_preferred</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">style_paned_menu</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_new_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_new_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
         <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">height</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">:</span>
             <span class="n">orientation</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">orientation</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span>
-        <span class="n">group</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span>
-        <span class="n">group</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WA_DeleteOnClose</span><span class="p">)</span>
+        <span class="n">identifier</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
         <span class="n">group</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ContextualMenu.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ContextualMenu.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">:</span>
-            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">removeWidget</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-                <span class="n">group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                <span class="k">del</span> <span class="n">group</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_new_group</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="ContextualMenu.set_actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ContextualMenu.set_actions">[docs]</a>    <span class="k">def</span> <span class="nf">set_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_group</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">fill_panedmenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="ContextualMenu.addBtnByAction"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ContextualMenu.addBtnByAction">[docs]</a>    <span class="k">def</span> <span class="nf">addBtnByAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_new_group</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">()</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="ContextualMenu.properties"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ContextualMenu.properties">[docs]</a>    <span class="k">def</span> <span class="nf">properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">addBtnByAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">()</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="ContextualMenu.set_properties"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.gui.html#openalea.oalab.gui.menu.ContextualMenu.set_properties">[docs]</a>    <span class="k">def</span> <span class="nf">set_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">set_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
         <span class="n">get</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span>
         <span class="n">style</span> <span class="o">=</span> <span class="n">get</span><span class="p">(</span><span class="s">&#39;style&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-</div></div>
+
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
 
     <span class="kn">import</span> <span class="nn">sys</span>
