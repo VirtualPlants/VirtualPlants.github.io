@@ -147,6 +147,28 @@
         <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">locals</span> <span class="o">+=</span> <span class="n">v</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.initialize"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span> <span class="s">&quot;shell&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span> <span class="s">&quot;events&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s">&quot;post_execute&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_to_history</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;You need ipython &gt;= 2.0 to use history.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.add_to_history"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.add_to_history">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send the last sent of history to the components that display history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.service.history</span> <span class="kn">import</span> <span class="n">display_history</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">history_manager</span><span class="o">.</span><span class="n">get_range</span><span class="p">()</span>
+
+        <span class="n">input_</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># loop all elements in iterator to get last one.</span>
+        <span class="c"># TODO: search method returning directly last input</span>
+        <span class="k">for</span> <span class="n">session</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">input_</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">display_history</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
 
 </div></div>
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>

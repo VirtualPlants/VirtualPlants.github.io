@@ -66,6 +66,7 @@
 <span class="c">###############################################################################</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
@@ -75,6 +76,7 @@
 <span class="kn">from</span> <span class="nn">ConfigParser</span> <span class="kn">import</span> <span class="n">NoSectionError</span><span class="p">,</span> <span class="n">NoOptionError</span>
 <span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
 <span class="kn">from</span> <span class="nn">openalea.core.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
 
 
 <div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
@@ -96,6 +98,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="n">ControlManager</span><span class="p">()</span>
 
@@ -103,9 +106,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">repositories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span> <span class="o">=</span> <span class="s">&quot;temp&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
         <span class="c"># TODO Search in preference file if user has path to append in self.repositories</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="ProjectManager.search_path"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.search_path">[docs]</a>    <span class="k">def</span> <span class="nf">search_path</span><span class="p">():</span>
@@ -378,14 +382,34 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
                 <span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">shell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
             <span class="n">project</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_changed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.update_namespace"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.update_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Definition: Update namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;lib&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">/</span> <span class="s">&#39;lib&#39;</span><span class="p">))</span>
+            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;project&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
+            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;data&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># close</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span>
 
 </div></div>
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
     <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
     <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
     <span class="kn">from</span> <span class="nn">openalea.oalab.shell</span> <span class="kn">import</span> <span class="n">ShellWidget</span>
-    <span class="kn">import</span> <span class="nn">sys</span>
 
     <span class="c"># Create Window with IPython shell</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
