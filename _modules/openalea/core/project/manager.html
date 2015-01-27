@@ -26,8 +26,8 @@
     <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,7 +44,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <h1>Source code for openalea.core.project.manager</h1><div class="highlight"><pre>
 <span class="c"># -*- python -*-</span>
@@ -66,7 +66,6 @@
 <span class="c">###############################################################################</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
@@ -76,10 +75,9 @@
 <span class="kn">from</span> <span class="nn">ConfigParser</span> <span class="kn">import</span> <span class="n">NoSectionError</span><span class="p">,</span> <span class="n">NoOptionError</span>
 <span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
 <span class="kn">from</span> <span class="nn">openalea.core.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
-<span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
 
 
-<div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Object which permit to access to projects: creation, loading, searching, ...</span>
@@ -98,7 +96,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="n">ControlManager</span><span class="p">()</span>
 
@@ -106,13 +103,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">repositories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span> <span class="o">=</span> <span class="s">&quot;temp&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="c"># TODO Search in preference file if user has path to append in self.repositories</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="ProjectManager.search_path"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.search_path">[docs]</a>    <span class="k">def</span> <span class="nf">search_path</span><span class="p">():</span>
+<div class="viewcode-block" id="ProjectManager.search_path"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.search_path">[docs]</a>    <span class="k">def</span> <span class="nf">search_path</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of all path containing projects</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -152,17 +148,17 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">final_list</span><span class="p">)</span>
 </div>
     <span class="nd">@property</span>
-<div class="viewcode-block" id="ProjectManager.defaultdir"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.defaultdir">[docs]</a>    <span class="k">def</span> <span class="nf">defaultdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">defaultdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
-</div>
-<div class="viewcode-block" id="ProjectManager.load_settings"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.load_settings">[docs]</a>    <span class="k">def</span> <span class="nf">load_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">load_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">NoSectionError</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">):</span>
             <span class="k">pass</span>
-</div>
-<div class="viewcode-block" id="ProjectManager.write_settings"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.write_settings">[docs]</a>    <span class="k">def</span> <span class="nf">write_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ProjectManager.write_settings"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.write_settings">[docs]</a>    <span class="k">def</span> <span class="nf">write_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add a new path to the settings. &quot;&quot;&quot;</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repositories</span><span class="p">))</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">lst</span><span class="p">)</span>
@@ -179,7 +175,7 @@
 
         <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.discover"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.discover">[docs]</a>    <span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_name</span><span class="o">=</span><span class="s">&#39;oaproject.cfg&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.discover"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.discover">[docs]</a>    <span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_name</span><span class="o">=</span><span class="s">&#39;oaproject.cfg&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Discover projects from your disk and put them in self.projects.</span>
 
@@ -206,7 +202,7 @@
                 <span class="n">projects</span><span class="p">[</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="n">projects</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.search"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.search"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Search a specific project that match filters.</span>
 
@@ -237,7 +233,7 @@
             <span class="n">projects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">projects</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.default"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.default"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: a default empty project</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -256,7 +252,7 @@
 
         <span class="k">return</span> <span class="n">proj</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.create"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.create"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create new project and return it.</span>
 
@@ -281,7 +277,7 @@
 
         <span class="k">return</span> <span class="n">project</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.load_default"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.load_default">[docs]</a>    <span class="k">def</span> <span class="nf">load_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_settings</span><span class="p">()</span>
         <span class="n">projects</span> <span class="o">=</span> <span class="p">[</span><span class="n">proj</span> <span class="k">for</span> <span class="n">proj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="k">if</span> <span class="n">proj</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span><span class="p">]</span>
@@ -290,8 +286,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">project</span>
-</div>
-<div class="viewcode-block" id="ProjectManager.load"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ProjectManager.load"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load existing project</span>
 
@@ -326,7 +322,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">project</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.close"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">proj_path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.close"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">proj_path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Close current project.</span>
 
@@ -342,24 +338,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
 
-<div class="viewcode-block" id="ProjectManager.clear"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectManager.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/api_project.html#openalea.core.project.manager.ProjectManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clear the list of projects.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projects</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="ProjectManager.notify"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
         <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;project_changed&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_updated&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
-</div>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
 
     <span class="nd">@cproject.setter</span>
-<div class="viewcode-block" id="ProjectManager.cproject"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.cproject">[docs]</a>    <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">project</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;start_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
@@ -382,34 +378,14 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
                 <span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">shell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
             <span class="n">project</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_changed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
-</div>
-<div class="viewcode-block" id="ProjectManager.update_namespace"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.ProjectManager.update_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Definition: Update namespace</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;lib&#39;</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">/</span> <span class="s">&#39;lib&#39;</span><span class="p">))</span>
-            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
-            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;project&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
-            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;data&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c"># close</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span>
 
-</div></div>
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../openalea/vpltk/doc/user/autosum.html#openalea.core.project.manager.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">sys</span>
+</div>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
     <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
     <span class="kn">from</span> <span class="nn">openalea.oalab.shell</span> <span class="kn">import</span> <span class="n">ShellWidget</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
 
     <span class="c"># Create Window with IPython shell</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
@@ -428,7 +404,7 @@
 
     <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
-</div>
+
 <span class="k">if</span> <span class="p">(</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">):</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
@@ -436,9 +412,9 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -455,7 +431,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -468,9 +444,9 @@
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

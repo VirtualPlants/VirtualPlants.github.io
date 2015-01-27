@@ -26,8 +26,8 @@
     <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,7 +44,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <h1>Source code for openalea.oalab.project.projectwidget</h1><div class="highlight"><pre>
 <span class="c"># -*- python -*-</span>
@@ -83,6 +83,7 @@
 <span class="kn">from</span> <span class="nn">openalea.oalab.project.creator</span> <span class="kn">import</span> <span class="n">CreateProjectWidget</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.project.pretty_preview</span> <span class="kn">import</span> <span class="n">ProjectSelectorScroll</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">plugin_instance_exists</span><span class="p">,</span> <span class="n">plugin_instance</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.session.session</span> <span class="kn">import</span> <span class="n">Session</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">TODO:</span>
@@ -175,6 +176,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
 
         <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="n">ProjectManagerView</span><span class="p">()</span>
@@ -277,8 +279,11 @@
         <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;project_changed&#39;</span><span class="p">:</span>
             <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;project_updated&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="ProjectManagerWidget.set_project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.set_project">[docs]</a>    <span class="k">def</span> <span class="nf">set_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
@@ -817,9 +822,9 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -836,7 +841,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -849,9 +854,9 @@
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
