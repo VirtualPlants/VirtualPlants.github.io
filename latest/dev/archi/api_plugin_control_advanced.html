@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="OpenAlea community website" href="../../../index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -42,7 +42,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <span class="target" id="module-openalea.core.plugin.control"></span><div class="section" id="control-advanced">
 <h1>Control - Advanced<a class="headerlink" href="#control-advanced" title="Permalink to this headline">¶</a></h1>
@@ -51,6 +51,39 @@
 <p>For a complete explanation of code to write for each function, or to create a class
 from scratch, please have a look to <tt class="xref py py-class docutils literal"><span class="pre">IControlWidget</span></tt> and example after.</p>
 <p>To create a class for standard QWidget, you can copy/paste this code</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/widgets.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span>
+<span class="k">class</span> <span class="nc">XyzControlWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="s">&#39;qt signal&#39;</span> <span class="c"># for example &#39;valueChanged()&#39;, &#39;currentTextChanged()&#39;, ...</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">REAL_VALUE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setC1</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;constraint1&#39;</span><span class="p">,</span> <span class="n">DEFAULT_CONSTRAINT1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+</td></tr></table></div>
 </div>
 <div class="section" id="widget-selector">
 <h2>Widget selector<a class="headerlink" href="#widget-selector" title="Permalink to this headline">¶</a></h2>
@@ -142,7 +175,7 @@ In other words, it can be considered as a &#8220;read/write&#8221; widget with o
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
@@ -156,12 +189,14 @@ In other words, it can be considered as a &#8220;read/write&#8221; widget with o
 <li><a class="reference internal" href="#details">Details</a></li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../../../_sources/latest/dev/archi/api_plugin_control_advanced.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin_control_advanced.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -178,7 +213,7 @@ In other words, it can be considered as a &#8220;read/write&#8221; widget with o
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -190,9 +225,9 @@ In other words, it can be considered as a &#8220;read/write&#8221; widget with o
         <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

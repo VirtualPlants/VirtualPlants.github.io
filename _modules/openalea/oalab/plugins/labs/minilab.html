@@ -26,8 +26,8 @@
     <link rel="top" title="OpenAlea community website" href="../../../../../index.html" />
     <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,18 +44,57 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for openalea.oalab.plugins.labs.minilab</h1><div class="highlight"><pre>
-<span class="k">class</span> <span class="nc">MiniLab</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">sender_str</span><span class="p">,</span> <span class="n">receiver_str</span><span class="p">,</span> <span class="n">existing_connections</span><span class="p">):</span>
+<div class="viewcode-block" id="connect"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.connect">[docs]</a>    <span class="n">sender_name</span><span class="p">,</span> <span class="n">signal_name</span> <span class="o">=</span> <span class="n">sender_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">receiver_name</span><span class="p">,</span> <span class="n">slot_name</span> <span class="o">=</span> <span class="n">receiver_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">old</span> <span class="o">==</span> <span class="n">new</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">new</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sender_name</span><span class="p">,</span> <span class="n">receiver_name</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="n">signals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">plugin_instance_exists</span><span class="p">,</span> <span class="n">plugin_instances</span>
+
+    <span class="k">if</span> <span class="n">plugin_instance_exists</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">sender_name</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sender</span> <span class="ow">in</span> <span class="n">plugin_instances</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">sender_name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">signal_name</span><span class="p">):</span>
+                <span class="n">signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">signal_name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">plugin_instance_exists</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">receiver_name</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">receiver</span> <span class="ow">in</span> <span class="n">plugin_instances</span><span class="p">(</span><span class="s">&#39;oalab.applet&#39;</span><span class="p">,</span> <span class="n">receiver_name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">receiver</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">):</span>
+                <span class="n">slots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">receiver</span><span class="p">,</span> <span class="n">slot_name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">signals</span> <span class="ow">and</span> <span class="n">slots</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">signal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">signals</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">slot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slots</span><span class="p">):</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%d</span><span class="s"> -&gt; </span><span class="si">%s</span><span class="s">_</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sender_str</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">receiver_str</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">connection</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_connections</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="n">connection</span>
+                    <span class="n">signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span>
+                    <span class="n">existing_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">MiniLab</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
 <div class="viewcode-block" id="MiniLab"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.MiniLab">[docs]</a>
+    <span class="n">existing_connections</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># list to store all created connections</span>
+    <span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;mini&#39;</span>
     <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;IPython&#39;</span>
     <span class="n">icon</span> <span class="o">=</span> <span class="s">&#39;oxygen_utilities-terminal.png&#39;</span>
     <span class="n">applets</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;EditorManager&#39;</span><span class="p">]</span>
 
     <span class="c"># NEW LAYOUT API</span>
-    <span class="n">menu_names</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;File&#39;</span><span class="p">,</span> <span class="s">&#39;Edit&#39;</span><span class="p">,</span> <span class="s">&#39;Help&#39;</span><span class="p">)</span>
+    <span class="n">menu_names</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Project&#39;</span><span class="p">,</span> <span class="s">&#39;Edit&#39;</span><span class="p">,</span> <span class="s">&#39;Help&#39;</span><span class="p">)</span>
 
     <span class="n">layout</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s">&quot;children&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -183,14 +222,39 @@
             <span class="n">mainwin</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="c"># Initialize all applets</span>
         <span class="n">mainwin</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
-</pre></div></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_connect</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">):</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">receiver</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">existing_connections</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">connect_applet</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<div class="viewcode-block" id="MiniLab.connect_applet"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.MiniLab.connect_applet">[docs]</a>        <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_connect</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="o">*</span><span class="n">connection</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span></div>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="MiniLab.start"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.MiniLab.start">[docs]</a>        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span></div>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="MiniLab.initialize"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.MiniLab.initialize">[docs]</a>        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span></div>
+    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="MiniLab.finalize"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.MiniLab.finalize">[docs]</a>        <span class="k">pass</span>
+
+    <span class="nd">@classmethod</span></div>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="MiniLab.stop"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.labs.html#openalea.oalab.plugins.labs.minilab.MiniLab.stop">[docs]</a>        <span class="k">pass</span>
+</pre></div></div></div>
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -207,7 +271,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -220,9 +284,9 @@
           <li><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

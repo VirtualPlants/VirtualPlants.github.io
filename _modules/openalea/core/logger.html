@@ -1,0 +1,616 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.core.logger &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.core.logger</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2010 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Daniel Barbeau &lt;daniel.barbeau@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="sd">&quot;&quot;&quot;Central logging module from openalea.</span>
+
+
+<span class="sd">Simple Tutorial</span>
+<span class="sd">===============</span>
+
+<span class="sd">Just to see how easy it is to log something::</span>
+
+<span class="sd">    from openalea.core import logger</span>
+<span class="sd">    a = 1234</span>
+<span class="sd">    logger.debug(&quot;This is an evil value %d&quot;%a)</span>
+
+<span class="sd">This examples uses the defaults of the openalea.core.logger module:</span>
+<span class="sd">There is one base logger name &quot;openalea&quot; that logs to a default stream</span>
+<span class="sd">handler (prints out the logs to stderr).</span>
+
+<span class="sd">There are more default loggers available::</span>
+
+<span class="sd">    logger.default_init(level=logger.DEBUG, handlers=[&quot;file&quot;])</span>
+
+<span class="sd">This line will make logs go to rotating files in ~/.openalea/.</span>
+
+<span class="sd">If you&#39;re running PyQt4::</span>
+
+<span class="sd">    logger.default_init(level=logger.DEBUG, handlers=[&quot;qt&quot;])</span>
+
+<span class="sd">Will make your logs go to a QStandardItemModel that you can get</span>
+<span class="sd">this way::</span>
+
+<span class="sd">    itemModel = logger.get_handler(&quot;qt&quot;)</span>
+
+<span class="sd">You can directly use it in a QListView.</span>
+
+
+<span class="sd">Per-package loggers</span>
+<span class="sd">===================</span>
+<span class="sd">The previous example used the central OpenAlea logger. However, we recommend</span>
+<span class="sd">you use a specific logger for your package, eg. Openalea.MTG::</span>
+
+<span class="sd">    from openalea.core import logger</span>
+<span class="sd">    mylogger = logger.get_logger(&quot;Openalea.MTG&quot;)</span>
+<span class="sd">    [...]</span>
+<span class="sd">    mylogger.debug(&quot;Execution reached this place...&quot;)</span>
+
+<span class="sd">This will print nothing as `mylogger` is attached to no handler.</span>
+<span class="sd">You can attach it to Openalea&#39;s handlers if they are any available::</span>
+
+<span class="sd">    logger.connect_loggers_to_handlers(mylogger, logger.get_handler_names())</span>
+<span class="sd">    mylogger.debug(&quot;Execution reached this other place...&quot;)</span>
+
+<span class="sd">This will make every handler registered to OpenAlea receive the log.</span>
+
+<span class="sd">Or you can connect it to your own handlers (In this case you can completely bypass Openalea.)</span>
+<span class="sd">::</span>
+<span class="sd">    import logging</span>
+<span class="sd">    mylogger.addHandler(logging.FileHandler(&quot;path_to_file&quot;, mode=&quot;w&quot;))</span>
+
+<span class="sd">Indeed, `mylogger` is a logger.PatchedPyLogger slightly derived from</span>
+<span class="sd">standard logging.Logger.</span>
+
+<span class="sd">You can disconnect loggers and handlers::</span>
+<span class="sd">    logger.disconnect_loggers_from_handlers(mylogger, logger.get_handler_names())</span>
+
+<span class="sd">This will disconnect all handlers know by openalea from `mylogger`.</span>
+
+<span class="sd">Logging levels</span>
+<span class="sd">==============</span>
+
+<span class="sd">Logging typically happens at different levels, from the less important to the worst case.</span>
+<span class="sd">You have access to 5 default logging levels: DEBUG, INFO, WARNING, ERROR and CRITICAL.</span>
+
+<span class="sd">Through the openalea.core.logger module::</span>
+
+<span class="sd">    logger.debug(str)</span>
+<span class="sd">    logger.info(str)</span>
+<span class="sd">    logger.warning(str)</span>
+<span class="sd">    logger.error(str)</span>
+<span class="sd">    logger.critical(str)</span>
+
+<span class="sd">Or a custom logger::</span>
+
+<span class="sd">    mylogger = logger.get_logger(&quot;Openalea.MTG&quot;)</span>
+<span class="sd">    mylogger.debug(str)</span>
+<span class="sd">    mylogger.info(str)</span>
+<span class="sd">    mylogger.warning(str)</span>
+<span class="sd">    mylogger.error(str)</span>
+<span class="sd">    mylogger.critical(str)</span>
+
+<span class="sd">You can also send logs of arbitrary levels using the log(level (int), msg (str)) module function (or mylogger.log(int, str)).</span>
+
+<span class="sd">Logger objects can be set to ignore logs that happen at levels lower than a chosen one.</span>
+<span class="sd">The same goes for handlers.</span>
+
+<span class="sd">In openalea.core.logger, you can set all loggers and handlers to have the same level::</span>
+
+<span class="sd">    logger.set_global_logger_level(logger.INFO) #DEBUG logs will not be sent to handlers</span>
+<span class="sd">    logger.set_global_handler_level(logger.ERROR) #DEBUG and ERROR logs will be ignored by handlers.</span>
+
+<span class="sd">Of course you can do this more selectively::</span>
+
+<span class="sd">    lg = logger.get_logger(&quot;Openalea.MTG&quot;)</span>
+<span class="sd">    # lg will not send logs below the CRITICAL level:</span>
+<span class="sd">    lg.setLevel(logger.CRITICAL)</span>
+
+<span class="sd">    hd = logger.get_handler(&quot;qt&quot;)</span>
+<span class="sd">    # hd will not process logs below INFO level.</span>
+<span class="sd">    hd.setLevel(logger.INFO)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">DEBUG</span><span class="p">,</span> <span class="n">INFO</span><span class="p">,</span> <span class="n">WARNING</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">CRITICAL</span><span class="p">,</span> <span class="n">NOTSET</span>
+<span class="kn">import</span> <span class="nn">logging.handlers</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span>
+<span class="kn">from</span> <span class="nn">openalea.core.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
+
+
+<span class="c">#: List of default handler names:</span>
+<span class="n">defaultHandlerNames</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">,</span>  <span class="c">#TimedRotatingFileHandler</span>
+                       <span class="s">&quot;stream&quot;</span><span class="p">,</span> <span class="c">#Output to stream</span>
+                       <span class="p">]</span>
+
+<span class="c">#: The QLogHandlerItemModel class is only created if PyQt4 is already loaded</span>
+<span class="c"># otherwise ties core with PyQt and could prevent UI-less usage of core.</span>
+
+<span class="k">if</span> <span class="s">&quot;PyQt4.QtCore&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span> <span class="ow">and</span> <span class="s">&quot;PyQt4.QtGui&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+    <span class="n">QtCore</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s">&quot;PyQt4.QtCore&quot;</span><span class="p">]</span>
+    <span class="n">QtGui</span>  <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s">&quot;PyQt4.QtGui&quot;</span><span class="p">]</span>
+    <span class="n">QT_LOGGING_MODEL_AVAILABLE</span><span class="o">=</span><span class="bp">True</span>
+    <span class="n">defaultHandlerNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;qt&quot;</span><span class="p">)</span> <span class="c">#log to a QStandardItemModel</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c">#print __name__+&quot;.QLogHandlerItemModel won&#39;t be available&quot;</span>
+    <span class="n">QT_LOGGING_MODEL_AVAILABLE</span><span class="o">=</span><span class="bp">False</span>
+
+
+<span class="c">#######################</span>
+<span class="c"># TOP LEVEL FUNCTIONS #</span>
+<span class="c">#######################</span>
+<div class="viewcode-block" id="debug"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.debug">[docs]</a><span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send a debug level msg to openalea&#39;s default logger.</span>
+<span class="sd">    Handlers may or may not be connected yet.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_default_logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="info"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.info">[docs]</a><span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send a info level msg to openalea&#39;s default logger.</span>
+<span class="sd">    Handlers may or may not be connected yet.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_default_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="warning"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.warning">[docs]</a><span class="k">def</span> <span class="nf">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send a warning level msg to openalea&#39;s default logger.</span>
+<span class="sd">    Handlers may or may not be connected yet.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_default_logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send a error level msg to openalea&#39;s default logger.</span>
+<span class="sd">    Handlers may or may not be connected yet.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_default_logger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="critical"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.critical">[docs]</a><span class="k">def</span> <span class="nf">critical</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send a critical level msg to openalea&#39;s default logger.</span>
+<span class="sd">    Handlers may or may not be connected yet.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_default_logger</span><span class="p">()</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="log"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.log">[docs]</a><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Send an arbitrary level msg to openalea&#39;s default logger.</span>
+<span class="sd">    Handlers may or may not be connected yet.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_default_logger</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.get_logger">[docs]</a><span class="k">def</span> <span class="nf">get_logger</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the logger called `name`. It will always return</span>
+<span class="sd">    the same logger for the same name.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_handler"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.get_handler">[docs]</a><span class="k">def</span> <span class="nf">get_handler</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the handler called `name`. It will always return</span>
+<span class="sd">    the same handler for the same name.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_logger_names"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.get_logger_names">[docs]</a><span class="k">def</span> <span class="nf">get_logger_names</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Returns a list of logger names known by OpenAlea&#39;s LoggerOffice&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_logger_names</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="get_handler_names"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.get_handler_names">[docs]</a><span class="k">def</span> <span class="nf">get_handler_names</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Returns a list of handler names known by OpenAlea&#39;s LoggerOffice&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_handler_names</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="connect_loggers_to_handlers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.connect_loggers_to_handlers">[docs]</a><span class="k">def</span> <span class="nf">connect_loggers_to_handlers</span><span class="p">(</span><span class="n">loggers</span><span class="p">,</span> <span class="n">handlers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects loggers to handlers. Each argument can be a single item or</span>
+<span class="sd">    a list of them. Each item can be the name of the logger/handler or</span>
+<span class="sd">    an instance of that.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">connect_loggers_to_handlers</span><span class="p">(</span><span class="n">loggers</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="disconnect_loggers_from_handlers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.disconnect_loggers_from_handlers">[docs]</a><span class="k">def</span> <span class="nf">disconnect_loggers_from_handlers</span><span class="p">(</span><span class="n">loggers</span><span class="p">,</span> <span class="n">handlers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Disconnect loggers from handlers. Each argument can be a single item or</span>
+<span class="sd">    a list of them. Each item can be the name of the logger/handler or</span>
+<span class="sd">    an instance of that.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">disconnect_loggers_from_handlers</span><span class="p">(</span><span class="n">loggers</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="set_global_logger_level"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.set_global_logger_level">[docs]</a><span class="k">def</span> <span class="nf">set_global_logger_level</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set level of all known loggers to level.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">set_global_logger_level</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="set_global_handler_level"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.set_global_handler_level">[docs]</a><span class="k">def</span> <span class="nf">set_global_handler_level</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set level of all known handlers to level.&quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">set_global_handler_level</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="default_init"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.default_init">[docs]</a><span class="k">def</span> <span class="nf">default_init</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="n">defaultHandlerNames</span><span class="p">[:]):</span>
+    <span class="sd">&quot;&quot;&quot;Configure the LoggerOffice with a default `openalea` logger</span>
+<span class="sd">    and handlers named in `handlers`. The latter is a list of strings</span>
+<span class="sd">    from &quot;qt&quot;, &quot;file&quot;, &quot;stream&quot;.</span>
+
+<span class="sd">    - &quot;qt&quot; is only available if PyQt4 is installed. Logs will go to a QStandardItemModel.</span>
+<span class="sd">    - &quot;file&quot; creates a rotating file handler. Logs are stored in &quot;~/.openalea/log.log.X&quot; files</span>
+<span class="sd">      X get incremented every day. Beyond 20 days olds files get deleted.</span>
+<span class="sd">    - &quot;stream&quot; logs to stderr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+
+<span class="c">#####################</span>
+<span class="c"># END OF PUBLIC API #</span>
+<span class="c">#####################</span>
+
+
+
+
+<span class="c">############################</span>
+<span class="c"># Openalea Logging Central #</span>
+<span class="c">############################</span></div>
+<div class="viewcode-block" id="LoggerOffice"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice">[docs]</a><span class="k">class</span> <span class="nc">LoggerOffice</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This class behaves as the central registry of loggers</span>
+<span class="sd">    and handlers for Openalea. This way, the application can</span>
+<span class="sd">    query information about them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##################################################################</span>
+    <span class="c"># As the top level function (public API) simply redirect to this #</span>
+    <span class="c"># singleton, see the documentation of the former.                #</span>
+    <span class="c">##################################################################</span>
+
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">DEBUG</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Logger started&quot;</span><span class="p">)</span>
+        <span class="c"># -- our formatter --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__format</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s"> - </span><span class="si">%(pathname)s</span><span class="s"> - </span><span class="si">%(lineno)d</span><span class="s">&quot;</span>
+        <span class="c">#self.__format = &quot;%(message)s - %(pathname)s - %(lineno)d - %(levelname)s - %(asctime)s&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dformat</span> <span class="o">=</span> <span class="s">&quot;%H:%M:%S&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dformat</span><span class="p">)</span>
+
+        <span class="c"># -- user defined handlers --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># -- user defined loggers --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pyLoggers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__oaRootLogger</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># -- level of verbosity for handlers --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__globalHandlerLevel</span>    <span class="o">=</span> <span class="n">DEBUG</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_global_handler_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__globalHandlerLevel</span><span class="p">)</span>
+
+        <span class="c"># -- level of verbosity for loggers --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__globalLoggerLevel</span>    <span class="o">=</span> <span class="n">DEBUG</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_global_logger_level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__globalLoggerLevel</span><span class="p">)</span>
+
+    <span class="c">###################</span>
+    <span class="c"># Formatting logs #</span>
+    <span class="c">###################</span>
+<div class="viewcode-block" id="LoggerOffice.get_format"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_format">[docs]</a>    <span class="k">def</span> <span class="nf">get_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__format</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.get_date_format"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_date_format">[docs]</a>    <span class="k">def</span> <span class="nf">get_date_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dformat</span>
+
+    <span class="c">############</span>
+    <span class="c"># HANDLERS #</span>
+    <span class="c">############</span></div>
+<div class="viewcode-block" id="LoggerOffice.add_handler"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.add_handler">[docs]</a>    <span class="k">def</span> <span class="nf">add_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">handler</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__formatter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">handler</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.get_handler_names"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_handler_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_handler_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.get_handler"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_handler">[docs]</a>    <span class="k">def</span> <span class="nf">get_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">handler</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="c"># if handler is None:</span>
+        <span class="c">#     raise Exception(&quot;LoggerOffice.get_handler: no such handler %s&quot;%name)</span>
+        <span class="k">return</span> <span class="n">handler</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.iter_handlers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.iter_handlers">[docs]</a>    <span class="k">def</span> <span class="nf">iter_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+
+    <span class="c">###########</span>
+    <span class="c"># LOGGERS #</span>
+    <span class="c">###########</span></div>
+<div class="viewcode-block" id="LoggerOffice.add_logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.add_logger">[docs]</a>    <span class="k">def</span> <span class="nf">add_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pyLoggers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="c">#we force the propagate attribute to False</span>
+        <span class="c">#otherwise the logging.root logger gets</span>
+        <span class="c">#called somehow</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span><span class="o">=</span><span class="bp">False</span> <span class="c"># ugh why ?</span>
+        <span class="k">return</span> <span class="n">logger</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.get_logger_names"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_logger_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_logger_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pyLoggers</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.get_logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_logger">[docs]</a>    <span class="k">def</span> <span class="nf">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pyLoggers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_logger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">logger</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.iter_loggers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.iter_loggers">[docs]</a>    <span class="k">def</span> <span class="nf">iter_loggers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pyLoggers</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+
+    <span class="c">#################################</span>
+    <span class="c"># Logger to handler connections #</span>
+    <span class="c">#################################</span></div>
+<div class="viewcode-block" id="LoggerOffice.connect_loggers_to_handlers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.connect_loggers_to_handlers">[docs]</a>    <span class="k">def</span> <span class="nf">connect_loggers_to_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggers</span><span class="p">,</span> <span class="n">handlers</span><span class="p">,</span> <span class="n">noDisconnect</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">loggers</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__iterable_check</span><span class="p">(</span><span class="n">loggers</span><span class="p">)</span>
+        <span class="n">handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__iterable_check</span><span class="p">(</span><span class="n">handlers</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">noDisconnect</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">handler</span><span class="p">,</span> <span class="n">logger</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.disconnect_loggers_from_handlers"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.disconnect_loggers_from_handlers">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect_loggers_from_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggers</span><span class="p">,</span> <span class="n">handlers</span><span class="p">):</span>
+        <span class="n">loggers</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__iterable_check</span><span class="p">(</span><span class="n">loggers</span><span class="p">)</span>
+        <span class="n">handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__iterable_check</span><span class="p">(</span><span class="n">handlers</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">handler</span><span class="p">,</span> <span class="n">logger</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iterable_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">collections</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+
+    <span class="c">#########################</span>
+    <span class="c"># LOGGING LEVEL CONTROL #</span>
+    <span class="c">#########################</span>
+<div class="viewcode-block" id="LoggerOffice.set_global_handler_level"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.set_global_handler_level">[docs]</a>    <span class="k">def</span> <span class="nf">set_global_handler_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__globalHandlerLevel</span> <span class="o">=</span> <span class="n">level</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_handlers</span><span class="p">():</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__globalHandlerLevel</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.set_global_logger_level"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.set_global_logger_level">[docs]</a>    <span class="k">def</span> <span class="nf">set_global_logger_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__globalLoggerLevel</span> <span class="o">=</span> <span class="n">level</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_loggers</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__globalLoggerLevel</span><span class="p">)</span>
+
+    <span class="c">############</span>
+    <span class="c"># DEFAULTS #</span>
+    <span class="c">############</span></div>
+<div class="viewcode-block" id="LoggerOffice.set_defaults"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.set_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">set_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">handlers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;stream&quot;</span><span class="p">]</span>
+        <span class="c"># -- default handlers --</span>
+        <span class="k">if</span> <span class="n">QT_LOGGING_MODEL_AVAILABLE</span> <span class="ow">and</span> <span class="s">&quot;qt&quot;</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+            <span class="n">ha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="s">&#39;qt&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">QLogHandlerItemModel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_handler</span><span class="p">(</span><span class="s">&quot;qt&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&quot;qt&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">[</span><span class="s">&quot;qt&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~/.openalea/log.log&quot;</span><span class="p">)</span>
+            <span class="n">ha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="s">&#39;file&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">TimedRotatingFileHandler</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span>
+                                                                      <span class="n">when</span><span class="o">=</span><span class="s">&#39;midnight&#39;</span><span class="p">,</span>
+                                                                      <span class="n">backupCount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="n">ha</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_handler</span><span class="p">(</span><span class="s">&quot;file&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&quot;file&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">[</span><span class="s">&quot;file&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&quot;stream&quot;</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">:</span>
+            <span class="n">ha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="s">&#39;stream&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+            <span class="n">ha</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_handler</span><span class="p">(</span><span class="s">&quot;stream&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&quot;stream&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__handlers</span><span class="p">[</span><span class="s">&quot;stream&quot;</span><span class="p">]</span>
+
+        <span class="c"># -- default loggers --</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_default_logger</span><span class="p">(</span><span class="n">handlers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_global_logger_level</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.make_default_logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.make_default_logger">[docs]</a>    <span class="k">def</span> <span class="nf">make_default_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">handlers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">handlers</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;stream&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__oaRootLogger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_logger</span><span class="p">(</span><span class="s">&quot;openalea&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disconnect_loggers_from_handlers</span><span class="p">(</span><span class="s">&quot;openalea&quot;</span><span class="p">,</span> <span class="n">defaultHandlerNames</span><span class="p">[:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_loggers_to_handlers</span><span class="p">(</span><span class="s">&quot;openalea&quot;</span><span class="p">,</span> <span class="n">handlers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__oaRootLogger</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.set_default_logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.set_default_logger">[docs]</a>    <span class="k">def</span> <span class="nf">set_default_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__oaRootLogger</span> <span class="o">=</span> <span class="n">logger</span>
+</div>
+<div class="viewcode-block" id="LoggerOffice.get_default_logger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.LoggerOffice.get_default_logger">[docs]</a>    <span class="k">def</span> <span class="nf">get_default_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pyLoggers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;openalea&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_default_logger</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">logger</span>
+
+
+
+<span class="c"># Copied and hacked out of logging.__init__.py</span>
+<span class="c"># _srcfile is used when walking the stack to check when we&#39;ve got the first</span>
+<span class="c"># caller stack frame that is not from this file</span></div></div>
+<span class="k">if</span> <span class="n">__file__</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.pyc&#39;</span><span class="p">,</span> <span class="s">&#39;.pyo&#39;</span><span class="p">]:</span>
+    <span class="n">_srcfile</span> <span class="o">=</span> <span class="n">__file__</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.py&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">_srcfile</span> <span class="o">=</span> <span class="n">__file__</span>
+<span class="n">_srcfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normcase</span><span class="p">(</span><span class="n">_srcfile</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PatchedPyLogger"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.PatchedPyLogger">[docs]</a><span class="k">class</span> <span class="nc">PatchedPyLogger</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Patched Logger that identifies correctly the origin of the logger relative</span>
+<span class="sd">    to this module&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PatchedPyLogger.findCaller"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.logger.PatchedPyLogger.findCaller">[docs]</a>    <span class="k">def</span> <span class="nf">findCaller</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the stack frame of the caller so that we can note the source</span>
+<span class="sd">        file name, line number and function name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="s">&quot;(unknown file)&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;(unknown function)&quot;</span>
+        <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;f_code&quot;</span><span class="p">):</span>
+            <span class="n">co</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">f_code</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normcase</span><span class="p">(</span><span class="n">co</span><span class="o">.</span><span class="n">co_filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="p">[</span><span class="n">_srcfile</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">_srcfile</span><span class="p">]:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">f_back</span>
+                <span class="k">continue</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">f_lineno</span><span class="p">,</span> <span class="n">co</span><span class="o">.</span><span class="n">co_name</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">return</span> <span class="n">rv</span>
+
+</div></div>
+<span class="n">logging</span><span class="o">.</span><span class="n">setLoggerClass</span><span class="p">(</span><span class="n">PatchedPyLogger</span><span class="p">)</span>
+<span class="n">default_init</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;stream&quot;</span><span class="p">])</span>
+
+
+
+<span class="c">########################################################</span>
+<span class="c"># -------- Some Logging handlers for Openalea -------- #</span>
+<span class="c">########################################################</span>
+<span class="k">if</span> <span class="n">QT_LOGGING_MODEL_AVAILABLE</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">QLogHandlerItemModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A Handler that stores the logs in a QStandardItemModel, directly usable</span>
+<span class="sd">        by QtGui.QTableViews&quot;&quot;&quot;</span>
+
+        <span class="n">cyan</span>    <span class="o">=</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">188</span><span class="p">,</span> <span class="mi">227</span>
+        <span class="n">green</span>   <span class="o">=</span> <span class="mi">146</span><span class="p">,</span> <span class="mi">231</span><span class="p">,</span> <span class="mi">62</span>
+        <span class="n">yellow</span>  <span class="o">=</span> <span class="mi">236</span><span class="p">,</span> <span class="mi">235</span><span class="p">,</span> <span class="mi">130</span>
+        <span class="n">orange</span>  <span class="o">=</span> <span class="mi">236</span><span class="p">,</span> <span class="mi">169</span><span class="p">,</span> <span class="mi">35</span>
+        <span class="n">red</span>     <span class="o">=</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span>
+        <span class="n">__colormap__</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&quot;DEBUG&quot;</span>   <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">cyan</span><span class="p">),</span>
+                         <span class="s">&quot;INFO&quot;</span>    <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">green</span><span class="p">),</span>
+                         <span class="s">&quot;WARNING&quot;</span> <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">yellow</span><span class="p">),</span>
+                         <span class="s">&quot;ERROR&quot;</span>   <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">orange</span><span class="p">),</span>
+                         <span class="s">&quot;CRITICAL&quot;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">red</span><span class="p">)</span>
+                         <span class="p">}</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">NOTSET</span><span class="p">):</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">+</span><span class="n">s</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">LoggerOffice</span><span class="p">()</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; - &quot;</span><span class="p">)]</span>
+
+            <span class="c"># -- if we find the &quot;Levelname&quot; column it will be used for colouring --</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">messageTypeIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot;Levelname&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">messageTypeIndex</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+
+        <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; - &quot;</span><span class="p">)</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">,</span> <span class="n">vals</span> <span class="p">)</span>
+
+            <span class="c"># -- optionnal colouring --</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">messageTypeIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">msgType</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messageTypeIndex</span><span class="p">]</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QLogHandlerItemModel</span><span class="o">.</span><span class="n">__colormap__</span><span class="p">[</span><span class="n">msgType</span><span class="p">])</span>
+                <span class="n">it</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messageTypeIndex</span><span class="p">]</span>
+                <span class="n">foreground</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="n">foreground</span><span class="p">()</span>
+                <span class="n">foreground</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
+                <span class="n">it</span><span class="o">.</span><span class="n">setForeground</span><span class="p">(</span><span class="n">foreground</span><span class="p">)</span>
+                <span class="n">it</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -28,8 +28,8 @@
     <link rel="next" title="PEP: Declarative Language to Design GUI" href="pep_ui_declarative.html" />
     <link rel="prev" title="PEP: Project" href="pep_project.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -52,14 +52,60 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="pep-contract-suppliers">
 <h1>PEP: Contract Suppliers<a class="headerlink" href="#pep-contract-suppliers" title="Permalink to this headline">¶</a></h1>
 <p>In applications, some classes have a central role and are used by numerous other
 classes.</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>interface.py</tt></div><div class="highlight"><pre><span class="k">class</span> <span class="nc">IHelper</span><span class="p">(</span><span class="n">Interface</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">seText</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
 <p>IReader is an interface that describe a contract.</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>implementations.py</tt></div><div class="highlight"><pre><span class="k">class</span> <span class="nc">Helper1</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">text</span>
+
+<span class="k">class</span> <span class="nc">Helper2</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Reader supplies IReader contract.</p>
+<div class="highlight-ini"><div class="code-block-filename"><tt>suppliers.ini</tt></div><div class="highlight"><pre><span class="k">[General]</span>
+<span class="c1"># Options common to all supplier managers</span>
+<span class="na">user_path</span> <span class="o">=</span> <span class="s">~/home/guillaume/plugins</span>
+
+<span class="k">[General.backend]</span>
+<span class="na">IHelper</span> <span class="o">=</span> <span class="s">&#39;Helper1&#39;</span>
+
+<span class="k">[General.backend.IReader]</span>
+<span class="na">tags</span> <span class="o">=</span> <span class="s">PyQt4, PySide</span>
+
+<span class="k">[TissueLab]</span>
+<span class="na">user_path</span> <span class="o">=</span> <span class="s">~/home/guillaume/plugins/tests/</span>
+
+<span class="k">[TissueLab.backend]</span>
+<span class="na">IHelper</span> <span class="o">=</span> <span class="s">&quot;Helper2&quot;</span>
+
+<span class="k">[TissueLab.helper]</span>
+<span class="na">user_path</span> <span class="o">=</span> <span class="s">~/home/guillaume/plugins/tests/</span>
+</pre></div>
+</div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.vpltk.catalog.catalog</span> <span class="kn">import</span> <span class="n">Catalog</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">catalog</span> <span class="o">=</span> <span class="n">Catalog</span><span class="p">()</span>
 </pre></div>
@@ -120,7 +166,7 @@ To get interface class :</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
@@ -140,12 +186,14 @@ To get interface class :</p>
   <h4>Next topic</h4>
   <p class="topless"><a href="pep_ui_declarative.html"
                         title="next chapter">PEP: Declarative Language to Design GUI</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../../../_sources/latest/dev/peps/pep_suppliers.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/peps/pep_suppliers.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -162,7 +210,7 @@ To get interface class :</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -181,9 +229,9 @@ To get interface class :</p>
           <li><a href="index.html" >PEP : OpenAleaLab (Python) Enhancement Proposals</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

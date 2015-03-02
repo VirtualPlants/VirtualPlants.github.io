@@ -1,0 +1,545 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.visualea.code_editor &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.visualea.code_editor</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Visualea: OpenAlea graphical user interface</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Samuel Dufour-Kowalski &lt;samuel.dufour@sophia.inria.fr&gt;</span>
+<span class="c">#                       Christophe Pradal &lt;christophe.prada@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the CeCILL v2 License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL_V2-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot;Python code editor&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;CeCILL V2&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">qt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span>
+<span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">openalea.visualea.util</span> <span class="kn">import</span> <span class="n">open_dialog</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+
+
+<div class="viewcode-block" id="get_editor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.get_editor">[docs]</a><span class="k">def</span> <span class="nf">get_editor</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Return the editor class &quot;&quot;&quot;</span>
+    
+    <span class="n">editor</span> <span class="o">=</span> <span class="n">PythonCodeEditor</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">str</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;editor&#39;</span><span class="p">,</span> <span class="s">&#39;use_external&#39;</span><span class="p">)</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">l</span><span class="p">):</span> <span class="n">editor</span> <span class="o">=</span> <span class="n">ExternalCodeEditor</span>
+        
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">editor</span>
+
+</div>
+<div class="viewcode-block" id="AbstractCodeEditor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.AbstractCodeEditor">[docs]</a><span class="k">class</span> <span class="nc">AbstractCodeEditor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; External code editor &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="AbstractCodeEditor.is_widget"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.AbstractCodeEditor.is_widget">[docs]</a>    <span class="k">def</span> <span class="nf">is_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="AbstractCodeEditor.is_empty"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.AbstractCodeEditor.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="AbstractCodeEditor.edit_file"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.AbstractCodeEditor.edit_file">[docs]</a>    <span class="k">def</span> <span class="nf">edit_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open file in the editor &quot;&quot;&quot;</span>
+        </div>
+<div class="viewcode-block" id="AbstractCodeEditor.edit_module"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.AbstractCodeEditor.edit_module">[docs]</a>    <span class="k">def</span> <span class="nf">edit_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Edit the source file of a python module &quot;&quot;&quot;</span>
+
+        <span class="kn">import</span> <span class="nn">inspect</span>
+        <span class="n">filename</span> <span class="o">=</span>  <span class="n">inspect</span><span class="o">.</span><span class="n">getsourcefile</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+
+</div></div>
+<div class="viewcode-block" id="ExternalCodeEditor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.ExternalCodeEditor">[docs]</a><span class="k">class</span> <span class="nc">ExternalCodeEditor</span><span class="p">(</span><span class="n">AbstractCodeEditor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; External code editor &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">AbstractCodeEditor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExternalCodeEditor.is_widget"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.ExternalCodeEditor.is_widget">[docs]</a>    <span class="k">def</span> <span class="nf">is_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="ExternalCodeEditor.get_command"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.ExternalCodeEditor.get_command">[docs]</a>    <span class="k">def</span> <span class="nf">get_command</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return command to execute &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;editor&#39;</span><span class="p">,</span> <span class="s">&#39;command&#39;</span><span class="p">)</span>
+            
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">cmd</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="s">&#39;posix&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&quot;/usr/bin/vim&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s">&quot;C:</span><span class="se">\\</span><span class="s">windows</span><span class="se">\\</span><span class="s">notepad.exe&quot;</span>
+
+        <span class="k">return</span> <span class="n">cmd</span>
+
+</div>
+<div class="viewcode-block" id="ExternalCodeEditor.edit_file"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.ExternalCodeEditor.edit_file">[docs]</a>    <span class="k">def</span> <span class="nf">edit_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open file in the editor &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;Cannot find the file to edit.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_command</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Popen</span><span class="p">([</span><span class="n">c</span><span class="p">,</span> <span class="n">filename</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Cannot execute </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="p">,)</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="PythonCodeEditor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor">[docs]</a><span class="k">class</span> <span class="nc">PythonCodeEditor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">AbstractCodeEditor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simple Python code editor &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        
+        <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">AbstractCodeEditor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_editor</span><span class="p">()</span>
+
+        <span class="n">vboxlayout</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hboxlayout</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hboxlayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hboxlayout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applybut</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&quot;Apply changes&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hboxlayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savbut</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s">&quot;Save changes&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hboxlayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savbut</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hboxlayout</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savescut</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QShortcut</span><span class="p">(</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Save</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savescut</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;triggered()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_changes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savbut</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_changes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_changes</span><span class="p">)</span>
+        
+    
+<div class="viewcode-block" id="PythonCodeEditor.is_widget"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.is_widget">[docs]</a>    <span class="k">def</span> <span class="nf">is_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.file_changed"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.file_changed">[docs]</a>    <span class="k">def</span> <span class="nf">file_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;File has changed on the disk.&quot;</span><span class="p">,</span>
+                                         <span class="s">&quot;Reload ?</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+                                         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,)</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="n">ret</span> <span class="o">==</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">):</span> <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.get_editor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.get_editor">[docs]</a>    <span class="k">def</span> <span class="nf">get_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an editor object based on QScintilla if available.</span>
+<span class="sd">        Else, return a standard editor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">PyQt4.Qsci</span> <span class="kn">import</span> <span class="n">QsciScintilla</span><span class="p">,</span> <span class="n">QsciLexerPython</span><span class="p">,</span> <span class="n">QsciAPIs</span>
+            
+            <span class="n">textedit</span> <span class="o">=</span> <span class="n">QsciScintilla</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setAutoIndent</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setAutoCompletionThreshold</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setAutoCompletionSource</span><span class="p">(</span><span class="n">QsciScintilla</span><span class="o">.</span><span class="n">AcsDocument</span><span class="p">)</span>
+
+            <span class="c"># API</span>
+            <span class="n">lex</span> <span class="o">=</span> <span class="n">QsciLexerPython</span><span class="p">(</span><span class="n">textedit</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setLexer</span><span class="p">(</span><span class="n">lex</span><span class="p">)</span>
+
+<span class="c">#             apis = QsciAPIs(lex)</span>
+<span class="c">#             apis.prepare()</span>
+            
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">textedit</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setLineWrapMode</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="o">.</span><span class="n">NoWrap</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+            <span class="n">textedit</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">textedit</span>
+
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.goToLine"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.goToLine">[docs]</a>    <span class="k">def</span> <span class="nf">goToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linenb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Go to line nb &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensureLineVisible</span><span class="p">(</span><span class="n">linenb</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.setText"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the text of the editor &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.getText"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.getText">[docs]</a>    <span class="k">def</span> <span class="nf">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return editor text &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.edit_file"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.edit_file">[docs]</a>    <span class="k">def</span> <span class="nf">edit_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open file in the editor &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;File : &quot;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savbut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">filewatcher</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QFileSystemWatcher</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filewatcher</span><span class="o">.</span><span class="n">addPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filewatcher</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;fileChanged(const QString &amp;)&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_changed</span><span class="p">)</span>
+        
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savbut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot; Sources are not available...&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.edit_module"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.edit_module">[docs]</a>    <span class="k">def</span> <span class="nf">edit_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Edit the source file of a python module &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">module</span><span class="p">):</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="kn">import</span> <span class="nn">inspect</span>
+        <span class="n">filename</span> <span class="o">=</span>  <span class="n">inspect</span><span class="o">.</span><span class="n">getsourcefile</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">savbut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.apply_changes"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.apply_changes">[docs]</a>    <span class="k">def</span> <span class="nf">apply_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reload file &quot;&quot;&quot;</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">):</span>
+            <span class="n">newsrc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
+            <span class="k">exec</span> <span class="n">newsrc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">__dict__</span>
+
+</div>
+<div class="viewcode-block" id="PythonCodeEditor.save_changes"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.PythonCodeEditor.save_changes">[docs]</a>    <span class="k">def</span> <span class="nf">save_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Save module &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">)):</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Cannot write file </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">return</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">filewatcher</span><span class="o">.</span><span class="n">removePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Write file : &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">filewatcher</span><span class="o">.</span><span class="n">addPath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            
+            
+
+
+</div></div>
+<div class="viewcode-block" id="NodeCodeEditor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.NodeCodeEditor">[docs]</a><span class="k">class</span> <span class="nc">NodeCodeEditor</span><span class="p">(</span><span class="n">PythonCodeEditor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Default node editor &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        
+        <span class="n">PythonCodeEditor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">factory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_class</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
+        
+
+
+<div class="viewcode-block" id="NodeCodeEditor.edit_class"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.NodeCodeEditor.edit_class">[docs]</a>    <span class="k">def</span> <span class="nf">edit_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodefactory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open class source in editor &quot;&quot;&quot;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="n">nodefactory</span><span class="o">.</span><span class="n">get_node_src</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Module : &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">nodemodule_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applybut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savbut</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textedit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot; Sources are not available...&quot;</span><span class="p">)</span>
+            
+</div>
+<div class="viewcode-block" id="NodeCodeEditor.apply_changes"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.NodeCodeEditor.apply_changes">[docs]</a>    <span class="k">def</span> <span class="nf">apply_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Apply &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">get_node_src</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">apply_new_src</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NodeCodeEditor.save_changes"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.NodeCodeEditor.save_changes">[docs]</a>    <span class="k">def</span> <span class="nf">save_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Save module &quot;&quot;&quot;</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Save&quot;</span><span class="p">,</span>
+                                         <span class="s">&quot;Modification will be written in the module</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">+</span>
+                                         <span class="s">&quot;Continue ?</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+                                         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">ret</span> <span class="o">==</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">):</span> <span class="k">return</span>
+
+        <span class="n">module_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">nodemodule_name</span>
+        <span class="n">newsrc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">save_new_src</span><span class="p">(</span><span class="n">newsrc</span><span class="p">)</span>
+
+
+</div></div>
+<div class="viewcode-block" id="Command"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.Command">[docs]</a><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Execute a command depending on a filename.</span>
+<span class="sd">    Create a process and execute the command locally.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">cwd</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">basename</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;%&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">win32api</span>
+            <span class="n">cmd1</span> <span class="o">=</span> <span class="n">win32api</span><span class="o">.</span><span class="n">GetShortPathName</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="n">command</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">cmd1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="o">%</span><span class="n">name</span><span class="p">,</span> <span class="n">shell</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">cwd</span> <span class="o">=</span> <span class="n">cwd</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="EditorSelector"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.EditorSelector">[docs]</a><span class="k">class</span> <span class="nc">EditorSelector</span><span class="p">(</span><span class="n">AbstractCodeEditor</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dialog to select an editor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">editors</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        @param editors : dictionnary name:command</span>
+<span class="sd">        @param params : strings to replace command param (%s)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+        <span class="n">vboxlayout</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">vboxlayout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">editors</span> <span class="o">=</span> <span class="n">editors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+
+        <span class="c"># put the edit button in the first place</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">editors</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;edit&#39;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;edit&#39;</span><span class="p">)</span>
+            <span class="n">keys</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;edit&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">but</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">but</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">vboxlayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">but</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">but</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">button_clicked</span><span class="p">)</span>
+
+    
+<div class="viewcode-block" id="EditorSelector.is_widget"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.EditorSelector.is_widget">[docs]</a>    <span class="k">def</span> <span class="nf">is_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+            </div>
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Destroy widget &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">editors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">e</span>
+        
+        
+<div class="viewcode-block" id="EditorSelector.button_clicked"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.code_editor.EditorSelector.button_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">button_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">command</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">get_editor</span><span class="p">()(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">())</span>
+            
+            <span class="k">if</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">is_widget</span><span class="p">()):</span>
+                <span class="n">open_dialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(),</span> <span class="n">widget</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> 
+                            <span class="n">delete_on_close</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="n">widget</span><span class="o">.</span><span class="n">edit_file</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">Command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="n">c</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

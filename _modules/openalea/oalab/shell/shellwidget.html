@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.shell.shellwidget &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.shell.shellwidget</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">streamredirection</span> <span class="kn">import</span> <span class="n">GraphicalStreamRedirection</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.check.ipython</span> <span class="kn">import</span> <span class="n">has_new_ipython</span>
+<span class="k">if</span> <span class="n">has_new_ipython</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">IPython.qt.console.rich_ipython_widget</span> <span class="kn">import</span> <span class="n">RichIPythonWidget</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">IPython.frontend.qt.console.rich_ipython_widget</span> <span class="kn">import</span> <span class="n">RichIPythonWidget</span>
+
+
+<div class="viewcode-block" id="ShellWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget">[docs]</a><span class="k">class</span> <span class="nc">ShellWidget</span><span class="p">(</span><span class="n">RichIPythonWidget</span><span class="p">,</span> <span class="n">GraphicalStreamRedirection</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ShellWidget is an IPython shell.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">RichIPythonWidget</span><span class="p">()</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">ShellWidget</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param interpreter : InteractiveInterpreter in which</span>
+<span class="sd">        the code will be executed</span>
+
+<span class="sd">        :param message: welcome message string</span>
+
+<span class="sd">        :param  parent: specifies the parent widget.</span>
+<span class="sd">        If no parent widget has been specified, it is possible to</span>
+<span class="sd">        exit the interpreter by Ctrl-D.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">interpreter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
+            <span class="n">interpreter</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
+        <span class="c"># Set interpreter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span> <span class="o">=</span> <span class="n">interpreter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="c"># Multiple Stream Redirection</span>
+        <span class="n">GraphicalStreamRedirection</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Compatibility with visualea</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runsource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">runsource</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">runcode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">loadcode</span>
+
+        <span class="c"># Write welcome message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="c"># Set kernel manager</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">IPython.qt.inprocess</span> <span class="kn">import</span> <span class="n">QtInProcessKernelManager</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">warnings</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&quot;You are using a deprecated version of IPython (please update).&quot;</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="c"># DEPRECATED !</span>
+            <span class="kn">from</span> <span class="nn">IPython.frontend.qt.inprocess_kernelmanager</span> <span class="kn">import</span> <span class="n">QtInProcessKernelManager</span>
+            <span class="n">km</span> <span class="o">=</span> <span class="n">QtInProcessKernelManager</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="p">)</span>
+            <span class="n">km</span><span class="o">.</span><span class="n">start_channels</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">frontends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">km</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_manager</span> <span class="o">=</span> <span class="n">km</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">km</span> <span class="o">=</span> <span class="n">QtInProcessKernelManager</span><span class="p">()</span>
+            <span class="n">km</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span>
+            <span class="n">km</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s">&#39;qt4&#39;</span>
+
+            <span class="n">kernel_client</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">client</span><span class="p">()</span>
+            <span class="n">kernel_client</span><span class="o">.</span><span class="n">start_channels</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_manager</span> <span class="o">=</span> <span class="n">km</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_client</span> <span class="o">=</span> <span class="n">kernel_client</span>
+        <span class="c"># For Debug Only</span>
+        <span class="c"># self.interpreter.locals[&#39;shell&#39;] = self</span>
+
+<div class="viewcode-block" id="ShellWidget.read"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_client</span><span class="o">.</span><span class="n">stdin_channel</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.get_interpreter"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.get_interpreter">[docs]</a>    <span class="k">def</span> <span class="nf">get_interpreter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: the interpreter object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.write"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a text in the stdout of the shell and flush it.</span>
+<span class="sd">        :param txt: String to write.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.push"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.push">[docs]</a>    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Push variables in the namespace.</span>
+<span class="sd">        :param var: dict of objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">locals</span> <span class="o">+=</span> <span class="n">v</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.initialize"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span> <span class="s">&quot;shell&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span> <span class="s">&quot;events&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s">&quot;post_execute&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_to_history</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;You need ipython &gt;= 2.0 to use history.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShellWidget.add_to_history"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.ShellWidget.add_to_history">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send the last sent of history to the components that display history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.service.history</span> <span class="kn">import</span> <span class="n">display_history</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">history_manager</span><span class="o">.</span><span class="n">get_range</span><span class="p">()</span>
+
+        <span class="n">input_</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># loop all elements in iterator to get last one.</span>
+        <span class="c"># TODO: search method returning directly last input</span>
+        <span class="k">for</span> <span class="n">session</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">input_</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">display_history</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.shell.html#openalea.oalab.shell.shellwidget.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">qt</span> <span class="k">as</span> <span class="n">qt_</span>
+    <span class="kn">from</span> <span class="nn">ipythoninterpreter</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">qt_</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+    <span class="c"># Set interpreter</span>
+    <span class="n">interpreter</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+
+    <span class="n">interpreter</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpreter</span>
+    <span class="c"># Set Shell Widget</span>
+    <span class="n">shellwdgt</span> <span class="o">=</span> <span class="n">ShellWidget</span><span class="p">(</span><span class="n">interpreter</span><span class="p">)</span>
+    <span class="n">interpreter</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;shell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shellwdgt</span>
+
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="n">qt_</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">shellwdgt</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span><span class="p">(</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">):</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

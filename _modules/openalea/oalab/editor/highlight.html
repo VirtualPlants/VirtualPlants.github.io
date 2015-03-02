@@ -26,8 +26,8 @@
     <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,11 +44,11 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for openalea.oalab.editor.highlight</h1><div class="highlight"><pre>
 <span class="c"># -*- python -*-</span>
-<span class="c"># </span>
+<span class="c">#</span>
 <span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
 <span class="c">#</span>
 <span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
@@ -68,11 +68,12 @@
 
 <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">pygments.formatters.html</span> <span class="kn">import</span> <span class="n">HtmlFormatter</span>
-<span class="kn">from</span> <span class="nn">pygments.lexers</span> <span class="kn">import</span> <span class="n">PythonLexer</span>
+<span class="kn">from</span> <span class="nn">pygments.lexers</span> <span class="kn">import</span> <span class="n">guess_lexer_for_filename</span><span class="p">,</span> <span class="n">PythonLexer</span>
 <span class="kn">from</span> <span class="nn">pygments.styles</span> <span class="kn">import</span> <span class="n">get_style_by_name</span>
 
 
 <div class="viewcode-block" id="Highlighter"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.Highlighter">[docs]</a><span class="k">class</span> <span class="nc">Highlighter</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSyntaxHighlighter</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Highlighter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_document</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="p">()</span>
@@ -201,6 +202,7 @@
 
 </div>
 <div class="viewcode-block" id="PygmentsBlockUserData"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.PygmentsBlockUserData">[docs]</a><span class="k">class</span> <span class="nc">PygmentsBlockUserData</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextBlockUserData</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; Storage for the user data associated with each line.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -213,27 +215,28 @@
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;syntax_stack&#39;</span><span class="p">]</span>
-        <span class="n">kwds</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
-                           <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span> <span class="p">])</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                          <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">])</span>
         <span class="k">return</span> <span class="s">&#39;PygmentsBlockUserData(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">kwds</span>
 
 </div>
 <div class="viewcode-block" id="GenericHighlighter"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.html#openalea.oalab.editor.highlight.GenericHighlighter">[docs]</a><span class="k">class</span> <span class="nc">GenericHighlighter</span><span class="p">(</span><span class="n">Highlighter</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;a.txt&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GenericHighlighter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="n">lexer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_document</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span> <span class="o">=</span> <span class="n">HtmlFormatter</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span> <span class="o">=</span> <span class="n">guess_lexer_for_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s">&#39;default&#39;</span><span class="p">)</span>
-</pre></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s">&#39;default&#39;</span><span class="p">)</span></div>
+</pre></div>
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -250,7 +253,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -263,9 +266,9 @@
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

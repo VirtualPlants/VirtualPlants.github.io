@@ -1,0 +1,466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.core.graph.interface.graph &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.core.graph.interface.graph</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2007 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">##############################################################################</span>
+<span class="sd">&quot;&quot;&quot;This module provide a set of graph concepts to form a graph interface&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<div class="viewcode-block" id="GraphError"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.GraphError">[docs]</a><span class="k">class</span> <span class="nc">GraphError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    base class of all graph exceptions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="InvalidEdge"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.InvalidEdge">[docs]</a><span class="k">class</span> <span class="nc">InvalidEdge</span><span class="p">(</span><span class="n">GraphError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    exception raised when a wrong edge id is provided</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="InvalidVertex"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.InvalidVertex">[docs]</a><span class="k">class</span> <span class="nc">InvalidVertex</span><span class="p">(</span><span class="n">GraphError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    exception raised when a wrong vertex id is provided</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="IGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph">[docs]</a><span class="k">class</span> <span class="nc">IGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Directed graph definition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IGraph.source"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph.source">[docs]</a>    <span class="k">def</span> <span class="nf">source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        retrieve the source of an edge</span>
+<span class="sd">        </span>
+<span class="sd">        :param eid: id of the edge</span>
+<span class="sd">        :type eid: eid</span>
+<span class="sd">        :rtype: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IGraph.target"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph.target">[docs]</a>    <span class="k">def</span> <span class="nf">target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        retrieve the target of an edge</span>
+<span class="sd">        </span>
+<span class="sd">        :param eid: id of the edge</span>
+<span class="sd">        :type eid: eid</span>
+<span class="sd">        :rtype: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IGraph.edge"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph.edge">[docs]</a>    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        find the matching edges with same source and same target</span>
+<span class="sd">        return None if it don&#39;t succeed</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            - `source` : id of the source vertex</span>
+<span class="sd">            - `target` : id of the target vertex</span>
+<span class="sd">        :Types:</span>
+<span class="sd">            - `source` : vid</span>
+<span class="sd">            - `target` : vid</span>
+<span class="sd">        :rtype: eid|iter of eid|None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        test wether a vertex belong to the graph, see `has_vertex`</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: vertex id to test</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+<div class="viewcode-block" id="IGraph.has_vertex"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph.has_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">has_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        test wether a vertex belong to the graph</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: vertex id to test</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IGraph.has_edge"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph.has_edge">[docs]</a>    <span class="k">def</span> <span class="nf">has_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        test wether an edge belong to the graph</span>
+<span class="sd">        </span>
+<span class="sd">        :param eid: edge id to test</span>
+<span class="sd">        :type eid: eid</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IGraph.is_valid"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IGraph.is_valid">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        test the validity of the graph</span>
+<span class="sd">        </span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IVertexListGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph">[docs]</a><span class="k">class</span> <span class="nc">IVertexListGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    interface of a graph seen as a vertex list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IVertexListGraph.vertices"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.vertices">[docs]</a>    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on vertices</span>
+<span class="sd">        </span>
+<span class="sd">        :rtype: iter of vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__iter__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        magic function for `vertices`</span>
+<span class="sd">        </span>
+<span class="sd">        :rtype: iter of vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+<div class="viewcode-block" id="IVertexListGraph.nb_vertices"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.nb_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">nb_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return the total number of vertices</span>
+<span class="sd">        </span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        magic function for `nb_vertices`</span>
+<span class="sd">        </span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+<div class="viewcode-block" id="IVertexListGraph.in_neighbors"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.in_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">in_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on the neighbors of vid</span>
+<span class="sd">        where edges are directed from neighbor to vid</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IVertexListGraph.out_neighbors"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.out_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">out_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on the neighbors of vid</span>
+<span class="sd">        where edges are directed from vid to neighbor</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IVertexListGraph.neighbors"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on the neighbors of vid</span>
+<span class="sd">        regardless of the orientation of the edge</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IVertexListGraph.nb_in_neighbors"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.nb_in_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_in_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of neighbors such as edges are directed from neighbor to vid</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IVertexListGraph.nb_out_neighbors"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.nb_out_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_out_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of neighbors such as edges are directed from vid to neighbor</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IVertexListGraph.nb_neighbors"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IVertexListGraph.nb_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of neighbors regardless of the orientation of the edge</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IEdgeListGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph">[docs]</a><span class="k">class</span> <span class="nc">IEdgeListGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Definition of a graph seen as a list of edges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IEdgeListGraph.edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph.edges">[docs]</a>    <span class="k">def</span> <span class="nf">edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        retrieve the edges linked to a specified vertex,</span>
+<span class="sd">        all if vid is None</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IEdgeListGraph.nb_edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph.nb_edges">[docs]</a>    <span class="k">def</span> <span class="nf">nb_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of edges linked to a specified vertex,</span>
+<span class="sd">        total number if vid is None</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IEdgeListGraph.in_edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph.in_edges">[docs]</a>    <span class="k">def</span> <span class="nf">in_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        retrieve the edges linked to a specified vertex,</span>
+<span class="sd">        oriented inside the vertex</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IEdgeListGraph.out_edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph.out_edges">[docs]</a>    <span class="k">def</span> <span class="nf">out_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        retrieve the edges linked to a specified vertex,</span>
+<span class="sd">        oriented outside the vertex</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IEdgeListGraph.nb_in_edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph.nb_in_edges">[docs]</a>    <span class="k">def</span> <span class="nf">nb_in_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of edges linked to a specified vertex,</span>
+<span class="sd">        oriented inside vertex</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IEdgeListGraph.nb_out_edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IEdgeListGraph.nb_out_edges">[docs]</a>    <span class="k">def</span> <span class="nf">nb_out_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of edges linked to a specified vertex,</span>
+<span class="sd">        oriented outside vertex</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: id of the reference vertex, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: iter of eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IMutableVertexGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableVertexGraph">[docs]</a><span class="k">class</span> <span class="nc">IMutableVertexGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    definition of graph edition methods for vertices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IMutableVertexGraph.add_vertex"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableVertexGraph.add_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add a vertex to the graph, if vid is not provided create a new vid</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: the id of the vertex to add, default=None</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :return: the id of the created vertex</span>
+<span class="sd">        :rtype: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IMutableVertexGraph.remove_vertex"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableVertexGraph.remove_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a specified vertex of the graph</span>
+<span class="sd">        remove all the edges attached to it</span>
+<span class="sd">        </span>
+<span class="sd">        :param vid: the id of the vertex to remove</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IMutableVertexGraph.clear"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableVertexGraph.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove all vertices and edges</span>
+<span class="sd">        don&#39;t change references to objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IMutableEdgeGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableEdgeGraph">[docs]</a><span class="k">class</span> <span class="nc">IMutableEdgeGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    definition of graph edition methods for edges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IMutableEdgeGraph.add_edge"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableEdgeGraph.add_edge">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">eid</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add an edge to the graph, if eid is not provided create a new eid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            - `edge` : a tuple (vertex source,vertex target)</span>
+<span class="sd">            - `eid` : the id of the created edge</span>
+<span class="sd">        :Types:</span>
+<span class="sd">            - `edge` : (vid,vid)</span>
+<span class="sd">            - `eid` : eid</span>
+<span class="sd">        :return: the id of the newly created edge</span>
+<span class="sd">        :rtype: eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IMutableEdgeGraph.remove_edge"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableEdgeGraph.remove_edge">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a specified edge from the graph</span>
+<span class="sd">        </span>
+<span class="sd">        :param eid: id of the edge to remove</span>
+<span class="sd">        :type eid: eid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IMutableEdgeGraph.clear_edges"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IMutableEdgeGraph.clear_edges">[docs]</a>    <span class="k">def</span> <span class="nf">clear_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove all the edges of the graph</span>
+<span class="sd">        don&#39;t change references to objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IExtendGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IExtendGraph">[docs]</a><span class="k">class</span> <span class="nc">IExtendGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    allow the graph to be extended by another graph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="IExtendGraph.extend"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.IExtendGraph.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add the specified graph to self, create new vid and eid</span>
+<span class="sd">        </span>
+<span class="sd">        :param graph: the graph to add</span>
+<span class="sd">        :type graph: Graph</span>
+<span class="sd">        :return: two dictionnary specifying correspondence between graph id and self id</span>
+<span class="sd">        :rtype: ({vid:vid},{eid:eid})</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="ICopyGraph"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.ICopyGraph">[docs]</a><span class="k">class</span> <span class="nc">ICopyGraph</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    allow the graph to be copied</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ICopyGraph.copy"><a class="viewcode-back" href="../../../../../openalea/core/doc/user/autosum.html#openalea.core.graph.interface.graph.ICopyGraph.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        make a shallow copy of the graph,</span>
+<span class="sd">        for a deep copy use the constructor `__init__`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

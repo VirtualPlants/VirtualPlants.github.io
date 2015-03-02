@@ -26,8 +26,8 @@
     <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,7 +44,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for openalea.oalab.plugins.controls</h1><div class="highlight"><pre>
 <span class="c"># -*- python -*-</span>
@@ -99,6 +99,7 @@
 <span class="sd">        return IntSlider</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+
 <div class="viewcode-block" id="PluginIntWidgetSelector"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.PluginIntWidgetSelector">[docs]</a><span class="k">class</span> <span class="nc">PluginIntWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
 
     <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt&#39;</span><span class="p">]</span>
@@ -124,6 +125,7 @@
 <div class="viewcode-block" id="PluginBoolWidgetSelector.load"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.PluginBoolWidgetSelector.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">BoolCheckBox</span>
         <span class="k">return</span> <span class="n">BoolCheckBox</span>
+
 </div></div>
 <div class="viewcode-block" id="PluginStringWidgetSelector"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.PluginStringWidgetSelector">[docs]</a><span class="k">class</span> <span class="nc">PluginStringWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
 
@@ -153,11 +155,12 @@
 <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span><span class="p">,</span> <span class="n">OpenAleaControlWidget</span>
 
+
 <div class="viewcode-block" id="OpenAleaControlWidgetFactory"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.OpenAleaControlWidgetFactory">[docs]</a><span class="k">def</span> <span class="nf">OpenAleaControlWidgetFactory</span><span class="p">(</span><span class="n">OpenAleaControlWidget</span><span class="p">,</span> <span class="n">OpenAleaWidget</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">OpenAleaControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">OpenAleaWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">interface</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># self.setAutoFillBackground(True)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
@@ -166,11 +169,12 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">OpenAleaWidget</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;AutoGeneratedControl&#39;</span>
     <span class="n">bases</span> <span class="o">=</span> <span class="p">[</span><span class="n">OpenAleaControlWidget</span><span class="p">,</span> <span class="n">OpenAleaWidget</span><span class="p">]</span>
 
-    <span class="n">klass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bases</span><span class="p">),</span> <span class="p">{</span><span class="s">&#39;__init__&#39;</span><span class="p">:</span><span class="n">__init__</span><span class="p">})</span>
+    <span class="n">klass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bases</span><span class="p">),</span> <span class="p">{</span><span class="s">&#39;__init__&#39;</span><span class="p">:</span> <span class="n">__init__</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">klass</span>
+
 </div>
 <div class="viewcode-block" id="new_plugin"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.new_plugin">[docs]</a><span class="k">def</span> <span class="nf">new_plugin</span><span class="p">(</span><span class="n">widget_class</span><span class="p">,</span> <span class="n">interface</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;large&#39;</span><span class="p">,</span> <span class="s">&#39;hline&#39;</span><span class="p">]</span>
 
     <span class="nd">@classmethod</span>
@@ -187,23 +191,23 @@
 </div>
 <span class="n">DEFAULT_SHAPES</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;large&#39;</span><span class="p">,</span> <span class="s">&#39;hline&#39;</span><span class="p">]</span>
 <span class="n">shapes</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;ISequence&#39;</span><span class="p">:[</span><span class="s">&#39;large&#39;</span><span class="p">],</span>
-    <span class="s">&#39;IFloat&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IDateTime&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;ITuple&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IColor&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;ITextStr&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IRGBColor&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IInt&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;ICodeStr&#39;</span><span class="p">:[</span><span class="s">&#39;large&#39;</span><span class="p">],</span>
-    <span class="s">&#39;IStr&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IColor&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IDict&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IEnumStr&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IColor&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IFileStr&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IDirStr&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
-    <span class="s">&#39;IBool&#39;</span><span class="p">:</span><span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;ISequence&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;large&#39;</span><span class="p">],</span>
+    <span class="s">&#39;IFloat&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IDateTime&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;ITuple&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IColor&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;ITextStr&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IRGBColor&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IInt&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;ICodeStr&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;large&#39;</span><span class="p">],</span>
+    <span class="s">&#39;IStr&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IColor&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IDict&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IEnumStr&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IColor&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IFileStr&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IDirStr&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
+    <span class="s">&#39;IBool&#39;</span><span class="p">:</span> <span class="n">DEFAULT_SHAPES</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c"># Exclude interfaces that have widgets designed for controls</span>
@@ -213,7 +217,7 @@
     <span class="n">iname</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">__name__</span>
     <span class="k">if</span> <span class="n">iname</span> <span class="ow">in</span> <span class="n">rejected</span><span class="p">:</span>
         <span class="k">continue</span>
-    <span class="k">if</span> <span class="n">iname</span>  <span class="ow">in</span> <span class="n">shapes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">iname</span> <span class="ow">in</span> <span class="n">shapes</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">shapes</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="bp">None</span>
@@ -224,9 +228,9 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -243,7 +247,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -256,9 +260,9 @@
           <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

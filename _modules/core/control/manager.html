@@ -26,8 +26,8 @@
     <link rel="top" title="OpenAlea community website" href="../../../index.html" />
     <link rel="up" title="core" href="../../core.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -45,7 +45,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for core.control.manager</h1><div class="highlight"><pre>
 <span class="c"># -*- python -*-</span>
@@ -74,11 +74,42 @@
 <span class="kn">from</span> <span class="nn">.control</span> <span class="kn">import</span> <span class="n">Control</span>
 
 
+<div class="viewcode-block" id="Follower"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.Follower">[docs]</a><span class="k">class</span> <span class="nc">Follower</span><span class="p">(</span><span class="n">AbstractListener</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listen</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="Follower.ignore_events"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.Follower.ignore_events">[docs]</a>    <span class="k">def</span> <span class="nf">ignore_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listen</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="Follower.follow_events"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.Follower.follow_events">[docs]</a>    <span class="k">def</span> <span class="nf">follow_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listen</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@lock_notify</span>
+<div class="viewcode-block" id="Follower.notify"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.Follower.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listen</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
+            <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+            <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;control_value_changed&#39;</span><span class="p">:</span>
+                <span class="n">control</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span><span class="p">:</span>
+                    <span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">old_value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+</div></div>
 <div class="viewcode-block" id="ControlContainer"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer">[docs]</a><span class="k">class</span> <span class="nc">ControlContainer</span><span class="p">(</span><span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">follower</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_controls</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="ControlContainer.control"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer.control">[docs]</a>    <span class="k">def</span> <span class="nf">control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -123,6 +154,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_control</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">control</span>
 </div>
 <div class="viewcode-block" id="ControlContainer.update"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dic</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -223,33 +255,15 @@
                 <span class="k">return</span> <span class="bp">True</span>
         <span class="k">return</span> <span class="bp">False</span>
 
+<div class="viewcode-block" id="ControlContainer.disable_followers"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer.disable_followers">[docs]</a>    <span class="k">def</span> <span class="nf">disable_followers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">follower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">follower</span><span class="o">.</span><span class="n">ignore_events</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="Follower"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.Follower">[docs]</a><span class="k">class</span> <span class="nc">Follower</span><span class="p">(</span><span class="n">AbstractListener</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
-        <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">func</span>
-
-    <span class="nd">@lock_notify</span>
-<div class="viewcode-block" id="Follower.notify"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.Follower.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
-            <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
-            <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;control_value_changed&#39;</span><span class="p">:</span>
-                <span class="n">control</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span><span class="p">:</span>
-                    <span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_old_value</span> <span class="o">=</span> <span class="n">value</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">old_value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-</div></div>
-<div class="viewcode-block" id="ControlManager"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlManager">[docs]</a><span class="k">class</span> <span class="nc">ControlManager</span><span class="p">(</span><span class="n">ControlContainer</span><span class="p">):</span>
-    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
-
-    <span class="n">follower</span> <span class="o">=</span> <span class="p">{}</span>
-
-<div class="viewcode-block" id="ControlManager.register_follower"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlManager.register_follower">[docs]</a>    <span class="k">def</span> <span class="nf">register_follower</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+<div class="viewcode-block" id="ControlContainer.enable_followers"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer.enable_followers">[docs]</a>    <span class="k">def</span> <span class="nf">enable_followers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">follower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">follower</span><span class="o">.</span><span class="n">follow_events</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ControlContainer.register_follower"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer.register_follower">[docs]</a>    <span class="k">def</span> <span class="nf">register_follower</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">unregister_follower</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">follower</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
@@ -257,12 +271,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">follower</span>
 </div>
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="ControlManager.unregister_follower"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlManager.unregister_follower">[docs]</a>    <span class="k">def</span> <span class="nf">unregister_follower</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="ControlContainer.unregister_follower"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlContainer.unregister_follower">[docs]</a>    <span class="k">def</span> <span class="nf">unregister_follower</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">unregister_listener</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">follower</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
 </div></div>
+<div class="viewcode-block" id="ControlManager"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.ControlManager">[docs]</a><span class="k">class</span> <span class="nc">ControlManager</span><span class="p">(</span><span class="n">ControlContainer</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
+
+</div>
 <div class="viewcode-block" id="control_dict"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.control.html#core.control.manager.control_dict">[docs]</a><span class="k">def</span> <span class="nf">control_dict</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the controls from the control manager in a dictionary</span>
@@ -278,9 +296,9 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -297,7 +315,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -311,9 +329,9 @@
           <li><a href="../../core.html" >core</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

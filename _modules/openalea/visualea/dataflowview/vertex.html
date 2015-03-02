@@ -1,0 +1,826 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.visualea.dataflowview.vertex &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.visualea.dataflowview.vertex</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c"># OpenAlea.Visualea: OpenAlea graphical user interface</span>
+<span class="c">#</span>
+<span class="c"># Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c"># File author(s): Daniel Barbeau &lt;daniel.barbeau@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c"># Distributed under the Cecill-C License.</span>
+<span class="c"># See accompanying file LICENSE.txt or copy at</span>
+<span class="c"># http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c"># OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">import</span> <span class="nn">sip</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">qt</span>
+<span class="kn">from</span> <span class="nn">openalea.visualea.graph_operator</span> <span class="kn">import</span> <span class="n">GraphOperator</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">observer</span><span class="p">,</span> <span class="n">compositenode</span>
+<span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">InputPort</span><span class="p">,</span> <span class="n">OutputPort</span><span class="p">,</span> <span class="n">AbstractPort</span><span class="p">,</span> <span class="n">AbstractNode</span>
+<span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">openalea.grapheditor</span> <span class="kn">import</span> <span class="n">qtgraphview</span><span class="p">,</span> <span class="n">baselisteners</span><span class="p">,</span> <span class="n">qtutils</span>
+<span class="kn">from</span> <span class="nn">openalea.grapheditor.qtutils</span> <span class="kn">import</span> <span class="n">mixin_method</span><span class="p">,</span> <span class="n">safeEffects</span>
+<span class="kn">from</span> <span class="nn">openalea.visualea</span> <span class="kn">import</span> <span class="n">images_rc</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="EvalObserver"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.EvalObserver">[docs]</a><span class="k">class</span> <span class="nc">EvalObserver</span><span class="p">(</span><span class="n">observer</span><span class="o">.</span><span class="n">AbstractListener</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="n">observer</span><span class="o">.</span><span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+
+<div class="viewcode-block" id="EvalObserver.notify"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.EvalObserver.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;start_eval&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex">[docs]</a><span class="k">class</span> <span class="nc">ObserverOnlyGraphicalVertex</span><span class="p">(</span><span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="p">,</span>
+                                  <span class="n">qtutils</span><span class="o">.</span><span class="n">AleaQGraphicsRoundedRectItem</span><span class="p">,</span>
+                                  <span class="p">):</span>
+    <span class="c"># --- PAINTING STUFF ---</span>
+    <span class="c"># Color Definition</span>
+    <span class="n">default_pen_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">darkGray</span><span class="p">)</span>
+    <span class="n">default_pen_selected_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">lightGray</span><span class="p">)</span>
+    <span class="n">default_pen_error_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span>
+
+    <span class="n">default_top_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+    <span class="n">default_bottom_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">140</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+    <span class="n">default_error_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+    <span class="n">default_user_application_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">144</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+    <span class="n">default_unlazy_color</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+    <span class="c"># gradient stops</span>
+    <span class="n">startPos</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">endPos</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="c"># Shape definition</span>
+    <span class="n">portSpacing</span> <span class="o">=</span> <span class="mf">5.0</span>
+    <span class="n">outMargins</span> <span class="o">=</span> <span class="mf">5.0</span>
+    <span class="n">delayMargins</span> <span class="o">=</span> <span class="mf">7.0</span>
+    <span class="n">evalColor</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+
+    <span class="n">default_corner_radius</span> <span class="o">=</span> <span class="mf">1.2</span>
+    <span class="n">default_margin</span> <span class="o">=</span> <span class="mf">3.0</span>
+    <span class="n">pen_width</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">maxTipLength</span> <span class="o">=</span> <span class="mi">400</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">qtutils</span><span class="o">.</span><span class="n">AleaQGraphicsRoundedRectItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">default_corner_radius</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span>
+                                                      <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+
+        <span class="c"># ----- The colors -----</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_top_color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_bottom_color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__penColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_pen_color</span>
+
+        <span class="c"># ----- Layout of the item -----</span>
+        <span class="n">ph</span> <span class="o">=</span> <span class="n">GraphicalPort</span><span class="o">.</span><span class="n">HEIGHT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vLayout</span> <span class="o">=</span> <span class="n">qtutils</span><span class="o">.</span><span class="n">VerticalLayout</span><span class="p">(</span><span class="n">margins</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outMargins</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outMargins</span><span class="p">,</span>
+                                                       <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                                              <span class="n">center</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># in ports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inPortLayout</span> <span class="o">=</span> <span class="n">qtutils</span><span class="o">.</span><span class="n">HorizontalLayout</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vLayout</span><span class="p">,</span>
+                                                     <span class="n">innerMargins</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">portSpacing</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                                                     <span class="n">center</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                     <span class="n">mins</span><span class="o">=</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">ph</span><span class="p">))</span>
+        <span class="c"># Caption</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_caption</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsSimpleTextItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vLayout</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_caption</span><span class="p">)</span>
+        <span class="c"># out ports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outPortLayout</span> <span class="o">=</span> <span class="n">qtutils</span><span class="o">.</span><span class="n">HorizontalLayout</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vLayout</span><span class="p">,</span>
+                                                      <span class="n">innerMargins</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">portSpacing</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span>
+                                                      <span class="n">center</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                      <span class="n">mins</span><span class="o">=</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">ph</span><span class="p">))</span>
+
+        <span class="c"># Editor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__editor</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Small dots when the vertex has hidden ports</span>
+        <span class="n">hiddenPortItem</span> <span class="o">=</span> <span class="n">HiddenPort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">hiddenPortItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hiddenPortItem</span> <span class="o">=</span> <span class="n">hiddenPortItem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inPortLayout</span><span class="o">.</span><span class="n">addFinalItem</span><span class="p">(</span><span class="n">hiddenPortItem</span><span class="p">)</span>
+
+        <span class="c"># Small box when the vertex is busy, beping evaluated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsRectItem</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalColor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span><span class="o">.</span><span class="n">setAcceptedMouseButtons</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># Clock image when the vertex has a delay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtSvg</span><span class="o">.</span><span class="n">QGraphicsSvgItem</span><span class="p">(</span><span class="s">&quot;:icons/clock.svg&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="o">.</span><span class="n">setAcceptedMouseButtons</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsSimpleTextItem</span><span class="p">(</span><span class="s">&quot;0&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s">&quot;ariana&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="o">.</span><span class="n">zValue</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># ----- drawing nicities -----</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen_width</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">safeEffects</span><span class="p">:</span>
+            <span class="n">fx</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsDropShadowEffect</span><span class="p">()</span>
+            <span class="n">fx</span><span class="o">.</span><span class="n">setOffset</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">fx</span><span class="o">.</span><span class="n">setBlurRadius</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setGraphicsEffect</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.initialise_from_model"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.initialise_from_model">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
+        <span class="n">mdict</span> <span class="o">=</span> <span class="n">vertex</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span>
+
+        <span class="c"># position/color...</span>
+        <span class="n">mdict</span><span class="o">.</span><span class="n">simulate_full_data_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">)</span>
+        <span class="n">userColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_view_data</span><span class="p">(</span><span class="s">&quot;userColor&quot;</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">userColor</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">store_view_data</span><span class="p">(</span><span class="n">useUserColor</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># add connectors and configure their visibility</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vertex</span><span class="o">.</span><span class="n">input_desc</span> <span class="o">+</span> <span class="n">vertex</span><span class="o">.</span><span class="n">output_desc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="c"># once connectors are added we also initialise them</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_connectors</span><span class="p">():</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">initialise_from_model</span><span class="p">()</span>
+
+        <span class="c"># configure other items to be visible or not</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_delay_item</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_hidden_port_item</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_graphical_tooltip</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">get_tip</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_graphical_caption</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">caption</span><span class="p">)</span>
+        <span class="c"># self.refresh_geometry() already done by set_graphical_caption</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_colors</span><span class="p">()</span>  <span class="c"># last because gradient depends on geometry</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.terminate_from_model"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.terminate_from_model">[docs]</a>    <span class="k">def</span> <span class="nf">terminate_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_ports</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">InputPort</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_ports</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">OutputPort</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.set_editor_instance"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.set_editor_instance">[docs]</a>    <span class="k">def</span> <span class="nf">set_editor_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__editor</span> <span class="o">=</span> <span class="n">editor</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.get_editor_instance"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.get_editor_instance">[docs]</a>    <span class="k">def</span> <span class="nf">get_editor_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editor</span>
+
+    <span class="c">###########</span>
+    <span class="c"># Queries #</span>
+    <span class="c">###########</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.all_inputs_visible"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.all_inputs_visible">[docs]</a>    <span class="k">def</span> <span class="nf">all_inputs_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inPortLayout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c">#############</span>
+    <span class="c"># Modifiers #</span>
+    <span class="c">#############</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.update_hidden_port_item"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.update_hidden_port_item">[docs]</a>    <span class="k">def</span> <span class="nf">update_hidden_port_item</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">visible</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_inputs_visible</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hiddenPortItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.update_delay_item"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.update_delay_item">[docs]</a>    <span class="k">def</span> <span class="nf">update_delay_item</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">visible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">delay</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">visible</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">delay</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.update_colors"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.update_colors">[docs]</a>    <span class="k">def</span> <span class="nf">update_colors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_top_color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_bottom_color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__penColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_pen_color</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_view_data</span><span class="p">(</span><span class="s">&quot;useUserColor&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">raise_exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_error_color</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span><span class="o">.</span><span class="n">darker</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__penColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_pen_error_color</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">user_application</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_user_application_color</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span><span class="o">.</span><span class="n">darker</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">lazy</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_unlazy_color</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span><span class="o">.</span><span class="n">darker</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">userColor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_view_data</span><span class="p">(</span><span class="s">&quot;userColor&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">userColor</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">userColor</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">userColor</span><span class="p">)</span>
+
+        <span class="n">pen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span><span class="p">()</span>
+        <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__penColor</span><span class="p">)</span>
+
+        <span class="n">gradient</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLinearGradient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span><span class="o">.</span><span class="n">topLeft</span><span class="p">(),</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span>
+        <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startPos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span><span class="p">)</span>
+        <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endPos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span><span class="p">)</span>
+        <span class="n">brush</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">gradient</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.set_graphical_caption"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.set_graphical_caption">[docs]</a>    <span class="k">def</span> <span class="nf">set_graphical_caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">caption</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the name displayed in the vertex widget, doesn&#39;t change</span>
+<span class="sd">the vertex data&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">caption</span> <span class="o">==</span> <span class="s">&quot;&quot;</span> <span class="ow">or</span> <span class="n">caption</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">caption</span> <span class="o">=</span> <span class="s">&quot; &quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="n">caption</span> <span class="o">=</span> <span class="n">caption</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;...&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_caption</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_geometry</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.set_graphical_tooltip"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.set_graphical_tooltip">[docs]</a>    <span class="k">def</span> <span class="nf">set_graphical_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rawtooltip</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rawtooltip</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">rawtooltip</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rawtooltip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxTipLength</span><span class="p">:</span>
+            <span class="n">rawtooltip</span> <span class="o">=</span> <span class="n">rawtooltip</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">maxTipLength</span><span class="p">]</span>
+            <span class="n">rawtooltip</span> <span class="o">+=</span> <span class="s">&quot;...</span><span class="se">\n</span><span class="s">See Help tab for complete documentation&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">rawtooltip</span><span class="p">)</span>
+
+    <span class="c">####################</span>
+    <span class="c"># Observer methods #</span>
+    <span class="c">####################</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.store_view_data"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.store_view_data">[docs]</a>    <span class="k">def</span> <span class="nf">store_view_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.get_view_data"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.get_view_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_view_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.notify"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Notification sent by the vertex associated to the item &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">refresh</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">Settings</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;EvalCue&quot;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">refresh</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">eventTopKey</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;close&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__editor</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__editor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;data_modified&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;caption&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_graphical_caption</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;internal_state_changed&quot;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;delay&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_delay_item</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;lazy&quot;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;blocked&quot;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;user_application&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_colors</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;metadata_changed&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;userColor&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">store_view_data</span><span class="p">(</span><span class="n">useUserColor</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">update_colors</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;useUserColor&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_colors</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;exception_state_changed&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_colors</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;hiddenPortChange&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_hidden_port_item</span><span class="p">()</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;tooltip_modified&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_graphical_tooltip</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">refresh</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;start_eval&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span>
+                <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+            <span class="k">elif</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;stop_eval&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">processEvents</span><span class="p">()</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;input_port_added&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;output_port_added&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;cleared_input_ports&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_ports</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">port</span><span class="p">(),</span> <span class="n">InputPort</span><span class="p">))</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">eventTopKey</span> <span class="o">==</span> <span class="s">&quot;cleared_output_ports&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_ports</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">port</span><span class="p">(),</span> <span class="n">OutputPort</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+    <span class="c">#######################################</span>
+    <span class="c"># Methods to add/remove model ports #</span>
+    <span class="c"># They automatically do the according #</span>
+    <span class="c"># operation in the GUI. #</span>
+    <span class="c">#######################################</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.add_port"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.add_port">[docs]</a>    <span class="k">def</span> <span class="nf">add_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelPort</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">modelPort</span><span class="p">,</span> <span class="n">InputPort</span><span class="p">):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inPortLayout</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">modelPort</span><span class="p">,</span> <span class="n">OutputPort</span><span class="p">):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outPortLayout</span>
+        <span class="k">if</span> <span class="n">modelPort</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="n">GraphicalPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelPort</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gp</span><span class="p">:</span>
+                <span class="n">l</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">gp</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_connector</span><span class="p">(</span><span class="n">gp</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">refresh_geometry</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.remove_port"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.remove_port">[docs]</a>    <span class="k">def</span> <span class="nf">remove_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelPort</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">modelPort</span><span class="p">,</span> <span class="n">InputPort</span><span class="p">):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inPortLayout</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">modelPort</span><span class="p">,</span> <span class="n">OutputPort</span><span class="p">):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outPortLayout</span>
+        <span class="k">for</span> <span class="n">gp</span> <span class="ow">in</span> <span class="n">l</span><span class="o">.</span><span class="n">_items</span><span class="p">[:]:</span>
+            <span class="k">if</span> <span class="n">gp</span><span class="o">.</span><span class="n">port</span><span class="p">()</span> <span class="o">==</span> <span class="n">modelPort</span><span class="p">:</span>
+                <span class="n">l</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">gp</span><span class="p">)</span>
+                <span class="n">gp</span><span class="o">.</span><span class="n">remove_from_view</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove_connector</span><span class="p">(</span><span class="n">gp</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">gp</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">refresh_geometry</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.remove_ports"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.remove_ports">[docs]</a>    <span class="k">def</span> <span class="nf">remove_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">con</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter_connectors</span><span class="p">(</span><span class="nb">filter</span><span class="p">)):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inPortLayout</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">con</span><span class="o">.</span><span class="n">port</span><span class="p">(),</span> <span class="n">InputPort</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">outPortLayout</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">remove_from_view</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_connector</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+
+    <span class="c">#####################################################################</span>
+    <span class="c"># Code related to the layout of subitems and geometry of the vertex #</span>
+    <span class="c">#####################################################################</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.layout_items"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.layout_items">[docs]</a>    <span class="k">def</span> <span class="nf">layout_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vLayout</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vLayout</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_busyItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">diBr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span>
+        <span class="n">dtBr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="o">-</span><span class="n">diBr</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayMargins</span><span class="p">,</span>
+                               <span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="n">diBr</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delayText</span><span class="o">.</span><span class="n">setPos</span><span class="p">((</span><span class="n">diBr</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">-</span> <span class="n">dtBr</span><span class="o">.</span><span class="n">width</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                               <span class="p">(</span><span class="n">diBr</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="n">dtBr</span><span class="o">.</span><span class="n">height</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geom</span>
+</div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.refresh_geometry"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.refresh_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">halfPortH</span> <span class="o">=</span> <span class="n">GraphicalPort</span><span class="o">.</span><span class="n">HEIGHT</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout_items</span><span class="p">()</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">pen_width</span><span class="p">,</span>
+                                            <span class="n">halfPortH</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen_width</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">pen_width</span><span class="p">,</span>
+                                            <span class="o">-</span><span class="p">(</span><span class="n">halfPortH</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen_width</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setRect</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_cached_shape</span><span class="p">()</span>
+
+    <span class="c">################</span>
+    <span class="c"># Drawing Code #</span>
+    <span class="c">################</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.paint"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span>
+        <span class="n">pen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span><span class="p">()</span>
+        <span class="n">brush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">()</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">block</span><span class="p">):</span>
+            <span class="n">brush</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BDiagPattern</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">drawPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c">################</span>
+    <span class="c"># Qt Overloads #</span>
+    <span class="c">################</span></div>
+<div class="viewcode-block" id="ObserverOnlyGraphicalVertex.itemChange"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.ObserverOnlyGraphicalVertex.itemChange">[docs]</a>    <span class="k">def</span> <span class="nf">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">change</span> <span class="o">==</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemSelectedChange</span><span class="p">:</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">pen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span><span class="p">()</span>
+            <span class="n">brush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">brush</span><span class="p">()</span>
+            <span class="n">gradient</span> <span class="o">=</span> <span class="n">brush</span><span class="o">.</span><span class="n">gradient</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
+                <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_pen_selected_color</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">gradient</span><span class="p">:</span>  <span class="c"># invert the gradient</span>
+                    <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endPos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span><span class="p">)</span>
+                    <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startPos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span><span class="p">)</span>
+                <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span>
+                <span class="n">scene</span><span class="o">.</span><span class="n">focusedItemChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_pen_color</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">gradient</span><span class="p">:</span>  <span class="c"># invert the gradient</span>
+                    <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startPos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__topColor</span><span class="p">)</span>
+                    <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endPos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bottomColor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">)</span>
+
+        <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsRectItem</span><span class="o">.</span><span class="n">itemChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+    <span class="n">mousePressEvent</span> <span class="o">=</span> <span class="n">mixin_method</span><span class="p">(</span><span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsRectItem</span><span class="p">,</span>
+                                   <span class="s">&quot;mousePressEvent&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="GraphicalVertex"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalVertex">[docs]</a><span class="k">class</span> <span class="nc">GraphicalVertex</span><span class="p">(</span><span class="n">ObserverOnlyGraphicalVertex</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">ObserverOnlyGraphicalVertex</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GraphicalVertex.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalVertex.mouseDoubleClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
+            <span class="c"># Read settings</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">localsettings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+                <span class="nb">str</span> <span class="o">=</span> <span class="n">localsettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;DoubleClick&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">str</span> <span class="o">=</span> <span class="s">&quot;[&#39;open&#39;]&quot;</span>
+
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">GraphOperator</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">(),</span>
+                                     <span class="n">graphScene</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+            <span class="n">operator</span><span class="o">.</span><span class="n">set_vertex_item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="s">&#39;open&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">operator</span><span class="p">(</span><span class="n">fName</span><span class="o">=</span><span class="s">&quot;vertex_open&quot;</span><span class="p">)()</span>
+            <span class="k">elif</span><span class="p">(</span><span class="s">&#39;run&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">operator</span><span class="p">(</span><span class="n">fName</span><span class="o">=</span><span class="s">&quot;vertex_run&quot;</span><span class="p">)()</span>
+</div>
+<div class="viewcode-block" id="GraphicalVertex.contextMenuEvent"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalVertex.contextMenuEvent">[docs]</a>    <span class="k">def</span> <span class="nf">contextMenuEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Context menu event : Display the menu&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">operator</span> <span class="o">=</span> <span class="n">GraphOperator</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">(),</span>
+                                 <span class="n">graphScene</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+        <span class="n">operator</span><span class="o">.</span><span class="n">vertexType</span> <span class="o">=</span> <span class="n">GraphicalVertex</span>
+        <span class="n">operator</span><span class="o">.</span><span class="n">set_vertex_item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">get_sensible_parent</span><span class="p">()</span>
+        <span class="n">menu</span> <span class="o">=</span> <span class="n">qtutils</span><span class="o">.</span><span class="n">AleaQMenu</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">get_selected_items</span><span class="p">(</span><span class="n">GraphicalVertex</span><span class="p">)</span>
+
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Run&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_run&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Open Widget&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_open&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">(),</span> <span class="n">compositenode</span><span class="o">.</span><span class="n">CompositeNode</span><span class="p">):</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Inspect composite node&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_composite_inspect&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Delete&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_remove&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Reset&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_reset&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Replace By&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_replace&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Reload&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_reload&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Caption&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_set_caption&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Show/Hide ports&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_show_hide_ports&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">action</span> <span class="o">=</span> <span class="n">operator</span><span class="p">(</span><span class="s">&quot;Mark as User Application&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_mark_user_app&quot;</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">user_application</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="n">action</span> <span class="o">=</span> <span class="n">operator</span><span class="p">(</span><span class="s">&quot;Lazy&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_set_lazy&quot;</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">lazy</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="n">action</span> <span class="o">=</span> <span class="n">operator</span><span class="p">(</span><span class="s">&quot;Block&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_block&quot;</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Internals&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;vertex_edit_internals&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">alignMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s">&quot;Align...&quot;</span><span class="p">)</span>
+        <span class="n">alignMenu</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Align horizontally&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;graph_align_selection_horizontal&quot;</span><span class="p">))</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Align left&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;graph_align_selection_left&quot;</span><span class="p">))</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Align right&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;graph_align_selection_right&quot;</span><span class="p">))</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Align centered&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;graph_align_selection_mean&quot;</span><span class="p">))</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Distribute horizontally&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;graph_distribute_selection_horizontally&quot;</span><span class="p">))</span>
+            <span class="n">alignMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Distribute vertically&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;graph_distribute_selection_vertically&quot;</span><span class="p">))</span>
+
+        <span class="c"># The colouring</span>
+        <span class="n">colorMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s">&quot;Color...&quot;</span><span class="p">)</span>
+        <span class="n">colorMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Set user color...&quot;</span><span class="p">,</span> <span class="n">colorMenu</span><span class="p">,</span> <span class="s">&quot;graph_set_selection_color&quot;</span><span class="p">))</span>
+        <span class="c"># check if the current selection is coloured and tick the</span>
+        <span class="c"># menu item if an item of the selection uses the user color.</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">operator</span><span class="p">(</span><span class="s">&quot;Use user color&quot;</span><span class="p">,</span> <span class="n">colorMenu</span><span class="p">,</span> <span class="s">&quot;graph_use_user_color&quot;</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="s">&quot;useUserColor&quot;</span><span class="p">):</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="n">colorMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="c"># display the menu...</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">screenPos</span><span class="p">())</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="GraphicalInVertex"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalInVertex">[docs]</a><span class="k">class</span> <span class="nc">GraphicalInVertex</span><span class="p">(</span><span class="n">GraphicalVertex</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphicalInVertex.initialise_from_model"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalInVertex.initialise_from_model">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GraphicalVertex</span><span class="o">.</span><span class="n">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polishEvent</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GraphicalInVertex.polishEvent"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalInVertex.polishEvent">[docs]</a>    <span class="k">def</span> <span class="nf">polishEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># fix input or output node position</span>
+        <span class="n">midX</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">itemGeoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">filterType</span><span class="o">=</span><span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="p">,</span>
+                                           <span class="n">subcall</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">translated</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pos</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">itemGeoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">|</span> <span class="n">y</span><span class="p">,</span> <span class="n">itemGeoms</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">midX</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">top</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_view_data</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="n">midX</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+</div></div>
+<div class="viewcode-block" id="GraphicalOutVertex"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalOutVertex">[docs]</a><span class="k">class</span> <span class="nc">GraphicalOutVertex</span><span class="p">(</span><span class="n">GraphicalVertex</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphicalOutVertex.initialise_from_model"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalOutVertex.initialise_from_model">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">GraphicalVertex</span><span class="o">.</span><span class="n">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polishEvent</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GraphicalOutVertex.polishEvent"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalOutVertex.polishEvent">[docs]</a>    <span class="k">def</span> <span class="nf">polishEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># fix input or output node position</span>
+        <span class="n">midX</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">itemGeoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">filterType</span><span class="o">=</span><span class="n">qtgraphview</span><span class="o">.</span><span class="n">Vertex</span><span class="p">,</span>
+                                           <span class="n">subcall</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">translated</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pos</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">itemGeoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">|</span> <span class="n">y</span><span class="p">,</span> <span class="n">itemGeoms</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">midX</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">bottom</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_view_data</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="n">midX</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+
+<span class="c">#########################################################</span>
+<span class="c"># ----------------------- PORTS ----------------------- #</span>
+<span class="c">#########################################################</span>
+</div></div>
+<div class="viewcode-block" id="HiddenPort"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort">[docs]</a><span class="k">class</span> <span class="nc">HiddenPort</span> <span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Graphical representation of hidden ports&quot;&quot;&quot;</span>
+    <span class="n">__size</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSizeF</span><span class="p">(</span><span class="mf">15.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+    <span class="n">__nosize</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSizeF</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s">&quot;hidden ports&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HiddenPort.add_to_view"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.add_to_view">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="HiddenPort.initialise_from_model"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.initialise_from_model">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="HiddenPort.get_id"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s">&quot;inf&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HiddenPort.size"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span>
+</div>
+<div class="viewcode-block" id="HiddenPort.sizeHint"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blop</span><span class="p">,</span> <span class="n">blip</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="HiddenPort.boundingRect"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.boundingRect">[docs]</a>    <span class="k">def</span> <span class="nf">boundingRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HiddenPort.paint"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.HiddenPort.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBackgroundMode</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">TransparentMode</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">200</span><span class="p">)))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">drawEllipse</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">5.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">))</span>
+
+
+<span class="c"># --------------------------- ConnectorType ---------------------------------</span></div></div>
+<div class="viewcode-block" id="GraphicalPort"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort">[docs]</a><span class="k">class</span> <span class="nc">GraphicalPort</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsEllipseItem</span><span class="p">,</span> <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Connector</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; A vertex port &quot;&quot;&quot;</span>
+    <span class="n">MAX_TIPLEN</span> <span class="o">=</span> <span class="mi">400</span>
+    <span class="n">WIDTH</span> <span class="o">=</span> <span class="mf">7.0</span>
+    <span class="n">HEIGHT</span> <span class="o">=</span> <span class="mf">7.0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsEllipseItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">WIDTH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Connector</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__interfaceColor</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_connection_modifiers</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoModifier</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialise_from_model</span><span class="p">()</span>
+
+    <span class="n">port</span> <span class="o">=</span> <span class="n">baselisteners</span><span class="o">.</span><span class="n">GraphElementListenerBase</span><span class="o">.</span><span class="n">get_observed</span>
+
+<div class="viewcode-block" id="GraphicalPort.initialise_from_model"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.initialise_from_model">[docs]</a>    <span class="k">def</span> <span class="nf">initialise_from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span>
+        <span class="n">mdict</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span>
+        <span class="c"># graphical data init.</span>
+        <span class="n">mdict</span><span class="o">.</span><span class="n">simulate_full_data_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="n">interface</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">get_interface</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">interface</span> <span class="ow">and</span> <span class="n">interface</span><span class="o">.</span><span class="n">__color__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__interfaceColor</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="o">*</span><span class="n">interface</span><span class="o">.</span><span class="n">__color__</span><span class="p">)</span>
+        <span class="c"># update tooltip</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;tooltip_modified&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="GraphicalPort.change_observed"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.change_observed">[docs]</a>    <span class="k">def</span> <span class="nf">change_observed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">AbstractPort</span><span class="p">):</span>
+            <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Element</span><span class="o">.</span><span class="n">clear_observed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_observed</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GraphicalPort.close_and_delete"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.close_and_delete">[docs]</a>    <span class="k">def</span> <span class="nf">close_and_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_observed</span><span class="p">()</span>
+        <span class="k">del</span> <span class="bp">self</span>
+</div>
+<div class="viewcode-block" id="GraphicalPort.notify"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear_observed</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;tooltip_modified&quot;</span><span class="p">,</span> <span class="s">&quot;stop_eval&quot;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__update_tooltip</span><span class="p">()</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;metadata_changed&quot;</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">sender</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()):</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;hide&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>  <span class="c"># if hide</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parentItem</span><span class="p">()</span><span class="o">.</span><span class="n">refresh_geometry</span><span class="p">()</span>
+        <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Connector</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GraphicalPort.clear_observed"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.clear_observed">[docs]</a>    <span class="k">def</span> <span class="nf">clear_observed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">qtgraphview</span><span class="o">.</span><span class="n">Element</span><span class="o">.</span><span class="n">clear_observed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span>
+</div>
+    <span class="k">def</span> <span class="nf">__update_tooltip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span><span class="o">.</span><span class="n">vertex</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">(),</span> <span class="n">OutputPort</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">(),</span> <span class="n">InputPort</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_TIPLEN</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;String too long...&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#self.setToolTip(&quot;Value: &quot; + s)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span><span class="o">.</span><span class="n">get_tip</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+<div class="viewcode-block" id="GraphicalPort.get_id"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">()</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span>
+
+    <span class="c">##################</span>
+    <span class="c"># QtWorld-Events #</span>
+    <span class="c">#################</span></div>
+<div class="viewcode-block" id="GraphicalPort.contextMenuEvent"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.contextMenuEvent">[docs]</a>    <span class="k">def</span> <span class="nf">contextMenuEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">(),</span> <span class="n">OutputPort</span><span class="p">):</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">GraphOperator</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span>
+                                     <span class="n">graphScene</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
+            <span class="n">operator</span><span class="o">.</span><span class="n">set_port_item</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">menu</span> <span class="o">=</span> <span class="n">qtutils</span><span class="o">.</span><span class="n">AleaQMenu</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">get_sensible_parent</span><span class="p">())</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Send to pool&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;port_send_to_pool&quot;</span><span class="p">))</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Send to console&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;port_send_to_console&quot;</span><span class="p">))</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="s">&quot;Print&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="s">&quot;port_print_value&quot;</span><span class="p">))</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">screenPos</span><span class="p">())</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GraphicalPort.paint"><a class="viewcode-back" href="../../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dataflowview.vertex.GraphicalPort.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()):</span>
+            <span class="k">return</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBackgroundMode</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">TransparentMode</span><span class="p">)</span>
+        <span class="n">gradient</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLinearGradient</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">highlighted</span><span class="p">:</span>
+            <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+            <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">darkRed</span><span class="p">)</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interfaceColor</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">yellow</span><span class="p">)</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+                <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">darkYellow</span><span class="p">)</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interfaceColor</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+                <span class="n">gradient</span><span class="o">.</span><span class="n">setColorAt</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interfaceColor</span><span class="o">.</span><span class="n">light</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">gradient</span><span class="p">))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawEllipse</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">WIDTH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">HEIGHT</span><span class="p">))</span>
+</div>
+    <span class="n">itemChange</span> <span class="o">=</span> <span class="n">mixin_method</span><span class="p">(</span><span class="n">qtgraphview</span><span class="o">.</span><span class="n">Connector</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">,</span>
+                              <span class="s">&quot;itemChange&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

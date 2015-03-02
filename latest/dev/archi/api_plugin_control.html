@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="OpenAlea community website" href="../../../index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -42,7 +42,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="controls">
 <span id="label-plugin-control"></span><h1>Controls<a class="headerlink" href="#controls" title="Permalink to this headline">¶</a></h1>
@@ -143,9 +143,65 @@ You just need to define the widget part as this widget will be used in all cases
 </div></blockquote>
 <p>Class is derivated from ControlWidgetSelectorPlugin that considers that attributes that are not
 explicitly defined are empty (edit_shape, view_shape), null (icon_path=&#8217;&#8216;) or disabled (paint=False).</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugins/__init__.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">openalea.oalab</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.control</span> <span class="kn">import</span> <span class="n">ControlWidgetSelectorPlugin</span>
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+
+<span class="k">class</span> <span class="nc">PluginXyzWidget</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IXyz&#39;</span><span class="p">]</span> <span class="c"># Interface name like IInt</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;XyzWidgetSelector&#39;</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">icon_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/Xyz_responsive.png&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mypackage.plugins.widgets</span> <span class="kn">import</span> <span class="n">XyzControlWidget</span>
+        <span class="k">return</span> <span class="n">XyzControlWidget</span>
+</pre></div>
+</td></tr></table></div>
 </div>
 <div class="section" id="register-plugin">
 <h3>register plugin<a class="headerlink" href="#register-plugin" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
+    <span class="c"># setup instructions</span>
+
+    <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>
+<span class="hll">        <span class="s">&#39;oalab.qt_control&#39;</span><span class="p">:</span>                                         <span class="c"># Plugin category</span>
+</span>            <span class="p">[</span>
+<span class="hll">            <span class="s">&#39;PluginXyzWidget = mypackage.plugins:PluginXyzWidget&#39;</span>   <span class="c"># Plugin name = path to plugin (factory)</span>
+</span>            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">See IBool example for real case</p>
@@ -176,7 +232,69 @@ This example also define a constraint widget to set min and max value for slider
 <p>We define a widget based on QCheckBox like that:</p>
 <img alt="../../../_images/control_qcheckbox.png" class="align-center" src="../../../_images/control_qcheckbox.png" />
 <p>This widget will be used for all shapes and will also be used as selector.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BoolCheckBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">,</span> <span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateChanged</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
 <p>Now, lets define plugin that links to it:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">PluginIntWidgetSelector</span><span class="p">(</span><span class="n">ControlWidgetSelectorPlugin</span><span class="p">):</span>
+
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt&#39;</span><span class="p">]</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;IntWidgetSelector&#39;</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="s">&#39;Integer editor&#39;</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;IInt.min&#39;</span><span class="p">,</span> <span class="s">&#39;IInt.max&#39;</span><span class="p">]</span>
+    <span class="n">edit_shape</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;responsive&#39;</span><span class="p">]</span>
+    <span class="n">icon_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/IntWidgetSelector_hline.png&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.selectors</span> <span class="kn">import</span> <span class="n">IntWidgetSelector</span>
+        <span class="k">return</span> <span class="n">IntWidgetSelector</span>
+</pre></div>
+</td></tr></table></div>
 </div>
 </div>
 <div class="section" id="advanced-documentation">
@@ -189,7 +307,7 @@ This example also define a constraint widget to set min and max value for slider
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
@@ -214,12 +332,14 @@ This example also define a constraint widget to set min and max value for slider
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../../../_sources/latest/dev/archi/api_plugin_control.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin_control.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -236,7 +356,7 @@ This example also define a constraint widget to set min and max value for slider
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -248,9 +368,9 @@ This example also define a constraint widget to set min and max value for slider
         <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

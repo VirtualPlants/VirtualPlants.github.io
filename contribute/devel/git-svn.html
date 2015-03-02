@@ -27,8 +27,8 @@
     <link rel="next" title="Test your development" href="testing.html" />
     <link rel="prev" title="Development guidelines" href="guidelines.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -50,10 +50,18 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="migrate-public-gforge-svn-to-github">
 <h1>Migrate public gforge/svn to github<a class="headerlink" href="#migrate-public-gforge-svn-to-github" title="Permalink to this headline">¶</a></h1>
+<p>First install <strong>git-svn</strong></p>
+<p>On linux, package is generally called &#8220;git-svn&#8221;</p>
+<p>On Mac OS X with macport:</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo port deactivate git
+sudo port install git +svn
+</pre></div>
+</div>
+<p>All scripts are available in virtualplants/svntogit project.</p>
 <div class="section" id="migrate-whole-svn-repository-to-git">
 <h2>Migrate whole svn repository to git<a class="headerlink" href="#migrate-whole-svn-repository-to-git" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
@@ -73,11 +81,11 @@
 </div>
 <p>If it fails due to an author missing in author file, like
 Author: anonymous not defined in svn-authors file</p>
-<p>Just add it to author file, go to PROJECT-git-svn and continue:
-.. code-block:: bash</p>
-<blockquote>
-<div>cd PROJECT-git-svn
-git svn fetch</div></blockquote>
+<p>Just add it to author file, go to PROJECT-git-svn and continue:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd </span>PROJECT-git-svn
+git svn fetch
+</pre></div>
+</div>
 <p>To synchronize with last svn changes (done after git svn clone)</p>
 <div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd </span>PROJECT-git-svn
 git svn rebase
@@ -93,11 +101,12 @@ git svn rebase
 </dd>
 </dl>
 </div>
-<div class="section" id="hack-to-migrate-subpart-of-repository-while-keeping-history">
-<h2>Hack to migrate subpart of repository while keeping history<a class="headerlink" href="#hack-to-migrate-subpart-of-repository-while-keeping-history" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="migrate-subpart-of-repository-while-keeping-history">
+<h2>Migrate subpart of repository while keeping history<a class="headerlink" href="#migrate-subpart-of-repository-while-keeping-history" title="Permalink to this headline">¶</a></h2>
 <p>Hack to extract only commit with modification in a specific directory</p>
-<div class="highlight-bash"><div class="highlight"><pre><span class="c">#1. Convert a whole repository but keep only one directory (here misc)</span>
-git svn clone --authors-file<span class="o">=</span>../../utilitaires/svn-authors  --include-paths<span class="o">=</span><span class="s2">&quot;^misc&quot;</span> svn://scm.gforge.inria.fr/svnroot/openalea/trunk misc-git-svn
+<div class="highlight-bash"><div class="highlight"><pre><span class="c">#1. Convert a whole repository but keep only one directory (here &quot;misc&quot; from &quot;openalea&quot; svn repository)</span>
+<span class="c"># Replace svn url with right one found on gforge</span>
+git svn clone --authors-file<span class="o">=</span>svn-authors  --include-paths<span class="o">=</span><span class="s2">&quot;^misc&quot;</span> svn://scm.gforge.inria.fr/svnroot/openalea/trunk misc-git-svn
 
 <span class="c">#2. Generate a file with commit information</span>
 <span class="nb">cd </span>misc-git-svn
@@ -138,13 +147,13 @@ git merge misc-git-svn
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Migrate public gforge/svn to github</a><ul>
 <li><a class="reference internal" href="#migrate-whole-svn-repository-to-git">Migrate whole svn repository to git</a></li>
-<li><a class="reference internal" href="#hack-to-migrate-subpart-of-repository-while-keeping-history">Hack to migrate subpart of repository while keeping history</a></li>
+<li><a class="reference internal" href="#migrate-subpart-of-repository-while-keeping-history">Migrate subpart of repository while keeping history</a></li>
 </ul>
 </li>
 </ul>
@@ -155,12 +164,14 @@ git merge misc-git-svn
   <h4>Next topic</h4>
   <p class="topless"><a href="testing.html"
                         title="next chapter">Test your development</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../../_sources/contribute/devel/git-svn.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/contribute/devel/git-svn.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
@@ -177,7 +188,7 @@ git merge misc-git-svn
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -195,9 +206,9 @@ git merge misc-git-svn
         <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

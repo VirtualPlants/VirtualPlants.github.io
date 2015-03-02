@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="OpenAlea community website" href="../../../index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -42,7 +42,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <span class="target" id="module-openalea.core.plugin.applet"></span><div class="section" id="applets">
 <h1>Applets<a class="headerlink" href="#applets" title="Permalink to this headline">¶</a></h1>
@@ -98,14 +98,119 @@ your python package.</p>
 <div class="section" id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <p>The module called oalab.gui.help provides this help widget:</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>oalab/gui/help.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+
+<span class="k">class</span> <span class="nc">HelpWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">openWeb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="c"># Specific to this applet</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># optionnal, common to all applets</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># optionnal, common to all applets</span>
+        <span class="k">pass</span>
+</pre></div>
+</td></tr></table></div>
 <p>OpenAleaLab is the main application that gather all widgets.
 We want to add HelpWidget in the MainWindow and allow communication between both classes.
 For that purpose, we create a Plugin called HelpWidgetPlugin in helper package:</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/plugins/oalab/helpwidget.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">HelpWidgetPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c"># Data that describe plugin</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Import widget and return it</span>
+        <span class="kn">from</span> <span class="nn">mypackage</span> <span class="kn">import</span> <span class="n">MyApplet</span>
+        <span class="k">return</span> <span class="n">MyApplet</span>
+
+    <span class="k">def</span> <span class="nf">graft</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="c"># 1. Ask to mainwindow to place it</span>
+        <span class="c"># 2. Fill menus, actions, toolbars, ...</span>
+
+        <span class="c"># 1.</span>
+            <span class="n">mainwindow</span><span class="o">.</span><span class="n">add_applet</span><span class="p">(</span><span class="n">applet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="s">&#39;inputs&#39;</span><span class="p">)</span>
+
+        <span class="c"># 2.</span>
+        <span class="k">if</span> <span class="n">applet</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">applet</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+                <span class="c"># Add actions in PanedMenu</span>
+                <span class="n">mainwindow</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="o">*</span><span class="n">action</span><span class="p">)</span>
+
+                <span class="c"># add action in classical menu</span>
+                <span class="n">pane_name</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">act</span><span class="p">,</span> <span class="n">btn_type</span> <span class="o">=</span> <span class="n">action</span>
+                <span class="n">mainwindow</span><span class="o">.</span><span class="n">add_action_to_existing_menu</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">act</span><span class="p">,</span> <span class="n">menu_name</span><span class="o">=</span><span class="n">pane_name</span><span class="p">,</span> <span class="n">sub_menu_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
 <p>It is very important to notice that adding widget in the right area is done by
 the plugin, not the application. Application does almost nothing, it is just
 a container of widgets. Real application intelligence is delegated to Plugins
 (placing and linking components) and components (doing real treatments).</p>
 <p>Finally, we register this plugin in setup.py of package helper.</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>helper/setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
+    <span class="c"># setup instructions</span>
+
+    <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>
+<span class="hll">        <span class="s">&#39;oalab.applet&#39;</span><span class="p">:</span>                                                  <span class="c"># Plugin category</span>
+</span>            <span class="p">[</span>
+<span class="hll">            <span class="s">&#39;HelpWidgetPlugin = helper.plugins.oalab:HelpWidgetPlugin&#39;</span>   <span class="c"># Plugin name = path to plugin (factory)</span>
+</span>            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
 </div>
 <div class="section" id="details">
 <h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
@@ -123,7 +228,7 @@ You can use it by derivating your class from PluginApplet.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
@@ -135,12 +240,14 @@ You can use it by derivating your class from PluginApplet.</p>
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../../../_sources/latest/dev/archi/api_plugin_applet.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin_applet.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
       <input type="text" name="q" />
@@ -157,7 +264,7 @@ You can use it by derivating your class from PluginApplet.</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -169,9 +276,9 @@ You can use it by derivating your class from PluginApplet.</p>
         <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
     </div>
   </body>
 </html>

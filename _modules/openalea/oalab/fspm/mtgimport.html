@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.fspm.mtgimport &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.fspm.mtgimport</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">openalea.mtg.io</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">openalea.mtg.plantframe</span> <span class="kn">as</span> <span class="nn">plantframe</span>
+<span class="kn">import</span> <span class="nn">openalea.mtg.algo</span> <span class="kn">as</span> <span class="nn">algo</span> 
+<span class="kn">from</span> <span class="nn">openalea.mtg</span> <span class="kn">import</span> <span class="n">aml</span><span class="p">,</span> <span class="n">dresser</span>
+<span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">norm</span><span class="p">,</span><span class="n">Vector3</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">mean</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="flatten"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.fspm.html#openalea.oalab.fspm.mtgimport.flatten">[docs]</a><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="n">microroot</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">component_roots_at_scale_iter</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">root</span><span class="p">,</span><span class="n">g</span><span class="o">.</span><span class="n">max_scale</span><span class="p">())</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+    
+    <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sub_tree</span><span class="p">(</span><span class="n">microroot</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">g</span><span class="p">,</span> <span class="n">props</span> <span class="o">=</span> <span class="n">colored_tree</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="n">colors</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">vertices</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">max_scale</span><span class="p">()))})</span>
+    
+    <span class="c">#f = file(&#39;debug.txt&#39;,&#39;w&#39;)</span>
+    <span class="c">#f.write(str(g))</span>
+    <span class="c">#f.close()</span>
+    <span class="k">return</span> <span class="n">g</span>
+</div>
+<div class="viewcode-block" id="read_mtg"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.fspm.html#openalea.oalab.fspm.mtgimport.read_mtg">[docs]</a><span class="k">def</span> <span class="nf">read_mtg</span><span class="p">(</span><span class="n">fn</span> <span class="o">=</span> <span class="s">&#39;walnut.mtg&#39;</span> <span class="p">,</span><span class="n">drf</span> <span class="o">=</span> <span class="s">&#39;walnut.drf&#39;</span><span class="p">):</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span><span class="n">fn</span>
+    <span class="n">drf</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span><span class="n">drf</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">read_mtg_file</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="n">topdia</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">&#39;TopDia&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="n">dressing_data</span> <span class="o">=</span> <span class="n">dresser</span><span class="o">.</span><span class="n">dressing_data_from_file</span><span class="p">(</span><span class="n">drf</span><span class="p">)</span>
+    <span class="n">pf</span> <span class="o">=</span> <span class="n">plantframe</span><span class="o">.</span><span class="n">PlantFrame</span><span class="p">(</span><span class="n">g</span><span class="p">,</span>  <span class="n">TopDiameter</span><span class="o">=</span><span class="n">topdia</span><span class="p">,</span> 
+                               <span class="n">DressingData</span> <span class="o">=</span> <span class="n">dressing_data</span><span class="p">)</span>
+    <span class="n">pf</span><span class="o">.</span><span class="n">propagate_constraints</span><span class="p">()</span>
+
+    <span class="n">diameters</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">algo_diameter</span><span class="p">()</span>
+    <span class="n">toppositions</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">points</span>
+    
+    <span class="n">g</span><span class="o">.</span><span class="n">properties</span><span class="p">()[</span><span class="s">&#39;TopDiameter&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">diameters</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">properties</span><span class="p">()[</span><span class="s">&#39;TopPosition&#39;</span><span class="p">]</span><span class="o">=</span> <span class="nb">dict</span><span class="p">([</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">Vector3</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">toppositions</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
+    
+    <span class="n">g</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span>
+</div>
+<div class="viewcode-block" id="color_last_year_node"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.fspm.html#openalea.oalab.fspm.mtgimport.color_last_year_node">[docs]</a><span class="k">def</span> <span class="nf">color_last_year_node</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">year_ancestors</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="n">ancestors</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">g</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;U&#39;</span>
+        <span class="k">while</span> <span class="n">g</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">i</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;U&#39;</span> <span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">ancestors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ancestors</span>
+    <span class="n">leaves</span> <span class="o">=</span> <span class="p">[</span><span class="n">vtx</span> <span class="k">for</span> <span class="n">vtx</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">vertices</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">nb_children</span><span class="p">(</span><span class="n">vtx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">g</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">vtx</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;U&#39;</span><span class="p">]</span>
+    <span class="n">gu</span> <span class="o">=</span> <span class="p">[</span><span class="n">year_ancestors</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leaves</span><span class="p">]</span>
+    <span class="n">toppos</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">&#39;TopPosition&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">nodepos</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">toppos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">toppos</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+    
+    <span class="k">def</span> <span class="nf">nodelength</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+           <span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">toppos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">nodepos</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+           <span class="k">return</span> <span class="mi">0</span>
+    
+    <span class="n">gul</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sum</span><span class="p">([</span><span class="n">nodelength</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ui</span><span class="p">])</span> <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="n">gu</span><span class="p">]</span>
+    <span class="n">avg_length_gu</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">gul</span><span class="p">)</span>
+    <span class="c">#print &#39;**&#39;, avg_length_gu, min(gul), max(gul)</span>
+    <span class="n">leavesly</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">gu</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">last_year_ancestors</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="n">ancestors</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">nodepos</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="n">avg_length_gu</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+                <span class="n">ancestors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                  <span class="n">np</span> <span class="o">=</span> <span class="n">toppos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                  <span class="n">l</span> <span class="o">+=</span> <span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">np</span><span class="p">)</span>
+                  <span class="n">p</span> <span class="o">=</span> <span class="n">np</span>
+                <span class="k">except</span><span class="p">:</span>
+                  <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+               <span class="k">break</span>
+        <span class="k">return</span> <span class="n">ancestors</span>
+    <span class="n">lygus</span> <span class="o">=</span> <span class="p">[</span><span class="n">last_year_ancestors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">leavesly</span><span class="p">]</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">lygu</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">lygus</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lygu</span><span class="p">:</span>
+          <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">labels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s">&#39;S&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s">&#39;SV&#39;</span>
+            <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;V&#39;</span><span class="o">+</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+
+</div>
+<div class="viewcode-block" id="construct_lstring"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.fspm.html#openalea.oalab.fspm.mtgimport.construct_lstring">[docs]</a><span class="k">def</span> <span class="nf">construct_lstring</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="n">idp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">&#39;TopPosition&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()])</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">properties</span><span class="p">()[</span><span class="s">&#39;mtgid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idp</span>
+    <span class="n">paramnames</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;TopPosition&#39;</span><span class="p">,</span><span class="s">&#39;TopDiameter&#39;</span><span class="p">]</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;S&#39;</span><span class="p">:</span> <span class="n">paramnames</span><span class="o">+</span><span class="p">[</span><span class="s">&#39;mtgid&#39;</span><span class="p">],</span> <span class="s">&#39;U&#39;</span> <span class="p">:</span> <span class="n">paramnames</span><span class="p">,</span> <span class="s">&#39;V&#39;</span> <span class="p">:</span> <span class="n">paramnames</span> <span class="p">}</span>
+    <span class="n">lstring</span> <span class="o">=</span> <span class="n">mtg2axialtree</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lstring</span>
+</div>
+<div class="viewcode-block" id="construct_walnut_lstring"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.fspm.html#openalea.oalab.fspm.mtgimport.construct_walnut_lstring">[docs]</a><span class="k">def</span> <span class="nf">construct_walnut_lstring</span><span class="p">():</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">read_mtg</span><span class="p">()</span>
+    <span class="n">color_last_year_node</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">construct_lstring</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    </div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__m_ain__&#39;</span><span class="p">:</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">read_mtg</span><span class="p">()</span>
+    <span class="n">color_last_year_node</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="n">lstring</span> <span class="o">=</span> <span class="n">construct_lstring</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="c"># print len(lstring)</span>
+    <span class="c"># print len([0 for i in lstring if not i.name in &#39;[]&#39;])</span>
+    <span class="c"># print lstring[0:10]</span>
+    <span class="c"># print lstring[5]</span>
+    <span class="c"># print len(lstring[5])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>
