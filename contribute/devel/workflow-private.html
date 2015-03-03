@@ -130,10 +130,10 @@ To fork it, do these steps (do it only one time for a project)</p>
 </div>
 <div class="section" id="configure-your-fork">
 <h2>Configure your fork<a class="headerlink" href="#configure-your-fork" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash"><div class="highlight"><pre>git remote add private_devel giturl
-<span class="c"># with giturl something like git+ssh://gbaty@scm.gforge.inria.fr//gitroot/project/repository.git</span>
-git fetch private_devel
-git checkout private_devel/master -b private_devel_master
+<div class="highlight-bash"><div class="highlight"><pre>git remote add upstream giturl
+<span class="c"># with giturl something like git+ssh://username@scm.gforge.inria.fr//gitroot/project/repository.git</span>
+git fetch upstream
+git checkout upstream/master -b upstream_master
 </pre></div>
 </div>
 <p>Your fork is now ready to work on !</p>
@@ -144,8 +144,8 @@ git checkout private_devel/master -b private_devel_master
 Development must be short : <strong>one branch = one task</strong></p>
 <p><strong>NEVER NEVER work on master, always on a branch</strong></p>
 <p>Get last version of upstream/master</p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout private_upstream_master <span class="c"># go to your local master branch</span>
-git pull private_upstream master <span class="c"># update it with upstream master</span>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream_master <span class="c"># go to your local master branch</span>
+git pull upstream master <span class="c"># update it with upstream master</span>
 git push <span class="c"># push upstream changes to your personal repository</span>
 </pre></div>
 </div>
@@ -190,15 +190,15 @@ git commit
 <p>Before asking other to integrate your work, you must clean it.
 First get last modifications and work on a new branch created especially for cleaning.</p>
 <p>Get last version of upstream/master</p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout private_upstream_master <span class="c"># go to your local master branch</span>
-git pull private_upstream private_upstream_master <span class="c"># update it with upstream master</span>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream_master <span class="c"># go to your local master branch</span>
+git pull upstream upstream_master <span class="c"># update it with upstream master</span>
 git push <span class="c"># push upstream changes to your personal repository</span>
 </pre></div>
 </div>
 <p>It is safer to create a new branch for rebase</p>
 <div class="highlight-bash"><div class="highlight"><pre>git checkout wip_fix_app_crash_mac_os_10_9 <span class="c"># get your development branch</span>
 git checkout -b fix_app_crash_mac_os_10_9 <span class="c"># create and checkout new branch, not we removed the &quot;wip&quot;</span>
-git rebase private_upstream_master
+git rebase upstream_master
 </pre></div>
 </div>
 <p>If master has diverged during your work, conflicts can occur !
@@ -243,20 +243,20 @@ git checkout username/branch
 <div class="section" id="integrator-integrate-branch">
 <h2>Integrator: integrate branch<a class="headerlink" href="#integrator-integrate-branch" title="Permalink to this headline">¶</a></h2>
 <p>Read this paragraph only if you are an integrator !</p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout private_upstream_master
-git pull private_upstream master
+<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream_master
+git pull upstream master
 git merge username/branch
-git push private_upstream master
+git push upstream master
 </pre></div>
 </div>
 </div>
 <div class="section" id="finalization">
 <h2>Finalization<a class="headerlink" href="#finalization" title="Permalink to this headline">¶</a></h2>
 <p>If pull request has been integrated:</p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout private_upstream_master
-git pull private_upstream master
+<div class="highlight-bash"><div class="highlight"><pre>git checkout upstream_master
+git pull upstream master
 
-<span class="c"># Check you find all yours commits on private_upstream_master</span>
+<span class="c"># Check you find all yours commits on upstream_master</span>
 <span class="c"># If yes:</span>
 <span class="c"># git branch --delete branch # delete branch locally</span>
 <span class="c"># git push origin :branch # delete branch on gforge fork</span>
