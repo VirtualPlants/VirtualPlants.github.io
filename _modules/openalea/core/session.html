@@ -79,11 +79,15 @@
 <span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">Observed</span>
 <span class="kn">from</span> <span class="nn">openalea.core.datapool</span> <span class="kn">import</span> <span class="n">DataPool</span>
 
+<span class="kn">from</span> <span class="nn">openalea.core.service.interface</span> <span class="kn">import</span> <span class="n">load_interfaces</span>
+
 <span class="kn">import</span> <span class="nn">shelve</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
 
+
 <div class="viewcode-block" id="Session"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session">[docs]</a><span class="k">class</span> <span class="nc">Session</span><span class="p">(</span><span class="n">Observed</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A session is composed by different workspaces, and an user package.</span>
 <span class="sd">    A workspace is an open node</span>
@@ -93,11 +97,11 @@
     <span class="n">USR_PKG_NAME</span> <span class="o">=</span> <span class="s">&quot;__my package__&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+
         <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cworkspace</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="c"># current workspace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cworkspace</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c"># current workspace</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graphViews</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">datapool</span> <span class="o">=</span> <span class="n">DataPool</span><span class="p">()</span>
@@ -113,12 +117,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
-    <span class="c">#gengraph</span>
+    <span class="c"># gengraph</span>
 <div class="viewcode-block" id="Session.simulate_workspace_addition"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.simulate_workspace_addition">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_workspace_addition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;workspace_added&quot;</span><span class="p">,</span> <span class="n">ws</span><span class="p">))</span>
     <span class="c">#/gengraph</span>
-    </div>
+</div>
 <div class="viewcode-block" id="Session.get_current_workspace"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.get_current_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the current workspace object &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cworkspace</span><span class="p">]</span>
@@ -127,10 +131,10 @@
 
 <div class="viewcode-block" id="Session.get_graph_views"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.get_graph_views">[docs]</a>    <span class="k">def</span> <span class="nf">get_graph_views</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphViews</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    </div>
+</div>
 <div class="viewcode-block" id="Session.add_graph_view"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.add_graph_view">[docs]</a>    <span class="k">def</span> <span class="nf">add_graph_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graphViews</span><span class="p">[</span><span class="n">view</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-    </div>
+</div>
 <div class="viewcode-block" id="Session.add_workspace"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.add_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">add_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compositenode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">notify</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open a new workspace in the session</span>
@@ -145,7 +149,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compositenode</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">compositenode</span>
-        
+
         <span class="k">if</span><span class="p">(</span><span class="n">notify</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;workspace_added&quot;</span><span class="p">,</span> <span class="n">compositenode</span><span class="p">))</span>
 
@@ -158,7 +162,7 @@
         <span class="k">if</span><span class="p">(</span><span class="n">notify</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="Session.init"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_workspace</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Session.init"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_workspace</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Init the Session &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">session_filename</span> <span class="o">=</span> <span class="bp">None</span>
@@ -166,7 +170,6 @@
 
         <span class="c"># init pkgmanager</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span><span class="o">.</span><span class="n">find_and_register_packages</span><span class="p">()</span>
-
 
         <span class="c"># Create user package if needed</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">USR_PKG_NAME</span><span class="p">)):</span>
@@ -179,18 +182,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">add_workspace</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cworkspace</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="n">load_interfaces</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">()</span>
-
 </div>
-<div class="viewcode-block" id="Session.clear"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_workspace</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Session.clear"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_workspace</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reinit Session &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">datapool</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">create_workspace</span><span class="p">)</span>
-
 </div>
-<div class="viewcode-block" id="Session.save"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Session.save"><a class="viewcode-back" href="../../../openalea/core/doc/user/autosum.html#openalea.core.session.Session.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save session in filename</span>
 <span class="sd">        user_pkg and workspaces data are saved</span>
@@ -215,7 +217,7 @@
         <span class="n">d</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
 
         <span class="c"># datapool</span>
-        <span class="n">d</span><span class="p">[</span><span class="s">&#39;datapool&#39;</span><span class="p">]</span> <span class="o">=</span><span class="p">{}</span>
+        <span class="n">d</span><span class="p">[</span><span class="s">&#39;datapool&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapool</span><span class="p">:</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -223,7 +225,7 @@
                 <span class="n">d</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">print</span> <span class="n">e</span>
-                <span class="k">print</span> <span class="s">&quot;Unable to save </span><span class="si">%s</span><span class="s"> in the datapool...&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&quot;Unable to save </span><span class="si">%s</span><span class="s"> in the datapool...&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;datapool&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
 
         <span class="c"># workspaces</span>

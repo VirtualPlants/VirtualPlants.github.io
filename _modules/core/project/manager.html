@@ -78,6 +78,7 @@
 <span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
 <span class="kn">from</span> <span class="nn">openalea.core.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
+<span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">get_openalea_tmp_dir</span>
 
 
 <div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.html#core.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="n">Observed</span><span class="p">,</span> <span class="n">AbstractListener</span><span class="p">):</span>
@@ -97,6 +98,7 @@
         <span class="n">Observed</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_openalea_tmp_dir</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
@@ -110,7 +112,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
         <span class="c"># TODO Search in preference file if user has path to append in self.repositories</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
-
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="ProjectManager.search_path"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.html#core.project.manager.ProjectManager.search_path">[docs]</a>    <span class="k">def</span> <span class="nf">search_path</span><span class="p">():</span>

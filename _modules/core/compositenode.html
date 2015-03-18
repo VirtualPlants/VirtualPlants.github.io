@@ -86,7 +86,7 @@
 <span class="kn">from</span> <span class="nn">openalea.core.metadatadict</span> <span class="kn">import</span> <span class="n">MetaDataDict</span>
 <span class="kn">import</span> <span class="nn">logger</span>
 
-<span class="n">quantify</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">quantify</span> <span class="o">=</span> <span class="bp">False</span>
 
 <div class="viewcode-block" id="IncompatibleNodeError"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.compositenode.IncompatibleNodeError">[docs]</a><span class="k">class</span> <span class="nc">IncompatibleNodeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
@@ -1227,7 +1227,9 @@
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
         <span class="n">fstr</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgfactory_template</span><span class="p">)</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="n">fstr</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">NAME</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">get_python_name</span><span class="p">(),</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_python_name</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fstr</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">NAME</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                                       <span class="n">PNAME</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
                                       <span class="n">DESCRIPTION</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
                                       <span class="n">CATEGORY</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">category</span><span class="p">),</span>
