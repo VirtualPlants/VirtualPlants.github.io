@@ -212,8 +212,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="ProjectManagerWidget.close"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+<div class="viewcode-block" id="ProjectManagerWidget.closeEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeSettings</span><span class="p">()</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="ProjectManagerWidget.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
@@ -230,7 +231,7 @@
 </div>
 <div class="viewcode-block" id="ProjectManagerWidget.menus"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.menus">[docs]</a>    <span class="k">def</span> <span class="nf">menus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar_actions</span><span class="p">()]</span>
-        <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&#39;Project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&#39;File&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">menu</span><span class="o">.</span><span class="n">addActions</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
         <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
         <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu_available_projects</span><span class="p">)</span>
@@ -282,6 +283,21 @@
 </div>
 <div class="viewcode-block" id="ProjectManagerWidget.set_project"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.set_project">[docs]</a>    <span class="k">def</span> <span class="nf">set_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">set_project</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+    <span class="c">####################################################################</span>
+    <span class="c"># Settings</span>
+    <span class="c">####################################################################</span></div>
+<div class="viewcode-block" id="ProjectManagerWidget.writeSettings"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerWidget.writeSettings">[docs]</a>    <span class="k">def</span> <span class="nf">writeSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register current settings (geometry and window state)</span>
+<span class="sd">        in a setting file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+            <span class="n">last_proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">cproject</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">,</span> <span class="n">last_proj</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
 </div></div>
 <div class="viewcode-block" id="ProjectManagerView"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView">[docs]</a><span class="k">class</span> <span class="nc">ProjectManagerView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">):</span>
@@ -357,8 +373,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">expandAll</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">close_all_scripts</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_controls</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="ProjectManagerView.refresh"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
@@ -586,32 +600,8 @@
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">project</span><span class="p">:</span>
             <span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_controls</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_container</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_container</span><span class="o">.</span><span class="n">save_all</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="ProjectManagerView.save_controls"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.save_controls">[docs]</a>    <span class="k">def</span> <span class="nf">save_controls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c"># Hack to save controls!!!</span>
-        <span class="c"># TODO: save controls inside project</span>
-        <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">()</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;control.py&quot;</span>
-        <span class="kn">from</span> <span class="nn">openalea.oalab.service.applet</span> <span class="kn">import</span> <span class="n">get_applet</span>
-        <span class="n">ctrl_manager_wid</span> <span class="o">=</span> <span class="n">get_applet</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s">&quot;ControlManager&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ctrl_manager_wid</span><span class="p">:</span>
-            <span class="n">ctrl_view</span> <span class="o">=</span> <span class="n">ctrl_manager_wid</span><span class="o">.</span><span class="n">view</span>
-            <span class="n">ctrl_view</span><span class="o">.</span><span class="n">save_controls</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="ProjectManagerView.load_controls"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.load_controls">[docs]</a>    <span class="k">def</span> <span class="nf">load_controls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c"># Hack to load controls!!!</span>
-        <span class="c"># TODO: load controls inside project</span>
-        <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">project</span><span class="p">:</span>
-            <span class="n">filename</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&quot;control.py&quot;</span>
-            <span class="kn">from</span> <span class="nn">openalea.oalab.service.applet</span> <span class="kn">import</span> <span class="n">get_applet</span>
-<span class="c">#             ctrl_manager_wid = get_applet(identifier=&quot;ControlManager&quot;)</span>
-<span class="c">#             if ctrl_manager_wid:</span>
-<span class="c">#                 ctrl_view = ctrl_manager_wid.view</span>
-<span class="c">#                 ctrl_view.load_controls(filename)</span>
 </div>
 <div class="viewcode-block" id="ProjectManagerView.save_as"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.save_as">[docs]</a>    <span class="k">def</span> <span class="nf">save_as</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">()</span>

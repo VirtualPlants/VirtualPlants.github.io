@@ -71,6 +71,8 @@
 <span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">AbstractNode</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Annotation</span>
 <span class="kn">from</span> <span class="nn">openalea.core.dataflow</span> <span class="kn">import</span> <span class="n">SubDataflow</span>
 
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+
 
 <div class="viewcode-block" id="AnnotationNode"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.AnnotationNode">[docs]</a><span class="k">class</span> <span class="nc">AnnotationNode</span><span class="p">(</span><span class="n">Annotation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A DummyNode is a fake node.&quot;&quot;&quot;</span>
@@ -101,7 +103,7 @@
 <div class="viewcode-block" id="IterNode.reset"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.IterNode.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reset to the intial state &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iterable</span> <span class="o">=</span> <span class="s">&quot;Empty&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;nextval&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;nextval&#39;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextval</span>
 </div>
 <div class="viewcode-block" id="IterNode.eval"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.IterNode.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -129,6 +131,7 @@
             <span class="k">if</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;nextval&quot;</span><span class="p">)):</span>
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextval</span>
             <span class="k">return</span> <span class="bp">False</span>
+
 </div></div>
 <div class="viewcode-block" id="IterWithDelayNode"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.IterWithDelayNode">[docs]</a><span class="k">class</span> <span class="nc">IterWithDelayNode</span><span class="p">(</span><span class="n">IterNode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Iteration Node &quot;&quot;&quot;</span>
@@ -158,6 +161,7 @@
             <span class="k">if</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;nextval&quot;</span><span class="p">)):</span>
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextval</span>
             <span class="k">return</span> <span class="bp">False</span>
+
 </div></div>
 <div class="viewcode-block" id="StopSimulation"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.StopSimulation">[docs]</a><span class="k">class</span> <span class="nc">StopSimulation</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Iteration Node &quot;&quot;&quot;</span>
@@ -182,6 +186,7 @@
             <span class="k">return</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
+
 </div></div>
 <div class="viewcode-block" id="Counter"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.Counter">[docs]</a><span class="k">class</span> <span class="nc">Counter</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Loop a number of cycle, then stop &quot;&quot;&quot;</span>
@@ -206,12 +211,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span>
             <span class="k">return</span> <span class="n">delay</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span><span class="o">+</span><span class="n">step</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span><span class="o">+=</span> <span class="n">step</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">+</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">+=</span> <span class="n">step</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span>
             <span class="k">return</span> <span class="n">delay</span>
-        
+
         <span class="k">return</span> <span class="bp">False</span>
+
 </div></div>
 <div class="viewcode-block" id="RDVNode"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.RDVNode">[docs]</a><span class="k">class</span> <span class="nc">RDVNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -246,7 +252,7 @@
         <span class="n">key</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
 
 </div>
@@ -265,9 +271,10 @@
 
         <span class="n">key</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="PoolDefault"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.PoolDefault">[docs]</a><span class="k">class</span> <span class="nc">PoolDefault</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -281,7 +288,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">DataPool</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PoolDefault.reset"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.PoolDefault.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;key&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;key&#39;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
 </div>
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
@@ -293,10 +300,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">default_value</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default_value</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="InitNode"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.InitNode">[docs]</a><span class="k">class</span> <span class="nc">InitNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -315,7 +323,6 @@
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; inputs is the list of input values &quot;&quot;&quot;</span>
 
-
         <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">):</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -331,12 +338,12 @@
 </div></div>
 <div class="viewcode-block" id="AccuList"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.AccuList">[docs]</a><span class="k">class</span> <span class="nc">AccuList</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; List Accumulator</span>
-<span class="sd">    </span>
+
 <span class="sd">    Add to a list (in datapool) the receive value</span>
-<span class="sd">    </span>
-<span class="sd">    :param inputs: a list containing the value to append and </span>
+
+<span class="sd">    :param inputs: a list containing the value to append and</span>
 <span class="sd">        the name of the datapool variable</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
@@ -349,7 +356,7 @@
         <span class="n">varname</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">varname</span><span class="p">):</span>
-            <span class="n">varname</span> <span class="o">=</span> <span class="s">&quot;AccuList_</span><span class="si">%i</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="s">&quot;AccuList_</span><span class="si">%i</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
         <span class="c"># Create datapool variable if necessary</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span> <span class="ow">or</span>
@@ -359,7 +366,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;list accumulator : </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">varname</span><span class="p">))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;list accumulator : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">varname</span><span class="p">))))</span>
         <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="p">)</span>
@@ -370,7 +377,7 @@
 
 <span class="sd">    Add to a Float (in datapool) the receive value</span>
 
-<span class="sd">    :param inputs: a list containing the value to append and </span>
+<span class="sd">    :param inputs: a list containing the value to append and</span>
 <span class="sd">        the name of the datapool variable</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -385,28 +392,27 @@
         <span class="n">varname</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">varname</span><span class="p">):</span>
-            <span class="n">varname</span> <span class="o">=</span> <span class="s">&quot;AccuFloat_</span><span class="si">%i</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="s">&quot;AccuFloat_</span><span class="si">%i</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
         <span class="c"># Create datapool variable if necessary</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span> <span class="ow">or</span>
            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">varname</span><span class="p">],</span> <span class="nb">float</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;float accumulator : </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">varname</span><span class="p">))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;float accumulator : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">varname</span><span class="p">))))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">varname</span><span class="p">],</span> <span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="LambdaVar"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.LambdaVar">[docs]</a><span class="k">class</span> <span class="nc">LambdaVar</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Return a lambda variable &quot;&quot;&quot;</span>
-    <span class="c">#cpt = 0</span>
-    
+    <span class="c"># cpt = 0</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-        <span class="k">print</span> <span class="s">&#39;args &#39;</span><span class="p">,</span> <span class="n">args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s">&quot;X&quot;</span><span class="p">)</span>
-        <span class="c">#self.set_caption(&quot;X&quot; + str(LambdaVar.cpt))</span>
-        <span class="c">#LambdaVar.cpt = 1</span>
+        <span class="c"># self.set_caption(&quot;X&quot; + str(LambdaVar.cpt))</span>
+        <span class="c"># LambdaVar.cpt = 1</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">SubDataflow</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -423,7 +429,7 @@
         <span class="n">init</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous</span> <span class="o">=</span> <span class="n">init</span> 
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous</span> <span class="o">=</span> <span class="n">init</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">previous</span> <span class="o">=</span> <span class="n">x</span>
@@ -433,6 +439,7 @@
 <div class="viewcode-block" id="Delay.reset"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.Delay.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reset to the intial state &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous</span> <span class="o">=</span> <span class="bp">None</span>
+
 </div></div>
 <div class="viewcode-block" id="WhileUniVar"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.WhileUniVar">[docs]</a><span class="k">class</span> <span class="nc">WhileUniVar</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; While Loop Univariate</span>
@@ -456,12 +463,13 @@
 
             <span class="c"># Test for infinite loop</span>
             <span class="k">if</span><span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">newvalue</span><span class="p">):</span>
-                <span class="n">cpt</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span><span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Infinite Loop&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">newvalue</span>
-            <span class="k">print</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">value</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">)</span>
 
@@ -485,22 +493,23 @@
         <span class="k">while</span><span class="p">(</span><span class="n">test</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">)):</span>
             <span class="n">newvals</span> <span class="o">=</span> <span class="p">[]</span>
 
-
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">)</span>
                 <span class="n">newvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
             <span class="c"># Test for infinite loop</span>
             <span class="k">if</span><span class="p">(</span><span class="n">values</span> <span class="o">==</span> <span class="n">newvals</span><span class="p">):</span>
-                <span class="n">cpt</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span><span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Infinite Loop&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">values</span> <span class="o">=</span> <span class="n">newvals</span>
 
-            <span class="k">print</span> <span class="n">values</span>
+            <span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">values</span>
 
         <span class="k">return</span> <span class="n">values</span>
+
 </div>
 <div class="viewcode-block" id="while_multi2"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.while_multi2">[docs]</a><span class="k">def</span> <span class="nf">while_multi2</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
         <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
@@ -509,7 +518,7 @@
 
             <span class="c"># Test for infinite loop</span>
             <span class="k">if</span><span class="p">(</span><span class="n">values</span> <span class="o">==</span> <span class="n">newvals</span><span class="p">):</span>
-                <span class="n">cpt</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span><span class="p">(</span><span class="n">cpt</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Infinite Loop&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -518,6 +527,7 @@
             <span class="k">print</span> <span class="n">values</span>
 
         <span class="k">return</span> <span class="n">values</span>
+
 </div>
 <div class="viewcode-block" id="system_cmd"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.system_cmd">[docs]</a><span class="k">def</span> <span class="nf">system_cmd</span><span class="p">(</span><span class="n">str_list</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Execute a system command</span>
@@ -528,6 +538,7 @@
     <span class="kn">import</span> <span class="nn">subprocess</span>
 
     <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">str_list</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
 </div>
 <div class="viewcode-block" id="shell_command"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.shell_command">[docs]</a><span class="k">def</span> <span class="nf">shell_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Execute a command in a shell</span>
@@ -535,12 +546,13 @@
 <span class="sd">    dir : the directory where the cmd is executed</span>
 <span class="sd">    Output : status</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">PIPE</span>
+    <span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">STDOUT</span><span class="p">,</span> <span class="n">PIPE</span>
 
     <span class="n">p</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">directory</span><span class="p">,</span>
-        <span class="n">stdin</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">)</span>
+              <span class="n">stdin</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">)</span>
     <span class="n">status</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">status</span><span class="p">,</span>
+
 </div>
 <div class="viewcode-block" id="For"><a class="viewcode-back" href="../../../../openalea/core/doc/user/autosum.html#openalea.core.system.systemnodes.For">[docs]</a><span class="k">class</span> <span class="nc">For</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; While Loop Univariate</span>
@@ -570,10 +582,10 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">pkg_name</span><span class="p">,</span> <span class="n">as_paths</span><span class="p">)</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
-        <span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span> 
+        <span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
     <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span><span class="n">filenames</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">filenames</span><span class="p">))</span></div>
 </pre></div>
 
           </div>

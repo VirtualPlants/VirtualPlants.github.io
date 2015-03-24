@@ -355,6 +355,16 @@
         <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;project_changed&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_updated&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
+    <span class="k">def</span> <span class="nf">_close_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;close_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">unregister_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_closed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
@@ -368,15 +378,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_started&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;close_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">unregister_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_closed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close_project</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close_project</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="n">project</span>
