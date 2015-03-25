@@ -45,7 +45,7 @@
           <div class="body" role="main">
             
   <div class="section" id="private-development-on-gforge">
-<span id="workflow-private"></span><h1>Private development on gforge<a class="headerlink" href="#private-development-on-gforge" title="Permalink to this headline">¶</a></h1>
+<span id="workflow-gforge"></span><h1>Private development on gforge<a class="headerlink" href="#private-development-on-gforge" title="Permalink to this headline">¶</a></h1>
 <p>Steps to follow are :</p>
 <p>To do only the first time</p>
 <blockquote>
@@ -61,13 +61,24 @@
 <li>create a new //branch// with explicit name (ex: //fix_app_crash_mac_os_10_9//)</li>
 <li>work on your new branch</li>
 <li><strong>prepare your work for merging</strong></li>
-<li>submit your pull request</li>
+<li>merge it</li>
 </ul>
 </div></blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you are a new git user, you can try git on <a class="reference external" href="http://try.github.io">try.github.io</a> to be more familiar with git commands.
 You can also have a look to <a class="reference external" href="https://fr.atlassian.com/git">Atlassian Git documentation</a>.</p>
+</div>
+<div class="section" id="configure-git">
+<h2>Configure git<a class="headerlink" href="#configure-git" title="Permalink to this headline">¶</a></h2>
+<p>&#8220;&#8211;global&#8221; refer to your username on your computer. <strong>So you need to config only once for you.</strong></p>
+<p>If you want a specific config for a specific project, please use &#8220;&#8211;local&#8221;</p>
+<div class="highlight-bash"><div class="highlight"><pre>git config --global user.name <span class="s2">&quot;my name&quot;</span>
+git config --global user.email myemail@foo.com
+git config --global push.default simple
+git config --global core.editor &lt;your_favorite_editor&gt;
+</pre></div>
+</div>
 </div>
 <div class="section" id="create-your-private-area">
 <h2>Create your private area<a class="headerlink" href="#create-your-private-area" title="Permalink to this headline">¶</a></h2>
@@ -145,70 +156,96 @@ git push --set-upstream origin wip_fix_app_crash_mac_os_10_9
 <span class="c"># wip means &quot;work in progress&quot;</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="work-on-your-modifications">
+<h2>Work on your modifications<a class="headerlink" href="#work-on-your-modifications" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file(s)</span>
+git commit
+git add mynewfile.py
+git commit
+<span class="c"># edit file(s)</span>
+git commit
+</pre></div>
+</div>
+</div>
+<div class="section" id="commit-message">
+<h2>Commit message<a class="headerlink" href="#commit-message" title="Permalink to this headline">¶</a></h2>
+<p>Please write a <a class="reference external" href="http://web-design-weekly.com/blog/2013/09/01/a-better-git-commit/">good commit message</a>:</p>
+<p>Try to limit using the -m commit flag.</p>
+<p>If using the simpler git commit command it should open up Vim (if it’s your default editor) where you can construct a better commit by following some of these simple steps.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The <strong>first line should be a short summary</strong>. Referencing the bug number or the main accomplishment of the change. e.g “Fixes issue #8976″. This is the title of your commit and should be <strong>less than 50 characters</strong>.</li>
+<li>Then a <strong>line break</strong>.</li>
+<li>Followed by a <strong>longer detailed description about the things that changed</strong>. This section is a really good place to explain what and why. You could cover statistics, performance wins, roadblocks, etc. The text should be wrapped at 72 characters.</li>
+</ul>
+</div></blockquote>
 <p>Save your branch and commits on your personal repository.</p>
 <div class="highlight-bash"><div class="highlight"><pre>git push origin wip_fix_app_crash_mac_os_10_9
 </pre></div>
 </div>
 </div>
-<div class="section" id="submit-your-pull-request">
-<h2>Submit your pull-request<a class="headerlink" href="#submit-your-pull-request" title="Permalink to this headline">¶</a></h2>
-<p>Go to upstream project page on gforge.inria.fr and click on tracker tab (outils suivi).
-Create a new entry, and do not forget to give an url.
-This url is used by reviewers to reach your work, review it and integrate it.</p>
-<p>url is something like:
-git+ssh://username&#64;scm.gforge.inria.fr//gitroot/username/project.git</p>
-<p>branch is the name of your branch, for example &#8220;fix_app_crash_mac_os_10_9&#8221;.</p>
-<p>You need to allow at list one official &#8220;integrator&#8221; to read your private repository.
-For that, on your private project, go to &#8220;user and permissions&#8221;,
-add a new &#8220;reviewer&#8221; (or integrator) role with &#8220;read access&#8221; to repository and then add the integrator.</p>
-</div>
-<div class="section" id="reviewer-review-branch">
-<h2>Reviewer: review branch<a class="headerlink" href="#reviewer-review-branch" title="Permalink to this headline">¶</a></h2>
-<p>Read this part only if you are a reviewer !</p>
-<div class="highlight-bash"><div class="highlight"><pre>git remote add username git+ssh://username@scm.gforge.inria.fr//gitroot/username/project.git
-git fetch username
-git checkout username/branch -b review_username_branch
-<span class="c"># review changes, if all correct, write it on tracker and set state to &quot;confirmed&quot;</span>
+<div class="section" id="prepare-your-work-for-merging">
+<h2>Prepare your work for merging<a class="headerlink" href="#prepare-your-work-for-merging" title="Permalink to this headline">¶</a></h2>
+<p>Before asking other to integrate your work, you must clean it.
+First get last modifications and work on a new branch created especially for cleaning.</p>
+<p>Get last version of upstream/master</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout master <span class="c"># go to your local master branch</span>
+git pull upstream master <span class="c"># update it with upstream master</span>
+git push <span class="c"># push upstream changes to your personal repository</span>
 </pre></div>
 </div>
+<p>It is safer to create a new branch for rebase</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout wip_fix_app_crash_mac_os_10_9 <span class="c"># get your development branch</span>
+git checkout -b fix_app_crash_mac_os_10_9 <span class="c"># create and checkout new branch, not we removed the &quot;wip&quot;</span>
+git rebase master
+</pre></div>
 </div>
-<div class="section" id="integrator-integrate-branch">
-<h2>Integrator: integrate branch<a class="headerlink" href="#integrator-integrate-branch" title="Permalink to this headline">¶</a></h2>
-<p>Read this paragraph only if you are an integrator !</p>
-<div class="highlight-bash"><div class="highlight"><pre><span class="c"># Check branch has not changed since previous review</span>
-git checkout review_username_branch
-git pull
-
-git checkout master
+<p>If master has diverged during your work, conflicts can occur !
+Fix conflicts for each file and finish rebase :</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file1 and solve conflicts</span>
+git add file1 <span class="c"># say to git that conflict is resolved</span>
+<span class="c"># edit file2 and solve conflicts</span>
+git add file2
+git rebase --continue
+</pre></div>
+</div>
+<p>If rebase has gone wrong, for example you&#8217;ve rebased the wrong branch, you can cancel it with</p>
+<div class="highlight-bash"><div class="highlight"><pre>git rebase --abort
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For advanced user, you can also use <a class="reference external" href="https://help.github.com/articles/interactive-rebase">git rebase &#8211;interactive</a>.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you want a review on your code, you can use <a class="reference internal" href="workflow-private.html#workflow-private"><em>Private development on gforge</em></a>.
+Else, just integrate it yourself.</p>
+</div>
+</div>
+<div class="section" id="merge-branch">
+<h2>Merge branch<a class="headerlink" href="#merge-branch" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout master
 git pull upstream master
 
 <span class="c"># --no-ff (no fast forward) is used to create a merge commit.</span>
-<span class="c"># This commit is used to create a link between tracker and git repository</span>
-git merge --no-ff review_username_branch
-</pre></div>
-</div>
-<p>It is very important to follow this message convention:</p>
-<div class="highlight-text"><div class="highlight"><pre>Merge pr/[#trackerid] from branch username/branchname into master
-#example: Merge pr/[#18786] from branch gbaty/support_repr_vtk into master
+git merge --no-ff fix_app_crash_mac_os_10_9
 </pre></div>
 </div>
 <p>Then push it to official repository</p>
 <div class="highlight-bash"><div class="highlight"><pre>git push upstream master
 </pre></div>
 </div>
-<p>Finally, set PR tracker state to &#8220;closed&#8221; and add comment &#8220;merged&#8221;.
-This is important to signal to others contributors that pr has been integrated.</p>
 </div>
 <div class="section" id="finalization">
 <h2>Finalization<a class="headerlink" href="#finalization" title="Permalink to this headline">¶</a></h2>
-<p>If pull request has been integrated:</p>
-<div class="highlight-bash"><div class="highlight"><pre>git checkout master
-git pull upstream master
+<div class="highlight-bash"><div class="highlight"><pre>git push <span class="c"># push last master version on your clone</span>
 
-<span class="c"># Check you find all yours commits on upstream_master</span>
+<span class="c"># Check you find all yours commits on upstream/master</span>
 <span class="c"># If yes:</span>
-<span class="c"># git branch --delete branch # delete branch locally</span>
-<span class="c"># git push origin :branch # delete branch on gforge fork</span>
+<span class="c"># git branch --delete fix_app_crash_mac_os_10_9 # delete branch locally</span>
+<span class="c"># git push origin :fix_app_crash_mac_os_10_9 # delete branch on gforge fork</span>
 </pre></div>
 </div>
 <p>You can now start a new contribution cycle, see &#8220;Create development branch&#8221;</p>
@@ -224,13 +261,15 @@ git pull upstream master
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Private development on gforge</a><ul>
+<li><a class="reference internal" href="#configure-git">Configure git</a></li>
 <li><a class="reference internal" href="#create-your-private-area">Create your private area</a></li>
 <li><a class="reference internal" href="#create-your-fork">Create your fork</a></li>
 <li><a class="reference internal" href="#configure-your-fork">Configure your fork</a></li>
 <li><a class="reference internal" href="#create-development-branch">Create development branch</a></li>
-<li><a class="reference internal" href="#submit-your-pull-request">Submit your pull-request</a></li>
-<li><a class="reference internal" href="#reviewer-review-branch">Reviewer: review branch</a></li>
-<li><a class="reference internal" href="#integrator-integrate-branch">Integrator: integrate branch</a></li>
+<li><a class="reference internal" href="#work-on-your-modifications">Work on your modifications</a></li>
+<li><a class="reference internal" href="#commit-message">Commit message</a></li>
+<li><a class="reference internal" href="#prepare-your-work-for-merging">Prepare your work for merging</a></li>
+<li><a class="reference internal" href="#merge-branch">Merge branch</a></li>
 <li><a class="reference internal" href="#finalization">Finalization</a></li>
 </ul>
 </li>
@@ -239,7 +278,7 @@ git pull upstream master
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/contribute/devel/workflow-private.txt"
+      <li><a href="../../_sources/contribute/devel/workflow-gforge.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>

@@ -97,6 +97,169 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
 
 </div></div>
+<div class="viewcode-block" id="QFloatSlider"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.QFloatSlider">[docs]</a><span class="k">class</span> <span class="nc">QFloatSlider</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="p">):</span>
+
+    <span class="n">floatValueChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QSlider</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;valueChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">notifyValueChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider_step</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">floatValue</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<div class="viewcode-block" id="QFloatSlider.notifyValueChanged"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.QFloatSlider.notifyValueChanged">[docs]</a>    <span class="k">def</span> <span class="nf">notifyValueChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">floatValue</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">floatValueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">floatValue</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="QFloatSlider.setFloatValue"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.QFloatSlider.setFloatValue">[docs]</a>    <span class="k">def</span> <span class="nf">setFloatValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider_step</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="QFloatSlider.value"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.QFloatSlider.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">floatValue</span>
+</div>
+<div class="viewcode-block" id="QFloatSlider.setStep"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.QFloatSlider.setStep">[docs]</a>    <span class="k">def</span> <span class="nf">setStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider_step</span> <span class="o">=</span> <span class="n">step</span>
+
+</div></div>
+<div class="viewcode-block" id="AbstractFloatWidget"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.AbstractFloatWidget">[docs]</a><span class="k">class</span> <span class="nc">AbstractFloatWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbstractFloatWidget.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.AbstractFloatWidget.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minimum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AbstractFloatWidget.read"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.AbstractFloatWidget.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">mini</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">min</span>
+        <span class="n">maxi</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">max</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="n">mini</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="n">maxi</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AbstractFloatWidget.apply"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.AbstractFloatWidget.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="FloatSlider"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSlider">[docs]</a><span class="k">class</span> <span class="nc">FloatSlider</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">AbstractFloatWidget</span><span class="p">):</span>
+    <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span> <span class="o">=</span> <span class="n">QFloatSlider</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="p">()</span>
+
+        <span class="c"># Fill background to avoid to see text or widget behind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">AbstractFloatWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># To be compatible with tree or table views, slider must keep focus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">22</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">floatValueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setFloatValue</span><span class="p">)</span>
+        <span class="c"># self.slider.floatValueChanged.connect(self.valueChanged)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
+
+<div class="viewcode-block" id="FloatSlider.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSlider.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minimum</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minimum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maximum</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setStep</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FloatSlider.apply"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSlider.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">minimum</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">maximum</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">slider_step</span>
+</div>
+<div class="viewcode-block" id="FloatSlider.value"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSlider.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="FloatSlider.step"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSlider.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">slider_step</span>
+</div>
+<div class="viewcode-block" id="FloatSlider.setValue"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSlider.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setFloatValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="FloatSpinBox"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSpinBox">[docs]</a><span class="k">class</span> <span class="nc">FloatSpinBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="p">,</span> <span class="n">AbstractFloatWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractFloatWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FloatSpinBox.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSpinBox.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minimum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FloatSpinBox.step"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSpinBox.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">singleStep</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="FloatSimpleSlider"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSimpleSlider">[docs]</a><span class="k">class</span> <span class="nc">FloatSimpleSlider</span><span class="p">(</span><span class="n">QFloatSlider</span><span class="p">,</span> <span class="n">AbstractFloatWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QFloatSlider</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">AbstractFloatWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">floatValueChanged</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FloatSimpleSlider.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSimpleSlider.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="n">minimum</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">maximum</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStep</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFloatValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FloatSimpleSlider.step"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSimpleSlider.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">slider_step</span>
+</div>
+<div class="viewcode-block" id="FloatSimpleSlider.apply"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.FloatSimpleSlider.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">control</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+
+</div></div>
 <div class="viewcode-block" id="AbstractIntWidget"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.AbstractIntWidget">[docs]</a><span class="k">class</span> <span class="nc">AbstractIntWidget</span><span class="p">(</span><span class="n">AbstractQtControlWidget</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -152,7 +315,7 @@
 
         <span class="c"># To be compatible with tree or table views, slider must keep focus</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">22</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spinbox</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">slider</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span>
 
