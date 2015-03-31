@@ -362,6 +362,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;close_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">unregister_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">)</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_closed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
@@ -377,6 +378,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;start_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
                 <span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">shell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_started&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_close_project</span><span class="p">()</span>
@@ -392,6 +394,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_changed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
 </div>
+<div class="viewcode-block" id="ProjectManager.clear_namespace"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.html#core.project.manager.ProjectManager.clear_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">clear_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">ns</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;world&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;project&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.world</span> <span class="kn">import</span> <span class="n">World</span>
+        <span class="n">world</span> <span class="o">=</span> <span class="n">World</span><span class="p">()</span>
+        <span class="n">world</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
 <div class="viewcode-block" id="ProjectManager.update_namespace"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.html#core.project.manager.ProjectManager.update_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Definition: Update namespace</span>
@@ -406,9 +419,9 @@
             <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
             <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;project&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
             <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;data&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c"># close</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span>
+            <span class="kn">from</span> <span class="nn">openalea.oalab.world</span> <span class="kn">import</span> <span class="n">World</span>
+            <span class="n">world</span> <span class="o">=</span> <span class="n">World</span><span class="p">()</span>
+            <span class="n">world</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="n">interpreter</span><span class="p">)</span>
 
 </div></div>
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.html#core.project.manager.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>

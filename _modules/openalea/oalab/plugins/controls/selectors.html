@@ -71,7 +71,13 @@
 <span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">AbstractListener</span>
 
 <span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.constraints</span> <span class="kn">import</span> <span class="n">IntConstraintWidget</span><span class="p">,</span> <span class="n">FloatConstraintWidget</span>
-<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">IntSimpleSlider</span><span class="p">,</span> <span class="n">IntSpinBox</span><span class="p">,</span> <span class="n">IntSlider</span><span class="p">,</span> <span class="n">IntDial</span><span class="p">,</span> <span class="n">FloatSlider</span><span class="p">,</span> <span class="n">FloatSpinBox</span><span class="p">,</span> <span class="n">FloatSimpleSlider</span><span class="p">,</span> <span class="n">BoolCheckBox</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">IntSimpleSlider</span><span class="p">,</span> <span class="n">IntSpinBox</span><span class="p">,</span> <span class="n">IntSlider</span><span class="p">,</span> <span class="n">IntDial</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">FloatSlider</span><span class="p">,</span> <span class="n">FloatSpinBox</span><span class="p">,</span> <span class="n">FloatSimpleSlider</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">BoolCheckBox</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">IntRangeSpinBoxes</span><span class="p">,</span> <span class="n">IntRangeSimpleSlider</span><span class="p">,</span> <span class="n">IntRangeSlider</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.widgets</span> <span class="kn">import</span> <span class="n">ColormapRectangle</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.painters</span> <span class="kn">import</span> <span class="n">PainterColormap</span>
 
 
 <div class="viewcode-block" id="IntWidgetSelector"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.IntWidgetSelector">[docs]</a><span class="k">class</span> <span class="nc">IntWidgetSelector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -105,13 +111,16 @@
         <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">shape</span> <span class="o">=</span> <span class="s">&#39;hline&#39;</span>
 
-        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;hline&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;large&#39;</span><span class="p">,</span> <span class="s">&#39;hline&#39;</span><span class="p">):</span>
+            <span class="c"># widget = FloatSimpleSlider()</span>
             <span class="n">widget</span> <span class="o">=</span> <span class="n">FloatSlider</span><span class="p">()</span>
+            <span class="c"># widget = FloatSpinBox()</span>
         <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;vline&#39;</span><span class="p">:</span>
             <span class="n">widget</span> <span class="o">=</span> <span class="n">FloatSimpleSlider</span><span class="p">()</span>
             <span class="n">widget</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;large&#39;</span><span class="p">,</span> <span class="s">&#39;small&#39;</span><span class="p">,</span> <span class="s">&#39;responsive&#39;</span><span class="p">):</span>
-            <span class="n">widget</span> <span class="o">=</span> <span class="n">FloatSlider</span><span class="p">()</span>
+            <span class="c"># widget = FloatSpinBox()</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;small&#39;</span><span class="p">,</span> <span class="s">&#39;responsive&#39;</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">FloatSpinBox</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">widget</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">return</span> <span class="n">widget</span>
@@ -119,7 +128,55 @@
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="FloatWidgetSelector.edit_constraints"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.FloatWidgetSelector.edit_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">edit_constraints</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="n">widget</span> <span class="o">=</span> <span class="n">FloatConstraintWidget</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">widget</span></div></div>
+        <span class="k">return</span> <span class="n">widget</span>
+
+</div></div>
+<div class="viewcode-block" id="IntRangeWidgetSelector"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.IntRangeWidgetSelector">[docs]</a><span class="k">class</span> <span class="nc">IntRangeWidgetSelector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IntRangeWidgetSelector.edit"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.IntRangeWidgetSelector.edit">[docs]</a>    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="s">&#39;hline&#39;</span>
+
+        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;large&#39;</span><span class="p">,</span> <span class="s">&#39;hline&#39;</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">IntRangeSimpleSlider</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;vline&#39;</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">IntRangeSimpleSlider</span><span class="p">()</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;small&#39;</span><span class="p">,</span> <span class="s">&#39;responsive&#39;</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">IntRangeSpinBoxes</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">widget</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IntRangeWidgetSelector.edit_constraints"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.IntRangeWidgetSelector.edit_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">edit_constraints</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">IntConstraintWidget</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">widget</span>
+
+</div></div>
+<div class="viewcode-block" id="ColormapWidgetSelector"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.ColormapWidgetSelector">[docs]</a><span class="k">class</span> <span class="nc">ColormapWidgetSelector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ColormapWidgetSelector.edit"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.ColormapWidgetSelector.edit">[docs]</a>    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="s">&#39;hline&#39;</span>
+
+        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;hline&#39;</span><span class="p">,</span> <span class="s">&#39;large&#39;</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">ColormapRectangle</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;vline&#39;</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">ColormapRectangle</span><span class="p">()</span>
+            <span class="c"># widget.setOrientation(QtCore.Qt.Vertical)</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;small&#39;</span><span class="p">,</span> <span class="s">&#39;responsive&#39;</span><span class="p">):</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">ColormapRectangle</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">widget</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ColormapWidgetSelector.paint"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.selectors.ColormapWidgetSelector.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s">&#39;hline&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PainterColormap</span><span class="p">()</span></div></div>
 </pre></div>
 
           </div>
