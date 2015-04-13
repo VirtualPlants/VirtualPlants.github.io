@@ -48,10 +48,11 @@
             
   <h1>Source code for openalea.oalab.shell.shellwidget</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">streamredirection</span> <span class="kn">import</span> <span class="n">GraphicalStreamRedirection</span>
-<span class="kn">from</span> <span class="nn">openalea.vpltk.check.ipython</span> <span class="kn">import</span> <span class="n">has_new_ipython</span>
-<span class="k">if</span> <span class="n">has_new_ipython</span><span class="p">():</span>
+
+
+<span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">IPython.qt.console.rich_ipython_widget</span> <span class="kn">import</span> <span class="n">RichIPythonWidget</span>
-<span class="k">else</span><span class="p">:</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">IPython.frontend.qt.console.rich_ipython_widget</span> <span class="kn">import</span> <span class="n">RichIPythonWidget</span>
 
 
@@ -88,7 +89,7 @@
         <span class="n">GraphicalStreamRedirection</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c"># Compatibility with visualea</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runsource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">runsource</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runsource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">run_cell</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">runcode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loadcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpreter</span><span class="o">.</span><span class="n">loadcode</span>
 
@@ -180,10 +181,10 @@
     <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
     <span class="n">interpreter</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
 
-    <span class="n">interpreter</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpreter</span>
+    <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpreter</span>
     <span class="c"># Set Shell Widget</span>
     <span class="n">shellwdgt</span> <span class="o">=</span> <span class="n">ShellWidget</span><span class="p">(</span><span class="n">interpreter</span><span class="p">)</span>
-    <span class="n">interpreter</span><span class="o">.</span><span class="n">locals</span><span class="p">[</span><span class="s">&#39;shell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shellwdgt</span>
+    <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;shell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shellwdgt</span>
 
     <span class="n">mainWindow</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">shellwdgt</span><span class="p">)</span>

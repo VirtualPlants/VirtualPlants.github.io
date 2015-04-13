@@ -73,10 +73,9 @@
 <span class="kn">import</span> <span class="nn">ui_mainwindow</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">openalea.oalab.shell</span> <span class="kn">import</span> <span class="n">get_shell_class</span>
-    <span class="kn">from</span> <span class="nn">openalea.core.interpreter</span> <span class="kn">import</span> <span class="n">get_interpreter_class</span>
+    <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span> <span class="k">as</span> <span class="n">get_interpreter</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">openalea.vpltk.shell.shell</span> <span class="kn">import</span> <span class="n">get_shell_class</span><span class="p">,</span> <span class="n">get_interpreter_class</span>
-
 
 
 <span class="kn">from</span> <span class="nn">openalea.core.algo.dataflow_evaluation</span> <span class="kn">import</span> <span class="n">AbstractEvaluation</span>
@@ -143,8 +142,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowerpane</span><span class="p">)</span>
 
         <span class="c"># python interpreter</span>
-        <span class="n">InterpreterClass</span> <span class="o">=</span> <span class="n">get_interpreter_class</span><span class="p">()</span>
-        <span class="n">interpreter</span> <span class="o">=</span> <span class="n">InterpreterClass</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">interpreter</span> <span class="o">=</span> <span class="n">get_interpreter</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+            <span class="n">InterpreterClass</span> <span class="o">=</span> <span class="n">get_interpreter_class</span><span class="p">()</span>
+            <span class="n">interpreter</span> <span class="o">=</span> <span class="n">InterpreterClass</span><span class="p">()</span>
                     
         <span class="c"># interpreter init defered after session init</span>
         <span class="n">shellclass</span> <span class="o">=</span> <span class="n">get_shell_class</span><span class="p">()</span>
@@ -181,7 +183,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tabWorkspace</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">ws_changed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_lineEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_node</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tabWorkspace</span><span class="o">.</span><span class="n">tabCloseRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_tab_workspace</span><span class="p">)</span>
-
 
         <span class="c"># Help Menu</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_About</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">about</span><span class="p">)</span>
@@ -332,7 +333,6 @@
         <span class="n">cli</span><span class="o">.</span><span class="n">init_interpreter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interpreterWidget</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span>
                              <span class="n">session</span><span class="p">,</span>
                              <span class="p">{</span><span class="s">&quot;tabs&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">tabWorkspace</span><span class="p">})</span>
-
 
         <span class="c"># -- now, many package manager related views --</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">pkgmanager</span>
@@ -531,7 +531,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">open_widget_tab</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="n">factory</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_last_open</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">__pkg_id__</span><span class="p">,</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.about"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.about">[docs]</a>    <span class="k">def</span> <span class="nf">about</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Display About Dialog &quot;&quot;&quot;</span>
@@ -551,7 +550,6 @@
 <div class="viewcode-block" id="MainWindow.web"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.web">[docs]</a>    <span class="k">def</span> <span class="nf">web</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Open OpenAlea website &quot;&quot;&quot;</span>
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDesktopServices</span><span class="o">.</span><span class="n">openUrl</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QUrl</span><span class="p">(</span><span class="n">metainfo</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.quit"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.quit">[docs]</a>    <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Quit Application &quot;&quot;&quot;</span>
@@ -568,7 +566,8 @@
                 <span class="n">wid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabWorkspace</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wid</span><span class="p">,</span> <span class="n">dataflowview</span><span class="o">.</span><span class="n">DataflowView</span><span class="p">)</span> <span class="ow">and</span> <span class="n">wid</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span> <span class="o">==</span> <span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                     <span class="n">index</span> <span class="o">=</span> <span class="n">i</span>
-            <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span>
             <span class="k">if</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;graphoperator_graphsaved&quot;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
                 <span class="n">caption</span> <span class="o">=</span> <span class="s">&quot;Workspace </span><span class="si">%i</span><span class="s"> - </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -598,7 +597,6 @@
             <span class="n">w</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.reinit_treeview"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.reinit_treeview">[docs]</a>    <span class="k">def</span> <span class="nf">reinit_treeview</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reinitialise package and category views &quot;&quot;&quot;</span>
@@ -606,7 +604,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pkg_model</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datapool_model</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_model</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.close_tab_workspace"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.close_tab_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">close_tab_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cindex</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Close workspace indexed by cindex cindex is Node&quot;&quot;&quot;</span>
@@ -676,14 +673,12 @@
         <span class="k">if</span> <span class="n">gwidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="p">:</span>
             <span class="n">gwidget</span><span class="o">.</span><span class="n">show_entire_scene</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">index</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.add_pkgdir"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.add_pkgdir">[docs]</a>    <span class="k">def</span> <span class="nf">add_pkgdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dirname</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Select Package/Directory&quot;</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span><span class="o">.</span><span class="n">load_directory</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dirname</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reinit_treeview</span><span class="p">()</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.reload_all"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.reload_all">[docs]</a>    <span class="k">def</span> <span class="nf">reload_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -699,7 +694,6 @@
 <div class="viewcode-block" id="MainWindow.ws_changed"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.ws_changed">[docs]</a>    <span class="k">def</span> <span class="nf">ws_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Current workspace has changed &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">cworkspace</span> <span class="o">=</span> <span class="n">index</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.contextMenuEvent"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.contextMenuEvent">[docs]</a>    <span class="k">def</span> <span class="nf">contextMenuEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Context menu event : Display the menu&quot;&quot;&quot;</span>
@@ -793,9 +787,8 @@
             <span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Python Script&quot;</span><span class="p">,</span> <span class="s">&quot;Python script (*.py)&quot;</span><span class="p">)</span>
             
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
-
-        
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="c"># Try if IPython    </span>
         <span class="k">try</span><span class="p">:</span>
@@ -841,7 +834,8 @@
             <span class="bp">self</span><span class="p">,</span> <span class="s">&quot;OpenAlea Session&quot;</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">homePath</span><span class="p">(),</span> <span class="s">&quot;Session file (*.oas)&quot;</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </div>
@@ -860,7 +854,8 @@
             <span class="bp">self</span><span class="p">,</span> <span class="s">&quot;OpenAlea Session&quot;</span><span class="p">,</span>  <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">homePath</span><span class="p">(),</span> <span class="s">&quot;Session file (*.oas)&quot;</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </div>
@@ -912,7 +907,6 @@
             <span class="k">print</span> <span class="n">e</span>
             <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
 
-
     <span class="c">############################</span>
     <span class="c"># Handling the Help widget #</span>
     <span class="c">############################</span></div>
@@ -934,7 +928,6 @@
     <span class="c"># Window support</span></div>
 <div class="viewcode-block" id="MainWindow.display_leftpanel"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.display_leftpanel">[docs]</a>    <span class="k">def</span> <span class="nf">display_leftpanel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toggled</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitter_2</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">toggled</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="MainWindow.display_rightpanel"><a class="viewcode-back" href="../../../latest/dev/archi/draft/api_openalea_visualea.html#openalea.visualea.mainwindow.MainWindow.display_rightpanel">[docs]</a>    <span class="k">def</span> <span class="nf">display_rightpanel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toggled</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">toggled</span><span class="p">)</span>
@@ -1006,8 +999,8 @@
         <span class="n">painter</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">svg_gen</span><span class="p">)</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
         <span class="n">view</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="p">)</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
-</pre></div></div></div>
+        <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span></div></div>
+</pre></div>
 
           </div>
         </div>

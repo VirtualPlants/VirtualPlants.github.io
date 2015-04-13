@@ -49,49 +49,80 @@
             
   <h1>Source code for core.service.ipython</h1><div class="highlight"><pre>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;get_interpreter&quot;</span><span class="p">,</span> <span class="s">&quot;interpreter&quot;</span><span class="p">]</span>
-<span class="kn">from</span> <span class="nn">openalea.core.util</span> <span class="kn">import</span> <span class="n">warn_deprecated</span>
 
 
-<div class="viewcode-block" id="get_interpreter"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.service.html#core.service.ipython.get_interpreter">[docs]</a><span class="k">def</span> <span class="nf">get_interpreter</span><span class="p">():</span>
-    <span class="n">warn_deprecated</span><span class="p">(</span><span class="n">__name__</span><span class="o">+</span><span class="s">&quot;.get_interpreter&quot;</span><span class="p">,</span> <span class="n">__name__</span><span class="o">+</span><span class="s">&#39;interpreter&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2014</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="kn">from</span> <span class="nn">openalea.oalab.session.session</span> <span class="kn">import</span> <span class="n">Session</span>
-    <span class="k">if</span> <span class="n">Session</span><span class="o">.</span><span class="n">instantiated</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Session</span><span class="p">()</span><span class="o">.</span><span class="n">interpreter</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">interpreter_</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">IPython.core.getipython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
-            <span class="n">interpreter_</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">):</span>
-            <span class="k">pass</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">interpreter_</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">openalea.core.interpreter</span> <span class="kn">import</span> <span class="n">get_interpreter_class</span>
-            <span class="n">interpreter_</span> <span class="o">=</span> <span class="n">get_interpreter_class</span><span class="p">()()</span>
-        <span class="k">if</span> <span class="n">interpreter_</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">interpreter_</span>
+<span class="k">class</span> <span class="nc">IInterpreterPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-</div>
-<span class="k">def</span> <span class="nf">_interpreter_class</span><span class="p">():</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">openalea.core.interpreter.ipython</span> <span class="kn">import</span> <span class="n">Interpreter</span>
-    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">code</span> <span class="kn">import</span> <span class="n">InteractiveInterpreter</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    entry_point: openalea.interpreter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;InterpreterName&#39;</span>
 
-        <span class="k">class</span> <span class="nc">Interpreter</span><span class="p">(</span><span class="n">InteractiveInterpreter</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">run_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">runcode</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: interpreter class following IInterpreter interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-            <span class="nd">@property</span>
-            <span class="k">def</span> <span class="nf">user_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">locals</span>
 
-            <span class="nd">@user_ns.setter</span>
-            <span class="k">def</span> <span class="nf">user_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">locals</span> <span class="o">=</span> <span class="n">ns</span>
+<span class="k">class</span> <span class="nc">IInterpreter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="k">return</span> <span class="n">Interpreter</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class able to interprete python code</span>
+
+<span class="sd">    entry_point: openalea.interpreter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        current interpreter namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_ns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">run_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run a complete IPython cell.</span>
+
+<span class="sd">        :param raw_cell: The code (including IPython code such as %magic functions) to run.</span>
+<span class="sd">        :type raw_cell: :obj:`str`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">run_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code_obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute a code object.</span>
+
+<span class="sd">        When an exception occurs, self.showtraceback() is called to display a</span>
+<span class="sd">        traceback.</span>
+
+<span class="sd">        :param code_obj: code object, A compiled code object, to be executed</span>
+<span class="sd">        :return False : successful execution, True : an error occurred.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clear all internal namespaces, and attempt to release references to</span>
+<span class="sd">        user objects.</span>
+<span class="sd">        If namespace is specified, use it to populate interpreter namespace.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param namespace: update namespace with interpreter namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param variables: dict The variables to inject into interpreter namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varnames</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param variables: list of variable name to get from interpreter namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varnames</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param variables: list of variable name to delete in the user&#39;s namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
 <span class="n">_interpreter</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="kn">from</span> <span class="nn">openalea.core.interpreter</span> <span class="kn">import</span> <span class="n">_interpreter_class</span><span class="p">,</span> <span class="n">adapt_interpreter</span>
 
 
 <div class="viewcode-block" id="interpreter"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.service.html#core.service.ipython.interpreter">[docs]</a><span class="k">def</span> <span class="nf">interpreter</span><span class="p">():</span>
@@ -105,51 +136,14 @@
             <span class="kn">from</span> <span class="nn">IPython.core.getipython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">Interpreter</span> <span class="o">=</span> <span class="n">_interpreter_class</span><span class="p">()</span>
-                <span class="n">_interpreter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Interpreter</span><span class="p">())</span>
-                <span class="k">return</span> <span class="n">_interpreter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c"># We can adapt ipython interpreter here to use openalea with ipython</span>
-                <span class="c"># ex:</span>
-                <span class="c"># ip.locals = ip.user_ns</span>
-                <span class="n">_interpreter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">_interpreter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">_interpreter_class</span><span class="p">()()</span>
+            <span class="n">adapt_interpreter</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+            <span class="n">_interpreter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_interpreter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">except</span><span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">):</span>
             <span class="n">Interpreter</span> <span class="o">=</span> <span class="n">_interpreter_class</span><span class="p">()</span>
             <span class="n">_interpreter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Interpreter</span><span class="p">())</span>
-            <span class="k">return</span> <span class="n">_interpreter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-</div>
-<span class="k">class</span> <span class="nc">IInterpreter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    TODO: complete</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">user_ns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">run_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_cell</span><span class="p">,</span> <span class="n">store_history</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">shell_futures</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span> <span class="nf">runcode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code_obj</span><span class="p">):</span>
-        <span class="k">pass</span>
-
-    <span class="c"># def push(self, variables, interactive=True):</span>
-    <span class="c">#     &quot;&quot;&quot;</span>
-    <span class="c">#     :param variables: dict, str or list/tuple of str</span>
-    <span class="c"># The variables to inject into the user&#39;s namespace.  If a dict, a</span>
-    <span class="c"># simple update is done.  If a str, the string is assumed to have</span>
-    <span class="c"># variable names separated by spaces.  A list/tuple of str can also</span>
-    <span class="c"># be used to give the variable names.  If just the variable names are</span>
-    <span class="c"># give (list/tuple/str) then the variable values looked up in the</span>
-    <span class="c"># callers frame.</span>
-    <span class="c">#     :param interactive: bool</span>
-    <span class="c"># If True (default), the variables will be listed with the ``who``</span>
-    <span class="c"># magic.</span>
-    <span class="c">#     &quot;&quot;&quot;</span>
-    <span class="c">#</span>
-    <span class="c">#     # Unused for the moment</span>
-    <span class="c">#     # code.InteractiveInterpreter class doesn&#39;t have method push</span>
-    <span class="c">#     pass</span>
+            <span class="k">return</span> <span class="n">_interpreter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 </pre></div>
 
           </div>

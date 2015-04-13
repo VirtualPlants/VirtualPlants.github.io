@@ -52,7 +52,7 @@
 
 <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractQtControlWidget</span>
-<span class="kn">from</span> <span class="nn">q_widgets</span> <span class="kn">import</span> <span class="n">QFloatSlider</span><span class="p">,</span> <span class="n">QSpanSlider</span>
+<span class="kn">from</span> <span class="nn">q_widgets</span> <span class="kn">import</span> <span class="n">QFloatSlider</span><span class="p">,</span> <span class="n">QSpanSlider</span><span class="p">,</span> <span class="n">QColormapBar</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">For documentation, see :class:`~openalea.oalab.plugins.control`</span>
@@ -541,23 +541,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">start_spinbox</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="n">value</span><span class="p">))</span>
 
 </div></div>
-<span class="kn">from</span> <span class="nn">openalea.oalab.plugins.controls.painters</span> <span class="kn">import</span> <span class="n">PainterColormap</span>
-
-
-<div class="viewcode-block" id="ColormapRectangle"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle">[docs]</a><span class="k">class</span> <span class="nc">ColormapRectangle</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="ColormapRectangle"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle">[docs]</a><span class="k">class</span> <span class="nc">ColormapRectangle</span><span class="p">(</span><span class="n">QColormapBar</span><span class="p">,</span> <span class="n">AbstractQtControlWidget</span><span class="p">):</span>
     <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">QColormapBar</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">color_points</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_painter</span> <span class="o">=</span> <span class="n">PainterColormap</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
 
-<div class="viewcode-block" id="ColormapRectangle.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">dict</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))]),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ColormapRectangle.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;grey&#39;</span><span class="p">,</span><span class="n">color_points</span><span class="o">=</span><span class="nb">dict</span><span class="p">([(</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)),(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))])),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="ColormapRectangle.read"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
@@ -565,41 +562,93 @@
 </div>
 <div class="viewcode-block" id="ColormapRectangle.apply"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
         <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
+
+</div></div>
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+<span class="kn">import</span> <span class="nn">tissuelab</span>
+
+<div class="viewcode-block" id="ColormapSwitcher"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher">[docs]</a><span class="k">class</span> <span class="nc">ColormapSwitcher</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">AbstractQtControlWidget</span><span class="p">):</span>
+    <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span> <span class="o">=</span> <span class="n">QColormapBar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span> <span class="o">=</span> <span class="s">&quot;grey&quot;</span>
+
+        <span class="c"># self.label = QtGui.QLabel(self)</span>
+        <span class="c"># self.label.setText(&quot;Colormap&quot;)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># self.setMinimumHeight(50)</span>
+
+        <span class="n">colormap_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c"># colormaps_path = Path(shared_data(tissuelab, &#39;colormaps/grey.lut&#39;)).parent</span>
+        <span class="n">colormaps_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">tissuelab</span><span class="p">)</span><span class="o">/</span><span class="s">&#39;colormaps&#39;</span>
+        <span class="k">for</span> <span class="n">colormap_file</span> <span class="ow">in</span> <span class="n">colormaps_path</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="s">&#39;*.lut&#39;</span><span class="p">):</span>
+            <span class="n">colormap_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">colormap_file</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">colormap_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colormap_name</span><span class="p">)</span>
+        <span class="n">colormap_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="c"># map between string and combobox index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_index</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span>  <span class="n">colormap_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map_index</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_index</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span><span class="p">])</span>
+
+        <span class="c"># Fill background to avoid to see text or widget behind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateColormap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># line = QtGui.QHBoxLayout(self)</span>
+        <span class="c"># line.setContentsMargins(0, 0, 0, 0)</span>
+
+        <span class="c"># line.addWidget(self.label)</span>
+        <span class="c"># line.addWidget(self.combobox)</span>
+        <span class="c"># layout.addLayout(line)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_changed_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span>
+
+<div class="viewcode-block" id="ColormapSwitcher.reset"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;grey&#39;</span><span class="p">,</span><span class="n">color_points</span><span class="o">=</span><span class="nb">dict</span><span class="p">([(</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)),(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))])),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="ColormapRectangle.setValue"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">color_points</span> <span class="o">=</span> <span class="n">value</span>
+<div class="viewcode-block" id="ColormapSwitcher.read"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="ColormapRectangle.value"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_points</span>
+<div class="viewcode-block" id="ColormapSwitcher.apply"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+        <span class="n">AbstractQtControlWidget</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="ColormapRectangle.paintEvent"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapRectangle.paintEvent">[docs]</a>    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">rectangle</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span>
+<div class="viewcode-block" id="ColormapSwitcher.value"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ColormapSwitcher.setValue"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_bar</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_index</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="ColormapSwitcher.updateColormap"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plugins.controls.html#openalea.oalab.plugins.controls.widgets.ColormapSwitcher.updateColormap">[docs]</a>    <span class="k">def</span> <span class="nf">updateColormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">colormap_index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combobox</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">colormap_index</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">colormap_painter</span><span class="o">.</span><span class="n">paint_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_points</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">tissuelab.gui.vtkviewer.colormap_utils</span> <span class="kn">import</span> <span class="n">Colormap</span><span class="p">,</span> <span class="n">colormap_from_file</span>
+        <span class="n">colormap_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">tissuelab</span><span class="p">,</span><span class="s">&#39;colormaps/&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span><span class="o">+</span><span class="s">&#39;.lut&#39;</span><span class="p">)</span>
 
-        <span class="c"># x = r.bottomLeft().x()</span>
-        <span class="c"># y = r.topRight().y()</span>
-        <span class="c"># lx = r.width() / 101</span>
-
-        <span class="c"># cmap = self.color_points</span>
-
-        <span class="c"># points = cmap.keys()</span>
-
-        <span class="c"># if len(points)&gt;1:</span>
-        <span class="c">#     points.sort()</span>
-        <span class="c">#     prev_point = points[0]</span>
-        <span class="c">#     prev_color = tuple([255*cmap[prev_point][c] for c in [0,1,2]])</span>
-
-        <span class="c">#     for point in points[1:]:</span>
-        <span class="c">#         gradient = QtGui.QLinearGradient(x + prev_point*100*lx, y, x + point*100*lx, y)</span>
-        <span class="c">#         gradient.setColorAt(0, QtGui.QColor(*prev_color))</span>
-        <span class="c">#         color = tuple([255*cmap[point][c] for c in [0,1,2]])</span>
-        <span class="c">#         gradient.setColorAt(1, QtGui.QColor(*color))</span>
-        <span class="c">#         painter.fillRect(x + prev_point*100*lx, y, (point-prev_point)*100*lx, r.height(), gradient)</span>
-        <span class="c">#         prev_point = point</span>
-        <span class="c">#         prev_color = color</span></div></div>
-</pre></div>
+        <span class="n">colormap</span> <span class="o">=</span> <span class="n">colormap_from_file</span><span class="p">(</span><span class="n">colormap_path</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colormap_name</span><span class="p">,</span><span class="n">color_points</span><span class="o">=</span><span class="n">colormap</span><span class="o">.</span><span class="n">_color_points</span><span class="p">))</span>
+</pre></div></div></div>
 
           </div>
         </div>

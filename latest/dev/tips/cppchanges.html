@@ -64,12 +64,12 @@
 </div>
 <div class="section" id="libstdc-libc">
 <h2>libstdc++/libc++<a class="headerlink" href="#libstdc-libc" title="Permalink to this headline">¶</a></h2>
-<p>libc++ is not binary compatible with gcc&#8217;s libstdc++ (except for some low level stuff such as operator new).
-For example the std::string in gcc&#8217;s libstdc++ is refcounted, whereas in libc++ it uses the &#8220;short string optimization&#8221;.
+<p>libc++ is not binary compatible with gcc's libstdc++ (except for some low level stuff such as operator new).
+For example the std::string in gcc's libstdc++ is refcounted, whereas in libc++ it uses the &quot;short string optimization&quot;.
 If you were to accidentally mix these two strings in the same program (and mistake them for the same data structure), you would inevitably get a run time crash.
 In order to turn this run time crash into a link time error, libc++ uses a C++11 language feature called inline namespace to change the ABI of
 <tt class="docutils literal"><span class="pre">std::string</span></tt> without impacting the API of <tt class="docutils literal"><span class="pre">std::string</span></tt>. That is, to you <tt class="docutils literal"><span class="pre">std::string</span></tt> looks the same. But to the linker, <tt class="docutils literal"><span class="pre">std::string</span></tt> is being mangled as if it is in namespace <tt class="docutils literal"><span class="pre">std::__1</span></tt>.
-Thus the linker knows that <tt class="docutils literal"><span class="pre">std::basic_string</span></tt> and <tt class="docutils literal"><span class="pre">std::__1::basic_string</span></tt> are two different data structures (the former coming from gcc&#8217;s libstdc++ and the latter coming from libc++).</p>
+Thus the linker knows that <tt class="docutils literal"><span class="pre">std::basic_string</span></tt> and <tt class="docutils literal"><span class="pre">std::__1::basic_string</span></tt> are two different data structures (the former coming from gcc's libstdc++ and the latter coming from libc++).</p>
 <div class="section" id="ext-slist-class">
 <h3>ext/slist class<a class="headerlink" href="#ext-slist-class" title="Permalink to this headline">¶</a></h3>
 <p>Works with gcc/stdlib</p>

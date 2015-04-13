@@ -48,25 +48,83 @@
           <div class="body" role="main">
             
   <h1>Source code for core.interpreter</h1><div class="highlight"><pre>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">.ipython</span> <span class="kn">import</span> <span class="n">Interpreter</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">code</span> <span class="kn">import</span> <span class="n">InteractiveInterpreter</span>
-
-    <span class="k">class</span> <span class="nc">Interpreter</span><span class="p">(</span><span class="n">InteractiveInterpreter</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="nb">super</span><span class="p">(</span><span class="n">Interpreter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">user_ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">locals</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.check.ipython</span> <span class="kn">import</span> <span class="n">has_ipython</span>
 
 
-<div class="viewcode-block" id="get_interpreter_class"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.interpreter.html#core.interpreter.get_interpreter_class">[docs]</a><span class="k">def</span> <span class="nf">get_interpreter_class</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">get_interpreter_class</span><span class="p">():</span>
+<div class="viewcode-block" id="get_interpreter_class"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.interpreter.html#core.interpreter.get_interpreter_class">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :return: the interpreter class to instantiate the shell</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openalea.core.util</span> <span class="kn">import</span> <span class="n">warn_deprecated</span>
-    <span class="n">warn_deprecated</span><span class="p">(</span><span class="n">__name__</span><span class="o">+</span><span class="s">&quot;.get_interpreter_class&quot;</span><span class="p">,</span> <span class="s">&#39;openalea.core.service.ipython.interpreter&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2014</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">Interpreter</span></div>
-</pre></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.ipython</span> <span class="kn">import</span> <span class="n">InProcessInterpreter</span> <span class="k">as</span> <span class="n">Interpreter</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.python</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+    <span class="k">return</span> <span class="n">Interpreter</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.util</span> <span class="kn">import</span> <span class="n">warn_deprecated</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_interpreter</span><span class="p">():</span>
+<div class="viewcode-block" id="get_interpreter"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.interpreter.html#core.interpreter.get_interpreter">[docs]</a>    <span class="n">warn_deprecated</span><span class="p">(</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&quot;.get_interpreter&quot;</span><span class="p">,</span> <span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;interpreter&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2014</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="kn">from</span> <span class="nn">openalea.oalab.session.session</span> <span class="kn">import</span> <span class="n">Session</span>
+    <span class="k">if</span> <span class="n">Session</span><span class="o">.</span><span class="n">instantiated</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Session</span><span class="p">()</span><span class="o">.</span><span class="n">interpreter</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">interpreter_</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">IPython.core.getipython</span> <span class="kn">import</span> <span class="n">get_ipython</span>
+            <span class="n">interpreter_</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">NameError</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">interpreter_</span><span class="p">:</span>
+            <span class="n">interpreter_</span> <span class="o">=</span> <span class="n">get_interpreter_class</span><span class="p">()()</span>
+        <span class="k">if</span> <span class="n">interpreter_</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">interpreter_</span>
+
+
+<span class="k">def</span> <span class="nf">_interpreter_class</span><span class="p">():</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.interpreter.ipython</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">code</span> <span class="kn">import</span> <span class="n">InteractiveInterpreter</span>
+
+    <span class="k">return</span> <span class="n">Interpreter</span>
+
+
+<span class="k">def</span> <span class="nf">adapt_interpreter</span><span class="p">(</span><span class="n">ip</span><span class="p">):</span>
+<div class="viewcode-block" id="adapt_interpreter"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.interpreter.html#core.interpreter.adapt_interpreter">[docs]</a>
+    <span class="k">def</span> <span class="nf">loadcode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load &#39;source&#39; and use &#39;namespace&#39; if it is in parameter.</span>
+<span class="sd">        Else use locals.</span>
+
+<span class="sd">        :param source: text (string) to load</span>
+<span class="sd">        :param namespace: dict to use to execute the source</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Not multiligne</span>
+        <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">exec</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">exec</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locals</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">runsource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;&lt;input&gt;&quot;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s">&quot;single&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_code</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">symbol</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">runcode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_code</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+
+    <span class="n">ip</span><span class="o">.</span><span class="n">locals</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">user_ns</span>
+    <span class="n">ip</span><span class="o">.</span><span class="n">runcode</span> <span class="o">=</span> <span class="n">runcode</span>
+    <span class="n">ip</span><span class="o">.</span><span class="n">runsource</span> <span class="o">=</span> <span class="n">runsource</span>
+    <span class="n">ip</span><span class="o">.</span><span class="n">loadcode</span> <span class="o">=</span> <span class="n">loadcode</span>
+
+    <span class="k">return</span> <span class="n">ip</span>
+</pre></div></div>
 
           </div>
         </div>
