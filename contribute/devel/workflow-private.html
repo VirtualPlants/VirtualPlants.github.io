@@ -69,6 +69,17 @@
 <p class="last">If you are a new git user, you can try git on <a class="reference external" href="http://try.github.io">try.github.io</a> to be more familiar with git commands.
 You can also have a look to <a class="reference external" href="https://fr.atlassian.com/git">Atlassian Git documentation</a>.</p>
 </div>
+<div class="section" id="configure-git">
+<h2>Configure git<a class="headerlink" href="#configure-git" title="Permalink to this headline">¶</a></h2>
+<p>&quot;--global&quot; refer to your username on your computer. <strong>So you need to config only once for you.</strong></p>
+<p>If you want a specific config for a specific project, please use &quot;--local&quot;</p>
+<div class="highlight-bash"><div class="highlight"><pre>git config --global user.name <span class="s2">&quot;my name&quot;</span>
+git config --global user.email myemail@foo.com
+git config --global push.default simple
+git config --global core.editor &lt;your_favorite_editor&gt;
+</pre></div>
+</div>
+</div>
 <div class="section" id="create-your-private-area">
 <h2>Create your private area<a class="headerlink" href="#create-your-private-area" title="Permalink to this headline">¶</a></h2>
 <p>Do this step only one time, once created, never do it again.</p>
@@ -145,9 +156,67 @@ git push --set-upstream origin wip_fix_app_crash_mac_os_10_9
 <span class="c"># wip means &quot;work in progress&quot;</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="work-on-your-modifications">
+<h2>Work on your modifications<a class="headerlink" href="#work-on-your-modifications" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file(s)</span>
+git commit
+git add mynewfile.py
+git commit
+<span class="c"># edit file(s)</span>
+git commit
+</pre></div>
+</div>
+</div>
+<div class="section" id="commit-message">
+<h2>Commit message<a class="headerlink" href="#commit-message" title="Permalink to this headline">¶</a></h2>
+<p>Please write a <a class="reference external" href="http://web-design-weekly.com/blog/2013/09/01/a-better-git-commit/">good commit message</a>:</p>
+<p>Try to limit using the -m commit flag.</p>
+<p>If using the simpler git commit command it should open up Vim (if it’s your default editor) where you can construct a better commit by following some of these simple steps.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The <strong>first line should be a short summary</strong>. Referencing the bug number or the main accomplishment of the change. e.g “Fixes issue #8976″. This is the title of your commit and should be <strong>less than 50 characters</strong>.</li>
+<li>Then a <strong>line break</strong>.</li>
+<li>Followed by a <strong>longer detailed description about the things that changed</strong>. This section is a really good place to explain what and why. You could cover statistics, performance wins, roadblocks, etc. The text should be wrapped at 72 characters.</li>
+</ul>
+</div></blockquote>
 <p>Save your branch and commits on your personal repository.</p>
 <div class="highlight-bash"><div class="highlight"><pre>git push origin wip_fix_app_crash_mac_os_10_9
 </pre></div>
+</div>
+</div>
+<div class="section" id="prepare-your-work-for-merging">
+<h2>Prepare your work for merging<a class="headerlink" href="#prepare-your-work-for-merging" title="Permalink to this headline">¶</a></h2>
+<p>Before asking other to integrate your work, you must clean it.
+First get last modifications and work on a new branch created especially for cleaning.</p>
+<p>Get last version of upstream/master</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout master <span class="c"># go to your local master branch</span>
+git pull upstream master <span class="c"># update it with upstream master</span>
+git push <span class="c"># push upstream changes to your personal repository</span>
+</pre></div>
+</div>
+<p>It is safer to create a new branch for rebase</p>
+<div class="highlight-bash"><div class="highlight"><pre>git checkout wip_fix_app_crash_mac_os_10_9 <span class="c"># get your development branch</span>
+git checkout -b fix_app_crash_mac_os_10_9 <span class="c"># create and checkout new branch, not we removed the &quot;wip&quot;</span>
+git rebase master
+</pre></div>
+</div>
+<p>If master has diverged during your work, conflicts can occur !
+Fix conflicts for each file and finish rebase :</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># edit file1 and solve conflicts</span>
+git add file1 <span class="c"># say to git that conflict is resolved</span>
+<span class="c"># edit file2 and solve conflicts</span>
+git add file2
+git rebase --continue
+</pre></div>
+</div>
+<p>If rebase has gone wrong, for example you've rebased the wrong branch, you can cancel it with</p>
+<div class="highlight-bash"><div class="highlight"><pre>git rebase --abort
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For advanced user, you can also use <a class="reference external" href="https://help.github.com/articles/interactive-rebase">git rebase --interactive</a>.</p>
 </div>
 </div>
 <div class="section" id="submit-your-pull-request">
@@ -234,10 +303,14 @@ git pull upstream master
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Private development on gforge</a><ul>
+<li><a class="reference internal" href="#configure-git">Configure git</a></li>
 <li><a class="reference internal" href="#create-your-private-area">Create your private area</a></li>
 <li><a class="reference internal" href="#create-your-fork">Create your fork</a></li>
 <li><a class="reference internal" href="#configure-your-fork">Configure your fork</a></li>
 <li><a class="reference internal" href="#create-development-branch">Create development branch</a></li>
+<li><a class="reference internal" href="#work-on-your-modifications">Work on your modifications</a></li>
+<li><a class="reference internal" href="#commit-message">Commit message</a></li>
+<li><a class="reference internal" href="#prepare-your-work-for-merging">Prepare your work for merging</a></li>
 <li><a class="reference internal" href="#submit-your-pull-request">Submit your pull-request</a></li>
 <li><a class="reference internal" href="#reviewer-review-branch">Reviewer: review branch</a></li>
 <li><a class="reference internal" href="#integrator-integrate-branch">Integrator: integrate branch</a></li>
