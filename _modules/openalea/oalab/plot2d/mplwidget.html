@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.plot2d.mplwidget &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="openalea.oalab.plot2d" href="../plot2d.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../plot2d.html" accesskey="U">openalea.oalab.plot2d</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.plot2d.mplwidget</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">mpl</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backend_bases</span> <span class="kn">import</span> <span class="n">FigureManagerBase</span> <span class="k">as</span> <span class="n">FigureManagerBase</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt4agg</span> <span class="kn">import</span> <span class="n">FigureManagerQT</span> <span class="k">as</span> <span class="n">mpl_FigureManagerQT</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt4agg</span> <span class="kn">import</span> <span class="n">FigureCanvasQTAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_qt4agg</span> <span class="kn">import</span> <span class="n">NavigationToolbar2QTAgg</span> <span class="k">as</span> <span class="n">NavigationToolbar</span>
+
+
+<div class="viewcode-block" id="new_figure_manager_given_figure"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.new_figure_manager_given_figure">[docs]</a><span class="k">def</span> <span class="nf">new_figure_manager_given_figure</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new figure manager instance for the given figure.</span>
+<span class="sd">    This function is made to replace its homonyme in mpl.backends.backend_qt4agg</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">FigureManagerQTwithTab</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="AbstractMplWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.AbstractMplWidget">[docs]</a><span class="k">class</span> <span class="nc">AbstractMplWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract class for widget using matplotlib</span>
+
+<span class="sd">    It implement the `get_singleton` method that return the class `_singleton`</span>
+<span class="sd">    attribute (instanciating it if necessary). Such a subclass can:</span>
+<span class="sd">     - Have its own `_singleton` attribute, set to None by default</span>
+<span class="sd">     - Override the class method `create_singleton` that takes no argument which</span>
+<span class="sd">       return the singleton instance. </span>
+<span class="sd">       Otherwise the default method calls the class constructor with no argument</span>
+
+<span class="sd">    It also duck type the QMainWindow interface used by matplotlib</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_singleton</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="AbstractMplWidget.get_singleton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.AbstractMplWidget.get_singleton">[docs]</a>    <span class="k">def</span> <span class="nf">get_singleton</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_singleton</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_singleton</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">create_singleton</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_singleton</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="AbstractMplWidget.create_singleton"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.AbstractMplWidget.create_singleton">[docs]</a>    <span class="k">def</span> <span class="nf">create_singleton</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">()</span>
+
+    <span class="c"># duck type required QMainWidow interface</span>
+    <span class="c"># ---------------------------------------</span></div>
+<div class="viewcode-block" id="AbstractMplWidget.get_window"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.AbstractMplWidget.get_window">[docs]</a>    <span class="k">def</span> <span class="nf">get_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return (grand)parent window, creating it if necessary &quot;&quot;&quot;</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span>        <span class="c"># top widget which is not a main window</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>  <span class="c"># its parent, which should be a main window</span>
+        <span class="k">while</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">):</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">p</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">=</span> <span class="n">p</span>  <span class="c"># needs to keep a ref or else it&#39;ll be deleted</span>
+
+        <span class="k">return</span> <span class="n">p</span>
+</div>
+<div class="viewcode-block" id="AbstractMplWidget.show"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.AbstractMplWidget.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; duck typing of QMainWindow.show &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_window</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AbstractMplWidget.statusBar"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.AbstractMplWidget.statusBar">[docs]</a>    <span class="k">def</span> <span class="nf">statusBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; duck typing of QMainWindow.statusBar &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_window</span><span class="p">()</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="MplTabWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget">[docs]</a><span class="k">class</span> <span class="nc">MplTabWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">,</span> <span class="n">AbstractMplWidget</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Singleton class that implement mpl figure in a tab widget &quot;&quot;&quot;</span>
+    <span class="n">_singleton</span> <span class="o">=</span> <span class="bp">None</span>                           <span class="c"># has its own singleton</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTabsClosable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tabCloseRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabCloseEvent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_fct</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># events &amp; actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>  <span class="c"># keyboard &amp; mouse focus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>                  <span class="c"># accept drop event</span>
+
+<div class="viewcode-block" id="MplTabWidget.initialize"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.plot2d</span> <span class="kn">import</span> <span class="n">activate_in_pyplot</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+        <span class="c"># work with qt4agg backend</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">switch_backend</span><span class="p">(</span><span class="s">&#39;qt4agg&#39;</span><span class="p">)</span>
+
+        <span class="n">activate_in_pyplot</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+
+    <span class="c"># manage canvas tabs</span>
+    <span class="c"># ------------------</span></div>
+<div class="viewcode-block" id="MplTabWidget.add_tab_canvas"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.add_tab_canvas">[docs]</a>    <span class="k">def</span> <span class="nf">add_tab_canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig_num</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">close_function</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; add a tab canvas with mpl figure in it &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fig_num</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fig_num</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c"># create canvas</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">CanvasWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># add canvas in a new tab</span>
+        <span class="n">canvas_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fig_num</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">canvas_num</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_fct</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">close_function</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">widget</span><span class="o">.</span><span class="n">canvas</span><span class="p">,</span> <span class="n">widget</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.tabCloseEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.tabCloseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">tabCloseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab_index</span><span class="p">):</span>
+        <span class="n">close_fct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_fct</span><span class="p">[</span><span class="n">tab_index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">close_fct</span><span class="p">:</span>
+            <span class="n">close_fct</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_canvas_tab</span><span class="p">(</span><span class="n">tab_index</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.remove_canvas_tab"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.remove_canvas_tab">[docs]</a>    <span class="k">def</span> <span class="nf">remove_canvas_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab_index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">tab_index</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">[</span><span class="n">tab_index</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.remove_canvas_widget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.remove_canvas_widget">[docs]</a>    <span class="k">def</span> <span class="nf">remove_canvas_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; remove the tab containing given `widget` &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_canvas_tab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;MplTabWidget does not contain widget: &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+
+    <span class="c"># drop event for OpenAleaLab</span></div>
+<div class="viewcode-block" id="MplTabWidget.dragEnterEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&quot;text/plain&quot;</span><span class="p">):</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.dropEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">mimeData</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mimeData</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&quot;text/plain&quot;</span><span class="p">):</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+
+        <span class="kn">import</span> <span class="nn">os</span>
+        <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span> <span class="k">as</span> <span class="n">nd</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mimeData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;data/&#39;&quot;</span><span class="p">):</span>
+            <span class="c"># mimeData come from OpenAleaLab</span>
+            <span class="kn">from</span> <span class="nn">openalea.oalab.session.session</span> <span class="kn">import</span> <span class="n">Session</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;data&#39;</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="c"># load image and imshow it</span>
+        <span class="k">print</span> <span class="n">filename</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_position</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c"># OALab actions</span></div>
+<div class="viewcode-block" id="MplTabWidget.get_plugin_actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.get_plugin_actions">[docs]</a>    <span class="k">def</span> <span class="nf">get_plugin_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return actions list for OAlab &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">add_some_action</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fct</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fct</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+            <span class="n">action</span><span class="o">.</span><span class="n">setShortcuts</span><span class="p">([</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">])</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setShortcutContext</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WidgetWithChildrenShortcut</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">action</span>
+
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">add_some_action</span><span class="p">(</span><span class="s">&#39;clear&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clf</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Ctrl+delete&#39;</span><span class="p">,</span> <span class="s">&#39;Ctrl+backspace&#39;</span><span class="p">])</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s">&#39;pyplot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">add_some_action</span><span class="p">(</span><span class="s">&#39;new&#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">new_figure</span><span class="p">,</span>  <span class="p">[</span><span class="s">&#39;Ctrl+N&#39;</span><span class="p">])</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s">&#39;pyplot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">add_some_action</span><span class="p">(</span><span class="s">&#39;close&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_figure</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Ctrl+W&#39;</span><span class="p">])</span>
+        <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s">&#39;pyplot&#39;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">actions</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.toolbar_actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.toolbar_actions">[docs]</a>    <span class="k">def</span> <span class="nf">toolbar_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[[</span><span class="s">&#39;Plot2D&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_plugin_actions</span><span class="p">()]</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.clf"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.clf">[docs]</a>    <span class="k">def</span> <span class="nf">clf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.new_figure"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.new_figure">[docs]</a>    <span class="k">def</span> <span class="nf">new_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MplTabWidget.close_figure"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.MplTabWidget.close_figure">[docs]</a>    <span class="k">def</span> <span class="nf">close_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="CanvasWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.CanvasWidget">[docs]</a><span class="k">class</span> <span class="nc">CanvasWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Widget that contains a mpl canvas &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">())</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setMargin</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>  <span class="c"># strong = keyboard &amp; mouse focus</span>
+
+<div class="viewcode-block" id="CanvasWidget.addToolBar"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.CanvasWidget.addToolBar">[docs]</a>    <span class="k">def</span> <span class="nf">addToolBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">insertWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="FigureManagerQTwithTab"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.FigureManagerQTwithTab">[docs]</a><span class="k">class</span> <span class="nc">FigureManagerQTwithTab</span><span class="p">(</span><span class="n">mpl_FigureManagerQT</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; qt4agg.FigureManageQT subclass that put mpl figures in a MplTabWidget &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; overwrite the FigureManageAt.__init__ &quot;&quot;&quot;</span>
+        <span class="c">#focused = QtGui.QApplication.focusWidget()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="n">MplTabWidget</span><span class="o">.</span><span class="n">get_singleton</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">add_tab_canvas</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgetclosed</span><span class="p">)</span>
+        <span class="n">FigureManagerBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+
+        <span class="c"># self.window.setAttribute(QtCore.Qt.WA_DeleteOnClose)</span>
+
+        <span class="c">##image = os.path.join( mpl.rcParams[&#39;datapath&#39;],&#39;images&#39;,&#39;matplotlib.png&#39; )</span>
+        <span class="c">##self.window.setWindowIcon(QtGui.QIcon( image ))</span>
+
+        <span class="c"># Give the keyboard focus to the figure instead of the</span>
+        <span class="c"># manager; StrongFocus accepts both tab and click to focus and</span>
+        <span class="c"># will enable the canvas to process event w/o clicking.</span>
+        <span class="c"># ClickFocus only takes the focus is the window has been</span>
+        <span class="c"># clicked</span>
+        <span class="c"># on. http://developer.qt.nokia.com/doc/qt-4.8/qt.html#FocusPolicy-enum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">StrongFocus</span><span class="p">)</span>
+        <span class="c"># self.canvas.setFocus()</span>
+
+        <span class="c"># QtCore.QObject.connect( self.widget, QtCore.SIGNAL( &#39;destroyed()&#39; ),</span>
+        <span class="c"># self._widgetclosed )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">_destroying</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_toolbar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">addToolBar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="p">)</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;message&quot;</span><span class="p">),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_show_message</span><span class="p">)</span>
+            <span class="n">tbs_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tbs_height</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># resize the main window so it will display the canvas with the</span>
+        <span class="c"># requested size:</span>
+        <span class="c">##cs = canvas.sizeHint()</span>
+        <span class="c">##sbs = self.window.statusBar().sizeHint()</span>
+        <span class="c">##self._status_and_tool_height = tbs_height+sbs.height()</span>
+        <span class="c">##height = cs.height() + self._status_and_tool_height</span>
+        <span class="c">##self.window.resize(cs.width(), height)</span>
+        <span class="c">##</span>
+        <span class="c"># self.window.setCentralWidget(self.canvas)</span>
+
+        <span class="k">if</span> <span class="n">mpl</span><span class="o">.</span><span class="n">is_interactive</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">notify_axes_change</span><span class="p">(</span><span class="n">fig</span><span class="p">):</span>
+            <span class="c"># This will be called whenever the current axes is changed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">setCurrentWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">add_axobserver</span><span class="p">(</span><span class="n">notify_axes_change</span><span class="p">)</span>
+
+        <span class="c"># if focused is not None:</span>
+        <span class="c">#    focused.setFocus()</span>
+
+<div class="viewcode-block" id="FigureManagerQTwithTab.destroy"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.plot2d.html#openalea.oalab.plot2d.mplwidget.FigureManagerQTwithTab.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; override to close only the suitable tab, not the whole MplTabWidget &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">remove_canvas_widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+
+    <span class="c"># def _widgetclosed( self ):</span>
+    <span class="c"># print &#39;FigureManagerQTwithTab._widgetclosed&#39;</span>
+    <span class="c"># mpl_FigureManagerQT._widgetclosed(self)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../plot2d.html" >openalea.oalab.plot2d</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

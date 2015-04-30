@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.service.notebook_control &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.service.notebook_control</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">openalea.core.service.interface</span> <span class="kn">import</span> <span class="n">interface_class</span><span class="p">,</span> <span class="n">interface_name</span>
+<span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
+<span class="kn">from</span> <span class="nn">openalea.core.control.control</span> <span class="kn">import</span> <span class="n">Control</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">AbstractListener</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.gui.control.widget</span> <span class="kn">import</span> <span class="n">AbstractControlWidget</span>
+
+
+<span class="k">class</span> <span class="nc">NotebookControlWidget</span><span class="p">(</span><span class="n">AbstractControlWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="NotebookControlWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget">[docs]</a>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notebookclass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">AbstractControlWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">notebookclass</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">):</span>
+<div class="viewcode-block" id="NotebookControlWidget.apply"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.apply">[docs]</a>        <span class="n">control</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">autoapply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span></div>
+<div class="viewcode-block" id="NotebookControlWidget.autoapply"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.autoapply">[docs]</a>        <span class="k">if</span> <span class="n">auto</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_control_out</span> <span class="o">=</span> <span class="n">control</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">on_trait_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_widget_value_changed</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">kargs</span><span class="p">):</span></div>
+<div class="viewcode-block" id="NotebookControlWidget.reset"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.reset">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset widget to default values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traits</span><span class="p">()[</span><span class="s">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">on_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span></div>
+<div class="viewcode-block" id="NotebookControlWidget.on_value_changed"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.on_value_changed">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method called when value changed.</span>
+<span class="sd">        This method generally read control and refresh view if :term:`auto-read mode` is enabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_in</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">on_widget_value_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span></div>
+<div class="viewcode-block" id="NotebookControlWidget.on_widget_value_changed"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.on_widget_value_changed">[docs]</a>        <span class="bp">self</span><span class="o">.</span><span class="n">_control_out</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span></div>
+<div class="viewcode-block" id="NotebookControlWidget.setValue"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.setValue">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change widget value.</span>
+<span class="sd">        If your class derivates from an third-party widget, it is sometime necessary</span>
+<span class="sd">        to adapt control value type to widget supported type.</span>
+<span class="sd">        Example unicode to QString in pyqt API v1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
+<div class="viewcode-block" id="NotebookControlWidget.value"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.NotebookControlWidget.value">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns widget value.</span>
+<span class="sd">        If your class derivates from an third-party widget, it is sometime necessary</span>
+<span class="sd">        to adapt widget value type to control type.</span>
+<span class="sd">        If widget supports more than one interface, returned value depends on given interface.</span>
+<span class="sd">        If none, returns widget preferred type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_ipython_display_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="o">.</span><span class="n">_ipython_display_</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">IPython.html</span> <span class="kn">import</span> <span class="n">widgets</span></div>
+<span class="n">available_widgets</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;IInt&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">widgets</span><span class="o">.</span><span class="n">IntSliderWidget</span><span class="p">],</span>
+    <span class="s">&#39;IStr&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">widgets</span><span class="o">.</span><span class="n">HTMLWidget</span><span class="p">],</span>
+    <span class="s">&#39;IBool&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">widgets</span><span class="o">.</span><span class="n">CheckboxWidget</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="n">preferred_widgets</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;IInt&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;slider&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSliderWidget</span><span class="p">,</span>
+        <span class="s">&#39;progress&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntProgressWidget</span>
+    <span class="p">},</span>
+
+    <span class="s">&#39;IStr&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;html&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HTMLWidget</span><span class="p">,</span>
+        <span class="s">&#39;latex&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">LatexWidget</span><span class="p">,</span>
+        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">TextWidget</span><span class="p">,</span>
+        <span class="s">&#39;text area&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">TextareaWidget</span>
+    <span class="p">},</span>
+
+    <span class="s">&#39;IBool&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&#39;checkbox&#39;</span><span class="p">:</span> <span class="n">widgets</span><span class="o">.</span><span class="n">CheckboxWidget</span>
+    <span class="p">},</span>
+
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">notebook_editor</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">preferred</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="notebook_editor"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.notebook_editor">[docs]</a>    <span class="n">iname</span> <span class="o">=</span> <span class="n">interface_name</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="p">)</span>
+    <span class="n">notebookclass</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">preferred</span><span class="p">:</span>
+        <span class="n">notebookclass</span> <span class="o">=</span> <span class="n">preferred</span>
+    <span class="k">elif</span> <span class="n">preferences</span> <span class="ow">and</span> <span class="n">iname</span> <span class="ow">in</span> <span class="n">preferences</span><span class="p">:</span>
+        <span class="n">notebookclass</span> <span class="o">=</span> <span class="n">preferences</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">elif</span> <span class="n">iname</span> <span class="ow">in</span> <span class="n">preferred_widgets</span><span class="p">:</span>
+        <span class="n">notebookclass</span> <span class="o">=</span> <span class="n">preferred_widgets</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">notebookclass</span><span class="p">:</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">NotebookControlWidget</span><span class="p">(</span><span class="n">notebookclass</span><span class="o">=</span><span class="n">notebookclass</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">widget</span>
+
+
+<span class="k">def</span> <span class="nf">select_default_widgets</span><span class="p">():</span></div>
+<div class="viewcode-block" id="select_default_widgets"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.service.html#openalea.oalab.service.notebook_control.select_default_widgets">[docs]</a>    <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">ContainerWidget</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&quot;Select default widgets&quot;</span><span class="p">)</span>
+    <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">iname</span><span class="p">,</span> <span class="n">widget_dict</span> <span class="ow">in</span> <span class="n">preferred_widgets</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="n">iclass</span> <span class="o">=</span> <span class="n">interface_class</span><span class="p">(</span><span class="n">iname</span><span class="p">)</span>
+<span class="c">#         for name, notebookclass in widgets.iteritems():</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">widget_dict</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">SelectWidget</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">iclass</span><span class="o">.</span><span class="n">__alias__</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="n">dic</span><span class="p">[</span><span class="n">iname</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">children</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">set_css</span><span class="p">(</span><span class="s">&#39;border&#39;</span><span class="p">,</span> <span class="s">&quot;1px solid&quot;</span><span class="p">)</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dic</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>
