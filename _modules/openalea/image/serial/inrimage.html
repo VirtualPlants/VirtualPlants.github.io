@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.image.serial.inrimage &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.image.serial.inrimage</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       image.serial: read/write spatial nd images</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 - 2011 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Eric Moscardi &lt;eric.moscardi@sophia.inria.fr&gt;</span>
+<span class="c">#                       Daniel Barbeau &lt;daniel.barbeau@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines inrimage format</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">calcsize</span><span class="p">,</span><span class="n">pack</span><span class="p">,</span><span class="n">unpack</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">openalea.image.spatial_image</span> <span class="kn">import</span> <span class="n">SpatialImage</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;read_inriheader&quot;</span><span class="p">,</span><span class="s">&quot;read_inrimage&quot;</span><span class="p">,</span><span class="s">&quot;write_inrimage&quot;</span><span class="p">]</span>
+
+<span class="n">specific_header_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;XDIM&quot;</span><span class="p">,</span><span class="s">&quot;YDIM&quot;</span><span class="p">,</span><span class="s">&quot;ZDIM&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;VDIM&quot;</span><span class="p">,</span><span class="s">&quot;TYPE&quot;</span><span class="p">,</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;SCALE&quot;</span><span class="p">,</span><span class="s">&quot;CPU&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;VX&quot;</span><span class="p">,</span><span class="s">&quot;VY&quot;</span><span class="p">,</span><span class="s">&quot;VZ&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;TX&quot;</span><span class="p">,</span><span class="s">&quot;TY&quot;</span><span class="p">,</span><span class="s">&quot;TZ&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;#GEOMETRY&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">open_inrifile</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Open an inrimage file</span>
+
+<span class="sd">    Manage the gz attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;.gz&quot;</span><span class="p">,</span><span class="s">&quot;.zip&quot;</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">fzip</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">fzip</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="p">)</span>
+        <span class="n">fzip</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">f</span>
+
+<span class="k">def</span> <span class="nf">_read_header</span> <span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Extract header from a stream and return it</span>
+<span class="sd">    as a python dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#read header string</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">header</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;##}</span><span class="se">\n</span><span class="s">&quot;</span> <span class="p">:</span>
+        <span class="n">header</span> <span class="o">+=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+
+    <span class="c">#read infos in header</span>
+    <span class="n">prop</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">hstart</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;{</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">hend</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;##}&quot;</span><span class="p">)</span>
+    <span class="n">infos</span> <span class="o">=</span> <span class="p">[</span><span class="n">gr</span> <span class="k">for</span> <span class="n">gr</span> <span class="ow">in</span> <span class="n">header</span><span class="p">[</span><span class="n">hstart</span><span class="p">:</span><span class="n">hend</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> \
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c">#format infos</span>
+    <span class="k">for</span> <span class="n">prop_def</span> <span class="ow">in</span> <span class="n">infos</span> <span class="p">:</span>
+        <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="o">=</span> <span class="n">prop_def</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)</span>
+        <span class="n">prop</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">prop</span>
+
+<div class="viewcode-block" id="read_inriheader"><a class="viewcode-back" href="../../../../openalea-components/image/doc/reference/serial.html#openalea.image.serial.inrimage.read_inriheader">[docs]</a><span class="k">def</span> <span class="nf">read_inriheader</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read only the header of an inrimage</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `filename` (str) - name of the file to read</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">open_inrifile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">prop</span> <span class="o">=</span> <span class="n">_read_header</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">prop</span>
+</div>
+<div class="viewcode-block" id="read_inrimage"><a class="viewcode-back" href="../../../../openalea-components/image/doc/reference/serial.html#openalea.image.serial.inrimage.read_inrimage">[docs]</a><span class="k">def</span> <span class="nf">read_inrimage</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read an inrimage, either zipped or not according to extension</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `filename` (str) - name of the file to read</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">open_inrifile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c">#read header</span>
+    <span class="n">prop</span> <span class="o">=</span> <span class="n">_read_header</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">prop</span><span class="p">[</span><span class="s">&quot;Filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span> <span class="c"># Jonathan : 14.05.2012</span>
+
+    <span class="c">#extract usefull infos to read image</span>
+    <span class="n">zdim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;ZDIM&quot;</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">ydim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;YDIM&quot;</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">xdim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;XDIM&quot;</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">vdim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;VDIM&quot;</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="c">#if vdim != 1 :</span>
+        <span class="c">#   msg = &quot;don&#39;t know how to handle vectorial pixel values&quot;</span>
+    <span class="c">#   raise NotImplementedError(msg)</span>
+
+    <span class="c">#find data type</span>
+    <span class="n">pixsize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">,</span><span class="s">&quot;0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;TYPE&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s">&quot;unsigned fixed&quot;</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">pixsize</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="n">ntyp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">try</span> <span class="p">:</span>
+                <span class="n">ntyp</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&quot;np.dtype(np.uint</span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">pixsize</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s">&quot;undefined pix size: </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">pixsize</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s">&quot;float&quot;</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">pixsize</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="n">ntyp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">try</span> <span class="p">:</span>
+                <span class="n">ntyp</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&quot;np.dtype(np.float</span><span class="si">%d</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="n">pixsize</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s">&quot;undefined pix size: </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">pixsize</span><span class="p">)</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;unable to read that type of datas : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dtype</span>
+        <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c">#read datas</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">ntyp</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="n">xdim</span> <span class="o">*</span> <span class="n">ydim</span> <span class="o">*</span> <span class="n">zdim</span> <span class="o">*</span> <span class="n">vdim</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">),</span><span class="n">ntyp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vdim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="p">:</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="n">vdim</span><span class="p">,</span><span class="n">xdim</span><span class="p">,</span><span class="n">ydim</span><span class="p">,</span><span class="n">zdim</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s">&quot;F&quot;</span> <span class="p">)</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="n">xdim</span><span class="p">,</span><span class="n">ydim</span><span class="p">,</span><span class="n">zdim</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s">&quot;F&quot;</span> <span class="p">)</span>
+        <span class="c">#mat = mat.transpose(2,1,0)</span>
+
+    <span class="c">#create SpatialImage</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;VX&quot;</span><span class="p">,</span><span class="s">&quot;VY&quot;</span><span class="p">,</span><span class="s">&quot;VZ&quot;</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;TX&quot;</span><span class="p">,</span><span class="s">&quot;TY&quot;</span><span class="p">,</span><span class="s">&quot;TZ&quot;</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">img</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="n">res</span><span class="p">,</span><span class="n">vdim</span><span class="p">,</span><span class="n">prop</span><span class="p">)</span>
+
+    <span class="c">#return</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">img</span>
+
+</div>
+<span class="k">def</span> <span class="nf">write_inrimage_to_stream</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="c">#metadata</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="s">&quot;info&quot;</span><span class="p">,{})</span> <span class="p">)</span>
+
+    <span class="c">#image dimensions</span>
+    <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;XDIM&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;YDIM&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;ZDIM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;VDIM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;1&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;XDIM&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;YDIM&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;ZDIM&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;VDIM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="c">#image resolution</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="s">&quot;resolution&quot;</span><span class="p">,(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">info</span><span class="p">[</span><span class="s">&quot;VX&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;VY&quot;</span><span class="p">],</span><span class="n">info</span><span class="p">[</span><span class="s">&quot;VZ&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">res</span><span class="p">)</span>
+
+    <span class="c">#data type</span>
+    <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;unsigned fixed&quot;</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;8 bits&quot;</span>
+    <span class="k">elif</span> <span class="n">img</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;unsigned fixed&quot;</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;16 bits&quot;</span>
+    <span class="k">elif</span> <span class="n">img</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;unsigned fixed&quot;</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;32 bits&quot;</span>
+    <span class="k">elif</span> <span class="n">img</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;unsigned fixed&quot;</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;64 bits&quot;</span>
+    <span class="k">elif</span> <span class="n">img</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;float&quot;</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;32 bits&quot;</span>
+    <span class="k">elif</span> <span class="n">img</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span> <span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;float&quot;</span>
+        <span class="n">info</span><span class="p">[</span><span class="s">&quot;PIXSIZE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;64 bits&quot;</span>
+    <span class="c">#elif img.dtype == np.float128 :</span>
+    <span class="c">#   info[&quot;TYPE&quot;] = &quot;float&quot;</span>
+    <span class="c">#   info[&quot;PIXSIZE&quot;] = &quot;128 bits&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;unable to write that type of datas : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c">#mandatory else an error occurs when reading image</span>
+    <span class="n">info</span><span class="p">[</span><span class="s">&#39;#GEOMETRY&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;CARTESIAN&#39;</span>
+    <span class="n">info</span><span class="p">[</span><span class="s">&#39;CPU&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;decm&#39;</span>
+
+    <span class="c">#write header</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s">&quot;#INRIMAGE-4#{</span><span class="se">\n</span><span class="s">&quot;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">specific_header_keys</span> <span class="p">:</span><span class="c">#HACK pas bo to ensure order of specific headers</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">specific_header_keys</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">header</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">info</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="c">#fill header to be a multiple of 256</span>
+    <span class="n">header_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">header_size</span> <span class="o">%</span> <span class="mi">256</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+        <span class="n">header</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">*</span> <span class="p">(</span> <span class="mi">256</span> <span class="o">-</span> <span class="n">header_size</span> <span class="o">%</span> <span class="mi">256</span> <span class="p">)</span>
+
+    <span class="n">header</span> <span class="o">+=</span> <span class="s">&quot;##}</span><span class="se">\n</span><span class="s">&quot;</span>
+
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="s">&quot;F&quot;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span> <span class="p">:</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="s">&quot;F&quot;</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unhandled image dimension </span><span class="si">%d</span><span class="s">.&quot;</span><span class="o">%</span><span class="n">img</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="write_inrimage"><a class="viewcode-back" href="../../../../openalea-components/image/doc/reference/serial.html#openalea.image.serial.inrimage.write_inrimage">[docs]</a><span class="k">def</span> <span class="nf">write_inrimage</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Write an inrimage zipped or not according to the extension</span>
+
+<span class="sd">    .. warning:: if img is not a |SpatialImage|, default values will be used</span>
+<span class="sd">                 for the resolution of the image</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `img` (|SpatialImage|) - image to write</span>
+<span class="sd">     - `filename` (str) - name of the file to read</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#open stream</span>
+    <span class="n">zipped</span> <span class="o">=</span> <span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;.gz&quot;</span><span class="p">,</span><span class="s">&quot;.zip&quot;</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">zipped</span> <span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;wb&quot;</span><span class="p">)</span>
+        <span class="c">#f = StringIO()</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;wb&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">write_inrimage_to_stream</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c"># -- remove probably corrupt file--</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

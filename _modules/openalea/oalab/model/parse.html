@@ -366,10 +366,10 @@
 <span class="sd">        outputs = output_name:output_type, ...</span>
 
 <span class="sd">    :use:</span>
+<span class="sd">        &gt;&gt;&gt; from openalea.oalab.model.parse import parse_input_and_output</span>
 <span class="sd">        &gt;&gt;&gt; comment = &#39;&#39;&#39;</span>
-<span class="sd">        &gt;&gt;&gt; input = a:int=4, b</span>
-<span class="sd">        &gt;&gt;&gt; output = r:float</span>
-<span class="sd">        &gt;&gt;&gt; &#39;&#39;&#39;</span>
+<span class="sd">        ... input = a:int=4, b</span>
+<span class="sd">        ... output = r:float&#39;&#39;&#39;</span>
 <span class="sd">        &gt;&gt;&gt; inputs, outputs = parse_input_and_output(comment)</span>
 <span class="sd">        &gt;&gt;&gt; inputs</span>
 <span class="sd">        [&#39;a:int=4&#39;, &#39;b&#39;]</span>
@@ -403,18 +403,18 @@
 <span class="sd">    :return: docstring of the file if exists (must be a multiline docstring!). If not found, return None.</span>
 
 <span class="sd">    :use:</span>
-<span class="sd">        &gt;&gt;&gt; f = open(lpyfilename, &quot;r&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; lpystring = f.read()</span>
-<span class="sd">        &gt;&gt;&gt; f.close()</span>
+<span class="sd">        &gt;&gt;&gt; f = open(lpyfilename, &quot;r&quot;) # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; lpystring = f.read() # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; f.close() # doctest: +SKIP</span>
 <span class="sd">        &gt;&gt;&gt;</span>
-<span class="sd">        &gt;&gt;&gt; docstring = parse_lpy(lpystring)</span>
+<span class="sd">        &gt;&gt;&gt; docstring = parse_lpy(lpystring) # doctest: +SKIP</span>
 <span class="sd">        &gt;&gt;&gt;</span>
-<span class="sd">        &gt;&gt;&gt; from openalea.oalab.model.parse import parse_doc</span>
-<span class="sd">        &gt;&gt;&gt; if docstring is not None:</span>
-<span class="sd">        &gt;&gt;&gt;     model, inputs, outputs = parse_doc(docstring)</span>
-<span class="sd">        &gt;&gt;&gt;     print &quot;model : &quot;, model</span>
-<span class="sd">        &gt;&gt;&gt;     print &quot;inputs : &quot;, inputs</span>
-<span class="sd">        &gt;&gt;&gt;     print &quot;outputs : &quot;, outputs</span>
+<span class="sd">        &gt;&gt;&gt; from openalea.oalab.model.parse import parse_doc </span>
+<span class="sd">        &gt;&gt;&gt; if docstring is not None: # doctest: +SKIP</span>
+<span class="sd">        ...     model, inputs, outputs = parse_doc(docstring) # doctest: +SKIP</span>
+<span class="sd">        ...     print &quot;model : &quot;, model # doctest: +SKIP</span>
+<span class="sd">        ...     print &quot;inputs : &quot;, inputs # doctest: +SKIP</span>
+<span class="sd">        ...     print &quot;outputs : &quot;, outputs # doctest: +SKIP</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># TODO: need a code review</span>
     <span class="n">begin</span> <span class="o">=</span> <span class="bp">None</span>
@@ -461,14 +461,15 @@
 <span class="sd">        - an attribute *interface*: interface/type of the input obj (str) (optional)</span>
 <span class="sd">        - an attribute *default*: default value of the input obj (str) (optional)</span>
 
+<span class="sd">    &gt;&gt;&gt; from openalea.oalab.model.parse import InputObj</span>
 <span class="sd">    &gt;&gt;&gt; obj = InputObj(&#39;a:float=1&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; obj.name</span>
 <span class="sd">    &#39;a&#39;</span>
 <span class="sd">    &gt;&gt;&gt; obj.default</span>
-<span class="sd">    1</span>
+<span class="sd">    &#39;1&#39;</span>
 <span class="sd">    &gt;&gt;&gt; obj.interface</span>
-<span class="sd">    &#39;IFloat&#39;</span>
-<span class="sd">    &gt;&gt;&gt; print obj</span>
+<span class="sd">    IFloat</span>
+<span class="sd">    &gt;&gt;&gt; obj</span>
 <span class="sd">    InputObj(&#39;a:IFloat=1&#39;)</span>
 
 <span class="sd">    :param string: string object with format &quot;input_name:input_type=input_default_value&quot; or &quot;input_name=input_default_value&quot; or &quot;input_name:input_type&quot; or &quot;input_name&quot;</span>
@@ -538,12 +539,13 @@
 </div>
 <div class="viewcode-block" id="prepare_inputs"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.model.html#openalea.oalab.model.parse.prepare_inputs">[docs]</a><span class="k">def</span> <span class="nf">prepare_inputs</span><span class="p">(</span><span class="n">inputs_info</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from openalea.oalab.model.parse import InputObj</span>
 <span class="sd">    &gt;&gt;&gt; inputs_info = [InputObj(&#39;a:int=1&#39;), InputObj(&#39;b:int=2&#39;)]</span>
-<span class="sd">    &gt;&gt;&gt; prepare_inputs(inputs_info) #DOCTEST: +IGNORE</span>
+<span class="sd">    &gt;&gt;&gt; prepare_inputs(inputs_info) # doctest: +SKIP</span>
 <span class="sd">    {&#39;a&#39;:1, &#39;b&#39;:2}</span>
-<span class="sd">    &gt;&gt;&gt; prepare_inputs(inputs_info, 10) #DOCTEST: +IGNORE</span>
+<span class="sd">    &gt;&gt;&gt; prepare_inputs(inputs_info, 10) # doctest: +SKIP</span>
 <span class="sd">    {&#39;a&#39;:10, &#39;b&#39;:2}</span>
-<span class="sd">    &gt;&gt;&gt; prepare_inputs(inputs_info, 10, 20) #DOCTEST: +IGNORE</span>
+<span class="sd">    &gt;&gt;&gt; prepare_inputs(inputs_info, 10, 20) # doctest: +SKIP</span>
 <span class="sd">    {&#39;a&#39;:10, &#39;b&#39;:20}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&quot;unknown&quot;</span><span class="p">)</span>

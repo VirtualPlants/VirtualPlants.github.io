@@ -55,15 +55,20 @@
 
 <span class="sd">:Example:</span>
 
-<span class="sd">&gt;&gt;&gt; python multisetup install</span>
-<span class="sd">&gt;&gt;&gt; python multisetup install sdist --dist-dir ../dist</span>
-<span class="sd">&gt;&gt;&gt; python multisetup --quiet --keep-going install sdist --dist-dir ../dist</span>
+
+<span class="sd">.. code-block:: bash</span>
+
+<span class="sd">    python multisetup.py install</span>
+<span class="sd">    python multisetup.py install sdist --dist-dir ../dist</span>
+<span class="sd">    python multisetup.py --quiet --keep-going install sdist --dist-dir ../dist</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
 <span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: multisetup.py 3618 2012-06-18 15:58:17Z pradal $&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
 <span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">call</span><span class="p">,</span> <span class="n">PIPE</span><span class="p">,</span> <span class="n">Popen</span>
 
@@ -72,7 +77,7 @@
     <span class="kn">from</span> <span class="nn">path</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">pj</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pj</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;openalea&#39;</span><span class="p">,</span> <span class="s">&#39;core&#39;</span><span class="p">,</span> <span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="s">&#39;core&#39;</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pj</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;openalea&#39;</span><span class="p">,</span> <span class="s">&#39;core&#39;</span><span class="p">,</span> <span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="s">&#39;core&#39;</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">path</span> <span class="kn">import</span> <span class="n">path</span>
     <span class="k">except</span><span class="p">:</span>
@@ -98,7 +103,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        #</span>
 <span class="sd">        if self.command == &#39;sphinx_upload&#39;:</span>
@@ -109,8 +113,6 @@
 <span class="sd">            if self.options.project:</span>
 <span class="sd">                cmd += &#39; --project %s&#39; % self.project</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
-
 
 
 <div class="viewcode-block" id="Multisetup"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.multisetup.Multisetup">[docs]</a><span class="k">class</span> <span class="nc">Multisetup</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -151,7 +153,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_packages</span><span class="p">()</span>
         <span class="c">#self.parse_intern_commands()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_commands</span><span class="p">()</span>
-
 
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Multisetup.help"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.multisetup.Multisetup.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
@@ -225,17 +226,16 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">package_to_remove</span><span class="p">)</span>
                     <span class="c"># until we found another package</span>
                     <span class="k">continue</span>
-                <span class="c"># otherwise, it is an argument that </span>
+                <span class="c"># otherwise, it is an argument that</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c">#starts with a - sign</span>
                     <span class="k">if</span> <span class="n">package_to_remove</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">):</span>
                         <span class="k">break</span>
                     <span class="c"># or is invalid</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;--exclude-packages error: package </span><span class="si">%s</span><span class="s"> not found in package list&#39;</span> \
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;--exclude-packages error: package </span><span class="si">%s</span><span class="s"> not found in package list&#39;</span>
                         <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
 
             <span class="c">#self.commands.pop(index)</span>
-
 </div>
 <div class="viewcode-block" id="Multisetup.parse_commands"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.multisetup.Multisetup.parse_commands">[docs]</a>    <span class="k">def</span> <span class="nf">parse_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Search and remove multisetup options</span>
@@ -244,31 +244,31 @@
 <span class="sd">        to multisetup such as --help, --quiet, --keep-going so that the</span>
 <span class="sd">        remaining commands are fully comptatible with setuptools.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;--update-version&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;--update-version&#39;</span><span class="p">:</span>
             <span class="n">old_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">new_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>            
-            <span class="n">ver_regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;version\s*=\s*</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">old_version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span><span class="s">r&quot;\.&quot;</span><span class="p">))</span>
-            <span class="n">rel_regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;release\s*=\s*</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">old_version</span><span class="p">[:</span><span class="n">old_version</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span><span class="s">r&quot;\.&quot;</span><span class="p">))</span>
+            <span class="n">new_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">ver_regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;version\s*=\s*</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">old_version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="s">r&quot;\.&quot;</span><span class="p">))</span>
+            <span class="n">rel_regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;release\s*=\s*</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">old_version</span><span class="p">[:</span><span class="n">old_version</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="s">r&quot;\.&quot;</span><span class="p">))</span>
             <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">packages</span><span class="p">:</span>
                 <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="nb">dir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&quot;metainfo.ini&quot;</span> <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;metainfo.ini&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                         <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">IOError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="k">print</span> <span class="s">&quot;Couldn&#39;t read &quot;</span><span class="o">+</span><span class="nb">dir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span> <span class="n">e</span> 
+                    <span class="k">print</span> <span class="s">&quot;Couldn&#39;t read &quot;</span> <span class="o">+</span> <span class="nb">dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span> <span class="n">e</span>
                     <span class="k">continue</span>
-                    
-                <span class="n">txt</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">ver_regexp</span><span class="o">.</span><span class="n">subn</span><span class="p">(</span><span class="s">&quot;version = </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">new_version</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
-                <span class="n">txt</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">rel_regexp</span><span class="o">.</span><span class="n">subn</span><span class="p">(</span><span class="s">&quot;release = </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">new_version</span><span class="p">[:</span><span class="n">new_version</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)],</span> <span class="n">txt</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">n</span> <span class="p">:</span>
-                    <span class="k">print</span> <span class="s">&quot;updating &quot;</span><span class="o">+</span><span class="nb">dir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&quot;metainfo.ini&quot;</span>
+
+                <span class="n">txt</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">ver_regexp</span><span class="o">.</span><span class="n">subn</span><span class="p">(</span><span class="s">&quot;version = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">new_version</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+                <span class="n">txt</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">rel_regexp</span><span class="o">.</span><span class="n">subn</span><span class="p">(</span><span class="s">&quot;release = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">new_version</span><span class="p">[:</span><span class="n">new_version</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)],</span> <span class="n">txt</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">n</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;updating &quot;</span> <span class="o">+</span> <span class="nb">dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;metainfo.ini&quot;</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="nb">dir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span> <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                        <span class="k">print</span> <span class="s">&quot;Couldn&#39;t update &quot;</span><span class="o">+</span><span class="nb">dir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span> <span class="n">e</span>                        
+                        <span class="k">print</span> <span class="s">&quot;Couldn&#39;t update &quot;</span> <span class="o">+</span> <span class="nb">dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span> <span class="n">e</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">print</span> <span class="s">&quot;Couldn&#39;t update &quot;</span><span class="o">+</span><span class="nb">dir</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&quot;metainfo.ini&quot;</span>
+                    <span class="k">print</span> <span class="s">&quot;Couldn&#39;t update &quot;</span> <span class="o">+</span> <span class="nb">dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;metainfo.ini&quot;</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="s">&#39;--quiet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span>
@@ -286,16 +286,15 @@
         <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">L</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">L</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="Multisetup.run"><a class="viewcode-back" href="../../../openalea/misc/doc/user/autosum.html#openalea.misc.multisetup.Multisetup.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Enter in all package defined and Executing &#39;python setup.py&#39; with</span>
@@ -303,7 +302,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">sys</span>
-        <span class="kn">import</span> <span class="nn">os</span>		
+        <span class="kn">import</span> <span class="nn">os</span>
         <span class="k">if</span> <span class="n">color</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">openalea.deploy.console</span> <span class="kn">import</span> <span class="n">bold</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> \
@@ -326,12 +325,10 @@
         <span class="n">project_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">curdir</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span>
         <span class="n">directories</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">curdir</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">package</span><span class="p">)</span> <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">packages</span><span class="p">]</span>
 
-
         <span class="k">print</span> <span class="s">&#39;Will process the following directories: &#39;</span><span class="p">,</span>
         <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
             <span class="k">print</span> <span class="n">bold</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">basename</span><span class="p">()),</span>
         <span class="k">print</span> <span class="s">&#39;&#39;</span>
-
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">directories</span><span class="p">:</span>
@@ -345,14 +342,13 @@
                     <span class="k">print</span> <span class="n">red</span><span class="p">(</span><span class="s">&quot;cannot find this directory (</span><span class="si">%s</span><span class="s">)&quot;</span>
                               <span class="o">%</span> <span class="n">directory</span><span class="o">.</span><span class="n">basename</span><span class="p">())</span>
                     <span class="k">print</span> <span class="n">e</span>
-                    
-                <span class="k">print</span> <span class="s">&#39;Python exec : &#39;</span> <span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span>
+
+                <span class="k">print</span> <span class="s">&#39;Python exec : &#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span>
 
                 <span class="c">#print underline(&#39;Entering %s package&#39; % directory.basename())</span>
                 <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
-                    <span class="n">setup_command</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> setup.py </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span><span class="n">cmd</span><span class="p">)</span>
+                    <span class="n">setup_command</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> setup.py </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
                     <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Executing &quot;</span> <span class="o">+</span> <span class="n">setup_command</span> <span class="o">+</span> <span class="s">&#39;...processing&#39;</span><span class="p">,</span>
-
 
                     <span class="c">#Run setup.py with user commands</span>
                     <span class="n">outputs</span> <span class="o">=</span> <span class="bp">None</span>
@@ -387,15 +383,12 @@
                             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">errors</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
                                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;TOTAL&#39;</span><span class="p">):</span>
                                     <span class="n">res</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;TOTAL&#39;</span><span class="p">,</span> <span class="s">&#39;Total coverage&#39;</span><span class="p">)</span>
-                                    <span class="n">res</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span> <span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+                                    <span class="n">res</span> <span class="o">=</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
                                     <span class="k">print</span> <span class="n">purple</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">res</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Ran&#39;</span><span class="p">):</span>
                                     <span class="k">print</span> <span class="n">purple</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">x</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;FAILED&#39;</span><span class="p">):</span>
                                     <span class="k">print</span> <span class="n">purple</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">x</span><span class="p">)</span>
-
-
-
 
         <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
@@ -403,11 +396,9 @@
         <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curdir</span><span class="p">)</span>
 
 
-
-
 <span class="c">#if __name__ == &quot;__main__&quot;:</span>
-<span class="c">#    mysetup = Multisetup()</span>
-</pre></div></div></div>
+<span class="c">#    mysetup = Multisetup()</span></div></div>
+</pre></div>
 
           </div>
         </div>

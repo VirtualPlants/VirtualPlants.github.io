@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.stat.distribution.distribution &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.stat.distribution.distribution</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.StdLib</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 - 2008 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): CHAUBERT Florence &lt;florence.chaubert@cirad.fr&gt;</span>
+<span class="c">#                       Da SILVA David &lt;david.da_silva@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="sd">&quot;&quot;&quot;Set of distributions&quot;&quot;&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">openalea.plotools</span> <span class="kn">import</span> <span class="n">plotable</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">rpy2.rpy_classic</span>  <span class="kn">as</span> <span class="nn">rpy</span>
+    <span class="n">rpy</span><span class="o">.</span><span class="n">set_default_mode</span><span class="p">(</span><span class="n">rpy</span><span class="o">.</span><span class="n">BASIC_CONVERSION</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">rpy</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&quot;Install rpy2 to use this module&quot;</span><span class="p">)</span>
+
+<span class="c">#from scipy import stats</span>
+<span class="c">#import scipy</span>
+<span class="c">#import pylab</span>
+
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s">&quot;restructuredtext en&quot;</span>
+
+<div class="viewcode-block" id="random_continuous_law"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.random_continuous_law">[docs]</a><span class="k">def</span> <span class="nf">random_continuous_law</span><span class="p">(</span><span class="n">law</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate random values from continuous distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `law`: distribution to simulate</span>
+<span class="sd">     - `n` : number of random values</span>
+<span class="sd">     - `args`: parameters of continuous distribution to simulate</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `law`: string</span>
+<span class="sd">     - `n`: int</span>
+<span class="sd">     - `args`: float list</span>
+
+<span class="sd">    :returns: the vector of the random values from continuous distributions</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention:  n must be greater than 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="s">&#39;norm&#39;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rnorm</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mean</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="s">&#39;unif&#39;</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">runif</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="s">&#39;exp&#39;</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rexp</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">rate</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+
+
+<span class="c">################# normal distribution ###############</span></div>
+<div class="viewcode-block" id="dnorm"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.dnorm">[docs]</a><span class="k">def</span> <span class="nf">dnorm</span><span class="p">(</span><span class="n">x</span> <span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Give the density of a normal distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `x`: values</span>
+<span class="sd">     - `mean` : mean of the normal distribution</span>
+<span class="sd">     - `sd`: standard deviation of the normal distribution</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `x`: float list</span>
+<span class="sd">     - `mean`: float</span>
+<span class="sd">     - `sd`: float</span>
+
+<span class="sd">    :returns: the vector of the density of values from a specific normal distribution</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention:  sd must be greater or equal than 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">dnorm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+</div>
+<div class="viewcode-block" id="pnorm"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.pnorm">[docs]</a><span class="k">def</span> <span class="nf">pnorm</span><span class="p">(</span><span class="n">x</span> <span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Give the cumulative distribution of a normal distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `x`: values</span>
+<span class="sd">     - `mean` : mean of the normal distribution</span>
+<span class="sd">     - `sd`: standard deviation of the normal distribution</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `x`: float list</span>
+<span class="sd">     - `mean`: float</span>
+<span class="sd">     - `sd`: float</span>
+
+<span class="sd">    :returns: the vector of the cumulative probabilies of values from a specific normal distribution</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention:  sd must be greater or equal than 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">pnorm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+</div>
+<div class="viewcode-block" id="rnorm"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.rnorm">[docs]</a><span class="k">def</span> <span class="nf">rnorm</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate random values from normal distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `n` : number of random values</span>
+<span class="sd">     - `mean` : mean of the normal distribution</span>
+<span class="sd">     - `sd`: standard deviation of the normal distribution</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `n`: int</span>
+<span class="sd">     - `mean`: float</span>
+<span class="sd">     - `sd`: float</span>
+
+<span class="sd">    :returns: the vector of the random values from normal distribution</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention: n must be greater than 0</span>
+<span class="sd">    :attention: sd must be greater or equal than 0</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rnorm</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">)</span> 
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+
+<span class="c">############## end section normal distribution ########</span>
+
+<span class="c">################# poisson distribution ###############</span></div>
+<div class="viewcode-block" id="dpois"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.dpois">[docs]</a><span class="k">def</span> <span class="nf">dpois</span><span class="p">(</span><span class="n">x</span> <span class="p">,</span> <span class="n">lambd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Give the density of a poisson distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `x`: values</span>
+<span class="sd">     - `lambd` : parameter of poisson distribution</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `x`: float list</span>
+<span class="sd">     - `lambd` : float</span>
+
+<span class="sd">    :returns: the vector of the density of values from a specific poisson distribution</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention: lambd must be greater than 0</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">dpois</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lambd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+</div>
+<div class="viewcode-block" id="ppois"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.ppois">[docs]</a><span class="k">def</span> <span class="nf">ppois</span><span class="p">(</span><span class="n">x</span> <span class="p">,</span> <span class="n">lambd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Give the cumulative distribution of a poisson distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `x`: values</span>
+<span class="sd">     - `lambd` : parameter of poisson distribution</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `x`: float list</span>
+<span class="sd">     - `lambd` : float</span>
+
+<span class="sd">    :returns: the vector of the cumulative probabilies of values from a specific poisson distribution</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention:  lambd must be greater than 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">ppois</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lambd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+</div>
+<div class="viewcode-block" id="rpois"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.rpois">[docs]</a><span class="k">def</span> <span class="nf">rpois</span><span class="p">(</span><span class="n">n</span> <span class="p">,</span> <span class="n">lambd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate random values from poisson distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `n` : number of random values</span>
+<span class="sd">     - `lambd` : parameter of poisson distribution</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `n`: int</span>
+<span class="sd">     - `lambd`: float</span>
+
+<span class="sd">    :returns: the vector of the random values from poisson distribution</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention: n must be greater than 0</span>
+<span class="sd">    :attention: lambd must be greater than 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rpois</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">lambd</span><span class="p">)</span> 
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+
+<span class="c">############## end section poisson distribution ########</span>
+
+
+</div>
+<div class="viewcode-block" id="random_discrete_law"><a class="viewcode-back" href="../../../../openalea-components/stdlib/doc/user/autosum.html#openalea.stat.distribution.distribution.random_discrete_law">[docs]</a><span class="k">def</span> <span class="nf">random_discrete_law</span><span class="p">(</span><span class="n">law</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate random values from discrete distribution</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `law`: distribution to simulate</span>
+<span class="sd">     - `n` : number of random values</span>
+<span class="sd">     - `args`: parameters of discrete distribution to simulate</span>
+
+<span class="sd">    :Types:</span>
+<span class="sd">     - `law`: string</span>
+<span class="sd">     - `n`: int</span>
+<span class="sd">     - `args`: float list</span>
+
+<span class="sd">    :returns: the vector of the random values from discrete distributions</span>
+<span class="sd">    :returntype: float list</span>
+
+<span class="sd">    :attention:  n must be greater than 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="s">&#39;binom&#39;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rbinom</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prob</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="s">&#39;pois&#39;</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rpois</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="s">&#39;geom&#39;</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">rpy</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">rgeom</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">prob</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

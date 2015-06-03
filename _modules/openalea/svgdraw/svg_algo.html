@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.svgdraw.svg_algo &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.svgdraw.svg_algo</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       svgdraw: svg library</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines a set of algorithms for svg elements</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+<span class="kn">from</span> <span class="nn">svg_primitive</span> <span class="kn">import</span> <span class="n">SVGCenteredElement</span><span class="p">,</span><span class="n">SVGSphere</span>
+<span class="kn">from</span> <span class="nn">svg_path</span> <span class="kn">import</span> <span class="n">SVGPath</span><span class="p">,</span><span class="n">SVGConnector</span>
+<span class="kn">from</span> <span class="nn">svg_group</span> <span class="kn">import</span> <span class="n">SVGGroup</span>
+
+<div class="viewcode-block" id="expand_path"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_algo.expand_path">[docs]</a><span class="k">def</span> <span class="nf">expand_path</span> <span class="p">(</span><span class="n">sc</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Ensure that all elements that</span>
+<span class="sd">	are not direct svg primitives are</span>
+<span class="sd">	well defined as path.</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - &#39;sc&#39; (:class:`SVGScene`)</span>
+<span class="sd">	</span>
+<span class="sd">	:Return: None, modify scene in place</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">sc</span><span class="o">.</span><span class="n">elements</span><span class="p">()</span> <span class="p">:</span>
+		<span class="n">_expand_path</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span><span class="n">sc</span><span class="p">)</span>
+</div>
+<span class="k">def</span> <span class="nf">_find_center</span> <span class="p">(</span><span class="n">elm</span><span class="p">)</span> <span class="p">:</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span><span class="n">SVGCenteredElement</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">pt</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span><span class="n">SVGPath</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">pts</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">polyline_ctrl_points</span><span class="p">()</span> <span class="p">)</span>
+		<span class="n">pt</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;don&#39;t know how to handle elm of type </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span> <span class="p">)</span>
+	
+	<span class="k">return</span> <span class="n">elm</span><span class="o">.</span><span class="n">scene_pos</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_expand_path</span> <span class="p">(</span><span class="n">svgelm</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span> <span class="p">:</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svgelm</span><span class="p">,</span><span class="n">SVGGroup</span><span class="p">)</span> <span class="p">:</span>
+		<span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">svgelm</span><span class="o">.</span><span class="n">elements</span><span class="p">()</span> <span class="p">:</span>
+			<span class="n">_expand_path</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span><span class="n">sc</span><span class="p">)</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">svgelm</span><span class="p">,</span><span class="n">SVGConnector</span><span class="p">)</span> <span class="p">:</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">svgelm</span><span class="o">.</span><span class="n">commands</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+				<span class="n">source_elm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">svgelm</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="p">)</span>
+				<span class="n">target_elm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">svgelm</span><span class="o">.</span><span class="n">target</span><span class="p">()</span> <span class="p">)</span>
+				<span class="n">pt1</span> <span class="o">=</span> <span class="n">_find_center</span><span class="p">(</span><span class="n">source_elm</span><span class="p">)</span>
+				<span class="n">pt2</span> <span class="o">=</span> <span class="n">_find_center</span><span class="p">(</span><span class="n">target_elm</span><span class="p">)</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_elm</span><span class="p">,</span><span class="n">SVGCenteredElement</span><span class="p">)</span> <span class="p">:</span>
+					<span class="n">dx</span> <span class="o">=</span> <span class="n">pt2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pt1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+					<span class="n">dy</span> <span class="o">=</span> <span class="n">pt2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pt1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+					<span class="n">n</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">dy</span><span class="p">)</span>
+					<span class="n">dx</span> <span class="o">/=</span> <span class="n">n</span>
+					<span class="n">dy</span> <span class="o">/=</span> <span class="n">n</span>
+					<span class="n">rx</span><span class="p">,</span><span class="n">ry</span> <span class="o">=</span> <span class="n">source_elm</span><span class="o">.</span><span class="n">radius</span><span class="p">()</span>
+					<span class="n">R</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">rx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">ry</span><span class="p">)</span>
+					<span class="n">pt1</span> <span class="o">=</span> <span class="p">(</span><span class="n">pt1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>
+					       <span class="n">pt1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">R</span><span class="p">)</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_elm</span><span class="p">,</span><span class="n">SVGCenteredElement</span><span class="p">)</span> <span class="p">:</span>
+					<span class="n">dx</span> <span class="o">=</span> <span class="n">pt1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pt2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+					<span class="n">dy</span> <span class="o">=</span> <span class="n">pt1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pt2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+					<span class="n">n</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">dy</span><span class="p">)</span>
+					<span class="n">dx</span> <span class="o">/=</span> <span class="n">n</span>
+					<span class="n">dy</span> <span class="o">/=</span> <span class="n">n</span>
+					<span class="n">rx</span><span class="p">,</span><span class="n">ry</span> <span class="o">=</span> <span class="n">target_elm</span><span class="o">.</span><span class="n">radius</span><span class="p">()</span>
+					<span class="n">R</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">rx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">ry</span><span class="p">)</span>
+					<span class="n">pt2</span> <span class="o">=</span> <span class="p">(</span><span class="n">pt2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>
+					       <span class="n">pt2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">R</span><span class="p">)</span>
+				
+				<span class="n">svgelm</span><span class="o">.</span><span class="n">move_to</span><span class="p">(</span><span class="o">*</span><span class="n">pt1</span><span class="p">)</span>
+				<span class="n">svgelm</span><span class="o">.</span><span class="n">line_to</span><span class="p">(</span><span class="o">*</span><span class="n">pt2</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

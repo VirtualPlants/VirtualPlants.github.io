@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.pkg_builder.layout &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.pkg_builder.layout</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">.. topic:: PackageBuilder</span>
+
+<span class="sd">    A module that allows to automatically create a new package</span>
+
+<span class="sd">    :Code status: mature</span>
+<span class="sd">    :Documentation status: mature</span>
+<span class="sd">    :Author: Christophe Pradal</span>
+
+<span class="sd">    :Revision: $Id$</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">getopt</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">Template</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+
+<span class="c">#class Usage(Exception):</span>
+<span class="c">#    def __init__(self, msg):</span>
+<span class="c">#        self.msg = msg</span>
+
+
+<div class="viewcode-block" id="PackageBuilder"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder">[docs]</a><span class="k">class</span> <span class="nc">PackageBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provide methods to build a standard layout package.</span>
+<span class="sd">    Creates standard directories, files.</span>
+<span class="sd">    May also build templae setup file and SConstruct.</span>
+
+<span class="sd">    :param name: name of the package (directory name, import in python)</span>
+<span class="sd">    :param package: name as it appears in the egg name e.g., VisuAlea in OpenAlea.VisuAlea</span>
+<span class="sd">    :param project: a proper project name (openalea/vplants/alinea)</span>
+<span class="sd">    :param release: a relase version </span>
+
+
+<span class="sd">    :Usage:</span>
+
+<span class="sd">    ::</span>
+
+<span class="sd">        pkg = PackageBuilder(name=&#39;test&#39;, package=&#39;Test&#39;, projec=&#39;openalea&#39;, release=&#39;0.8&#39;)</span>
+<span class="sd">        pkg.mkdirs()</span>
+<span class="sd">        pkg.set_files()</span>
+<span class="sd">        pkg.template_legal()</span>
+<span class="sd">        pkg.template_setup()</span>
+<span class="sd">        pkg.template_scons()</span>
+<span class="sd">        pkg.template_wralea()</span>
+<span class="sd">        pkg.template_doc()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">good_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">&quot;[a-z_]{3,}&quot;</span> <span class="p">)</span>
+
+    <span class="n">project_name</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">openalea</span><span class="o">=</span><span class="s">&#39;OpenAlea&#39;</span><span class="p">,</span> <span class="n">vplants</span><span class="o">=</span><span class="s">&#39;VPlants&#39;</span><span class="p">,</span> <span class="n">alinea</span><span class="o">=</span><span class="s">&#39;Alinea&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="s">&#39;0.1&#39;</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c"># e.g. name = PlantGL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="c"># e.g. name = plantgl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="nb">dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">languages</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;python&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">release</span> <span class="o">=</span> <span class="n">release</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_project</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;PACKAGE&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">,</span>
+                        <span class="s">&#39;PACKAGE_NAME&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s">&#39;PROJECT&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
+                        <span class="s">&#39;DEFAULT_PROJECT&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="k">else</span> <span class="s">&#39;openalea&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;PROJECT_NAME&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;FULL_NAME&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s">&#39;RELEASE&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">release</span><span class="p">,</span>
+                <span class="p">}</span>
+
+<div class="viewcode-block" id="PackageBuilder.check_project"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.check_project">[docs]</a>    <span class="k">def</span> <span class="nf">check_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Checks that the project is the official list of projects [openalea, vplants ,alinea]&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;wrong project name. should be in openalea/vplants/alinea&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.check_name"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.check_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check correctness of pkg name. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">good_name</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;Error, package name </span><span class="si">%s</span><span class="s"> is invalid&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.mkdirs"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.mkdirs">[docs]</a>    <span class="k">def</span> <span class="nf">mkdirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create directories. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_dirs</span><span class="p">()</span>
+            <span class="n">dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span>
+
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">print</span> <span class="s">&quot; WARNING: Directory </span><span class="si">%s</span><span class="s"> already exists ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">d</span><span class="p">,)</span>
+                <span class="k">continue</span>
+
+            <span class="k">print</span> <span class="s">&quot;Creating </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">d</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">makedirs</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span> <span class="mi">0</span> <span class="p">]</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>
+                    <span class="k">raise</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.mkfiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.mkfiles">[docs]</a>    <span class="k">def</span> <span class="nf">mkfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create files on the disk. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_files</span><span class="p">()</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Creating </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.set_languages"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.set_languages">[docs]</a>    <span class="k">def</span> <span class="nf">set_languages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cpp</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">fortran</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cpp</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;cpp&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fortran</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;fortran&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.set_dirs"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.set_dirs">[docs]</a>    <span class="k">def</span> <span class="nf">set_dirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dirs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="p">]</span> <span class="o">+</span> <span class="n">dirs</span>
+        <span class="k">else</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;user&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;_static&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;_build&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;test&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;example&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;share&quot;</span><span class="p">,</span>
+               <span class="p">]</span>
+
+        <span class="c"># alias</span>
+        <span class="n">dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirs</span>
+        <span class="n">wralea_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="o">+</span><span class="s">&quot;_wralea&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;python&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="p">:</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">/</span><span class="n">wralea_name</span><span class="p">,</span>
+               <span class="p">])</span>
+        <span class="k">if</span> <span class="s">&#39;cpp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="p">:</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="s">&quot;cpp&quot;</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="s">&quot;wrapper&quot;</span><span class="p">,</span>
+               <span class="p">])</span>
+        <span class="k">if</span> <span class="s">&#39;c&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="p">:</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="s">&quot;c&quot;</span><span class="p">,</span>
+               <span class="p">])</span>
+        <span class="k">if</span> <span class="s">&#39;fortran&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="p">:</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="s">&quot;fortran&quot;</span><span class="p">,</span>
+               <span class="p">])</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.set_files"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.set_files">[docs]</a>    <span class="k">def</span> <span class="nf">set_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="o">/</span><span class="s">&#39;__init__.py&#39;</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectinitfiles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legalfiles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wraleafiles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sconsfiles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setupfiles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docfiles</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.projectinitfiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.projectinitfiles">[docs]</a>    <span class="k">def</span> <span class="nf">projectinitfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">/</span><span class="s">&#39;__init__.py&#39;</span> <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.legalfiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.legalfiles">[docs]</a>    <span class="k">def</span> <span class="nf">legalfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;LICENSE.txt&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;README.txt&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;ChangeLog.txt&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;AUTHORS.txt&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;NEWS.txt&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;TODO.txt&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.wraleafiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.wraleafiles">[docs]</a>    <span class="k">def</span> <span class="nf">wraleafiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">wralea_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="o">+</span><span class="s">&quot;_wralea&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">/</span><span class="n">wralea_name</span><span class="o">/</span><span class="s">&quot;__init__.py&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">/</span><span class="n">wralea_name</span><span class="o">/</span><span class="s">&quot;__wralea__.py&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.sconsfiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.sconsfiles">[docs]</a>    <span class="k">def</span> <span class="nf">sconsfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;cpp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;options.py&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;SConstruct&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="s">&quot;cpp&quot;</span><span class="o">/</span><span class="s">&quot;SConscript&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;src&quot;</span><span class="o">/</span><span class="s">&quot;wrapper&quot;</span><span class="o">/</span><span class="s">&quot;SConscript&quot;</span><span class="p">,</span>
+                   <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.setupfiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.setupfiles">[docs]</a>    <span class="k">def</span> <span class="nf">setupfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;setup.py&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;metainfo.ini&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.docfiles"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.docfiles">[docs]</a>    <span class="k">def</span> <span class="nf">docfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;setup the filenames for the doc layout&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;contents.rst&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;Makefile&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;make.bat&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;conf.py&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;user&quot;</span><span class="o">/</span><span class="s">&quot;overview.txt&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;user&quot;</span><span class="o">/</span><span class="s">&quot;manual.rst&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;user&quot;</span><span class="o">/</span><span class="s">&quot;index.rst&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkg_dir</span><span class="o">/</span><span class="s">&quot;doc&quot;</span><span class="o">/</span><span class="s">&quot;user&quot;</span><span class="o">/</span><span class="s">&quot;autosum.rst&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.template_wralea"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.template_wralea">[docs]</a>    <span class="k">def</span> <span class="nf">template_wralea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wraleafiles</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;__wralea__.py&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mkfiles</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+        <span class="n">wralea_py</span> <span class="o">=</span> <span class="n">f</span>
+
+        <span class="n">tpl_wralea</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_wralea.txt&#39;</span>
+
+        <span class="k">print</span> <span class="n">tpl_wralea</span>
+
+        <span class="n">wralea_txt</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tpl_wralea</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="n">wralea_txt</span> <span class="o">=</span> <span class="n">wralea_txt</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;Creating a template version for </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">wralea_py</span><span class="p">,</span> <span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">wralea_py</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">wralea_txt</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.template_doc"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.template_doc">[docs]</a>    <span class="k">def</span> <span class="nf">template_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docfiles</span><span class="p">()</span>
+        <span class="n">tpl_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tpl_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">namebase</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span>
+                <span class="n">tpl_files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">f</span><span class="p">,</span> <span class="n">tpl_file</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">tpl_files</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;Creating a template version for </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="p">)</span>
+            <span class="n">py_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="PackageBuilder.template_projectinit"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.template_projectinit">[docs]</a>    <span class="k">def</span> <span class="nf">template_projectinit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Build new files from a default one.</span>
+
+<span class="sd">        If the template file exist and the current file is empty, create a new one.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectinitfiles</span><span class="p">()</span>
+        <span class="n">tpl_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tpl_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">namebase</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span>
+                <span class="n">tpl_files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">f</span><span class="p">,</span> <span class="n">tpl_file</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">tpl_files</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
+
+            <span class="k">print</span> <span class="s">&quot;Creating a template version for </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="p">)</span>
+            <span class="n">py_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PackageBuilder.template_legal"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.template_legal">[docs]</a>    <span class="k">def</span> <span class="nf">template_legal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Build new files from a default one.</span>
+
+<span class="sd">        If the template file exist and the current file is empty, create a new one.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">legalfiles</span><span class="p">()</span>
+        <span class="n">tpl_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tpl_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">namebase</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span>
+                <span class="n">tpl_files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">f</span><span class="p">,</span> <span class="n">tpl_file</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">tpl_files</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
+
+            <span class="k">print</span> <span class="s">&quot;Creating a template version for </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="p">)</span>
+            <span class="n">py_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="PackageBuilder.template_setup"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.template_setup">[docs]</a>    <span class="k">def</span> <span class="nf">template_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Build a setup.py and an associated metainfo.ini &#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setupfiles</span><span class="p">()</span>
+
+        <span class="n">tpl_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tpl_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">namebase</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span>
+                <span class="n">tpl_files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">f</span><span class="p">,</span> <span class="n">tpl_file</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">tpl_files</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">HAS_SCONS</span><span class="o">=</span><span class="s">&#39;cpp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">languages</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
+
+            <span class="k">print</span> <span class="s">&quot;Creating a template version for </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="p">)</span>
+            <span class="n">py_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="PackageBuilder.template_scons"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.PackageBuilder.template_scons">[docs]</a>    <span class="k">def</span> <span class="nf">template_scons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Build default SConstruct and SConscript files. &#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sconsfiles</span><span class="p">()</span>
+        <span class="n">tpl_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;wrapper&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">tpl_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_SConscript_wrapper.txt&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tpl_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">dirname</span><span class="p">()</span><span class="o">/</span><span class="s">&#39;template_&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">.</span><span class="n">namebase</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span>
+                <span class="n">tpl_files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">f</span><span class="p">,</span> <span class="n">tpl_file</span><span class="p">))</span>
+            
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">tpl</span> <span class="ow">in</span> <span class="n">tpl_files</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">tpl</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
+
+            <span class="k">print</span> <span class="s">&quot;Creating a template version for </span><span class="si">%s</span><span class="s"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">f</span><span class="p">,</span> <span class="p">)</span>
+            <span class="n">py_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">py_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../openalea-components/pkg_builder/doc/user/autosum.html#openalea.pkg_builder.layout.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;This function is called by alea_create_package script that is installed </span>
+<span class="sd">    on your system when installing OpenAlea.PkgBuilder package.</span>
+
+<span class="sd">    To obtain specific help, type::</span>
+
+<span class="sd">        alea_create_package --help</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">usage</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">    %prog create a package layout automatically</span>
+
+<span class="s">    :Examples:</span>
+
+<span class="s">        python %prog --name MyPackage --languages cpp</span>
+<span class="s">        %prog --name MyPackage [--languages cpp fortran] [--project openalea]</span>
+
+<span class="s">    &quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">(</span><span class="n">usage</span><span class="o">=</span><span class="n">usage</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;--project&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;project&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>  
+        <span class="n">help</span><span class="o">=</span><span class="s">&quot;project name in [openalea, vplants, alinea]&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;--languages&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;languages&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  
+        <span class="n">help</span><span class="o">=</span><span class="s">&quot;languages separated by a space [cpp, c, fortran]&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;--release&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;release&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1.0&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;the package release&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;--name&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                      <span class="n">help</span><span class="o">=</span><span class="s">&quot;The name of the package as it appear in the eggname: e.g., VisuAlea in OpenAlea.VisuAlea&quot;</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span><span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&quot;Running create_layout version </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">__revision__</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">name</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;&quot;&quot;--name must be provided. See help (--help)&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">pkg</span> <span class="o">=</span> <span class="n">PackageBuilder</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">release</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">opts</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">languages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">languages</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">language</span> <span class="ow">in</span> <span class="n">languages</span><span class="p">:</span>
+            <span class="n">pkg</span><span class="o">.</span><span class="n">set_languages</span><span class="p">({</span><span class="n">language</span><span class="p">:</span><span class="bp">True</span><span class="p">})</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pkg</span><span class="o">.</span><span class="n">check_name</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;Error, package name </span><span class="si">%s</span><span class="s"> is invalid&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">opts</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">pkg</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">mkfiles</span><span class="p">()</span>
+
+    <span class="n">pkg</span><span class="o">.</span><span class="n">template_legal</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">template_setup</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">template_scons</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">template_wralea</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">template_projectinit</span><span class="p">()</span>
+    <span class="n">pkg</span><span class="o">.</span><span class="n">template_doc</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

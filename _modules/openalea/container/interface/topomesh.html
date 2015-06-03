@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.container.interface.topomesh &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.container.interface.topomesh</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c">#       ITopoMesh : container package</span>
+<span class="c">#</span>
+<span class="c">#       Copyright  or Copr. 2006 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       VPlants WebSite : https://gforge.inria.fr/projects/vplants/</span>
+<span class="c">#</span>
+
+<span class="n">__doc__</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">This module provide a topological mesh interface</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id: topomesh.py 13343 2012-12-07 04:08:32Z revesansparole $ &quot;</span>
+
+<div class="viewcode-block" id="TopomeshError"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.TopomeshError">[docs]</a><span class="k">class</span> <span class="nc">TopomeshError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    base class for all exception in a topomesh</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="InvalidWisp"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.InvalidWisp">[docs]</a><span class="k">class</span> <span class="nc">InvalidWisp</span> <span class="p">(</span><span class="n">TopomeshError</span><span class="p">,</span><span class="ne">KeyError</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    exception raised when a wrong wisp id is provided</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="InvalidDegree"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.InvalidDegree">[docs]</a><span class="k">class</span> <span class="nc">InvalidDegree</span> <span class="p">(</span><span class="n">TopomeshError</span><span class="p">,</span><span class="ne">ValueError</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    exception raised when a the degree is outside of bounds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="ITopomesh"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh">[docs]</a><span class="k">class</span> <span class="nc">ITopomesh</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    interface definition of a topological mesh</span>
+<span class="sd">    a mesh is formed of elements called wisps</span>
+<span class="sd">    separated by elements of degree-1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ITopomesh.degree"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.degree">[docs]</a>    <span class="k">def</span> <span class="nf">degree</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        maximum degree (or scale) of elements of the mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ITopomesh.is_valid"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.is_valid">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        test wether the mesh fulfill all mesh properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ITopomesh.has_wisp"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.has_wisp">[docs]</a>    <span class="k">def</span> <span class="nf">has_wisp</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return true if the wisp</span>
+<span class="sd">        specified by its id is in mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ITopomesh.borders"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.borders">[docs]</a>    <span class="k">def</span> <span class="nf">borders</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">,</span> <span class="n">degree_offset</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on all border of this wisp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ITopomesh.nb_borders"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.nb_borders">[docs]</a>    <span class="k">def</span> <span class="nf">nb_borders</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">,</span> <span class="n">degree_offset</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of border of this wisp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ITopomesh.regions"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.regions">[docs]</a>    <span class="k">def</span> <span class="nf">regions</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on all regions this wisp separate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ITopomesh.nb_regions"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.ITopomesh.nb_regions">[docs]</a>    <span class="k">def</span> <span class="nf">nb_regions</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of regions this wisp separate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IWispListMesh"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IWispListMesh">[docs]</a><span class="k">class</span> <span class="nc">IWispListMesh</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    mesh view as a collection of wisps</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IWispListMesh.wisps"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IWispListMesh.wisps">[docs]</a>    <span class="k">def</span> <span class="nf">wisps</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on all wisps of a given degree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="IWispListMesh.nb_wisps"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IWispListMesh.nb_wisps">[docs]</a>    <span class="k">def</span> <span class="nf">nb_wisps</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of wisps of the given degree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="INeighborhoodMesh"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.INeighborhoodMesh">[docs]</a><span class="k">class</span> <span class="nc">INeighborhoodMesh</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    implicit neighborhood between wisps at the same scale</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="INeighborhoodMesh.border_neighbors"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.INeighborhoodMesh.border_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">border_neighbors</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on all wisps at the same degree</span>
+<span class="sd">        that share a border with this wisp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="INeighborhoodMesh.nb_border_neighbors"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.INeighborhoodMesh.nb_border_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_border_neighbors</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of border_neighbors of this wisp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="INeighborhoodMesh.region_neighbors"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.INeighborhoodMesh.region_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">region_neighbors</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iterator on all wisps at the same degree</span>
+<span class="sd">        that share a region with this wisp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="INeighborhoodMesh.nb_region_neighbors"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.INeighborhoodMesh.nb_region_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_region_neighbors</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        number of region_neighbors of this wisp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div></div>
+<div class="viewcode-block" id="IMutableMesh"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IMutableMesh">[docs]</a><span class="k">class</span> <span class="nc">IMutableMesh</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    interface for editing methods on mesh</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IMutableMesh.add_wisp"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IMutableMesh.add_wisp">[docs]</a>    <span class="k">def</span> <span class="nf">add_wisp</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add a new wisp connected to nothing</span>
+<span class="sd">        if wid is None, create a free id</span>
+<span class="sd">        return used wid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="IMutableMesh.remove_wisp"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IMutableMesh.remove_wisp">[docs]</a>    <span class="k">def</span> <span class="nf">remove_wisp</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove wisp from the mesh</span>
+<span class="sd">        remove all attached links</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="IMutableMesh.link"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IMutableMesh.link">[docs]</a>    <span class="k">def</span> <span class="nf">link</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">,</span> <span class="n">border_id</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        link a wisp of degree degree with id wid</span>
+<span class="sd">        with another wisp of degree degree-1 with id border_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="IMutableMesh.unlink"><a class="viewcode-back" href="../../../../openalea-components/container/doc/user/autosum.html#openalea.container.interface.topomesh.IMutableMesh.unlink">[docs]</a>    <span class="k">def</span> <span class="nf">unlink</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">,</span> <span class="n">border_id</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove links between a region and its border</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

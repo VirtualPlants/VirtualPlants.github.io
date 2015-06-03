@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>image.gui.colormaps &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for image.gui.colormaps</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: iso-8859-15 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       openalea.image.analysis.gui.colormaps</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2010-2011 INRIA - CIRAD - INRA - ENS-Lyon</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Vincent Mirabet</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#       http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">################################################################################</span>
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="c"># import libraries</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="liste"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.liste">[docs]</a><span class="k">def</span> <span class="nf">liste</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    list of accessible colormaps</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">l</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;black_and_white&quot;</span><span class="p">,</span> <span class="s">&quot;white_and_black&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_full&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_green2red&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_red2blue&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_green2blue&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_red2green&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_blue2red&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow_blue2green&quot;</span><span class="p">]</span>
+    <span class="k">print</span> 
+
+</div>
+<div class="viewcode-block" id="black_and_white"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.black_and_white">[docs]</a><span class="k">def</span> <span class="nf">black_and_white</span><span class="p">(</span><span class="n">lut</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a black and white lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+</div>
+<div class="viewcode-block" id="white_and_black"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.white_and_black">[docs]</a><span class="k">def</span> <span class="nf">white_and_black</span><span class="p">(</span><span class="n">lut</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a black and white lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_full"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_full">[docs]</a><span class="k">def</span> <span class="nf">rainbow_full</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_green2red"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_green2red">[docs]</a><span class="k">def</span> <span class="nf">rainbow_green2red</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_red2blue"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_red2blue">[docs]</a><span class="k">def</span> <span class="nf">rainbow_red2blue</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">0.66</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_green2blue"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_green2blue">[docs]</a><span class="k">def</span> <span class="nf">rainbow_green2blue</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">0.66</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_red2green"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_red2green">[docs]</a><span class="k">def</span> <span class="nf">rainbow_red2green</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">end</span><span class="o">=.</span><span class="mi">33</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_blue2red"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_blue2red">[docs]</a><span class="k">def</span> <span class="nf">rainbow_blue2red</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+
+</div>
+<div class="viewcode-block" id="rainbow_blue2green"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.colormaps.rainbow_blue2green">[docs]</a><span class="k">def</span> <span class="nf">rainbow_blue2green</span><span class="p">(</span><span class="n">lut</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mf">0.66</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">0.33</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    creates a rainbow lut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">alpha_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">hue_range</span><span class="o">=</span><span class="p">[</span><span class="n">begin</span><span class="p">,</span><span class="n">end</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">value_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">lut</span><span class="o">.</span><span class="n">saturation_range</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lut</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

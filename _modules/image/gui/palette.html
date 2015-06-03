@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>image.gui.palette &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for image.gui.palette</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       colormap manipulations</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 - 2011 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provide a set of palettes to associate colors to data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id: $ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">colorsys</span> <span class="kn">import</span> <span class="n">hsv_to_rgb</span><span class="p">,</span><span class="n">rgb_to_hsv</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span><span class="n">uint32</span><span class="p">,</span> <span class="n">uint8</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">linspace</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span><span class="p">,</span> <span class="n">cm</span>
+
+<span class="n">fixed_palette_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s">&quot;grayscale_alpha&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow&quot;</span><span class="p">,</span><span class="s">&quot;bwrainbow&quot;</span><span class="p">,</span><span class="s">&quot;bw&quot;</span><span class="p">]</span>
+<span class="n">palette_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;grayscale&quot;</span><span class="p">,</span> <span class="s">&quot;grayscale_alpha&quot;</span><span class="p">,</span> <span class="s">&quot;rainbow&quot;</span><span class="p">,</span><span class="s">&quot;bwrainbow&quot;</span><span class="p">,</span><span class="s">&quot;bw&quot;</span><span class="p">]</span>
+<span class="n">palette_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">cm</span><span class="o">.</span><span class="n">datad</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&quot;_r&quot;</span><span class="p">)])</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="n">fixed_palette_names</span> <span class="o">+</span> <span class="p">[</span><span class="s">&quot;palette_names&quot;</span><span class="p">,</span><span class="s">&quot;palette_factory&quot;</span><span class="p">]</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Some developper documentation: This module implements some</span>
+<span class="sd">color LUTs, accessible using palette_factory.</span>
+
+<span class="sd">What are LUTs? They are simple vectors of color values and are used</span>
+<span class="sd">to display scalar images. If an image has a pixel of value 10,</span>
+<span class="sd">the display system will look in the LUT and index 10 to find what</span>
+<span class="sd">is its favourite colour.</span>
+
+<span class="sd">In some way they convert undisplayable scalars to displayable colors.</span>
+<span class="sd">For uint8 images this isn&#39;t obvious as most display systems allow some sort</span>
+<span class="sd">of 8 bit representation (the implicit LUT being greyscale),</span>
+<span class="sd">but if you have higher depth images like, uint16 which is fairly frequent,</span>
+<span class="sd">systems can&#39;t handle this. What they can handle is RGB[A], or more precisely,</span>
+<span class="sd">[A]RGB.</span>
+
+<span class="sd">What is RGB[A]? Practically, it is a color that is encoded using 8bit per channel.</span>
+<span class="sd">So we have 24bits or 32bits deep images. This means that each channel only has to</span>
+<span class="sd">be represented as a uint8. There IS another representation that fuses all channels</span>
+<span class="sd">into one single uint32 (for 24bits depth, the alpha is forced to 255).</span>
+
+<span class="sd">The LUTs that are created in this module treat each channel seperately, always 4 channels</span>
+<span class="sd">(eg. 4*uint8 per value, instead of 1*uint32). This is why LUT arrays are uint8, no need</span>
+<span class="sd">for them to be uint32.</span>
+
+<span class="sd">The palette_factory has an option to combine all 4 channels of a value into the uint32 ARGB32</span>
+<span class="sd">representation (even though to be suitable for Qt it is actually ABGR for some reason).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="bw"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.palette.bw">[docs]</a><span class="k">def</span> <span class="nf">bw</span> <span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Black and white palette</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)],</span><span class="n">uint8</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="grayscale"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.palette.grayscale">[docs]</a><span class="k">def</span> <span class="nf">grayscale</span> <span class="p">(</span><span class="n">cmax</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Grayscale values ranging from 0 to 255</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        - `cmax` (int) - data maximum value</span>
+
+<span class="sd">    :Returns Type: list of (R,G,B,(A) )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cmax</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span> <span class="n">cmax</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">pal</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">),</span>
+        <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="n">pal</span><span class="p">,</span><span class="n">uint8</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="grayscale_alpha"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.palette.grayscale_alpha">[docs]</a><span class="k">def</span> <span class="nf">grayscale_alpha</span> <span class="p">(</span><span class="n">cmax</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Grayscale values ranging from 0 to 255</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        - `cmax` (int) - data maximum value</span>
+
+<span class="sd">    :Returns Type: list of (R,G,B,(A) )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cmax</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span> <span class="n">cmax</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">pal</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mf">255.</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">)</span> <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">cmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="n">pal</span><span class="p">,</span><span class="n">uint8</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="rainbow"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.palette.rainbow">[docs]</a><span class="k">def</span> <span class="nf">rainbow</span> <span class="p">(</span><span class="n">cmax</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Rainbow values ranging from red to blue and violet</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        - `cmax` (int) - data maximum value</span>
+
+<span class="sd">    :Returns Type: list of (R,G,B)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cmax</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span> <span class="n">cmax</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">cmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cmax</span><span class="p">)</span>
+    <span class="n">pal</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hsv_to_rgb</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">)</span> <span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">255</span><span class="p">,)</span> \
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="n">pal</span><span class="p">,</span><span class="n">uint8</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="bwrainbow"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.palette.bwrainbow">[docs]</a><span class="k">def</span> <span class="nf">bwrainbow</span> <span class="p">(</span><span class="n">cmax</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Black, White plus Rainbow values ranging from red to blue and violet</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        - `cmax` (int) - data maximum value</span>
+
+<span class="sd">    :Returns Type: list of int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cmax</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span> <span class="n">cmax</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">cmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cmax</span><span class="p">)</span>
+    <span class="n">pal</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)]</span> \
+        <span class="o">+</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hsv_to_rgb</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="n">cmax</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">)</span> <span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">255</span><span class="p">,)</span> \
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cmax</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">array</span><span class="p">(</span><span class="n">pal</span><span class="p">,</span><span class="n">uint8</span><span class="p">)</span>
+
+
+</div>
+<span class="k">def</span> <span class="nf">matplotlib</span><span class="p">(</span><span class="n">cmax</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">convert</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span><span class="n">cmax</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="n">cmax</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">cmax</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pal</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="nb">bytes</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pal</span>
+
+<span class="k">def</span> <span class="nf">to_argb_swap_columns_and_recast</span><span class="p">(</span><span class="n">pal</span><span class="p">):</span>
+    <span class="c"># -- okay this is twisted. I originally expected</span>
+    <span class="c"># to put column 3 at 0 and shift the three first to the right</span>
+    <span class="c"># to acheive ARGB32. However, this doesn&#39;t seem to work</span>
+    <span class="c"># (empirically) and this is the swapping that works:</span>
+    <span class="c"># RGBA -&gt; ABGR. Can someone explain ? --</span>
+
+    <span class="n">new</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">pal</span><span class="p">)</span>
+    <span class="n">new</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">new</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">new</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">new</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">new</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">from_argb_swap_columns_and_recast</span><span class="p">(</span><span class="n">pal</span><span class="p">):</span>
+
+    <span class="n">new</span> <span class="o">=</span> <span class="n">pal</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pal</span><span class="p">),</span><span class="mi">4</span><span class="p">))</span>
+    <span class="n">new2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">pal</span><span class="p">)</span>
+    <span class="n">new2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">new2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">new2</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">new2</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pal</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">new2</span>
+
+<span class="n">palette_to_argb_func</span> <span class="o">=</span> <span class="n">to_argb_swap_columns_and_recast</span>
+
+<div class="viewcode-block" id="palette_factory"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.palette.palette_factory">[docs]</a><span class="k">def</span> <span class="nf">palette_factory</span> <span class="p">(</span><span class="n">palname</span><span class="p">,</span> <span class="n">cmax</span><span class="p">,</span> <span class="n">as_ARGB</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">if</span> <span class="n">cmax</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span> <span class="n">cmax</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="n">pal</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">palname</span> <span class="ow">in</span> <span class="n">fixed_palette_names</span><span class="p">:</span>
+        <span class="n">pal</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">palname</span><span class="p">](</span><span class="n">cmax</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mpal</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">palname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mpal</span><span class="p">:</span>
+            <span class="n">pal</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">mpal</span><span class="p">,</span><span class="n">cmax</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">as_ARGB</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">palette_to_argb_func</span><span class="p">(</span><span class="n">pal</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pal</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

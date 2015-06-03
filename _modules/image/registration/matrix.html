@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>image.registration.matrix &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for image.registration.matrix</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="c">#</span>
+<span class="c">#       vplants.asclepios.matrix</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 - 2011 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Eric MOSCARDI &lt;eric.moscardi@gmail.com&gt;</span>
+<span class="c">#                       Daniel BARBEAU &lt;daniel.barbeau@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#       http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">################################################################################</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="compute_rank"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.compute_rank">[docs]</a><span class="k">def</span> <span class="nf">compute_rank</span><span class="p">(</span> <span class="n">mat</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the rank of a matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span> <span class="o">&gt;</span> <span class="mf">1e-10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rank</span>
+
+</div>
+<div class="viewcode-block" id="read_matrix"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.read_matrix">[docs]</a><span class="k">def</span> <span class="nf">read_matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads 4x4 matrices either written by numpy or </span>
+<span class="sd">    Baladin matrices&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&quot;O8&quot;</span> <span class="ow">in</span> <span class="n">txt</span><span class="p">:</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">txt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s">&quot;(&quot;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="s">&quot;O8&quot;</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s">&quot;)&quot;</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">mat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Cannot read </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">filename</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="numpy_4x4_mat_to_c_array"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.numpy_4x4_mat_to_c_array">[docs]</a><span class="k">def</span> <span class="nf">numpy_4x4_mat_to_c_array</span><span class="p">(</span> <span class="n">numpy_matrix</span> <span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">numpy_matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">c_double</span> <span class="o">*</span> <span class="mi">16</span>
+    <span class="k">return</span> <span class="n">mat</span><span class="p">(</span> <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">numpy_matrix</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="inverse_matrix"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.inverse_matrix">[docs]</a><span class="k">def</span> <span class="nf">inverse_matrix</span><span class="p">(</span> <span class="n">numpy_matrix</span> <span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">numpy_matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">numpy_matrix</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.identity">[docs]</a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">target_res</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">source_res</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">source_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">matrix_real2voxels</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">target_res</span><span class="p">,</span> <span class="n">source_res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mat</span>
+     </div>
+<div class="viewcode-block" id="matrix_voxels2real"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.matrix_voxels2real">[docs]</a><span class="k">def</span> <span class="nf">matrix_voxels2real</span><span class="p">(</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">target_res</span><span class="p">,</span> <span class="n">source_res</span> <span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Converts a transform matrix (M&#39;) expressed in voxel coordinates</span>
+<span class="sd">    (from space_s to space_t) into a matrix M from space_r to space_r</span>
+<span class="sd">    where space_s is the voxel space from which M&#39; comes from and space_t</span>
+<span class="sd">    the one where it will end, and space_r is the real common space.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     * matrix : a 4x4 numpy.array.</span>
+<span class="sd">     * target_res : a 3-uple of unit vectors for the space_t (eg: (1.,2.,1)</span>
+<span class="sd">     * source_res : a 3-uple of unit vectors for the space_s (eg: (2.,1.,3)</span>
+
+<span class="sd">    :Returns:</span>
+<span class="sd">     * The matrix in &quot;real&quot; coordinates (M mapping space_r to space_r ,</span>
+<span class="sd">     instead of space_r to space_r).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">vx_t</span><span class="p">,</span> <span class="n">vy_t</span><span class="p">,</span> <span class="n">vz_t</span> <span class="o">=</span> <span class="n">target_res</span>
+    <span class="n">vx_s</span><span class="p">,</span> <span class="n">vy_s</span><span class="p">,</span> <span class="n">vz_s</span> <span class="o">=</span> <span class="n">source_res</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span> <span class="p">[</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span> <span class="n">vx_t</span> <span class="o">/</span><span class="n">vx_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span> <span class="n">vx_t</span> <span class="o">/</span><span class="n">vy_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span> <span class="n">vx_t</span> <span class="o">/</span><span class="n">vz_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span> <span class="n">vx_t</span><span class="p">],</span>
+                       <span class="p">[</span><span class="n">matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span> <span class="n">vy_t</span> <span class="o">/</span><span class="n">vx_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span> <span class="n">vy_t</span> <span class="o">/</span><span class="n">vy_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span> <span class="n">vy_t</span> <span class="o">/</span><span class="n">vz_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span> <span class="n">vy_t</span><span class="p">],</span>
+                       <span class="p">[</span><span class="n">matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span> <span class="n">vz_t</span> <span class="o">/</span><span class="n">vx_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span> <span class="n">vz_t</span> <span class="o">/</span><span class="n">vy_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span> <span class="n">vz_t</span> <span class="o">/</span><span class="n">vz_s</span><span class="p">,</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span> <span class="n">vz_t</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span>                      <span class="mf">0.</span><span class="p">,</span>                      <span class="mf">0.</span><span class="p">,</span>                                  <span class="mf">1.</span><span class="p">]</span> <span class="p">]</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="matrix_real2voxels"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.registration.html#image.registration.matrix.matrix_real2voxels">[docs]</a><span class="k">def</span> <span class="nf">matrix_real2voxels</span><span class="p">(</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">target_res</span><span class="p">,</span> <span class="n">source_res</span> <span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Converts a transform matrix (M) expressed in real coordinates</span>
+<span class="sd">    (a transform from space_r to space_r) into a matrix M&#39; from space_1 to space_2</span>
+<span class="sd">    where space_s is the voxel space from which M comes from and space_t the</span>
+<span class="sd">    one where it will end, and space_r is the real common space.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">     * matrix : a 4x4 numpy.array.</span>
+<span class="sd">     * target_res : a 3-uple of unit vectors for the space_2 (eg: (1.,2.,1)</span>
+<span class="sd">     * source_res : a 3-uple of unit vectors for the space_1 (eg: (2.,1.,3)</span>
+
+<span class="sd">    :Returns:</span>
+<span class="sd">     * The matrix in &quot;voxel&quot; coordinates (M&#39; mapping space_1 to space_2 ,</span>
+<span class="sd">     instead of space_r to space_r).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+    <span class="c"># vx_t, vy_t, vz_t = target_res</span>
+    <span class="c"># vx_s, vy_s, vz_s = source_res</span>
+
+    <span class="c"># --this is wrong, no time to check why just now --</span>
+    <span class="c"># return np.array( [ [matrix[0,0]* vx_s /vx_t, matrix[0,1]* vx_s /vy_t, matrix[0,2]* vx_s /vz_t, matrix[0,3]/ vx_t],</span>
+    <span class="c">#                    [matrix[1,0]* vy_s /vx_t, matrix[1,1]* vy_s /vy_t, matrix[1,2]* vy_s /vz_t, matrix[1,3]/ vy_t],</span>
+    <span class="c">#                    [matrix[2,0]* vz_s /vx_t, matrix[2,1]* vz_s /vy_t, matrix[2,2]* vz_s /vz_t, matrix[2,3]/ vz_t],</span>
+    <span class="c">#                    [0.,                      0.,                      0.,                                  1.] ] )</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">h_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">source_res</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">h_out</span><span class="p">)</span>
+    
+    <span class="n">size_in</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="mf">1.</span><span class="o">/</span><span class="n">x</span><span class="p">,</span> <span class="n">target_res</span><span class="p">)</span>
+    <span class="n">h_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">size_in</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">h_in</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,:])</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>   <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">res</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

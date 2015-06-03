@@ -1,0 +1,847 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.container.tree &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.container.tree</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Container</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2008-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Christophe Pradal &lt;christophe.pradal.at.cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module provides an implementation of a rooted tree graph.</span>
+<span class="sd">For interface definition, see :mod:`openalea.container.interface.tree`.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s">&quot;restructuredtext&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: tree.py 14917 2013-09-27 12:28:55Z pradal $ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">from</span> <span class="nn">interface.tree</span> <span class="kn">import</span> <span class="n">ITree</span><span class="p">,</span> <span class="n">IMutableTree</span><span class="p">,</span> <span class="n">IEditableTree</span>
+<span class="kn">from</span> <span class="nn">interface.graph</span> <span class="kn">import</span> <span class="n">IRootedGraph</span><span class="p">,</span> <span class="n">InvalidVertex</span><span class="p">,</span> <span class="n">InvalidEdge</span>
+<span class="kn">from</span> <span class="nn">traversal.tree</span> <span class="kn">import</span> <span class="n">pre_order</span><span class="p">,</span> <span class="n">post_order</span>
+
+<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree">[docs]</a><span class="k">class</span> <span class="nc">Tree</span><span class="p">(</span><span class="n">IRootedGraph</span><span class="p">,</span>
+           <span class="n">ITree</span><span class="p">,</span>
+           <span class="n">IMutableTree</span><span class="p">,</span>
+           <span class="n">IEditableTree</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Implementation of a rooted :class:`Tree`,</span>
+<span class="sd">    with methods to add and remove vertex.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Tree constructor.</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            - `root` is the root id which is by default 0</span>
+<span class="sd">        </span>
+<span class="sd">        :Returns:</span>
+<span class="sd">            - `tree` : a tree with one node.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="c"># Tree structure</span>
+        <span class="c"># Parent is a dict for DAG implementation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="p">{</span><span class="n">root</span> <span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># Some Vertex List Graph Concept methods.</span>
+    <span class="c">#########################################################################</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Tree.nb_vertices"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.nb_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">nb_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns the number of vertices.</span>
+
+<span class="sd">        :returns: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tree.vertices_iter"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.vertices_iter">[docs]</a>    <span class="k">def</span> <span class="nf">vertices_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :returns: iter of vertex_id</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Tree.vertices"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.vertices">[docs]</a>    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :returns: iter of vertex_id</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices_iter</span><span class="p">())</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># GraphConcept methods.</span>
+    <span class="c">#########################################################################</span>
+
+<div class="viewcode-block" id="Tree.has_vertex"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.has_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">has_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test wether a vertex belong to the graph</span>
+
+<span class="sd">        :param vid: vertex id to test</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+</div>
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Tree.is_valid"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.is_valid">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        test the validity of the graph</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="Tree.iteredges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.iteredges">[docs]</a>    <span class="k">def</span> <span class="nf">iteredges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iter on the edges of the tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">parent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># MutableVertexGraphConcept methods.</span>
+    <span class="c">#########################################################################</span>
+</div>
+<div class="viewcode-block" id="Tree.remove_vertex"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.remove_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">reparent_child</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a specified vertex of the graph</span>
+<span class="sd">        remove all the edges attached to it</span>
+
+<span class="sd">        :param vid: the id of the vertex to remove</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">vid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidVertex</span><span class="p">(</span><span class="s">&#39;Removing the root node </span><span class="si">%d</span><span class="s"> is forbidden.&#39;</span><span class="o">%</span> <span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reparent_child</span><span class="p">:</span>
+            <span class="n">new_parent_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">replace_parent</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">new_parent_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_children</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidVertex</span><span class="p">(</span><span class="s">&#39;Can not remove vertex </span><span class="si">%d</span><span class="s">  with children. Use remove_tree instead.&#39;</span><span class="o">%</span> <span class="n">vid</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tree.clear"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove all vertices and edges</span>
+<span class="sd">        don&#39;t change references to objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># Tree structure</span>
+        <span class="c"># Parent is a dict for DAG implementation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># RootedTreeConcept methods.</span>
+    <span class="c">#########################################################################</span>
+</div>
+<div class="viewcode-block" id="Tree.set_root"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.set_root">[docs]</a>    <span class="k">def</span> <span class="nf">set_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the tree root.</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+<span class="sd">         &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">vtx_id</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="Tree.get_root"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.get_root">[docs]</a>    <span class="k">def</span> <span class="nf">get_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the tree root.</span>
+
+<span class="sd">        :return: vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span>
+</div>
+    <span class="n">root</span><span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="n">get_root</span><span class="p">,</span> <span class="n">set_root</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="Tree.parent"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the parent of `vtx_id`.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: The vertex identifier.</span>
+
+<span class="sd">        :returns: vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tree.children_iter"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.children_iter">[docs]</a>    <span class="k">def</span> <span class="nf">children_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns a vertex iterator</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+
+<span class="sd">        :returns: iter of vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">,[]))</span>
+</div>
+<div class="viewcode-block" id="Tree.children"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.children">[docs]</a>    <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns a vertex iterator</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+
+<span class="sd">        :returns: iter of vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">,[])</span>
+</div>
+<div class="viewcode-block" id="Tree.nb_children"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.nb_children">[docs]</a>    <span class="k">def</span> <span class="nf">nb_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns the number of children</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: The vertex identifier.</span>
+
+<span class="sd">        :returns: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Tree.siblings_iter"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.siblings_iter">[docs]</a>    <span class="k">def</span> <span class="nf">siblings_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns an iterator of vtx_id siblings.</span>
+<span class="sd">        vtx_id is not include in siblings.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: The vertex identifier.</span>
+
+<span class="sd">        :returns: iter of vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">iter</span><span class="p">([])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">vid</span> <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span> <span class="k">if</span> <span class="n">vid</span> <span class="o">!=</span> <span class="n">vtx_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Tree.siblings"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.siblings">[docs]</a>    <span class="k">def</span> <span class="nf">siblings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns an iterator of vtx_id siblings.</span>
+<span class="sd">        vtx_id is not include in siblings.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: The vertex identifier.</span>
+
+<span class="sd">        :returns: iter of vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">siblings_iter</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Tree.nb_siblings"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.nb_siblings">[docs]</a>    <span class="k">def</span> <span class="nf">nb_siblings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        returns the number of siblings</span>
+
+<span class="sd">        :returns: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_children</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+
+</div>
+<div class="viewcode-block" id="Tree.is_leaf"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.is_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Test if `vtx_id` is a leaf.</span>
+
+<span class="sd">        :returns: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_children</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># MutableTreeConcept methods.</span>
+    <span class="c">#########################################################################</span>
+</div>
+<div class="viewcode-block" id="Tree.add_child"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add a child at the end of children</span>
+
+<span class="sd">        :param parent: The parent identifier.</span>
+<span class="sd">        :param child: The child identifier.</span>
+
+<span class="sd">        :returns: vertex id</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+        <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">parent</span><span class="p">,[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="k">return</span> <span class="n">child</span>
+</div>
+<div class="viewcode-block" id="Tree.insert_sibling"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.insert_sibling">[docs]</a>    <span class="k">def</span> <span class="nf">insert_sibling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id1</span><span class="p">,</span> <span class="n">vtx_id2</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Insert vtx_id2 before vtx_id1.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id1`: a vertex identifier</span>
+<span class="sd">         - `vtx_id2`: the vertex to insert</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">vtx_id2</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">vtx_id2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id1</span><span class="p">)</span>
+        <span class="n">siblings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">siblings</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">vtx_id1</span><span class="p">)</span>
+        <span class="n">siblings</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">vtx_id2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">vtx_id2</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="k">return</span> <span class="n">vtx_id2</span>
+</div>
+<div class="viewcode-block" id="Tree.insert_parent"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.insert_parent">[docs]</a>    <span class="k">def</span> <span class="nf">insert_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Insert parent_id between vtx_id and its actual parent.</span>
+<span class="sd">        Inherit of the complex of the parent of vtx_id.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: a vertex identifier</span>
+<span class="sd">         - `parent_id`: a vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">parent_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">parent_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+        <span class="n">old_parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">old_parent</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent_id</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">)</span>
+        <span class="c"># replace vtx_id by parent_id in children of old_parent</span>
+        <span class="k">if</span> <span class="n">old_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">children</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+            <span class="n">children</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_id</span>
+        <span class="k">return</span> <span class="n">parent_id</span>
+</div>
+<div class="viewcode-block" id="Tree.replace_parent"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.replace_parent">[docs]</a>    <span class="k">def</span> <span class="nf">replace_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">new_parent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Change the parent of vtx_id to new_parent_id.</span>
+<span class="sd">        The new parent of vtx_id is new_parent_id.</span>
+<span class="sd">        </span>
+<span class="sd">        This function do not change the edge_type between vtx_id and its parent.</span>
+<span class="sd">        </span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id` (int): a vertex identifier</span>
+<span class="sd">         - `new_parent_id` (int): a vertex identifier</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">new_parent_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="s">&quot;&quot;</span>
+
+        <span class="n">old_parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">new_parent_id</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">old_parent</span><span class="p">]</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">children</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">children</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Tree : nb_vertices=</span><span class="si">%d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span><span class="p">())]</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        
+        <span class="c">#v  = self.root</span>
+
+        <span class="c">#edge_type = self.property(&#39;edge_type&#39;)</span>
+        <span class="c">#label = self.property(&#39;label&#39;)</span>
+        <span class="c">#l.extend(display_tree(self,v, edge_type=edge_type, labels=label))</span>
+        <span class="c">#return &#39;\n&#39;.join(l)</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># Editable Tree Interface.</span>
+    <span class="c">#########################################################################</span>
+
+<div class="viewcode-block" id="Tree.sub_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.sub_tree">[docs]</a>    <span class="k">def</span> <span class="nf">sub_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the subtree rooted on `vtx_id`.</span>
+
+<span class="sd">        The induced subtree of the tree has the vertices in the ancestors of vtx_id.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `vtx_id`: A vertex of the original tree.</span>
+<span class="sd">          - `copy`:  </span>
+<span class="sd">            If True, return a new tree holding the subtree. If False, the subtree is</span>
+<span class="sd">            created using the original tree by deleting all vertices not in the subtree.</span>
+
+<span class="sd">        :returns: A sub tree of the tree. If copy=True, a new Tree is returned. </span>
+<span class="sd">            Else the subtree is created inplace by modifying the original tree. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="c"># remove all vertices not in the sub_tree</span>
+            <span class="n">bunch</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pre_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">vid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">vtx_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">treeid_id</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">treeid_id</span><span class="p">[</span><span class="n">vtx_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+            <span class="n">subtree</span> <span class="o">=</span> <span class="n">pre_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">)</span>
+            
+            <span class="n">subtree</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">subtree</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">treeid_id</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vid</span><span class="p">)]</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+                <span class="n">treeid_id</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">return</span> <span class="n">tree</span>
+</div>
+<div class="viewcode-block" id="Tree.insert_sibling_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.insert_sibling_tree">[docs]</a>    <span class="k">def</span> <span class="nf">insert_sibling_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">tree</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert a tree before the vid.</span>
+<span class="sd">        vid and the root of the tree are siblings.</span>
+<span class="sd">        Complexity have to be O(1) if tree comes from the actual tree</span>
+<span class="sd">        ( tree= self.sub_tree() )</span>
+
+<span class="sd">        :param vid: vertex identifier</span>
+<span class="sd">        :param tree: a rooted tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">treeid_id</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">root_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">insert_sibling</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="n">treeid_id</span><span class="p">[</span><span class="n">root</span><span class="p">]</span><span class="o">=</span><span class="n">root_id</span>
+
+        <span class="c"># pre_order traversal from root and renumbering</span>
+        <span class="k">for</span> <span class="n">vtx_id</span> <span class="ow">in</span> <span class="n">pre_order</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">treeid_id</span><span class="p">[</span><span class="n">tree</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">treeid_id</span><span class="p">[</span><span class="n">vtx_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="n">treeid_id</span>
+</div>
+<div class="viewcode-block" id="Tree.add_child_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.add_child_tree">[docs]</a>    <span class="k">def</span> <span class="nf">add_child_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a tree after the children of the parent vertex.</span>
+<span class="sd">        Complexity has to be O(1) if tree == sub_tree()</span>
+<span class="sd">        This method copies the tree and renumbers its vertices.</span>
+
+<span class="sd">        Returns a map between original tree vids and the newly added vids.</span>
+
+<span class="sd">        :param parent: vertex identifier</span>
+<span class="sd">        :param tree: a rooted tree</span>
+
+<span class="sd">        :returns: dict (original tree id -&gt; new id)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">treeid_id</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">root_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">treeid_id</span><span class="p">[</span><span class="n">root</span><span class="p">]</span><span class="o">=</span><span class="n">root_id</span>
+
+        <span class="c"># pre_order traversal from root and renumbering</span>
+        <span class="k">for</span> <span class="n">vtx_id</span> <span class="ow">in</span> <span class="n">pre_order</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">vtx_id</span> <span class="o">==</span> <span class="n">root</span><span class="p">:</span>
+               <span class="k">continue</span> 
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">treeid_id</span><span class="p">[</span><span class="n">tree</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)]</span>
+            <span class="n">vid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">treeid_id</span><span class="p">[</span><span class="n">vtx_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">vid</span>
+
+        <span class="k">return</span> <span class="n">treeid_id</span>
+</div>
+<div class="viewcode-block" id="Tree.remove_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.remove_tree">[docs]</a>    <span class="k">def</span> <span class="nf">remove_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the sub tree rooted on `vtx_id`.</span>
+
+<span class="sd">        :returns: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vid</span> <span class="o">=</span> <span class="n">vtx_id</span>
+
+        <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">vtx_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">post_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_vertex</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+            <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vertices</span>
+            
+
+</div>
+<div class="viewcode-block" id="Tree.copy"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.Tree.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Deep copy of the tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PropertyTree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree">[docs]</a><span class="k">class</span> <span class="nc">PropertyTree</span><span class="p">(</span><span class="n">Tree</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Tree with proeprties.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="PropertyTree.remove_vertex"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.remove_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">reparent_child</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a specified vertex of the graph</span>
+<span class="sd">        remove all the edges attached to it</span>
+
+<span class="sd">        :param vid: the id of the vertex to remove</span>
+<span class="sd">        :type vid: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vid</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">remove_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">reparent_child</span><span class="o">=</span><span class="n">reparent_child</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_vertex_properties</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.add_child"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add a child at the end of children</span>
+
+<span class="sd">        :param parent: The parent identifier.</span>
+<span class="sd">        :param child: The child identifier.</span>
+
+<span class="sd">        :returns: vertex id</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">child</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+
+        <span class="c"># Update the properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_vertex_properties</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">child</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.insert_sibling"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.insert_sibling">[docs]</a>    <span class="k">def</span> <span class="nf">insert_sibling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id1</span><span class="p">,</span> <span class="n">vtx_id2</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Insert vtx_id2 before vtx_id1.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id1`: a vertex identifier</span>
+<span class="sd">         - `vtx_id2`: the vertex to insert</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">vtx_id2</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">insert_sibling</span><span class="p">(</span><span class="n">vtx_id1</span><span class="p">,</span> <span class="n">vtx_id2</span><span class="p">)</span>
+
+        <span class="c"># Update the properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_vertex_properties</span><span class="p">(</span><span class="n">vtx_id2</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vtx_id2</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.insert_parent"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.insert_parent">[docs]</a>    <span class="k">def</span> <span class="nf">insert_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Insert parent_id between vtx_id and its actual parent.</span>
+<span class="sd">        Inherit of the complex of the parent of vtx_id.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: a vertex identifier</span>
+<span class="sd">         - `parent_id`: a vertex identifier</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">parent_id</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">insert_parent</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_vertex_properties</span><span class="p">(</span><span class="n">parent_id</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parent_id</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># Editable Tree Interface.</span>
+    <span class="c">#########################################################################</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.sub_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.sub_tree">[docs]</a>    <span class="k">def</span> <span class="nf">sub_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the subtree rooted on `vtx_id`.</span>
+
+<span class="sd">        The induced subtree of the tree has the vertices in the ancestors of vtx_id.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `vtx_id`: A vertex of the original tree.</span>
+<span class="sd">          - `copy`:  </span>
+<span class="sd">            If True, return a new tree holding the subtree. If False, the subtree is</span>
+<span class="sd">            created using the original tree by deleting all vertices not in the subtree.</span>
+
+<span class="sd">        :returns: A sub tree of the tree. If copy=True, a new Tree is returned. </span>
+<span class="sd">            Else the subtree is created inplace by modifying the original tree. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="c"># remove all vertices not in the sub_tree</span>
+            <span class="n">bunch</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pre_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">))</span>
+            <span class="n">remove_bunch</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="n">bunch</span>
+
+            <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">remove_bunch</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_remove_vertex_properties</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+                <span class="c">#self.remove_vertex(vid)</span>
+                <span class="c"># remove parent edge</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+                <span class="c"># remove children edges</span>
+                <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">vtx_id</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">treeid_id</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">()</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">():</span>
+                <span class="n">tree</span><span class="o">.</span><span class="n">add_property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            
+            <span class="n">treeid_id</span><span class="p">[</span><span class="n">vtx_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">_add_vertex_properties</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vertex_property</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))</span>
+            <span class="n">subtree</span> <span class="o">=</span> <span class="n">pre_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">)</span>
+            <span class="n">subtree</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">subtree</span><span class="p">:</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">parent</span> <span class="o">=</span> <span class="n">treeid_id</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                    <span class="n">v</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+                    <span class="n">treeid_id</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+                <span class="n">tree</span><span class="o">.</span><span class="n">_add_vertex_properties</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vertex_property</span><span class="p">(</span><span class="n">vid</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">tree</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.insert_sibling_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.insert_sibling_tree">[docs]</a>    <span class="k">def</span> <span class="nf">insert_sibling_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">tree</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert a tree before the vid.</span>
+<span class="sd">        vid and the root of the tree are siblings.</span>
+<span class="sd">        Complexity have to be O(1) if tree comes from the actual tree</span>
+<span class="sd">        ( tree= self.sub_tree() )</span>
+
+<span class="sd">        :param vid: vertex identifier</span>
+<span class="sd">        :param tree: a rooted tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">treeid_id</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">insert_sibling_tree</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">treeid_id</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">properties</span><span class="p">():</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="n">treeid_id</span>
+
+</div>
+<div class="viewcode-block" id="PropertyTree.add_child_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.add_child_tree">[docs]</a>    <span class="k">def</span> <span class="nf">add_child_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a tree after the children of the parent vertex.</span>
+<span class="sd">        Complexity have to be O(1) if tree == sub_tree()</span>
+
+<span class="sd">        :param parent: vertex identifier</span>
+<span class="sd">        :param tree: a rooted tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">treeid_id</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add_child_tree</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">treeid_id</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">properties</span><span class="p">():</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="n">treeid_id</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.remove_tree"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.remove_tree">[docs]</a>    <span class="k">def</span> <span class="nf">remove_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the sub tree rooted on `vtx_id`.</span>
+
+<span class="sd">        :returns: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vids</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">PropertyTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">remove_tree</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">vids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_vertex_properties</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vids</span>
+
+    <span class="c">#########################################################################</span>
+    <span class="c"># Property Interface for Tree Graph and Mutable property concept.</span>
+    <span class="c">#########################################################################</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.property_names"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.property_names">[docs]</a>    <span class="k">def</span> <span class="nf">property_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        names of all property maps.</span>
+<span class="sd">        Properties are defined only on vertices, even edge properties.</span>
+<span class="sd">        return iter of names</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.property_names_iter"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.property_names_iter">[docs]</a>    <span class="k">def</span> <span class="nf">property_names_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        iter on names of all property maps.</span>
+<span class="sd">        Properties are defined only on vertices, even edge properties.</span>
+<span class="sd">        return iter of names</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.property">[docs]</a>    <span class="k">def</span> <span class="nf">property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the property map between the vid and the data.</span>
+<span class="sd">        :returns:  dict of {vid:data}</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">{})</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.add_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.add_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new map between vid and a data</span>
+<span class="sd">        Do not fill this property for any vertex</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.remove_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.remove_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the property map called property_name from the graph.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="PropertyTree.properties"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.properties">[docs]</a>    <span class="k">def</span> <span class="nf">properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns all the property maps contain in the graph.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span>
+</div>
+    <span class="k">def</span> <span class="nf">_add_vertex_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a set of properties for a vertex identifier.</span>
+<span class="sd">        For properties that do not belong to the graph, </span>
+<span class="sd">        create a new property.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_remove_vertex_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a set of properties for a vertex identifier.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">():</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">p</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PropertyTree.get_vertex_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.tree.PropertyTree.get_vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertex_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns all the properties defined on a vertex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">name</span><span class="p">,</span><span class="n">p</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">vid</span><span class="p">])</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">p</span> <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">p</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.functional.functional &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.functional.functional</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.StdLib</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot; Standard python functions for functional programming. &quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span>  <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">ITextStr</span><span class="p">,</span> <span class="n">ICodeStr</span>
+
+<div class="viewcode-block" id="pymap"><a class="viewcode-back" href="../../../openalea-components/stdlib/doc/user/autosum.html#openalea.functional.functional.pymap">[docs]</a><span class="k">def</span> <span class="nf">pymap</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; map(func, seq) &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="nb">map</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">),</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="p">[],</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="pyfilter"><a class="viewcode-back" href="../../../openalea-components/stdlib/doc/user/autosum.html#openalea.functional.functional.pyfilter">[docs]</a><span class="k">def</span> <span class="nf">pyfilter</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; filter(func, seq) &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="nb">filter</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">),</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="p">[],</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="pyreduce"><a class="viewcode-back" href="../../../openalea-components/stdlib/doc/user/autosum.html#openalea.functional.functional.pyreduce">[docs]</a><span class="k">def</span> <span class="nf">pyreduce</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; reduce(func, seq) &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">seq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">),</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="p">[],</span> <span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="pyapply"><a class="viewcode-back" href="../../../openalea-components/stdlib/doc/user/autosum.html#openalea.functional.functional.pyapply">[docs]</a><span class="k">def</span> <span class="nf">pyapply</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">one_argument</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; apply(func, seq)&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">one_argument</span><span class="p">:</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="p">[</span><span class="n">seq</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">apply</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">()</span>
+</div>
+<div class="viewcode-block" id="pyifelse"><a class="viewcode-back" href="../../../openalea-components/stdlib/doc/user/autosum.html#openalea.functional.functional.pyifelse">[docs]</a><span class="k">def</span> <span class="nf">pyifelse</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+
+    <span class="n">h</span> <span class="o">=</span> <span class="n">f</span> <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span> <span class="k">else</span> <span class="n">g</span>
+    <span class="k">return</span> <span class="n">h</span><span class="p">(</span><span class="n">val</span><span class="p">),</span>
+</div>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">def pyfunction(func_str):</span>
+<span class="sd">    &#39;&#39;&#39; creates a function from a text string &#39;&#39;&#39;</span>
+
+<span class="sd">    if func_str:</span>
+<span class="sd">        func_str = str(func_str)</span>
+<span class="sd">        # Extract the function name</span>
+<span class="sd">        l = func_str.split(&#39;\n&#39;)</span>
+<span class="sd">        for line in l:</span>
+<span class="sd">            if &#39;def &#39; in line:</span>
+<span class="sd">                break</span>
+<span class="sd">        name = line.split(&#39;def &#39;)[1]</span>
+<span class="sd">        name = name.split(&#39;(&#39;)[0]</span>
+
+<span class="sd">        # local dictionary</span>
+<span class="sd">        d = {}</span>
+<span class="sd">        exec(str(func_str), d, globals())</span>
+
+<span class="sd">        return d.get(name, None)</span>
+<span class="sd">    else:</span>
+<span class="sd">        return None</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="pyfunction"><a class="viewcode-back" href="../../../openalea-components/stdlib/doc/user/autosum.html#openalea.functional.functional.pyfunction">[docs]</a><span class="k">class</span> <span class="nc">pyfunction</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function method</span>
+
+<span class="sd">    :param ins: the function code</span>
+<span class="sd">    :param outs: the function object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">):</span>
+        <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_input</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;func_str&quot;</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">ICodeStr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;function&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; inputs is the list of input values</span>
+
+<span class="sd">        :returns: the value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">func_str</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">func_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># Extract the function name</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">func_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;def &#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="s">&#39;lambda &#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">if</span> <span class="s">&#39;def&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;def &#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="s">&#39;lambda&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="c"># local dictionary</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">exec</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">func_str</span><span class="p">),</span> <span class="n">d</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

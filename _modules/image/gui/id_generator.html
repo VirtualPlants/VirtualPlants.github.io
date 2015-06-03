@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>image.gui.id_generator &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for image.gui.id_generator</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c">#       IdGenerator : graph package</span>
+<span class="c">#</span>
+<span class="c">#       Copyright  or Copr. 2006 - 2011 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Fred Theveny &lt;theveny@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       VPlants WebSite : https://gforge.inria.fr/projects/vplants/</span>
+<span class="c">################################################################################</span>
+
+<span class="n">__doc__</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">This module provide a generator for id numbers</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id: id_generator.py 9206 2010-07-02 01:12:52Z agpr $ &quot;</span>
+
+<div class="viewcode-block" id="IdMaxGenerator"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdMaxGenerator">[docs]</a><span class="k">class</span> <span class="nc">IdMaxGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="IdMaxGenerator.get_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdMaxGenerator.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">id</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id </span><span class="si">%d</span><span class="s"> already used&quot;</span> <span class="o">%</span> <span class="nb">id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="p">,</span><span class="nb">id</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">id</span>
+</div>
+<div class="viewcode-block" id="IdMaxGenerator.release_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdMaxGenerator.release_id">[docs]</a>    <span class="k">def</span> <span class="nf">release_id</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="IdMaxGenerator.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdMaxGenerator.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset the generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="IdSetGenerator"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdSetGenerator">[docs]</a><span class="k">class</span> <span class="nc">IdSetGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="IdSetGenerator.get_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdSetGenerator.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">id</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="p">,</span><span class="nb">id</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">=</span> <span class="nb">id</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="nb">id</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">try</span> <span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="nb">id</span>
+                <span class="k">except</span> <span class="ne">KeyError</span> <span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id </span><span class="si">%d</span><span class="s"> already used&quot;</span> <span class="o">%</span> <span class="nb">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="IdSetGenerator.release_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdSetGenerator.release_id">[docs]</a>    <span class="k">def</span> <span class="nf">release_id</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id out of range&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id already not used&quot;</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="IdSetGenerator.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdSetGenerator.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset the generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="IdGenerator"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdGenerator">[docs]</a><span class="k">class</span> <span class="nc">IdGenerator</span> <span class="p">(</span><span class="n">IdSetGenerator</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="IdListGenerator"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdListGenerator">[docs]</a><span class="k">class</span> <span class="nc">IdListGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="o">=</span><span class="p">[]</span>
+
+<div class="viewcode-block" id="IdListGenerator.get_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdListGenerator.get_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_id</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span>
+                <span class="n">ret</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">id</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="p">,</span><span class="nb">id</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="o">=</span><span class="nb">id</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="nb">id</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">try</span> <span class="p">:</span>
+                    <span class="n">ind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="nb">id</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id </span><span class="si">%d</span><span class="s"> already used&quot;</span> <span class="o">%</span> <span class="nb">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="IdListGenerator.release_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdListGenerator.release_id">[docs]</a>    <span class="k">def</span> <span class="nf">release_id</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">id</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id out of range&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;id already not used&quot;</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="IdListGenerator.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.gui.html#image.gui.id_generator.IdListGenerator.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_max</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_list</span><span class="o">=</span><span class="p">[]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

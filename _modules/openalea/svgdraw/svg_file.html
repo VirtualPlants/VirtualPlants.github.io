@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.svgdraw.svg_file &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.svgdraw.svg_file</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       svgdraw: svg library</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines read an write functions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">xml.dom.minidom</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span><span class="n">parseString</span><span class="p">,</span><span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">xml_element</span> <span class="kn">import</span> <span class="n">XMLElement</span>
+<span class="kn">from</span> <span class="nn">svg_scene</span> <span class="kn">import</span> <span class="n">SVGScene</span>
+
+<span class="c">#######################################################</span>
+<span class="c">#</span>
+<span class="c">#		pure xml</span>
+<span class="c">#</span>
+<span class="c">#######################################################</span>
+<div class="viewcode-block" id="XMLReader"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLReader">[docs]</a><span class="k">class</span> <span class="nc">XMLReader</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to read a serialized xml</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="k">pass</span>
+	
+<div class="viewcode-block" id="XMLReader.from_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLReader.from_xml">[docs]</a>	<span class="k">def</span> <span class="nf">from_xml</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+		<span class="n">elm</span> <span class="o">=</span> <span class="n">XMLElement</span><span class="p">()</span>
+		<span class="n">elm</span><span class="o">.</span><span class="n">load_xml</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">elm</span>
+</div></div>
+<div class="viewcode-block" id="XMLFileReader"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileReader">[docs]</a><span class="k">class</span> <span class="nc">XMLFileReader</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to read an xml file</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: use :func:`open_xml` instead</span>
+<span class="sd">	   of directly creating this object.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
+	
+<div class="viewcode-block" id="XMLFileReader.close"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileReader.close">[docs]</a>	<span class="k">def</span> <span class="nf">close</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="k">pass</span>
+	</div>
+<div class="viewcode-block" id="XMLFileReader.read"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileReader.read">[docs]</a>	<span class="k">def</span> <span class="nf">read</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+		<span class="n">elm</span> <span class="o">=</span> <span class="n">XMLElement</span><span class="p">()</span>
+		<span class="n">elm</span><span class="o">.</span><span class="n">load_xml</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">elm</span>
+</div></div>
+<div class="viewcode-block" id="XMLWriter"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLWriter">[docs]</a><span class="k">class</span> <span class="nc">XMLWriter</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to serialize an xml file</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span> <span class="o">=</span> <span class="bp">None</span>
+	
+<div class="viewcode-block" id="XMLWriter.to_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLWriter.to_xml">[docs]</a>	<span class="k">def</span> <span class="nf">to_xml</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span><span class="o">.</span><span class="n">toxml</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="XMLFileWriter"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileWriter">[docs]</a><span class="k">class</span> <span class="nc">XMLFileWriter</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to write an xml file</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: use :func:`open_xml` instead</span>
+<span class="sd">	   of directly creating this object.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span> <span class="o">=</span> <span class="bp">None</span>
+	
+<div class="viewcode-block" id="XMLFileWriter.flush"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileWriter.flush">[docs]</a>	<span class="k">def</span> <span class="nf">flush</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="p">:</span>
+			<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span><span class="o">.</span><span class="n">toxml</span><span class="p">()</span> <span class="p">)</span>
+		<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	</div>
+<div class="viewcode-block" id="XMLFileWriter.close"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileWriter.close">[docs]</a>	<span class="k">def</span> <span class="nf">close</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+	</div>
+<div class="viewcode-block" id="XMLFileWriter.write"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.XMLFileWriter.write">[docs]</a>	<span class="k">def</span> <span class="nf">write</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_elm</span><span class="p">)</span> <span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span> <span class="o">=</span> <span class="n">doc_elm</span><span class="o">.</span><span class="n">save_xml</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="open_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.open_xml">[docs]</a><span class="k">def</span> <span class="nf">open_xml</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Open an xml stream</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `filename` (str) - name of the stream</span>
+<span class="sd">	 - `mode` (&#39;r&#39; or &#39;w&#39;) - open the stream</span>
+<span class="sd">	   to read (&#39;r&#39;) or write (&#39;w&#39;) data</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: XMLStream</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s">&#39;r&#39;</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="n">XMLFileReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="n">mode</span><span class="o">==</span><span class="s">&#39;w&#39;</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="n">XMLFileWriter</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">UserWarning</span> <span class="p">(</span><span class="s">&quot;mode </span><span class="si">%s</span><span class="s"> not recognized&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="c">#######################################################</span>
+<span class="c">#</span>
+<span class="c">#		svg</span>
+<span class="c">#</span>
+<span class="c">#######################################################</span></div>
+<div class="viewcode-block" id="SVGReader"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGReader">[docs]</a><span class="k">class</span> <span class="nc">SVGReader</span> <span class="p">(</span><span class="n">XMLReader</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to read svg data</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: use :func:`from_xml` instead</span>
+<span class="sd">	   of directly creating this object.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SVGReader.from_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGReader.from_xml">[docs]</a>	<span class="k">def</span> <span class="nf">from_xml</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="n">XMLReader</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+		<span class="k">try</span> <span class="p">:</span>
+			<span class="n">root</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">children</span><span class="p">()</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodename</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;svg:svg&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">IndexError</span> <span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s">&quot;Old style svg file, you need to prefix node names with &#39;svg:&#39;&quot;</span><span class="p">)</span>
+		<span class="n">sc</span> <span class="o">=</span> <span class="n">SVGScene</span><span class="p">()</span>
+		<span class="n">sc</span><span class="o">.</span><span class="n">from_node</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+		<span class="n">sc</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+		<span class="k">return</span> <span class="n">sc</span>
+</div></div>
+<div class="viewcode-block" id="SVGFileReader"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGFileReader">[docs]</a><span class="k">class</span> <span class="nc">SVGFileReader</span> <span class="p">(</span><span class="n">XMLFileReader</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to read an svg file</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: use :func:`open_svg` instead</span>
+<span class="sd">	   of directly creating this object.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SVGFileReader.read"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGFileReader.read">[docs]</a>	<span class="k">def</span> <span class="nf">read</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="n">XMLFileReader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="k">try</span> <span class="p">:</span>
+			<span class="n">root</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">children</span><span class="p">()</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodename</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;svg:svg&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">IndexError</span> <span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s">&quot;Old style svg file, you need to prefix node names with &#39;svg:&#39;&quot;</span><span class="p">)</span>
+		<span class="n">sc</span> <span class="o">=</span> <span class="n">SVGScene</span><span class="p">()</span>
+		<span class="n">sc</span><span class="o">.</span><span class="n">_svgfilename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
+		<span class="n">sc</span><span class="o">.</span><span class="n">from_node</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+		<span class="n">sc</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+		<span class="k">return</span> <span class="n">sc</span>
+</div></div>
+<div class="viewcode-block" id="SVGWriter"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGWriter">[docs]</a><span class="k">class</span> <span class="nc">SVGWriter</span> <span class="p">(</span><span class="n">XMLWriter</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to serialize an svg file</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: use :func:`to_xml` instead</span>
+<span class="sd">	   of directly creating this object.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">svgscene</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">XMLWriter</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="n">XMLElement</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span>
+		                 <span class="n">Document</span><span class="o">.</span><span class="n">DOCUMENT_NODE</span><span class="p">,</span>
+		                 <span class="s">&quot;#document&quot;</span><span class="p">)</span>
+		<span class="n">comment</span> <span class="o">=</span> <span class="n">XMLElement</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span>
+		                     <span class="n">Document</span><span class="o">.</span><span class="n">COMMENT_NODE</span><span class="p">,</span>
+		                     <span class="s">&quot;#comment&quot;</span><span class="p">)</span>
+		<span class="n">comment</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s">&quot;data&quot;</span><span class="p">,</span>
+		                      <span class="s">&quot;created from python svgdraw module&quot;</span><span class="p">)</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svg_doc</span> <span class="o">=</span> <span class="n">doc</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svg_scene</span> <span class="o">=</span> <span class="n">svgscene</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svg_doc</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">svgscene</span><span class="p">)</span>
+	
+<div class="viewcode-block" id="SVGWriter.to_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGWriter.to_xml">[docs]</a>	<span class="k">def</span> <span class="nf">to_xml</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svg_scene</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_xml_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_svg_doc</span><span class="o">.</span><span class="n">save_xml</span><span class="p">()</span>
+		<span class="k">return</span> <span class="n">XMLWriter</span><span class="o">.</span><span class="n">to_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="SVGFileWriter"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGFileWriter">[docs]</a><span class="k">class</span> <span class="nc">SVGFileWriter</span> <span class="p">(</span><span class="n">XMLFileWriter</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class to write an svg file</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: use :func:`open_svg` instead</span>
+<span class="sd">	   of directly creating this object.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">XMLFileWriter</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="n">XMLElement</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="n">Document</span><span class="o">.</span><span class="n">DOCUMENT_NODE</span><span class="p">,</span><span class="s">&quot;#document&quot;</span><span class="p">)</span>
+		<span class="n">comment</span> <span class="o">=</span> <span class="n">XMLElement</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="n">Document</span><span class="o">.</span><span class="n">COMMENT_NODE</span><span class="p">,</span><span class="s">&quot;#comment&quot;</span><span class="p">)</span>
+		<span class="n">comment</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s">&quot;data&quot;</span><span class="p">,</span><span class="s">&quot;created from python svgdraw module&quot;</span><span class="p">)</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svg_doc</span> <span class="o">=</span> <span class="n">doc</span>
+	
+<div class="viewcode-block" id="SVGFileWriter.write"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.SVGFileWriter.write">[docs]</a>	<span class="k">def</span> <span class="nf">write</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">svgscene</span><span class="p">)</span> <span class="p">:</span>
+		<span class="n">svgscene</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svg_doc</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">svgscene</span><span class="p">)</span>
+		<span class="n">XMLFileWriter</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_svg_doc</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="open_svg"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.open_svg">[docs]</a><span class="k">def</span> <span class="nf">open_svg</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Open a stream to read svg data</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `filename` (str) - name of the stream</span>
+<span class="sd">	 - `mode` (&#39;r&#39; or &#39;w&#39;) - open the stream</span>
+<span class="sd">	   to read (&#39;r&#39;) or write (&#39;w&#39;) data</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: SVGStream</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s">&#39;r&#39;</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="n">SVGFileReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="n">mode</span><span class="o">==</span><span class="s">&#39;w&#39;</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="n">SVGFileWriter</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">UserWarning</span> <span class="p">(</span><span class="s">&quot;mode </span><span class="si">%s</span><span class="s"> not recognized&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="to_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.to_xml">[docs]</a><span class="k">def</span> <span class="nf">to_xml</span> <span class="p">(</span><span class="n">svgscene</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Serialize a scene into a string</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: :func:`from_xml`</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `svgscene` (:class:`SVGScene`)</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">w</span> <span class="o">=</span> <span class="n">SVGWriter</span><span class="p">(</span><span class="n">svgscene</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">w</span><span class="o">.</span><span class="n">to_xml</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="from_xml"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_file.from_xml">[docs]</a><span class="k">def</span> <span class="nf">from_xml</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Deserialize a string into a scene</span>
+<span class="sd">	</span>
+<span class="sd">	.. seealso: :func:`to_xml`</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `data` (str) - xml representation</span>
+<span class="sd">	   of a scene.</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: :class:`SVGScene`</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">r</span> <span class="o">=</span> <span class="n">SVGReader</span><span class="p">()</span>
+	<span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">from_xml</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

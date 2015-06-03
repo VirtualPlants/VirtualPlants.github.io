@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>image.interpolation.interpolation &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for image.interpolation.interpolation</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       image: geometric transform filters</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2011 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Eric Moscardi &lt;eric.moscardi@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module import functions for Geometric Transformation Filters</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">geometric_transform</span><span class="p">,</span> <span class="n">affine_transform</span><span class="p">,</span> <span class="n">filters</span>
+<span class="kn">from</span> <span class="nn">openalea.image.spatial_image</span> <span class="kn">import</span> <span class="n">SpatialImage</span>
+<span class="kn">from</span> <span class="nn">openalea.image.algo.morpho</span> <span class="kn">import</span> <span class="n">skiz</span>
+<span class="kn">from</span> <span class="nn">openalea.image.algo.basic</span> <span class="kn">import</span> <span class="n">component_gaussian_filter</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;resampling&quot;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">_apply_field</span><span class="p">(</span><span class="n">output_coords</span><span class="p">,</span><span class="n">tx</span><span class="p">,</span><span class="n">ty</span><span class="p">,</span><span class="n">tz</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">output_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">tx</span><span class="p">[</span><span class="n">output_coords</span><span class="p">],</span> <span class="n">output_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ty</span><span class="p">[</span><span class="n">output_coords</span><span class="p">],</span> <span class="n">output_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">tz</span><span class="p">[</span><span class="n">output_coords</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="resampling"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/components/image/image.interpolation.html#image.interpolation.interpolation.resampling">[docs]</a><span class="k">def</span> <span class="nf">resampling</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">transformation</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">output_shape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">output_voxels</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;constant&#39;</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">prefilter</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It resamples a 2-D or 3-D image using a 4*4 transformation matrix or a deformation field .</span>
+
+<span class="sd">    The value of a point in the result image is determined by spline interpolation of the requested order.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">    - `img`</span>
+
+<span class="sd">    - `transformation` (array) - Matrix 4x4 or deformation field</span>
+
+<span class="sd">    - `order` (int) - optional</span>
+<span class="sd">    order corresponds to the degree of a polynomial used to the spline interpolation</span>
+<span class="sd">    By default, order = 1 (linear interpolation)</span>
+
+<span class="sd">    - `output_shape` (tuple) - optional</span>
+<span class="sd">    The output shape can optionally be given.</span>
+<span class="sd">    By default, it is equal to the input shape</span>
+
+<span class="sd">    - `output_type` (tuple) - optional</span>
+<span class="sd">    The output data type can optionally be given.</span>
+<span class="sd">    By default, it is equal to the input data type</span>
+
+<span class="sd">    - `output_voxels` (tuple) - optional</span>
+<span class="sd">    The output voxels size can optionally be given.</span>
+<span class="sd">    By default, it is equal to the input voxels size</span>
+
+<span class="sd">    - `mode` (string) - optional</span>
+<span class="sd">    Points outside the boundaries of the input are filled</span>
+<span class="sd">    according to the given mode (&quot;constant&quot;, &quot;nearest&quot;, &quot;reflect&quot; or &quot;wrap&quot;)</span>
+<span class="sd">    By default, the given mode is &quot;constant&quot;</span>
+
+<span class="sd">    - `prefilter` (boolean) - optional</span>
+<span class="sd">    The parameter prefilter determines if the input is pre-filtered before interpolation</span>
+<span class="sd">    (necessary for spline interpolation of order &gt; 1)</span>
+<span class="sd">    If False it is assumed that the input is already filtered</span>
+
+<span class="sd">    :Returns Type: image resampled by the transformation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">transformation</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;using of a field deformation&#39;</span><span class="p">)</span>
+        <span class="n">_tx</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">_ty</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">_tz</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">_data</span> <span class="o">=</span> <span class="n">geometric_transform</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">_apply_field</span><span class="p">,</span> <span class="n">extra_arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">_tx</span><span class="p">,</span> <span class="n">_ty</span><span class="p">,</span> <span class="n">_tz</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">_data</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">_data</span><span class="p">,</span><span class="n">img</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+
+        <span class="n">transformation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">SpatialImage</span><span class="p">)</span> <span class="p">:</span>
+	    <span class="n">_data</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="n">img</span>
+
+    <span class="c">#extraction of the Rotation and Translation matrix (R,t)</span>
+    <span class="n">_R</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">_t</span> <span class="o">=</span> <span class="n">transformation</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="c">#extraction of voxel size of image</span>
+    <span class="n">vx</span><span class="p">,</span><span class="n">vy</span><span class="p">,</span><span class="n">vz</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">resolution</span>
+
+    <span class="c">#creating of output</span>
+    <span class="k">if</span> <span class="n">output_voxels</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">output_voxels</span> <span class="o">=</span> <span class="n">vx</span><span class="p">,</span><span class="n">vy</span><span class="p">,</span><span class="n">vz</span>
+    <span class="n">vox</span><span class="p">,</span><span class="n">voy</span><span class="p">,</span><span class="n">voz</span> <span class="o">=</span> <span class="n">output_voxels</span>
+
+    <span class="c">#scaling matrix</span>
+    <span class="c">#_output_scaling = np.diag([vox,voy,voz])</span>
+    <span class="c">#_input_scaling = np.diag([1. / vx, 1. / vy, 1. / vz])</span>
+
+    <span class="c">#change of basis</span>
+    <span class="c">#R = np.dot(_input_scaling, np.dot(_R, _output_scaling) )</span>
+    <span class="c">#t = np.dot(_input_scaling, _t)</span>
+
+    <span class="n">_output</span> <span class="o">=</span> <span class="n">affine_transform</span><span class="p">(</span><span class="n">_data</span><span class="p">,</span> <span class="n">_R</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_t</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">output_shape</span><span class="o">=</span><span class="n">output_shape</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="n">cval</span><span class="p">,</span> <span class="n">prefilter</span><span class="o">=</span><span class="n">prefilter</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">_output</span><span class="p">,</span> <span class="n">output_voxels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span>
+
+
+</div>
+<span class="k">def</span> <span class="nf">deformation_field</span><span class="p">(</span> <span class="n">image</span><span class="p">,</span> <span class="n">points1</span><span class="p">,</span> <span class="n">points2</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vectors</span> <span class="o">=</span> <span class="n">points2</span><span class="o">-</span><span class="n">points1</span>
+    <span class="n">points1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">points1</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">points2</span>
+
+    <span class="c">#points2 = np.round(points2)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">skiz</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">points1</span><span class="p">,</span> <span class="n">vectors</span><span class="p">)</span>
+    <span class="n">img_vectors</span> <span class="o">=</span> <span class="n">component_gaussian_filter</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">label</span>
+
+    <span class="c"># create an image with only the vectors at the points otherelse 0</span>
+    <span class="n">img_vect0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="o">+</span><span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points1</span><span class="p">):</span>
+        <span class="n">img_vect0</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">img_vect0</span> <span class="o">=</span> <span class="n">component_gaussian_filter</span><span class="p">(</span><span class="n">img_vect0</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">in_place</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="c"># create an image with only 1 at the points and fit it.</span>
+    <span class="n">img_pt1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="ow">in</span> <span class="n">points1</span><span class="p">:</span>
+        <span class="n">img_pt1</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">img_pt1</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">img_pt1</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+    <span class="c"># Normalization</span>
+    <span class="n">img_vect0</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">img_pt1</span>
+    <span class="n">img_vect0</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">/=</span> <span class="n">img_pt1</span>
+    <span class="n">img_vect0</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">/=</span> <span class="n">img_pt1</span>
+    <span class="n">zero_mask</span> <span class="o">=</span> <span class="n">img_pt1</span> <span class="o">&lt;</span><span class="mf">1e-6</span>
+    <span class="k">del</span> <span class="n">img_pt1</span>
+    <span class="n">masked_vectors</span> <span class="o">=</span> <span class="n">img_vectors</span><span class="p">[</span><span class="n">zero_mask</span><span class="p">]</span>
+    <span class="n">img_vect0</span><span class="p">[</span><span class="n">zero_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">masked_vectors</span>
+    <span class="k">del</span> <span class="n">masked_vectors</span><span class="p">,</span> <span class="n">zero_mask</span>
+
+    <span class="n">img_vect0</span> <span class="o">=</span> <span class="n">component_gaussian_filter</span><span class="p">(</span><span class="n">img_vect0</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">img_vect0</span><span class="p">,</span> <span class="n">image</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span><span class="n">vdim</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

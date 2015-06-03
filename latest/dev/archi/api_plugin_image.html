@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Imaging algorithms &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="OpenAleaLab API and concepts" href="index.html" />
+    <link rel="next" title="interface plugin documentation" href="api_plugin_interface.html" />
+    <link rel="prev" title="Control - Advanced" href="api_plugin_control_advanced.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api_plugin_interface.html" title="interface plugin documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api_plugin_control_advanced.html" title="Control - Advanced"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">OpenAleaLab API and concepts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-openalea.image.plugin"></span><div class="section" id="imaging-algorithms">
+<h1>Imaging algorithms<a class="headerlink" href="#imaging-algorithms" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>To add a new algorithm, you need to follow this approach:</dt>
+<dd><ol class="first last arabic simple">
+<li>Implement algorithm. This algorithm must follow image filtering specification</li>
+<li>Write a plugin class that describe algorithm and is able to load it</li>
+<li>register algorithm in the right category</li>
+</ol>
+</dd>
+</dl>
+<p>For example, to add a gaussian filter, you need to ...</p>
+<p>Step 1:</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/algo/image_filtering.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gaussian_filtering</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">std_dev</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Applies a gaussian smoothing filter to the image.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># applies gaussian filtering</span>
+    <span class="c"># filtered = ...</span>
+    <span class="c"># return filtered</span>
+</pre></div>
+</td></tr></table></div>
+<p>Then, define a plugin that describe algorithm.</p>
+<div class="highlight-python"><div class="code-block-filename"><tt>mypackage/plugin/image_filtering.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">GaussianSmoothingPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;image_filtering_gaussian_smoothing&#39;</span>
+    <span class="n">title</span> <span class="o">=</span>  <span class="s">&#39;Gaussian smoothing filter&#39;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;std_deviation&#39;</span><span class="p">,</span> <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;interface&#39;</span><span class="p">:</span> <span class="s">&#39;IFloat&#39;</span><span class="p">,</span> <span class="s">&#39;alias&#39;</span><span class="p">:</span> <span class="s">&#39;Standard Deviation&#39;</span><span class="p">}</span>
+    <span class="p">]</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;John Doe&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="s">&#39;john.doe@example.org&#39;</span><span class="p">,</span>
+                <span class="s">&#39;institute&#39;</span><span class="p">:</span> <span class="s">&#39;Doe Laboratory&#39;</span><span class="p">}]</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mypackage.algo.image_filtering</span> <span class="kn">import</span> <span class="n">gaussian_smoothing</span>
+        <span class="k">return</span> <span class="n">gaussian_smoothing</span>
+</pre></div>
+</td></tr></table></div>
+<p>And register this plugin in category <cite>openalea.image.filtering</cite></p>
+<div class="highlight-python"><div class="code-block-filename"><tt>setup.py</tt></div><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span>
+    <span class="c"># Declare scripts and wralea as entry_points (extensions) of your package</span>
+    <span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+        <span class="s">&#39;openalea.image.filtering&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s">&#39;GaussianSmoothingPlugin =  mypackage.plugin.image_filtering:GaussianSmoothingPlugin&#39;</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="categories">
+<h1>Categories<a class="headerlink" href="#categories" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="openalea-image-filtering">
+<h2>openalea.image.filtering<a class="headerlink" href="#openalea-image-filtering" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="openalea.image.plugin.IImageFilteringPlugin">
+<em class="property">class </em><tt class="descclassname">openalea.image.plugin.</tt><tt class="descname">IImageFilteringPlugin</tt><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/openalea/image/plugin.html#IImageFilteringPlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.image.plugin.IImageFilteringPlugin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Imaging algorithms</a></li>
+<li><a class="reference internal" href="#categories">Categories</a><ul>
+<li><a class="reference internal" href="#openalea-image-filtering">openalea.image.filtering</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api_plugin_control_advanced.html"
+                        title="previous chapter">Control - Advanced</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api_plugin_interface.html"
+                        title="next chapter">interface plugin documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/latest/dev/archi/api_plugin_image.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api_plugin_interface.html" title="interface plugin documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api_plugin_control_advanced.html" title="Control - Advanced"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="index.html" >OpenAleaLab API and concepts</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

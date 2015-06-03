@@ -1,0 +1,587 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.svgdraw.svg_element &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.svgdraw.svg_element</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       svgdraw: svg library</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines an abstract svg element</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span><span class="n">dirname</span>
+<span class="kn">from</span> <span class="nn">xml_element</span> <span class="kn">import</span> <span class="n">XMLElement</span><span class="p">,</span><span class="n">SVG_ELEMENT_TYPE</span>
+<span class="kn">from</span> <span class="nn">transform</span> <span class="kn">import</span> <span class="n">SVGTransform</span><span class="p">,</span><span class="n">translation</span><span class="p">,</span><span class="n">rotation</span><span class="p">,</span><span class="n">scaling</span>
+
+<span class="c">#to read svg transformations or values</span>
+<span class="c">#norm : http://www.w3.org/TR/SVG/coords.html#TransformAttribute</span>
+<span class="n">sep</span> <span class="o">=</span> <span class="s">r&quot;\s*,?\s*&quot;</span>
+<span class="n">digit</span> <span class="o">=</span> <span class="s">r&quot;([-]?\d+[.]?\d*e?[+-]?\d?)&quot;</span>
+<span class="n">float_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">digit</span><span class="o">+</span><span class="s">r&quot;(em)?(ex)?(px)?(pt)?(pc)?(cm)?(mm)?(in)?(\%)?&quot;</span><span class="p">)</span>
+
+<span class="n">matrix_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;matrix\(&quot;</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="s">&quot;\)&quot;</span><span class="p">)</span>
+<span class="n">translate_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;translate\(&quot;</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="s">&quot;?\)&quot;</span><span class="p">)</span>
+<span class="n">scale_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;scale\(&quot;</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="n">sep</span><span class="o">+</span><span class="n">digit</span><span class="o">+</span><span class="s">&quot;?\)&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="read_color"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.read_color">[docs]</a><span class="k">def</span> <span class="nf">read_color</span> <span class="p">(</span><span class="n">color_str</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Read a color string</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `color_str` (str) - a valid</span>
+<span class="sd">	   string representation of</span>
+<span class="sd">	   an SVG color</span>
+<span class="sd">	</span>
+<span class="sd">	:Return: tuple R,G,B if color</span>
+<span class="sd">	  is valid, None otherwise</span>
+<span class="sd">	</span>
+<span class="sd">	Returns Type:</span>
+<span class="sd">	 - (int,int,int)</span>
+<span class="sd">	 - None</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">color_str</span> <span class="o">==</span> <span class="s">&quot;none&quot;</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="bp">None</span>
+	<span class="k">else</span> <span class="p">:</span> <span class="c">#assert haxedecimal definition</span>
+	       <span class="c">#of the color col = #rrggbb</span>
+		<span class="n">col_str</span> <span class="o">=</span> <span class="n">color_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span><span class="c">#remove &#39;#&#39;</span>
+		<span class="n">red</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">col_str</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span>
+		<span class="n">green</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">col_str</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span>
+		<span class="n">blue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">col_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span><span class="mi">16</span><span class="p">)</span>
+		<span class="k">return</span> <span class="p">(</span><span class="n">red</span><span class="p">,</span><span class="n">green</span><span class="p">,</span><span class="n">blue</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="write_color"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.write_color">[docs]</a><span class="k">def</span> <span class="nf">write_color</span> <span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Create an str repr of a color</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `color` ( (int,int,int) ) -</span>
+<span class="sd">	   RGB representation of a color,</span>
+<span class="sd">	   (None for empty color)</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="s">&quot;none&quot;</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="s">&quot;#</span><span class="si">%.2x%.2x%.2x</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">color</span>
+</div>
+<div class="viewcode-block" id="read_dash"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.read_dash">[docs]</a><span class="k">def</span> <span class="nf">read_dash</span> <span class="p">(</span><span class="n">dash_str</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Read an str repr of dashing</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `dash_str` - string representation</span>
+<span class="sd">	   of dash information int,int</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: int,int</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">dash_length</span><span class="p">,</span><span class="n">void_length</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dash_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span> <span class="p">)</span>
+	<span class="k">return</span> <span class="n">dash_length</span><span class="p">,</span><span class="n">void_length</span>
+</div>
+<div class="viewcode-block" id="write_dash"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.write_dash">[docs]</a><span class="k">def</span> <span class="nf">write_dash</span> <span class="p">(</span><span class="n">dash</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Write a dash representation</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `dash` (int,int) - tuple dash_length,void_length</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">, </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dash</span>
+</div>
+<div class="viewcode-block" id="read_float"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.read_float">[docs]</a><span class="k">def</span> <span class="nf">read_float</span> <span class="p">(</span><span class="n">val_str</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Read a float string</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `val_str` (str) - a valid</span>
+<span class="sd">	   string representation of</span>
+<span class="sd">	   a floating number</span>
+<span class="sd">	</span>
+<span class="sd">	:Return: the value if the string</span>
+<span class="sd">	  is valid, None otherwise</span>
+<span class="sd">	</span>
+<span class="sd">	Returns Type:</span>
+<span class="sd">	 - float</span>
+<span class="sd">	 - None</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">val_str</span> <span class="o">==</span> <span class="s">&quot;none&quot;</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="bp">None</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="n">res</span> <span class="o">=</span> <span class="n">float_re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="write_float"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.write_float">[docs]</a><span class="k">def</span> <span class="nf">write_float</span> <span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Create an str repr of a float</span>
+<span class="sd">	</span>
+<span class="sd">	:Parameters:</span>
+<span class="sd">	 - `val` (float) - actual value</span>
+<span class="sd">	   of the number or None</span>
+<span class="sd">	</span>
+<span class="sd">	:Returns Type: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="s">&quot;none&quot;</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="k">return</span> <span class="s">&quot;</span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="SVGElement"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement">[docs]</a><span class="k">class</span> <span class="nc">SVGElement</span> <span class="p">(</span><span class="n">XMLElement</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Base class for all SVG element</span>
+<span class="sd">	</span>
+<span class="sd">	store attributes of geometry and style</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodeid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nodename</span><span class="o">=</span><span class="s">&quot;svg&quot;</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Constructor</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `nodeid` (str) - a unique id for this node</span>
+<span class="sd">		 - `parent` (:class:`SVGElement`) - owner of</span>
+<span class="sd">		    this node. Default None means that this</span>
+<span class="sd">		    element is top level.</span>
+<span class="sd">		 - `nodename` (str) - name of this particular</span>
+<span class="sd">		    type of node</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">XMLElement</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span><span class="n">SVG_ELEMENT_TYPE</span><span class="p">,</span><span class="n">nodename</span><span class="p">,</span><span class="n">nodeid</span><span class="p">)</span>
+		
+		<span class="c">#graphic style</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="p">{}</span>
+		
+		<span class="c">#transformation</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">SVGTransform</span><span class="p">()</span><span class="c">#transformation matrix expressed</span>
+		                                <span class="c">#in parent frame</span>
+		                                <span class="c">#pos_Rparent = transform * pos_Rlocal</span>
+		
+		<span class="c">#filename for abs path</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_svgfilename</span> <span class="o">=</span> <span class="bp">None</span>
+	
+	<span class="c">##############################################</span>
+	<span class="c">#</span>
+	<span class="c">#		access to style elements</span>
+	<span class="c">#</span>
+	<span class="c">##############################################</span>
+<div class="viewcode-block" id="SVGElement.get_style"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.get_style">[docs]</a>	<span class="k">def</span> <span class="nf">get_style</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Return style associated with this key</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `key` (str) - style descriptor</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: str</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_style"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_style">[docs]</a>	<span class="k">def</span> <span class="nf">set_style</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">str_val</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the style associated with this key</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `key` (str) - style descriptor</span>
+<span class="sd">		 - `str_val` (str) - actual value</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">str_val</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.displayed"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.displayed">[docs]</a>	<span class="k">def</span> <span class="nf">displayed</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Tells wether this element is visible or not</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: bool</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="s">&quot;display&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;display&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;none&quot;</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">False</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_display"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_display">[docs]</a>	<span class="k">def</span> <span class="nf">set_display</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the visibility of this element</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `display` (bool)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">display</span> <span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;display&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;true&quot;</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;display&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;none&quot;</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.fill"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.fill">[docs]</a>	<span class="k">def</span> <span class="nf">fill</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Return color used to fill the element</span>
+<span class="sd">		</span>
+<span class="sd">		Return None if element is not filled</span>
+<span class="sd">		</span>
+<span class="sd">		.. seealso: :func:stroke</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type:</span>
+<span class="sd">		 - (int,int,int)</span>
+<span class="sd">		 - None</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="s">&quot;fill&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="n">read_color</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;fill&quot;</span><span class="p">])</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">None</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_fill"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_fill">[docs]</a>	<span class="k">def</span> <span class="nf">set_fill</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the color used to fill the element</span>
+<span class="sd">		</span>
+<span class="sd">		.. seealso: :func:set_stroke</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `color` (int,int,int) - color</span>
+<span class="sd">		   used to fill the element, None</span>
+<span class="sd">		   if no color is used</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;fill&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">write_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.opacity"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.opacity">[docs]</a>	<span class="k">def</span> <span class="nf">opacity</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Return opacity of filling</span>
+<span class="sd">		</span>
+<span class="sd">		0. means transparent and 1. opaque</span>
+<span class="sd">		</span>
+<span class="sd">		Return None if element is not filled</span>
+<span class="sd">		</span>
+<span class="sd">		.. seealso: :func:fill</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: float</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="s">&quot;fill-opacity&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="n">read_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;fill-opacity&quot;</span><span class="p">])</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">None</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_opacity"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_opacity">[docs]</a>	<span class="k">def</span> <span class="nf">set_opacity</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opacity</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the opacity of filling</span>
+<span class="sd">		</span>
+<span class="sd">		.. seealso: :func:set_fill</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `opacity` (float) - 0. means transparent</span>
+<span class="sd">		    and 1. opaque</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;fill-opacity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">write_float</span><span class="p">(</span><span class="n">opacity</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.stroke"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.stroke">[docs]</a>	<span class="k">def</span> <span class="nf">stroke</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Return color used to paint border of the element</span>
+<span class="sd">		</span>
+<span class="sd">		Return None if element is not filled</span>
+<span class="sd">		</span>
+<span class="sd">		.. seealso: :func:fill</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type:</span>
+<span class="sd">		 - (int,int,int)</span>
+<span class="sd">		 - None</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="s">&quot;stroke&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="n">read_color</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;stroke&quot;</span><span class="p">])</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">None</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_stroke"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_stroke">[docs]</a>	<span class="k">def</span> <span class="nf">set_stroke</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the color used to paint the border</span>
+<span class="sd">		</span>
+<span class="sd">		.. seealso: :func:set_fill</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `color` (int,int,int) - color</span>
+<span class="sd">		   used to fill border ofthe element,</span>
+<span class="sd">		   None if no color is used</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;stroke&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">write_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.stroke_width"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.stroke_width">[docs]</a>	<span class="k">def</span> <span class="nf">stroke_width</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Return size of the border</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: float</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="s">&quot;stroke-width&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="p">:</span>
+			<span class="n">width</span> <span class="o">=</span> <span class="n">read_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;stroke-width&quot;</span><span class="p">])</span>
+			<span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+				<span class="k">return</span> <span class="mf">0.</span>
+			<span class="k">else</span> <span class="p">:</span>
+				<span class="k">return</span> <span class="n">width</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="mf">0.</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_stroke_width"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_stroke_width">[docs]</a>	<span class="k">def</span> <span class="nf">set_stroke_width</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the size of the border</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `width` (float) - size of</span>
+<span class="sd">		   the border in pixels</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;stroke-width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">write_float</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.stroke_dash"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.stroke_dash">[docs]</a>	<span class="k">def</span> <span class="nf">stroke_dash</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Return dashing type for stroke</span>
+<span class="sd">		</span>
+<span class="sd">		:Return:</span>
+<span class="sd">		 - dash length, void length in pix</span>
+<span class="sd">		 - None if continuous</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type:</span>
+<span class="sd">		 - int,int</span>
+<span class="sd">		 - None</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="s">&quot;stroke-dasharray&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="n">read_dash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;stroke-dasharray&quot;</span><span class="p">])</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">None</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_stroke_dash"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_stroke_dash">[docs]</a>	<span class="k">def</span> <span class="nf">set_stroke_dash</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dash_length</span><span class="p">,</span> <span class="n">void_length</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set dashing for this stroke</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `dash_length` (int) - length of dash in pixel</span>
+<span class="sd">		    if None, no dashing</span>
+<span class="sd">		 - `void_length` (int) - length of void in pixel</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">dash_length</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;stroke-dasharray&quot;</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">[</span><span class="s">&quot;stroke-dasharray&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">write_dash</span><span class="p">(</span> <span class="p">(</span><span class="n">dash_length</span><span class="p">,</span><span class="n">void_length</span><span class="p">)</span> <span class="p">)</span>
+	
+	<span class="c">##############################################</span>
+	<span class="c">#</span>
+	<span class="c">#		change of referential</span>
+	<span class="c">#</span>
+	<span class="c">##############################################</span></div>
+<div class="viewcode-block" id="SVGElement.scene_pos"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.scene_pos">[docs]</a>	<span class="k">def</span> <span class="nf">scene_pos</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Express the position in scene</span>
+<span class="sd">		absolute referential.</span>
+<span class="sd">		</span>
+<span class="sd">		Apply recursively all transformations</span>
+<span class="sd">		to pos to obtain the absolute position</span>
+<span class="sd">		in the scene.</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `pos` (float,float) - local</span>
+<span class="sd">		    coordinates of a point</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: float,float</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">ppos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">apply_to_point</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="n">ppos</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">scene_pos</span><span class="p">(</span><span class="n">ppos</span><span class="p">)</span>
+	
+	<span class="c">##############################################</span>
+	<span class="c">#</span>
+	<span class="c">#		transformation</span>
+	<span class="c">#</span>
+	<span class="c">##############################################</span></div>
+<div class="viewcode-block" id="SVGElement.transformation"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.transformation">[docs]</a>	<span class="k">def</span> <span class="nf">transformation</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Retrieve the associated transformation</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: :class:`SVGTransform`</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.set_transformation"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.set_transformation">[docs]</a>	<span class="k">def</span> <span class="nf">set_transformation</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transfo</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Set the transformation of this element</span>
+<span class="sd">		</span>
+<span class="sd">		Copy the transformation, then assign it</span>
+<span class="sd">		to the element.</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `transfo` (:class:`SVGTransform`)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">transfo</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.transform"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.transform">[docs]</a>	<span class="k">def</span> <span class="nf">transform</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transfo</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Combine a transformation with</span>
+<span class="sd">		the actual transformation of this</span>
+<span class="sd">		element.</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `transfo` (:class:`SVGTransform`)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">transfo</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.translate"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.translate">[docs]</a>	<span class="k">def</span> <span class="nf">translate</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Combine a translation</span>
+<span class="sd">		with the actual transformation</span>
+<span class="sd">		of this element.</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `dx` (float) - x displacement</span>
+<span class="sd">		 - `dy` (float) - y displacement</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">translation</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.rotate"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.rotate">[docs]</a>	<span class="k">def</span> <span class="nf">rotate</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Combine a rotation</span>
+<span class="sd">		with the actual transformation</span>
+<span class="sd">		of this element.</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `angle` (float) - angle of</span>
+<span class="sd">		   the rotation around Oz in</span>
+<span class="sd">		   direct orientation.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.scale"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.scale">[docs]</a>	<span class="k">def</span> <span class="nf">scale</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Combine a scaling</span>
+<span class="sd">		with the actual transformation</span>
+<span class="sd">		of this element.</span>
+<span class="sd">		</span>
+<span class="sd">		:Parameters:</span>
+<span class="sd">		 - `sx` (float) - x scaling</span>
+<span class="sd">		 - `sy` (float) - y scaling</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">scaling</span><span class="p">(</span><span class="n">sx</span><span class="p">,</span><span class="n">sy</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span>
+	
+	<span class="c">##############################################</span>
+	<span class="c">#</span>
+	<span class="c">#		SVG interface</span>
+	<span class="c">#</span>
+	<span class="c">##############################################</span></div>
+<div class="viewcode-block" id="SVGElement.abs_path"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.abs_path">[docs]</a>	<span class="k">def</span> <span class="nf">abs_path</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;absolute path to SVG file</span>
+<span class="sd">		</span>
+<span class="sd">		Used by images to access their</span>
+<span class="sd">		content since it is stored</span>
+<span class="sd">		outside of the main SVG file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_svgfilename</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+				<span class="k">return</span> <span class="n">filename</span>
+			<span class="k">else</span> <span class="p">:</span>
+				<span class="k">return</span> <span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_svgfilename</span><span class="p">),</span><span class="n">filename</span><span class="p">)</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">abs_path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.load_style"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.load_style">[docs]</a>	<span class="k">def</span> <span class="nf">load_style</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Load style attribute as a map</span>
+<span class="sd">		</span>
+<span class="sd">		Style attributes are originally stored</span>
+<span class="sd">		in a &quot;style&quot; attribute. Parse this</span>
+<span class="sd">		attribute to create a more easy access.</span>
+<span class="sd">		</span>
+<span class="sd">		:Returns Type: dict of (str|str)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">style</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">for</span> <span class="n">style_elm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="s">&quot;style&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">)</span> <span class="p">:</span>
+			<span class="k">if</span> <span class="s">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">style_elm</span> <span class="p">:</span>
+				<span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="o">=</span> <span class="n">style_elm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)</span>
+				<span class="n">style</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+		<span class="k">return</span> <span class="n">style</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.load"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.load">[docs]</a>	<span class="k">def</span> <span class="nf">load</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Load SVG attributes from XML attributes</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">XMLElement</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_style</span><span class="p">()</span> <span class="p">)</span>
+		<span class="c">#transformation</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_attribute</span><span class="p">(</span><span class="s">&quot;transform&quot;</span><span class="p">)</span> <span class="p">:</span>
+			<span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="s">&quot;transform&quot;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.save_style"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.save_style">[docs]</a>	<span class="k">def</span> <span class="nf">save_style</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Save style map as an XML attribute</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_style</span><span class="p">()</span>
+		<span class="n">style</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s">&quot;style&quot;</span><span class="p">,</span><span class="s">&quot;;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">it</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">style</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span> <span class="p">)</span>
+	</div>
+<div class="viewcode-block" id="SVGElement.save"><a class="viewcode-back" href="../../../openalea-components/svgdraw/doc/user/autosum.html#openalea.svgdraw.svg_element.SVGElement.save">[docs]</a>	<span class="k">def</span> <span class="nf">save</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Save SVG attributes as XML attributes</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">XMLElement</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">save_style</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s">&quot;transform&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">write</span><span class="p">()</span> <span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

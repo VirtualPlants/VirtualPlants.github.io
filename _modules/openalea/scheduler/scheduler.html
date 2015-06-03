@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.scheduler.scheduler &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.scheduler.scheduler</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       scheduler: simple scheduling of tasks</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Christophe Pradal &lt;christophe.pradal@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="sd">&quot;&quot;&quot;This module defines the base class Scheduler to list and evaluate tasks.&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">heappush</span><span class="p">,</span><span class="n">heappop</span>
+
+<div class="viewcode-block" id="Scheduler"><a class="viewcode-back" href="../../../openalea-components/scheduler/doc/user/autosum.html#openalea.scheduler.scheduler.Scheduler">[docs]</a><span class="k">class</span> <span class="nc">Scheduler</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Call a set of tasks at regular time interval.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialise the Scheduler.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#current step of evaluation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c">#heapqueue of tasks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c">###############################################</span>
+    <span class="c">#</span>
+    <span class="c">#    accessors</span>
+    <span class="c">#</span>
+    <span class="c">###############################################</span>
+<div class="viewcode-block" id="Scheduler.tasks"><a class="viewcode-back" href="../../../openalea-components/scheduler/doc/user/autosum.html#openalea.scheduler.scheduler.Scheduler.tasks">[docs]</a>    <span class="k">def</span> <span class="nf">tasks</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Iterate on all scheduled tasks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">task</span> <span class="k">for</span> <span class="n">cycle</span><span class="p">,</span><span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Scheduler.current_cycle"><a class="viewcode-back" href="../../../openalea-components/scheduler/doc/user/autosum.html#openalea.scheduler.scheduler.Scheduler.current_cycle">[docs]</a>    <span class="k">def</span> <span class="nf">current_cycle</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the value of the current cycle</span>
+<span class="sd">        </span>
+<span class="sd">        .. warning:: the current cycle has already been evaluated. The next</span>
+<span class="sd">                     next cycle to be executed is returned by `run`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span>
+    
+    <span class="c">###############################################</span>
+    <span class="c">#</span>
+    <span class="c">#    edit</span>
+    <span class="c">#</span>
+    <span class="c">###############################################</span></div>
+<div class="viewcode-block" id="Scheduler.register"><a class="viewcode-back" href="../../../openalea-components/scheduler/doc/user/autosum.html#openalea.scheduler.scheduler.Scheduler.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">start_time</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Register a new task in the scheduler.</span>
+<span class="sd">        </span>
+<span class="sd">        task: a Task object</span>
+<span class="sd">        start_time: ellapsed cycle number before</span>
+<span class="sd">                    evaluating the task. If None,</span>
+<span class="sd">                    uses task delay.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">+</span> <span class="n">task</span><span class="o">.</span><span class="n">delay</span><span class="p">()</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">assert</span> <span class="n">start_time</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span>
+        
+        <span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tasks</span><span class="p">,</span> <span class="p">(</span><span class="n">start_time</span><span class="p">,</span><span class="n">task</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="c">###############################################</span>
+    <span class="c">#</span>
+    <span class="c">#    evaluate</span>
+    <span class="c">#</span>
+    <span class="c">###############################################</span></div>
+<div class="viewcode-block" id="Scheduler.run"><a class="viewcode-back" href="../../../openalea-components/scheduler/doc/user/autosum.html#openalea.scheduler.scheduler.Scheduler.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate one cycle of the scheduler.</span>
+<span class="sd">        </span>
+<span class="sd">        yield the next cycle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="c">#retrieve tasks to evaluate at this cycle</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span><span class="p">,</span><span class="n">task</span> <span class="o">=</span> <span class="n">heappop</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+            <span class="n">task_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">(),</span><span class="n">task</span><span class="p">)]</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="p">:</span>
+                <span class="n">cc</span><span class="p">,</span><span class="n">task</span> <span class="o">=</span> <span class="n">heappop</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+                <span class="n">task_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">priority</span><span class="p">(),</span><span class="n">task</span><span class="p">)</span> <span class="p">)</span>
+            
+            <span class="c">#sort task by priority</span>
+            <span class="n">task_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+            
+            <span class="c">#evaluate</span>
+            <span class="k">for</span> <span class="n">priority</span><span class="p">,</span><span class="n">task</span> <span class="ow">in</span> <span class="n">task_list</span> <span class="p">:</span>
+                <span class="c">#evaluate the task</span>
+                <span class="n">delay</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+                <span class="c">#reinsert the task in the heapqueue</span>
+                <span class="k">if</span> <span class="n">delay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="p">:</span>
+                    <span class="n">heappush</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_cycle</span> <span class="o">+</span> <span class="n">delay</span><span class="p">,</span><span class="n">task</span><span class="p">)</span> <span class="p">)</span>
+            
+            <span class="c">#return</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+                <span class="k">yield</span> <span class="n">tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1034 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.container.topomesh_algo &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.container.topomesh_algo</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c">#       Topomesh : container package</span>
+<span class="c">#</span>
+<span class="c">#       Copyright or  or Copr. 2006 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       VPlants WebSite : https://gforge.inria.fr/projects/vplants/</span>
+<span class="c">#</span>
+
+<span class="n">__doc__</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">This module provide a simple pure python implementation</span>
+<span class="s">for a some topomesh algorithms</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id: topomesh_algo.py 14917 2013-09-27 12:28:55Z pradal $ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">topomesh</span> <span class="kn">import</span> <span class="n">Topomesh</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;clean_remove&quot;</span><span class="p">,</span><span class="s">&quot;clean_geometry&quot;</span><span class="p">,</span><span class="s">&quot;clean_orphans&quot;</span><span class="p">,</span>
+           <span class="s">&quot;is_flip_topo_allowed&quot;</span><span class="p">,</span><span class="s">&quot;flip_edge&quot;</span><span class="p">,</span>
+           <span class="s">&quot;is_collapse_topo_allowed&quot;</span><span class="p">,</span>
+           <span class="s">&quot;clean_duplicated_wisps&quot;</span><span class="p">,</span>
+           <span class="s">&quot;collapse_edge&quot;</span><span class="p">,</span><span class="s">&quot;collapse_face&quot;</span><span class="p">,</span>
+           <span class="s">&quot;expand&quot;</span><span class="p">,</span><span class="s">&quot;border&quot;</span><span class="p">,</span><span class="s">&quot;shrink&quot;</span><span class="p">,</span>
+           <span class="s">&quot;expand_to_border&quot;</span><span class="p">,</span><span class="s">&quot;expand_to_region&quot;</span><span class="p">,</span><span class="s">&quot;external_border&quot;</span><span class="p">,</span>
+           <span class="s">&quot;clean_duplicated_borders&quot;</span><span class="p">,</span><span class="s">&quot;merge_wisps&quot;</span><span class="p">,</span>
+           <span class="s">&quot;find_cycles&quot;</span><span class="p">,</span><span class="s">&quot;clone_mesh&quot;</span><span class="p">,</span>
+           <span class="s">&quot;topo_divide_edge&quot;</span><span class="p">,</span><span class="s">&quot;topo_divide_face&quot;</span><span class="p">,</span><span class="s">&quot;topo_divide_cell&quot;</span><span class="p">,</span>
+           <span class="s">&quot;ordered_pids&quot;</span><span class="p">,</span><span class="s">&quot;topo_triangulate_polygon&quot;</span><span class="p">,</span><span class="s">&quot;topo_triangulate_face&quot;</span><span class="p">,</span>
+           <span class="s">&quot;find_connex_parts&quot;</span><span class="p">]</span>
+<span class="c">###########################################################</span>
+<span class="c">#</span>
+<span class="c">#       mesh edition</span>
+<span class="c">#</span>
+<span class="c">###########################################################</span>
+<div class="viewcode-block" id="clean_remove"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.clean_remove">[docs]</a><span class="k">def</span> <span class="nf">clean_remove</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Remove a wisp and all wisps of smaller degree</span>
+<span class="sd">    that are no longer connected to anything.</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`) - mesh the wisp</span>
+<span class="sd">                                    belong to</span>
+<span class="sd">     - `degree` (int) - degree of the wisp</span>
+<span class="sd">     - `wid` (wid) - id of the wisp to remove in</span>
+<span class="sd">                     the first place</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">wid</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">deg</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">orphans</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">to_remove</span> <span class="p">:</span>
+            <span class="n">bids</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">bids</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_regions</span><span class="p">(</span><span class="n">deg</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+                    <span class="n">orphans</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+        <span class="n">to_remove</span> <span class="o">=</span> <span class="n">orphans</span>
+    
+    <span class="c">#handle points</span>
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">to_remove</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span></div>
+<div class="viewcode-block" id="merge_wisps"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.merge_wisps">[docs]</a><span class="k">def</span> <span class="nf">merge_wisps</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wid1</span><span class="p">,</span> <span class="n">wid2</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    merge two wisps into a single one</span>
+<span class="sd">    assertion1 : wisps share a border</span>
+<span class="sd">    assertion2 : this frontier has only these two wisps as regions</span>
+<span class="sd">    return wid of newly created wisp</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#find common frontier that will be removed</span>
+    <span class="n">frontier</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid1</span><span class="p">))</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid2</span><span class="p">))</span>
+    <span class="c">#test assertion 1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">frontier</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="c">#test assertion 2</span>
+    <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">frontier</span> <span class="p">:</span>
+        <span class="k">assert</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_regions</span><span class="p">(</span><span class="n">scale</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="c">#create new wisp</span>
+    <span class="n">nwid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+    <span class="c">#connect with regions if needed</span>
+    <span class="k">if</span> <span class="n">scale</span> <span class="o">&lt;</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid1</span><span class="p">))</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid2</span><span class="p">))</span> <span class="p">:</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">scale</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">rid</span><span class="p">,</span><span class="n">nwid</span><span class="p">)</span>
+    <span class="c">#connect with borders</span>
+    <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid1</span><span class="p">))</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid2</span><span class="p">)))</span> <span class="o">-</span> <span class="n">frontier</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">nwid</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span>
+    <span class="c">#remove old wisps</span>
+    <span class="n">clean_remove</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">wid1</span><span class="p">)</span>
+    <span class="n">clean_remove</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">wid2</span><span class="p">)</span>
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">nwid</span>
+</div>
+<div class="viewcode-block" id="is_flip_topo_allowed"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.is_flip_topo_allowed">[docs]</a><span class="k">def</span> <span class="nf">is_flip_topo_allowed</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Test wether the given edge might be safely flipped.</span>
+
+<span class="sd">    mesh: a topomesh object</span>
+<span class="sd">    eid: id of the edge to flip</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#only edge shared by two faces</span>
+    <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#regions are triangular faces</span>
+    <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#no existing edge already between the</span>
+    <span class="c">#two points of the flipped edge</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">pts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">pid1</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">region_neighbors</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="flip_edge"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.flip_edge">[docs]</a><span class="k">def</span> <span class="nf">flip_edge</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Flip the orientation of an edge.</span>
+
+<span class="sd">    in a triangulated mesh</span>
+<span class="sd">    call is_flip_topo_allowed if there is some doubt</span>
+<span class="sd">    on the validy of this operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#definition of local elements</span>
+    <span class="n">fid1</span><span class="p">,</span><span class="n">fid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="c">#work only if planar polygon</span>
+    <span class="n">pid3</span><span class="p">,</span><span class="n">pid4</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    <span class="n">pid1</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span> <span class="p">(</span><span class="n">pid3</span><span class="p">,</span><span class="n">pid4</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">pid2</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span> <span class="p">(</span><span class="n">pid3</span><span class="p">,</span><span class="n">pid4</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">eid13</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid3</span><span class="p">))</span>
+    <span class="n">eid14</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid4</span><span class="p">))</span>
+    <span class="n">eid23</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid3</span><span class="p">))</span>
+    <span class="n">eid24</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid4</span><span class="p">))</span>
+    <span class="c">#relink eid</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid3</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid4</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid1</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span>
+    <span class="c">#relink faces</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">,</span><span class="n">eid14</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">,</span><span class="n">eid23</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">,</span><span class="n">eid23</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">,</span><span class="n">eid14</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="is_collapse_topo_allowed"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.is_collapse_topo_allowed">[docs]</a><span class="k">def</span> <span class="nf">is_collapse_topo_allowed</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">protected_edges</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Test wether collapse of the edge is safe.</span>
+
+<span class="sd">    mesh: a topomesh object</span>
+<span class="sd">    eid: id of the edge to flip</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#collapse enabled only if faces are triangle or square</span>
+    <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#construct a local copy of the mesh</span>
+    <span class="c">#including all the faces that touch one</span>
+    <span class="c">#of the extremity of the edge</span>
+    <span class="c">#find relevant elements</span>
+    <span class="n">fids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">fids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">))</span>
+
+    <span class="n">eids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">fids</span> <span class="p">:</span>
+        <span class="n">eids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">))</span>
+        <span class="n">pids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">elms</span> <span class="o">=</span> <span class="p">(</span><span class="n">pids</span><span class="p">,</span><span class="n">eids</span><span class="p">,</span><span class="n">fids</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
+        <span class="n">cids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">fids</span> <span class="p">:</span>
+            <span class="n">cids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">))</span>
+        <span class="n">elms</span> <span class="o">=</span> <span class="n">elms</span> <span class="o">+</span> <span class="p">(</span><span class="n">cids</span><span class="p">,)</span>
+    
+    <span class="c">#construct local mesh</span>
+    <span class="n">lmesh</span> <span class="o">=</span> <span class="n">Topomesh</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">(),</span><span class="s">&quot;max&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">deg</span><span class="p">,</span><span class="n">wids</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elms</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+            <span class="n">lmesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">deg</span><span class="p">,</span><span class="n">wids</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elms</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">elms</span><span class="p">[</span><span class="n">deg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="p">:</span>
+                <span class="n">lmesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">deg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span><span class="n">rid</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+    <span class="c">#collapse edge on this local copy</span>
+    <span class="k">try</span> <span class="p">:</span>
+        <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span> <span class="o">=</span> <span class="n">collapse_edge</span><span class="p">(</span><span class="n">lmesh</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">protected_edges</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">UserWarning</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#test the result</span>
+    <span class="c">#edges without any face</span>
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">lmesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">lmesh</span><span class="o">.</span><span class="n">nb_regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#surperposed faces</span>
+    <span class="c">#TODO optimization</span>
+    <span class="k">for</span> <span class="n">ref_fid</span> <span class="ow">in</span> <span class="n">lmesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">ref_pids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">lmesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">ref_fid</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="p">[</span><span class="n">wid</span> <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">lmesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">wid</span> <span class="o">!=</span> <span class="n">ref_fid</span><span class="p">]</span> <span class="p">:</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">lmesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_pids</span><span class="p">)</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="n">pids</span> <span class="o">==</span> <span class="n">ref_pids</span> <span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_pids</span><span class="p">)</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span> <span class="o">-</span> <span class="n">ref_pids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_pids</span> <span class="o">-</span> <span class="n">pids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+<span class="c">#def clean_duplicated_edges (mesh, eid1, eid2) :</span>
+<span class="c">#    &quot;&quot;&quot;Remove a duplicated edge</span>
+<span class="c">#    </span>
+<span class="c">#    Remove eid2 and reconnect all faces</span>
+<span class="c">#    to eid1. If a face is not geometrically</span>
+<span class="c">#    defined (less than 3 edges) remove it</span>
+<span class="c">#    too.</span>
+<span class="c">#    </span>
+<span class="c">#    .. warning:: eid1 and eid2 must have</span>
+<span class="c">#      the same borders</span>
+<span class="c">#    </span>
+<span class="c">#    .. warning:: do not test for cells</span>
+<span class="c">#    </span>
+<span class="c">#    :Returns Type: None</span>
+<span class="c">#    &quot;&quot;&quot;</span>
+<span class="c">#    faces = set(mesh.regions(1,eid2) )</span>
+<span class="c">#    faces.discard(mesh.regions(1,eid1) )</span>
+<span class="c">#    </span>
+<span class="c">#    mesh.remove_wisp(1,eid2)</span>
+<span class="c">#    </span>
+<span class="c">#    for fid in faces :</span>
+<span class="c">#        mesh.link(2,fid,eid1)</span>
+<span class="c">#    </span>
+<span class="c">#    for fid in tuple(mesh.regions(1,eid1) ) :</span>
+<span class="c">#        if mesh.nb_borders(2,fid) &lt; 3 :</span>
+<span class="c">#            clean_remove(mesh,2,fid)</span>
+</div>
+<div class="viewcode-block" id="clean_duplicated_wisps"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.clean_duplicated_wisps">[docs]</a><span class="k">def</span> <span class="nf">clean_duplicated_wisps</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">wid1</span><span class="p">,</span> <span class="n">wid2</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Remove a duplicated wisp</span>
+<span class="sd">    </span>
+<span class="sd">    Remove wid2 and reconnect all regions to wid1.</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: assert the mesh degree is higher than deg. Otherwise</span>
+<span class="sd">                 a simple call to remove_wisp is sufficient</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: wid1 and wid2 must have the same borders</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: this method remove all wisps no longer geometrically</span>
+<span class="sd">       defined created in the process.</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (Topomesh)</span>
+<span class="sd">     - `deg` (int) - degree of the wisp</span>
+<span class="sd">     - `wid1` (wid) - id of the duplicated wisp to keep</span>
+<span class="sd">     - `wid2` (wid) - id of the duplicated wisp to remove</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">regions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">regions</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid1</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid2</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="n">regions</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">deg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span><span class="n">rid</span><span class="p">,</span><span class="n">wid1</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid1</span><span class="p">)</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_borders</span><span class="p">(</span><span class="n">deg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span><span class="n">rid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">deg</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">clean_remove</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">deg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span><span class="n">rid</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="collapse_edge"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.collapse_edge">[docs]</a><span class="k">def</span> <span class="nf">collapse_edge</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Collapse an edge</span>
+<span class="sd">    </span>
+<span class="sd">    Collapse and remove an edge</span>
+<span class="sd">    Remove adjacent faces and</span>
+<span class="sd">    duplicated edges if necessary</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning::</span>
+<span class="sd">     - edge eid has only two borders pid1</span>
+<span class="sd">       and pid2</span>
+<span class="sd">     - there is no other edge between</span>
+<span class="sd">       pid1 and pid2</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: do not test for cells</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`)</span>
+<span class="sd">     - `eid` (eid) - id of edge</span>
+<span class="sd">        to collapse</span>
+<span class="sd">    </span>
+<span class="sd">    :Return:</span>
+<span class="sd">     - pid1, id of remaining point</span>
+<span class="sd">     - pid2, id of point that have been removed</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: (pid,pid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="c">#remove eid</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="c">#relink edges connected to pid2</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid1</span><span class="p">)</span>
+    
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span>
+    
+    <span class="c">#test for duplicated edges</span>
+    <span class="n">edge</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">pid1</span><span class="p">)</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">pids</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">try</span> <span class="p">:</span>
+            <span class="n">other_eid</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="c">#edge is duplicated</span>
+            <span class="n">clean_duplicated_wisps</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">other_eid</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="p">:</span>
+            <span class="c">#edge is alone for the moment</span>
+            <span class="n">edge</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+    
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span>
+</div>
+<div class="viewcode-block" id="collapse_face"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.collapse_face">[docs]</a><span class="k">def</span> <span class="nf">collapse_face</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Collapse a face</span>
+<span class="sd">    </span>
+<span class="sd">    remove the face and call :func:`collapse_edge`</span>
+<span class="sd">    on all border of the face</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`)</span>
+<span class="sd">     - `fid` (fid) - id of face</span>
+<span class="sd">        to collapse</span>
+<span class="sd">    </span>
+<span class="sd">    :Return:</span>
+<span class="sd">     - pid0, id of the point that stands for</span>
+<span class="sd">       the face</span>
+<span class="sd">     - pids, list of points that have been</span>
+<span class="sd">       removed</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: pid,list of pid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    
+    <span class="n">pid0</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">removed_pids</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">edges</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">has_wisp</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span> <span class="o">=</span> <span class="n">collapse_edge</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">removed_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pid2</span><span class="p">)</span>
+            <span class="n">pid0</span> <span class="o">=</span> <span class="n">pid1</span>
+    
+    <span class="k">return</span> <span class="n">pid0</span><span class="p">,</span><span class="n">removed_pids</span>
+</div>
+<div class="viewcode-block" id="clone_mesh"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.clone_mesh">[docs]</a><span class="k">def</span> <span class="nf">clone_mesh</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Clone a mesh around a set of elements</span>
+<span class="sd">    </span>
+<span class="sd">    Create a new mesh with the same ids</span>
+<span class="sd">    than the old one where all wisps not</span>
+<span class="sd">    connected to the given one are ommited.</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`) - the master</span>
+<span class="sd">                mesh to clone</span>
+<span class="sd">     - `wids` (list of wid) - a list of top</span>
+<span class="sd">        wisps id that will remain in the clone</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: :class:`Topomesh`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">deg_max</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span>
+    
+    <span class="n">cmesh</span> <span class="o">=</span> <span class="n">Topomesh</span><span class="p">(</span><span class="n">deg_max</span><span class="p">,</span><span class="s">&quot;max&quot;</span><span class="p">)</span>
+    
+    <span class="c">#find local wisps</span>
+    <span class="n">loc_wisps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">deg</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">deg_max</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">wisps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+            <span class="n">wisps</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">deg_max</span><span class="p">,</span><span class="n">wid</span><span class="p">,</span><span class="n">deg_max</span> <span class="o">-</span> <span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">loc_wisps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wisps</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="n">loc_wisps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">deg_max</span><span class="p">,</span><span class="n">wids</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="c">#copy wisps</span>
+    <span class="k">for</span> <span class="n">deg</span><span class="p">,</span><span class="n">wids</span> <span class="ow">in</span> <span class="n">loc_wisps</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+            <span class="n">cmesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+    
+    <span class="c">#copy links between wisps</span>
+    <span class="k">for</span> <span class="n">deg</span><span class="p">,</span><span class="n">wids</span> <span class="ow">in</span> <span class="n">loc_wisps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">cmesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span>
+    
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">cmesh</span>
+
+<span class="c">###############################################</span>
+<span class="c">#</span>
+<span class="c">#        triangulation</span>
+<span class="c">#</span>
+<span class="c">###############################################</span></div>
+<span class="k">def</span> <span class="nf">_next_point</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">eids</span><span class="p">,</span> <span class="n">pid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">new_pid</span><span class="p">,</span>  <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="n">pid</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">eid</span><span class="p">,</span><span class="n">new_pid</span>
+
+<div class="viewcode-block" id="ordered_pids"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.ordered_pids">[docs]</a><span class="k">def</span> <span class="nf">ordered_pids</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return the list of points that</span>
+<span class="sd">    border this face ordered along edges</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`)</span>
+<span class="sd">     - `fid` (fid) : id of the face</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: list of pid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">eid</span> <span class="o">=</span> <span class="n">eids</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="k">try</span> <span class="p">:</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+            <span class="n">eid</span><span class="p">,</span><span class="n">pid</span> <span class="o">=</span> <span class="n">_next_point</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">eids</span><span class="p">,</span><span class="n">pids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">eids</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;unable to order&quot;</span><span class="p">)</span>
+    
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eids</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span> \
+             <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="n">pids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">pids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">])</span> <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">pids</span>
+</div>
+<div class="viewcode-block" id="topo_triangulate_polygon"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.topo_triangulate_polygon">[docs]</a><span class="k">def</span> <span class="nf">topo_triangulate_polygon</span> <span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Sort pids in tuples of 3 points</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `pids` (list of pid) - ordered list of points that form a closed polygon</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: list of (pid,pid,pid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s">&quot;unable to triangulate polygon with less than 3 points&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">pids</span><span class="p">]</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span><span class="n">pids</span><span class="p">]</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="n">polygon</span> <span class="o">=</span> <span class="n">polygons</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">polygon</span><span class="p">[:(</span><span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">polygon</span><span class="p">[</span><span class="n">mid</span><span class="p">:]</span> <span class="o">+</span> <span class="n">polygon</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">)</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
+                    <span class="n">triangles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="k">else</span> <span class="p">:</span>
+                    <span class="n">polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">triangles</span>
+</div>
+<div class="viewcode-block" id="topo_triangulate_face"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.topo_triangulate_face">[docs]</a><span class="k">def</span> <span class="nf">topo_triangulate_face</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Triangulate a face of a mesh</span>
+<span class="sd">    </span>
+<span class="sd">    Return a list of triangles for this face.</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`openalea.container.Topomesh`)</span>
+<span class="sd">     - `fid` (fid) - id of the face to triangulate</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: list of (pid,pid,pid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="n">ordered_pids</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">topo_triangulate_polygon</span><span class="p">(</span><span class="n">pids</span><span class="p">)</span>
+
+<span class="c">###########################################################</span>
+<span class="c">#</span>
+<span class="c">#       remove unwanted elements</span>
+<span class="c">#</span>
+<span class="c">###########################################################</span></div>
+<div class="viewcode-block" id="clean_geometry"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.clean_geometry">[docs]</a><span class="k">def</span> <span class="nf">clean_geometry</span> <span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    remove wisps not geometrically defined</span>
+<span class="sd">    i.e. with number of border smaller than scale+1</span>
+<span class="sd">    return a list of removed elements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">removed</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c">#remove non coherent elements</span>
+    <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">:</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+                <span class="n">removed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="c">#remove undefined geometrically</span>
+    <span class="k">for</span> <span class="n">scale</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">scale</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+                <span class="n">removed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">removed</span>
+</div>
+<div class="viewcode-block" id="clean_orphans"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.clean_orphans">[docs]</a><span class="k">def</span> <span class="nf">clean_orphans</span> <span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    remove wisps with no regions</span>
+<span class="sd">    return a list of removed elements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">removed</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">scale</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="n">scale</span><span class="p">))</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_regions</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+                <span class="n">removed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">removed</span>
+</div>
+<span class="k">def</span> <span class="nf">_find_neighbor</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wid</span><span class="p">,</span> <span class="n">wid_list</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    internal function to find a border neighbor</span>
+<span class="sd">    of wid in the provided list of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span><span class="n">eid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wid_list</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">wid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">border_neighbors</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">eid</span><span class="p">))</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">ind</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;no neighbor find in this list&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="clean_duplicated_borders"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.clean_duplicated_borders">[docs]</a><span class="k">def</span> <span class="nf">clean_duplicated_borders</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">outer</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    replace all wisps that account for the same</span>
+<span class="sd">    border between two regions by a unique wisp</span>
+
+<span class="sd">    if outer is True, then even elements that share</span>
+<span class="sd">    only one region are simplified</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">deg</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="c">#find duplicated borders</span>
+        <span class="n">bd</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">rids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">))</span>
+            <span class="n">rids</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">rids</span><span class="p">)</span>
+            <span class="k">try</span> <span class="p">:</span>
+                <span class="n">bd</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="p">:</span>
+                <span class="n">bd</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">wid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">outer</span> <span class="p">:</span>
+            <span class="n">duplicated</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">bd</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">duplicated</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">bd</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c">#replace duplicates by a single element</span>
+        <span class="k">for</span> <span class="n">rids</span><span class="p">,</span><span class="n">wids</span> <span class="ow">in</span> <span class="n">duplicated</span> <span class="p">:</span>
+            <span class="c">#create new single element</span>
+            <span class="n">nwid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="n">rids</span> <span class="p">:</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">deg</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">rid</span><span class="p">,</span><span class="n">nwid</span><span class="p">)</span>
+            <span class="c">#find external border of wids</span>
+            <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">external_border</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">nwid</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span>
+            <span class="c">#remove duplicates</span>
+            <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+                <span class="n">clean_remove</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+
+<span class="c">###########################################################</span>
+<span class="c">#</span>
+<span class="c">#       mesh division</span>
+<span class="c">#</span>
+<span class="c">###########################################################</span></div>
+<div class="viewcode-block" id="topo_divide_edge"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.topo_divide_edge">[docs]</a><span class="k">def</span> <span class="nf">topo_divide_edge</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Divide an edge into two edges</span>
+<span class="sd">    </span>
+<span class="sd">    remove eid and replace it by two</span>
+<span class="sd">    edges connected by a new point</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: the edge has only two</span>
+<span class="sd">       points as borders</span>
+<span class="sd">    </span>
+<span class="sd">    Modify mesh in place</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`)</span>
+<span class="sd">     - `eid` (eid) - edge to divide</span>
+<span class="sd">    </span>
+<span class="sd">    :Return:</span>
+<span class="sd">     - eid1,eid2 - the 2 new edges</span>
+<span class="sd">     - pid - id of the new separating point</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: eid,eid,pid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#create daughter edges</span>
+    <span class="n">eid1</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">eid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="n">eid1</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="n">eid2</span><span class="p">)</span>
+    
+    <span class="c">#associate with old points</span>
+    <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid1</span><span class="p">,</span><span class="n">pid1</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid2</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span>
+    
+    <span class="c">#create separating point</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid1</span><span class="p">,</span><span class="n">pid</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid2</span><span class="p">,</span><span class="n">pid</span><span class="p">)</span>
+    
+    <span class="c">#remove old edge</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">eid1</span><span class="p">,</span><span class="n">eid2</span><span class="p">,</span><span class="n">pid</span>
+</div>
+<div class="viewcode-block" id="topo_divide_face"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.topo_divide_face">[docs]</a><span class="k">def</span> <span class="nf">topo_divide_face</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fid</span><span class="p">,</span> <span class="n">pid1</span><span class="p">,</span> <span class="n">pid2</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Divide a face into two faces</span>
+<span class="sd">    </span>
+<span class="sd">    Remove fid from the mesh and replace it</span>
+<span class="sd">    by two faces divided along an edge</span>
+<span class="sd">    that join pid1 and pid2</span>
+<span class="sd">    </span>
+<span class="sd">    Modify mesh in place.</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: pid1 and pid2 must be</span>
+<span class="sd">      linkked through a path of edges</span>
+<span class="sd">      and not directly</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`)</span>
+<span class="sd">     - `fid` (fid) - face to divide</span>
+<span class="sd">     - `pid1` (pid) - first extremity</span>
+<span class="sd">       of the dividing segment</span>
+<span class="sd">     - `pid2` (pid) - second extremity</span>
+<span class="sd">       of the dividing segment</span>
+<span class="sd">    </span>
+<span class="sd">    :Return:</span>
+<span class="sd">     - fid1,fid2 - the 2 new faces</span>
+<span class="sd">     - eid - id of the new separating edge</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: fid,fid,eid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#create daughter faces</span>
+    <span class="n">fid1</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">cid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid</span><span class="p">,</span><span class="n">fid1</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid</span><span class="p">,</span><span class="n">fid2</span><span class="p">)</span>
+    
+    <span class="c">#sort edges in two sets</span>
+    <span class="c">#separated by pid1 and pid2</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">edges1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">front</span> <span class="o">=</span> <span class="p">[</span><span class="n">pid1</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">front</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">pid2</span> <span class="p">:</span>
+        <span class="n">eid</span><span class="p">,</span><span class="n">pid</span> <span class="o">=</span> <span class="n">_next_point</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">edges</span><span class="p">,</span><span class="n">front</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">edges</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="n">edges1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="n">front</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    
+    <span class="c">#link edges</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">edges1</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">edges</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="c">#create separating edge</span>
+    <span class="n">eid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid1</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">,</span><span class="n">pid2</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid2</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="c">#remove old face</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">fid1</span><span class="p">,</span><span class="n">fid2</span><span class="p">,</span><span class="n">eid</span>
+</div>
+<div class="viewcode-block" id="topo_divide_cell"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.topo_divide_cell">[docs]</a><span class="k">def</span> <span class="nf">topo_divide_cell</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">cid</span><span class="p">,</span> <span class="n">eids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Divide a cell into two cells</span>
+<span class="sd">    </span>
+<span class="sd">    Remove cid from the mesh and replace it</span>
+<span class="sd">    by two cells divided by a face bordered</span>
+<span class="sd">    by edges in eids</span>
+<span class="sd">    </span>
+<span class="sd">    Modify mesh in place.</span>
+<span class="sd">    </span>
+<span class="sd">    .. warning:: eids must form a closed path</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (:class:`Topomesh`)</span>
+<span class="sd">     - `cid` (cid) - cell to divide</span>
+<span class="sd">     - `eids` (list of eid) - list of id</span>
+<span class="sd">       of the edges of the future separating</span>
+<span class="sd">       face</span>
+<span class="sd">    </span>
+<span class="sd">    :Return:</span>
+<span class="sd">     - cid1,cid2 - the 2 new cells</span>
+<span class="sd">     - fid - id of the new separating face</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: cid,cid,fid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#create daughter cells</span>
+    <span class="n">cid1</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">cid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">wid</span><span class="p">,</span><span class="n">cid1</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">wid</span><span class="p">,</span><span class="n">cid2</span><span class="p">)</span>
+    
+    <span class="c">#sort faces in two sets</span>
+    <span class="c">#separated by edges in eids</span>
+    <span class="n">faces</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="c">#create front</span>
+    <span class="c">#order edges</span>
+    <span class="n">eid</span> <span class="o">=</span> <span class="n">eids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+    <span class="n">pid1</span><span class="p">,</span><span class="n">pid2</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    <span class="n">edge_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+    <span class="n">front</span> <span class="o">=</span> <span class="p">[</span><span class="n">pid2</span><span class="p">]</span>
+    <span class="k">while</span> <span class="n">front</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">pid1</span> <span class="p">:</span>
+        <span class="n">eid</span><span class="p">,</span><span class="n">pid</span> <span class="o">=</span> <span class="n">_next_point</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">edges</span><span class="p">,</span><span class="n">front</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">edge_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="n">edges</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="n">front</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    
+    <span class="n">start_fid</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">edge_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span> <span class="o">&amp;</span> <span class="n">faces</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">front</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_fid</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">edge_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">:</span>
+        <span class="n">fid</span><span class="p">,</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">)</span> \
+             <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">border_neighbors</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">front</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="p">)</span>
+        <span class="n">front</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+    
+    <span class="n">faces1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">front</span><span class="p">)</span>
+    <span class="n">faces</span> <span class="o">-=</span> <span class="n">faces1</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">front</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="n">front</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span> <span class="p">)</span> <span class="o">-</span> <span class="n">edges</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">)</span> <span class="o">&amp;</span> <span class="n">faces</span> <span class="p">:</span>
+                <span class="n">faces</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+                <span class="n">faces1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+                <span class="n">front</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+    
+    <span class="c">#link faces</span>
+    <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">faces1</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid1</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">fid</span> <span class="ow">in</span> <span class="n">faces</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    
+    <span class="c">#create separating face</span>
+    <span class="n">fid</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span> <span class="p">:</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span>
+    
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid1</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid2</span><span class="p">,</span><span class="n">fid</span><span class="p">)</span>
+    
+    <span class="c">#remove old cell</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">remove_wisp</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">cid</span><span class="p">)</span>
+    
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">cid1</span><span class="p">,</span><span class="n">cid2</span><span class="p">,</span><span class="n">fid</span>
+
+<span class="c">###########################################################</span>
+<span class="c">#</span>
+<span class="c">#       mesh partitioning</span>
+<span class="c">#</span>
+<span class="c">###########################################################</span></div>
+<div class="viewcode-block" id="expand"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.expand">[docs]</a><span class="k">def</span> <span class="nf">expand</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    add a layer of wisps around a given set of wisps</span>
+<span class="sd">    using borders to define the neighborhood</span>
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale of wisp elements</span>
+<span class="sd">    wisps : a list of wid</span>
+<span class="sd">    return : a set of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inside_wisps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">wids</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+        <span class="n">inside_wisps</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">border_neighbors</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">inside_wisps</span>
+</div>
+<div class="viewcode-block" id="border"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.border">[docs]</a><span class="k">def</span> <span class="nf">border</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wids</span><span class="p">,</span> <span class="n">outer</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    compute the outermost layer of wisps around a set of wisps</span>
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale of wisp elements</span>
+<span class="sd">    wids : a list of wid</span>
+<span class="sd">    outer : a boolean that tells wether or not wisps with only one regions are considered</span>
+<span class="sd">    return : a set of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inside_wisps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">wids</span><span class="p">)</span>
+    <span class="n">border</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">outer</span> <span class="ow">and</span> <span class="n">mesh</span><span class="o">.</span><span class="n">nb_regions</span><span class="p">(</span><span class="n">scale</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                <span class="n">border</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scale</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">))</span> <span class="o">-</span> <span class="n">inside_wisps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+                <span class="n">border</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">border</span>
+</div>
+<div class="viewcode-block" id="shrink"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.shrink">[docs]</a><span class="k">def</span> <span class="nf">shrink</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    remove a layer of wisps around a set of wisps</span>
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale of wisp elements</span>
+<span class="sd">    wids : a list of wid</span>
+<span class="sd">    return : a set of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">wids</span><span class="p">)</span> <span class="o">-</span> <span class="n">border</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">wids</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="expand_to_border"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.expand_to_border">[docs]</a><span class="k">def</span> <span class="nf">expand_to_border</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    compute the set of elements that touch the set of wisps</span>
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale of wisp elements</span>
+<span class="sd">    wids : a list of wid</span>
+<span class="sd">    return : a set of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">borders</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+        <span class="n">borders</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">borders</span>
+</div>
+<div class="viewcode-block" id="expand_to_region"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.expand_to_region">[docs]</a><span class="k">def</span> <span class="nf">expand_to_region</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    compute the set of elements touched by the set of wisps</span>
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale of wisp elements</span>
+<span class="sd">    wids : a list of wid</span>
+<span class="sd">    return : a set of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">wids</span> <span class="p">:</span>
+        <span class="n">cells</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">cells</span>
+</div>
+<div class="viewcode-block" id="external_border"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.external_border">[docs]</a><span class="k">def</span> <span class="nf">external_border</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    compute the list of border elements around this set of wisps</span>
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale of wisps elements</span>
+<span class="sd">    wids : a list of wid</span>
+<span class="sd">    return : a set of wid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inside_wisps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">wids</span><span class="p">)</span>
+    <span class="c">#compute list of borders_elms</span>
+    <span class="n">border_elms</span> <span class="o">=</span> <span class="n">expand_to_border</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">wids</span><span class="p">)</span>
+    <span class="c">#remove inside borders</span>
+    <span class="n">border</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">border_elms</span> <span class="p">:</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scale</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">regions</span> <span class="o">-</span> <span class="n">inside_wisps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">border</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">border</span>
+</div>
+<div class="viewcode-block" id="find_cycles"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.find_cycles">[docs]</a><span class="k">def</span> <span class="nf">find_cycles</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">length_max</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Find all cycles in the mesh.</span>
+
+<span class="sd">    Compute the list of cycles in the mesh</span>
+<span class="sd">    whose length is less than length_max.</span>
+<span class="sd">    A cycle is a list of elements at the given scale</span>
+<span class="sd">    connected by borders such as the first element</span>
+<span class="sd">    of the cycle is connected to the last element</span>
+
+<span class="sd">    Brut force algorithm.</span>
+
+<span class="sd">    mesh : a container.topomesh instance</span>
+<span class="sd">    scale : the scale to consider for cycles</span>
+<span class="sd">    length_max : maximum number of elements in a cycle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cycles</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="p">:</span><span class="c">#compute all cycles from each point</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[([</span><span class="n">wid</span><span class="p">],</span><span class="n">bid</span><span class="p">)</span> <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">wid</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">length_max</span><span class="p">)</span> <span class="p">:</span><span class="c">#increase the size of each path</span>
+                                     <span class="c">#up to length_max</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="p">)</span> <span class="p">:</span><span class="c">#walk trough each path</span>
+                <span class="n">path</span><span class="p">,</span><span class="n">extr</span> <span class="o">=</span> <span class="n">paths</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">neighbors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scale</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">extr</span><span class="p">)</span> <span class="p">)</span> \
+                                <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                    <span class="n">neighbors</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">neighbors</span> <span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nid</span> <span class="o">==</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span><span class="c">#closed path</span>
+                        <span class="n">pth</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                        <span class="n">pth</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                        <span class="n">cycles</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">pth</span><span class="p">)]</span> <span class="o">=</span> <span class="n">path</span><span class="c">#necessary to not duplicate paths</span>
+                    <span class="k">else</span> <span class="p">:</span>
+                        <span class="n">extrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="n">nid</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="n">extrs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">extr</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">extrs</span> <span class="p">:</span>
+                            <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="n">nid</span><span class="p">],</span><span class="n">bid</span><span class="p">)</span> <span class="p">)</span><span class="c">#increase the size of the path</span>
+
+    <span class="c">#drop keys to return only ordered paths</span>
+    <span class="k">return</span> <span class="n">cycles</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="find_connex_parts"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_algo.find_connex_parts">[docs]</a><span class="k">def</span> <span class="nf">find_connex_parts</span> <span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">wids</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Breaks wids into parts connected by borders</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">     - `mesh` (Topomesh)</span>
+<span class="sd">     - `deg` (int) - degree of wisps, must be bigger than 0</span>
+<span class="sd">     - `wids` (list of wid)</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns: a list of subparts of wids. Each subpart contains elements</span>
+<span class="sd">              linked by at least one border</span>
+<span class="sd">    </span>
+<span class="sd">    :Returns Type: iter of (list of wid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">remaining</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">wids</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+        <span class="n">wid</span> <span class="o">=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">front</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">part</span> <span class="o">=</span> <span class="p">[</span><span class="n">wid</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">front</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">rid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">deg</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">bid</span><span class="p">)</span> <span class="p">)</span> <span class="o">&amp;</span> <span class="n">remaining</span> <span class="p">:</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rid</span><span class="p">)</span>
+                <span class="n">remaining</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rid</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">rid</span><span class="p">)</span> <span class="p">:</span>
+                    <span class="n">front</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wid</span><span class="p">)</span>
+        
+        <span class="k">yield</span> <span class="n">part</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

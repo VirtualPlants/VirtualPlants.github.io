@@ -60,8 +60,9 @@
 <h3>Working with Project class<a class="headerlink" href="#working-with-project-class" title="Permalink to this headline">¶</a></h3>
 <p>You can work directly on project:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.core.project</span> <span class="kn">import</span> <span class="n">Project</span><span class="p">,</span> <span class="n">get_project_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c"># Real work on project:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">project_path</span> <span class="o">=</span> <span class="n">get_project_dir</span><span class="p">()</span> <span class="o">/</span> <span class="s">&#39;project1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project_path</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">get_project_dir</span><span class="p">())</span> <span class="o">/</span> <span class="s">&#39;project1&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">project_path</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
@@ -79,9 +80,10 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&quot;This project is used to said hello to everyone&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">startup_obj</span> <span class="o">=</span> <span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;startup&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;begin_numpy.py&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s">&quot;import numpy as np&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model_obj</span> <span class="o">=</span> <span class="n">project1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="o">=</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;eye.py&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s">&quot;print np.eye(2)&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">rename_data</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="s">&quot;eye.py&quot;</span><span class="p">,</span> <span class="s">&quot;eye_numpy.py&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span><span class="o">.</span><span class="n">rename_item</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="s">&quot;eye.py&quot;</span><span class="p">,</span> <span class="s">&quot;eye_numpy.py&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>At this time, project is only in memory. To write it on disk, just call &quot;project1.save()&quot;</p>
 </div>
 <div class="section" id="creation-and-manipulation-with-project-manager">
 <h3>Creation and Manipulation with Project Manager<a class="headerlink" href="#creation-and-manipulation-with-project-manager" title="Permalink to this headline">¶</a></h3>
@@ -110,8 +112,10 @@
 </div>
 </dd>
 <dt>Load project from a specific directory</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">oalab_dir</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">oalab</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p4</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;sum&#39;</span><span class="p">,</span> <span class="n">oalab_dir</span><span class="p">)</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">openalea.oalab</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project_dir</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p4</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;sum&#39;</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -126,7 +130,7 @@
 </div>
 </dd>
 <dt>Get model</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">project2</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s">&quot;sum_int&quot;</span><span class="p">)</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">project2</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s">&quot;sum_int&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -136,9 +140,9 @@
 <h3>Search other projects<a class="headerlink" href="#search-other-projects" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt>To search projects that are not located inside default directories:</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">repositories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;/path/to/search/projects&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">list_of_projects</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">repositories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;/path/to/search/projects&#39;</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project_manager</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_of_projects</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">projects</span> 
 </pre></div>
 </div>
 </dd>
@@ -290,7 +294,7 @@ By default, path is the user path of all projects ($HOME/.openalea/projects/).</
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Use:</th><td class="field-body"><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">project1</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;project1&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">project2</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;project2&#39;</span><span class="p">,</span> <span class="s">&#39;/path/to/project&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">project2</span> <span class="o">=</span> <span class="n">project_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&#39;project2&#39;</span><span class="p">,</span> <span class="s">&#39;/path/to/project&#39;</span><span class="p">)</span> 
 </pre></div>
 </div>
 </td>
