@@ -299,8 +299,10 @@
             <span class="n">config</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
             <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">,</span> <span class="n">last_proj</span><span class="p">)</span>
             <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
-
 </div></div>
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.drag_and_drop</span> <span class="kn">import</span> <span class="n">add_drag_format</span><span class="p">,</span> <span class="n">encode</span>
+
+
 <div class="viewcode-block" id="ProjectManagerView"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView">[docs]</a><span class="k">class</span> <span class="nc">ProjectManagerView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -637,77 +639,6 @@
         <span class="n">fname</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;Select Project Directory&#39;</span><span class="p">,</span> <span class="n">my_path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fname</span>
 
-    <span class="c"># Drag and drop</span>
-</div>
-<div class="viewcode-block" id="ProjectManagerView.startDrag"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.startDrag">[docs]</a>    <span class="k">def</span> <span class="nf">startDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supportedActions</span><span class="p">):</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span>
-        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">()</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">projectdata</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="n">category</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="c"># Check item in src</span>
-        <span class="c"># TODO move this part in dragEnterEvent with mimetype</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">category</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="s">&#39;model&#39;</span><span class="p">]:</span>
-            <span class="c"># Read file and parse model to get inputs, outputs, doc that may be</span>
-            <span class="c"># useful once dropped.</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-
-            <span class="c"># name_without_ext = &quot;.&quot;.join(text.split(&quot;.&quot;)[:-1])</span>
-            <span class="n">name_without_ext</span> <span class="o">=</span> <span class="n">text</span>
-            <span class="n">name_without_space</span> <span class="o">=</span> <span class="s">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_without_ext</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
-            <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;-&quot;</span><span class="p">,</span> <span class="s">&quot;+&quot;</span><span class="p">,</span> <span class="s">&quot;*&quot;</span><span class="p">,</span> <span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">]:</span>
-                <span class="n">name_without_space</span> <span class="o">=</span> <span class="s">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_without_space</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sym</span><span class="p">))</span>
-
-            <span class="n">python_call_string</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = Model(&quot;</span><span class="si">%s</span><span class="s">&quot;)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name_without_space</span><span class="p">,</span> <span class="n">name_without_ext</span><span class="p">)</span>
-            <span class="n">icon</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">icon</span><span class="p">()</span>
-            <span class="n">pixmap</span> <span class="o">=</span> <span class="n">icon</span><span class="o">.</span><span class="n">pixmap</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-
-            <span class="n">itemData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QByteArray</span><span class="p">()</span>
-            <span class="n">dataStream</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDataStream</span><span class="p">(</span><span class="n">itemData</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QIODevice</span><span class="o">.</span><span class="n">WriteOnly</span><span class="p">)</span>
-            <span class="n">model_id</span> <span class="o">=</span> <span class="n">name_without_ext</span>
-            <span class="n">dataStream</span><span class="o">.</span><span class="n">writeString</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">python_call_string</span><span class="p">))</span>
-            <span class="n">dataStream</span><span class="o">.</span><span class="n">writeString</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">model_id</span><span class="p">))</span>
-
-            <span class="n">mimeData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
-            <span class="n">mimeData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">python_call_string</span><span class="p">)</span>
-            <span class="n">mimeData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="s">&quot;openalealab/model&quot;</span><span class="p">,</span> <span class="n">itemData</span><span class="p">)</span>
-
-            <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mimeData</span><span class="p">)</span>
-            <span class="n">drag</span><span class="o">.</span><span class="n">setHotSpot</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="n">drag</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
-
-            <span class="n">drag</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="n">category</span> <span class="o">==</span> <span class="s">&#39;data&#39;</span><span class="p">:</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
-            <span class="n">mimetype</span><span class="p">,</span> <span class="n">mimedata</span> <span class="o">=</span> <span class="n">encode</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&#39;openalealab/data&#39;</span><span class="p">)</span>
-            <span class="n">qmime_data</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
-            <span class="n">qmime_data</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">mimetype</span><span class="p">,</span> <span class="n">mimedata</span><span class="p">)</span>
-            <span class="n">qmime_data</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-            <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">qmime_data</span><span class="p">)</span>
-            <span class="n">drag</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="ProjectManagerView.dragEnterEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&quot;openalealab/model&quot;</span><span class="p">):</span>
-            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="ProjectManagerView.dragMoveEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.dragMoveEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s">&quot;openalealab/model&quot;</span><span class="p">):</span>
-            <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
-            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
-</div>
-<div class="viewcode-block" id="ProjectManagerView.dropEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerView.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-        <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
-
 </div></div>
 <div class="viewcode-block" id="ProjectManagerModel"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerModel">[docs]</a><span class="k">class</span> <span class="nc">ProjectManagerModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">):</span>
 
@@ -716,6 +647,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_root_item</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">add_drag_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;openalealab/data&#39;</span><span class="p">)</span>
+        <span class="n">add_drag_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;openalealab/model&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProjectManagerModel.project_icon"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerModel.project_icon">[docs]</a>    <span class="k">def</span> <span class="nf">project_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
         <span class="c"># Propose icon by default.</span>
@@ -802,7 +736,18 @@
         <span class="k">elif</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root_item</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="s">&#39;project&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span></div></div>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="ProjectManagerModel.mimeData"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.project.html#openalea.oalab.project.projectwidget.ProjectManagerModel.mimeData">[docs]</a>    <span class="k">def</span> <span class="nf">mimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">category</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectdata</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s">&#39;openalealab/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">category</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="o">.</span><span class="n">mimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

@@ -83,12 +83,16 @@ python setup.py COMMAND
 <p>COMMAND can be:</p>
 <blockquote>
 <div><ul class="simple">
-<li><cite>develop --user</cite> : to install in developer mode, in your home dir</li>
+<li><strong>develop --user</strong> : to install in developer mode, in your home dir</li>
 <li><cite>develop --prefix=$HOME/local</cite> : to install in developer mode in directory of your choice</li>
 <li><cite>install</cite> : to do a system installation</li>
 <li><cite>install --prefix=...</cite> : to install in directory of your choice</li>
 </ul>
 </div></blockquote>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you don't know exactly what to do, please use: <strong>develop --user</strong></p>
+</div>
 <div class="highlight-bash"><div class="highlight"><pre>git clone https://github.com/openalea/sconsx.git
 <span class="nb">cd </span>sconsx
 python setup.py COMMAND
@@ -98,11 +102,14 @@ python setup.py COMMAND
 </div>
 <div class="section" id="setup-your-environment">
 <h2>Setup your environment<a class="headerlink" href="#setup-your-environment" title="Permalink to this headline">¶</a></h2>
-<p>If not yet done, edit your bashrc file (generally in /home/user/.bashrc) and add</p>
-<div class="highlight-bash"><div class="highlight"><pre><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.local/bin/
+<p>If not yet done, edit your bashrc file (generally in /home/user/.bashrc) and add (if not yet in file)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">source</span> ~/.openalea.sh
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HOME</span>/.local/bin/
+<span class="nb">export </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$HOME</span>/.local/lib:<span class="nv">$LD_LIBRARY_PATH</span>
 </pre></div>
 </div>
-<p>Then close your terminal and open it again.</p>
+<p>Save and close the file
+Then close your terminal and open it again.</p>
 <p>To download private repository, you need to configure your <a class="reference external" href="https://gforge.inria.fr/account/editsshkeys.php">ssh key on gforge</a>.</p>
 </div>
 <div class="section" id="download-mars-alt">
@@ -178,6 +185,27 @@ git pull
 </pre></div>
 </div>
 </div>
+<div class="section" id="error-loading-tiff-images">
+<h3>Error loading tiff images<a class="headerlink" href="#error-loading-tiff-images" title="Permalink to this headline">¶</a></h3>
+<p>Install python-libtiff</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt-get install python-libtiff
+</pre></div>
+</div>
+<p>Check libtiff is installed correctly</p>
+<div class="highlight-bash"><div class="highlight"><pre>python -c <span class="s2">&quot;import libtiff&quot;</span>
+</pre></div>
+</div>
+<p>If you get this message: <cite>ValueError: Failed to find TIFF header file (may be need to run: sudo apt-get install libtiff4-dev)</cite></p>
+<p>Diagnostic : File <a class="reference download internal" href="../_downloads/tiff_h_4_0_3.py"><tt class="xref download docutils literal"><span class="pre">tiff_h_4_0_3.py</span></tt></a> is missing...
+Add this file in the folder : /usr/lib/python2.7/dist-packages/libtiff/</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo cp tiff_h_4_0_3.py /usr/lib/python2.7/dist-packages/libtiff/
+</pre></div>
+</div>
+<p>Try again :</p>
+<div class="highlight-bash"><div class="highlight"><pre>python -c <span class="s2">&quot;import libtiff&quot;</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="other-troubles">
 <h3>Other troubles<a class="headerlink" href="#other-troubles" title="Permalink to this headline">¶</a></h3>
 <p>For other troubles, see:</p>
@@ -210,6 +238,7 @@ git pull
 <li><a class="reference internal" href="#contribute-to-packages">Contribute to packages</a></li>
 <li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
 <li><a class="reference internal" href="#multiple-installation">Multiple installation</a></li>
+<li><a class="reference internal" href="#error-loading-tiff-images">Error loading tiff images</a></li>
 <li><a class="reference internal" href="#other-troubles">Other troubles</a></li>
 </ul>
 </li>

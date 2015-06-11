@@ -100,6 +100,10 @@
         <span class="k">if</span> <span class="n">plugins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_plugins</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span>
 
+        <span class="k">for</span> <span class="n">metaplugin</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">(</span><span class="s">&#39;openalea.plugin&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">metaplugin</span><span class="o">.</span><span class="n">plugins</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">metaplugin</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
+
 <div class="viewcode-block" id="PluginManager.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># dict category -&gt; plugin name -&gt; Plugin class or Plugin proxy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span> <span class="o">=</span> <span class="p">{}</span>
@@ -111,7 +115,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_proxy</span>
 </div>
-<div class="viewcode-block" id="PluginManager.add_plugin"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.add_plugin">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PluginManager.add_plugin"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.add_plugin">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">plugin_proxy</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span><span class="p">:</span>
             <span class="n">plugin_proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span><span class="p">[</span><span class="n">category</span><span class="p">]</span>
 
@@ -121,7 +125,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">{})[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin</span>
 </div>
 <div class="viewcode-block" id="PluginManager.add_plugins"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.add_plugins">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugins</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -142,7 +149,7 @@
                 <span class="n">plugin_class</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> load plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_class</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">plugin_class</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
@@ -157,7 +164,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> load plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_class</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">plugin_class</span>
 

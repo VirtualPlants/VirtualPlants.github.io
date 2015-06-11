@@ -1253,102 +1253,8 @@ pixmap space</p>
 <div class="section" id="image-gui-stack-view-module">
 <h2>image.gui.stack_view module<a class="headerlink" href="#image-gui-stack-view-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-image.gui.stack_view3D">
-<span id="image-gui-stack-view3d-module"></span><h2>image.gui.stack_view3D module<a class="headerlink" href="#module-image.gui.stack_view3D" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="image.gui.stack_view3D.compute_cell_separation">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">compute_cell_separation</tt><span class="sig-paren">(</span><em>mat</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#compute_cell_separation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.compute_cell_separation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function creating a space between cells for display.
-Change the shared voxel between two cell to 0 so you can clearly see the seperations bewteen cells.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.create_labels">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">create_labels</tt><span class="sig-paren">(</span><em>img</em>, <em>render</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#create_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.create_labels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.display3D">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">display3D</tt><span class="sig-paren">(</span><em>img</em>, <em>list_remove=[]</em>, <em>dictionary=None</em>, <em>lut=&lt;function black_and_white at 0x7f08b269cde8&gt;</em>, <em>lut_range=False</em>, <em>cell_separation=False</em>, <em>verbose=False</em>, <em>labels=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#display3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.display3D" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>paramètres :</dt>
-<dd><ul class="first last simple">
-<li>img (SpatialImage ou SpatialImageAnalysis) : segmented tissu</li>
-<li>list_remove (list) : une liste des cellules à enlever lors de l'affichage</li>
-<li>dictionary (dict) : dictionnaire cells-&gt;scalar</li>
-<li>lut : -Look-Up Table- disponibles dans 'colormaps.py'</li>
-<li>lut_range (list) : list of 2 values defing the range (min, max) of the lut.</li>
-<li>cell_separation (bool) : if True add a &quot;separation&quot; between cells.</li>
-<li>verbose (bool) : pour afficher ou non les progressions</li>
-<li>labels (bool) : display labels of cell in 3D.</li>
-</ul>
-</dd>
-<dt>Examples <span class="classifier-delimiter">:</span> <span class="classifier"></span></dt>
-<dd>im1 = imread('/home/vince/softs/vplants/vplants/trunk/vtissue/imaging/mars_alt/test/data/segmentation/imgSeg.inr.gz')
-im1a=SpatialImageAnalysis(im1)
-dictionary=dict(zip(im1a.labels(), im1a.volume()))
-labs=im1a.labels()
-L1=im1a.L1()[1]
-filtre=[i for i in labs if i not in L1]
-display3D(im1, verbose=True)</dd>
-<dt>Fonction maitre en deux parties :</dt>
-<dd><ol class="first last arabic simple">
-<li>Gestion du format de l'objet donné en paramètre;</li>
-<li>Gestion de l'affichage.</li>
-</ol>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.export_vtk">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">export_vtk</tt><span class="sig-paren">(</span><em>img</em>, <em>filename='default'</em>, <em>list_remove=[]</em>, <em>dictionary=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#export_vtk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.export_vtk" title="Permalink to this definition">¶</a></dt>
-<dd><p>paramètres :
-img : SpatialImage ou SpatialImageAnalysis
-filename : le nom de la sortie
-list_remove : une liste des cellules à enlever lors de l'affichage
-dictionary : dictionnaire cells-&gt;scalar
-lut : disponibles dans colormaps
-verbose : pour afficher ou non les progressions</p>
-<p>ATTENTION, SUR CERTAINES MACHINES LE FICHIER VTK A DES VIRGULES POUR DEFINIR LES DOUBLE, ALORS QUE LES SOFTS ONT BESOIN DE POINTS</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.export_vtk_cut">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">export_vtk_cut</tt><span class="sig-paren">(</span><em>img</em>, <em>filename='default.vtk'</em>, <em>dictionary=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#export_vtk_cut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.export_vtk_cut" title="Permalink to this definition">¶</a></dt>
-<dd><p>paramètres :
-img : SpatialImage ou SpatialImageAnalysis
-filename : le nom de la sortie
-dictionary : dictionnaire cells-&gt;scalar
-lut : disponibles dans colormaps
-verbose : pour afficher ou non les progressions</p>
-<p>ATTENTION, SUR CERTAINES MACHINES LE FICHIER VTK A DES VIRGULES POUR DEFINIR LES DOUBLE, ALORS QUE LES SOFTS ONT BESOIN DE POINTS</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.img2polydata_complexe">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">img2polydata_complexe</tt><span class="sig-paren">(</span><em>image</em>, <em>list_remove=[]</em>, <em>sc=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#img2polydata_complexe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.img2polydata_complexe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a <a href="#id1"><span class="problematic" id="id2">|SpatialImage|</span></a> to a PolyData object with cells surface</p>
-<p>: Parameters :
-list_remove : a list of cells to be removed from the tissue before putting it on screen
-sc : if you give a parameter here, it will use it as scalar. you need to give a
-cell-&gt;scalar dictionary</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.img2polydata_simple">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">img2polydata_simple</tt><span class="sig-paren">(</span><em>image</em>, <em>dictionnaire=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#img2polydata_simple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.img2polydata_simple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a <a href="#id3"><span class="problematic" id="id4">|SpatialImage|</span></a> to a PolyData object with cells surface</p>
-<p>: Parameters :
-dictionnaire : cell-&gt;scalar dictionary</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="image.gui.stack_view3D.rootSpI">
-<tt class="descclassname">image.gui.stack_view3D.</tt><tt class="descname">rootSpI</tt><span class="sig-paren">(</span><em>img</em>, <em>list_remove=[]</em>, <em>sc=None</em>, <em>lut_range=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../_modules/image/gui/stack_view3D.html#rootSpI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.gui.stack_view3D.rootSpI" title="Permalink to this definition">¶</a></dt>
-<dd><p>case where the data is a spatialimage</p>
-</dd></dl>
-
+<div class="section" id="image-gui-stack-view3d-module">
+<h2>image.gui.stack_view3D module<a class="headerlink" href="#image-gui-stack-view3d-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-image.gui">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-image.gui" title="Permalink to this headline">¶</a></h2>
@@ -1378,7 +1284,7 @@ dictionnaire : cell-&gt;scalar dictionary</p>
 <li><a class="reference internal" href="#module-image.gui.slide_viewer">image.gui.slide_viewer module</a></li>
 <li><a class="reference internal" href="#module-image.gui.slide_viewer_ui">image.gui.slide_viewer_ui module</a></li>
 <li><a class="reference internal" href="#image-gui-stack-view-module">image.gui.stack_view module</a></li>
-<li><a class="reference internal" href="#module-image.gui.stack_view3D">image.gui.stack_view3D module</a></li>
+<li><a class="reference internal" href="#image-gui-stack-view3d-module">image.gui.stack_view3D module</a></li>
 <li><a class="reference internal" href="#module-image.gui">Module contents</a></li>
 </ul>
 </li>
