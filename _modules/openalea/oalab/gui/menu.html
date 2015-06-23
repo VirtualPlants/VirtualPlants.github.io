@@ -113,20 +113,17 @@
 <span class="n">style_paned_menu</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
 
 <span class="s">    QWidget {</span>
-<span class="s">         background-color: transparent;</span>
 <span class="s">     }</span>
 
 <span class="s">    &quot;&quot;&quot;</span>
 
 <span class="n">style_pane</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
 <span class="s">    QWidget {</span>
-<span class="s">         background-color: red;</span>
 <span class="s">     }</span>
 <span class="s">     &quot;&quot;&quot;</span>
 
 <span class="n">style_group</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
 <span class="s">    QWidget {</span>
-<span class="s">         background-color: green;</span>
 <span class="s">     }</span>
 <span class="s">     &quot;&quot;&quot;</span>
 
@@ -166,6 +163,8 @@
             <span class="n">menu</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">):</span>
             <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+            <span class="n">menu</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -346,7 +345,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Permit to add small widget like if it was a small button</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;big&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;bigwidget&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_group_big</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_group_small</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
@@ -551,6 +550,11 @@
             <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">()</span><span class="o">.</span><span class="n">addBtnByAction</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">btn_type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>

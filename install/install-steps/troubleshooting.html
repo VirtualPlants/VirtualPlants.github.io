@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multiple installation &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="multiple-installation">
+<h1>Multiple installation<a class="headerlink" href="#multiple-installation" title="Permalink to this headline">¶</a></h1>
+<p>To be sure you are using the right installation, you can run this command:</p>
+<div class="highlight-bash"><div class="highlight"><pre>python -c <span class="s1">&#39;import vplants.mars_alt; print vplants.mars_alt.__path__&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="error-loading-tiff-images">
+<h1>Error loading tiff images<a class="headerlink" href="#error-loading-tiff-images" title="Permalink to this headline">¶</a></h1>
+<p>Install python-libtiff</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt-get install python-libtiff
+</pre></div>
+</div>
+<p>Check libtiff is installed correctly</p>
+<div class="highlight-bash"><div class="highlight"><pre>python -c <span class="s2">&quot;import libtiff&quot;</span>
+</pre></div>
+</div>
+<p>If you get this message: <cite>ValueError: Failed to find TIFF header file (may be need to run: sudo apt-get install libtiff4-dev)</cite></p>
+<p>Diagnostic : File <tt class="xref download docutils literal"><span class="pre">tiff_h_4_0_3.py</span></tt> is missing...
+Add this file in the folder : /usr/lib/python2.7/dist-packages/libtiff/</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo cp tiff_h_4_0_3.py /usr/lib/python2.7/dist-packages/libtiff/
+</pre></div>
+</div>
+<p>Try again :</p>
+<div class="highlight-bash"><div class="highlight"><pre>python -c <span class="s2">&quot;import libtiff&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pkg-resources-distributionnotfound-openalea-container">
+<h1>pkg_resources.DistributionNotFound: openalea.container<a class="headerlink" href="#pkg-resources-distributionnotfound-openalea-container" title="Permalink to this headline">¶</a></h1>
+<p>If you get an error message like this one:</p>
+<div class="highlight-text"><div class="highlight"><pre>Traceback (most recent call last):
+  File &quot;setup.py&quot;, line 54, in &lt;module&gt;
+    &quot;console_scripts&quot;: [&quot;alea = openalea.core.alea:main&quot;],
+  File &quot;.../lib/python2.7/distutils/core.py&quot;, line 152, in setup
+    dist.run_commands()
+  File &quot;.../lib/python2.7/distutils/dist.py&quot;, line 953, in run_commands
+    self.run_command(cmd)
+  File &quot;.../lib/python2.7/distutils/dist.py&quot;, line 972, in run_command
+    cmd_obj.run()
+  File &quot;.../openalea/deploy/src/openalea/deploy/command.py&quot;, line 972, in run
+    set_env()
+  File &quot;.../openalea/deploy/src/openalea/deploy/command.py&quot;, line 813, in set_env
+    dyn_lib = install_lib.install_lib(dyn_lib)
+  File &quot;.../openalea/deploy/src/openalea/deploy/install_lib.py&quot;, line 220, in install_lib
+    egglibdirs = set(get_all_lib_dirs(precedence=INSTALL_DIST))
+  File &quot;.../openalea/deploy/src/openalea/deploy/util.py&quot;, line 134, in get_all_lib_dirs
+    for e in egg_names:
+  File &quot;.../openalea/deploy/src/openalea/deploy/util.py&quot;, line 116, in get_eggs
+    pkg = pkg_resources.get_distribution(project_name)
+  File &quot;.../site-packages/pkg_resources.py&quot;, line 345, in get_distribution
+    if isinstance(dist,Requirement): dist = get_provider(dist)
+  File &quot;.../site-packages/pkg_resources.py&quot;, line 224, in get_provider
+    return working_set.find(moduleOrReq) or require(str(moduleOrReq))[0]
+  File &quot;.../site-packages/pkg_resources.py&quot;, line 668, in require
+    needed = self.resolve(parse_requirements(requirements))
+  File &quot;.../site-packages/pkg_resources.py&quot;, line 571, in resolve
+    raise DistributionNotFound(req)
+pkg_resources.DistributionNotFound: openalea.container
+Executing /usr/local/opt/python/bin/python2.7 setup.py develop ...processing
+</pre></div>
+</div>
+<p>It is generally due to a partial uninstallation of python module.</p>
+<p>For example if you've installed a package myapp that depends on mydeps,
+then you've uninstalled mydeps but you've kept myapp, this problem might appear.
+pkg_resources tries to load mydeps and fails.
+Solution is easy : reinstall mydeps or uninstall myapp.</p>
+</div>
+<div class="section" id="other-troubles">
+<h1>Other troubles<a class="headerlink" href="#other-troubles" title="Permalink to this headline">¶</a></h1>
+<p>For other troubles, see:</p>
+<p>See <a class="reference external" href="http://openalea.gforge.inria.fr/beta_doc/vplants/vtissue/doc/_build/html/user/mars_alt_v1/troubleshootings.html">troubleshooting page</a></p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="../../latest/marsalt/index.html#marsalt"><em>Mars-alt Main Page</em></a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Multiple installation</a></li>
+<li><a class="reference internal" href="#error-loading-tiff-images">Error loading tiff images</a></li>
+<li><a class="reference internal" href="#pkg-resources-distributionnotfound-openalea-container">pkg_resources.DistributionNotFound: openalea.container</a></li>
+<li><a class="reference internal" href="#other-troubles">Other troubles</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/install/install-steps/troubleshooting.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+    </div>
+  </body>
+</html>

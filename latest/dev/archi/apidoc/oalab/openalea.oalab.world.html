@@ -63,23 +63,17 @@
 <div class="section" id="module-openalea.oalab.world.world">
 <span id="openalea-oalab-world-world-module"></span><h2>openalea.oalab.world.world module<a class="headerlink" href="#module-openalea.oalab.world.world" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="openalea.oalab.world.world.Transform">
-<em class="property">class </em><tt class="descclassname">openalea.oalab.world.world.</tt><tt class="descname">Transform</tt><span class="sig-paren">(</span><em>function</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#Transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.Transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
-</dd></dl>
-
-<dl class="class">
 <dt id="openalea.oalab.world.world.World">
 <em class="property">class </em><tt class="descclassname">openalea.oalab.world.world.</tt><tt class="descname">World</tt><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#World"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.World" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="openalea.oalab.scene.html#openalea.oalab.scene.vplscene.VPLScene" title="openalea.oalab.scene.vplscene.VPLScene"><tt class="xref py py-class docutils literal"><span class="pre">openalea.oalab.scene.vplscene.VPLScene</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">openalea.grapheditor.observer.AbstractListener</span></tt></p>
 <p>Contain objects of the world.</p>
 <dl class="docutils">
-<dt>When world changes, it notifies all listeners with these events:</dt>
+<dt>When world changes, several events can be notified to listeners:</dt>
 <dd><ul class="first last simple">
-<li>world_object_changed(scene, changes)</li>
-<li>world_object_replaced(scene, key, old_object, new_object)</li>
-<li>world_object_added(scene, key, new_object)</li>
-<li>world_object_removed(scene, old_object)</li>
+<li>world_object_changed(world, changes)</li>
+<li>world_object_replaced(world, key, old_object, new_object)</li>
+<li>world_object_added(world, key, new_object)</li>
+<li>world_object_removed(world, old_object)</li>
 </ul>
 </dd>
 </dl>
@@ -101,8 +95,18 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="openalea.oalab.world.world.World.change_object_attribute">
+<tt class="descname">change_object_attribute</tt><span class="sig-paren">(</span><em>name</em>, <em>attribute</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#World.change_object_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.World.change_object_attribute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="openalea.oalab.world.world.World.notify">
 <tt class="descname">notify</tt><span class="sig-paren">(</span><em>sender</em>, <em>event=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#World.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.World.notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.world.world.World.remove">
+<tt class="descname">remove</tt><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#World.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.World.remove" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -119,10 +123,17 @@
 
 <dl class="class">
 <dt id="openalea.oalab.world.world.WorldObject">
-<em class="property">class </em><tt class="descclassname">openalea.oalab.world.world.</tt><tt class="descname">WorldObject</tt><span class="sig-paren">(</span><em>obj</em>, <em>model_id=None</em>, <em>output_id=None</em>, <em>transform=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">openalea.oalab.world.world.</tt><tt class="descname">WorldObject</tt><span class="sig-paren">(</span><em>name</em>, <em>data</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.grapheditor.observer.Observed</span></tt></p>
 <p>Object of the world.</p>
 <dl class="docutils">
+<dt>WorldObject contains :</dt>
+<dd><ul class="first last simple">
+<li>name : world object identifier</li>
+<li>data : the object itself</li>
+<li>attributes : list of (name, Interface, value)</li>
+</ul>
+</dd>
 <dt>WorldObject provides meta-information like ...</dt>
 <dd><ul class="first last simple">
 <li>origin</li>
@@ -132,9 +143,49 @@
 </ul>
 </dd>
 </dl>
+<dl class="method">
+<dt id="openalea.oalab.world.world.WorldObject.attribute">
+<tt class="descname">attribute</tt><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.attribute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.world.world.WorldObject.get">
+<tt class="descname">get</tt><span class="sig-paren">(</span><em>name</em>, <em>default_value=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.world.world.WorldObject.notify_listeners">
+<tt class="descname">notify_listeners</tt><span class="sig-paren">(</span><em>event=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.notify_listeners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.notify_listeners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.world.world.WorldObject.set_attribute">
+<tt class="descname">set_attribute</tt><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>interface=None</em>, <em>alias=None</em>, <em>constraints=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.set_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.set_attribute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.world.world.WorldObject.attributes">
+<tt class="descname">attributes</tt><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.world.world.WorldObject.data">
+<tt class="descname">data</tt><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.world.world.WorldObject.name">
+<tt class="descname">name</tt><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="openalea.oalab.world.world.WorldObject.obj">
 <tt class="descname">obj</tt><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.obj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="openalea.oalab.world.world.WorldObject.silent">
+<tt class="descname">silent</tt><a class="reference internal" href="../../../../../_modules/openalea/oalab/world/world.html#WorldObject.silent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.world.world.WorldObject.silent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

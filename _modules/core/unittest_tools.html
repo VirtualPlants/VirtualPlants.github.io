@@ -51,10 +51,12 @@
 <span class="kn">import</span> <span class="nn">unittest</span>
 <span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">AbstractListener</span>
 
+
 <span class="k">class</span> <span class="nc">EventTracker</span><span class="p">(</span><span class="n">AbstractListener</span><span class="p">):</span>
-<div class="viewcode-block" id="EventTracker"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.unittest_tools.EventTracker">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="EventTracker"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.unittest_tools.EventTracker">[docs]</a>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -71,9 +73,18 @@
 
 <span class="k">class</span> <span class="nc">TestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span></div></div>
 <div class="viewcode-block" id="TestCase"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.unittest_tools.TestCase">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-<div class="viewcode-block" id="TestCase.check_events"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.unittest_tools.TestCase.check_events">[docs]</a>        <span class="n">ev_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">check_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TestCase.check_events"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.unittest_tools.TestCase.check_events">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        values:</span>
+<span class="sd">        dict {idx:[val, val2]}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ev_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">]</span>
+        <span class="n">ev_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">ev_names</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">event_idx</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">arg_idx</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ev_args</span><span class="p">[</span><span class="n">event_idx</span><span class="p">][</span><span class="n">arg_idx</span><span class="p">],</span> <span class="n">arg</span><span class="p">)</span>
 </pre></div></div></div>
 
           </div>
