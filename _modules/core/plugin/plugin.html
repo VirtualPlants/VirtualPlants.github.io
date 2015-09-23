@@ -36,9 +36,9 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -82,6 +82,12 @@
 <span class="kn">import</span> <span class="nn">site</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
+<span class="kn">from</span> <span class="nn">openalea.core.factory</span> <span class="kn">import</span> <span class="n">AbstractFactory</span>
+
+<div class="viewcode-block" id="plugin_name"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.plugin_name">[docs]</a><span class="k">def</span> <span class="nf">plugin_name</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">plugin</span><span class="o">.</span><span class="n">__name__</span>
+
+</div>
 <div class="viewcode-block" id="discover"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.discover">[docs]</a><span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return all Plugin objects from group.</span>
@@ -138,27 +144,69 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">yield</span> <span class="n">ep</span>
 </div>
-<div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="IPlugin"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.IPlugin">[docs]</a><span class="k">class</span> <span class="nc">IPlugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Define a Plugin from an entry point. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoint</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ep</span> <span class="o">=</span> <span class="n">epoint</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unique identifier. By default, identifier is pluginmodule:PluginClass</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
-<div class="viewcode-block" id="Plugin.name"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.Plugin.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">name</span>
-</div>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Short name to identify plugin. Different plugin may have same name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
     <span class="nd">@property</span>
-<div class="viewcode-block" id="Plugin.module_name"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.Plugin.module_name">[docs]</a>    <span class="k">def</span> <span class="nf">module_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">module_name</span>
-</div>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Human readable name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
     <span class="nd">@property</span>
-<div class="viewcode-block" id="Plugin.dist"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.Plugin.dist">[docs]</a>    <span class="k">def</span> <span class="nf">dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">dist</span>
+    <span class="k">def</span> <span class="nf">modulename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Python module path containing implementation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">objectname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Name of implementation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Current python distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Module containing implementation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">implementation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Real implementation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 </div>
-<div class="viewcode-block" id="Plugin.load"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.Plugin.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-</pre></div></div></div>
+<div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="PluginDef"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.plugin.html#core.plugin.plugin.PluginDef">[docs]</a><span class="k">class</span> <span class="nc">PluginDef</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="n">UNCHANGED</span> <span class="o">=</span><span class="mi">0</span>
+  <span class="n">DROP_PLUGIN</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="n">LOWER_CASE</span> <span class="o">=</span> <span class="mi">2</span>
+
+  <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">klass</span><span class="p">):</span>
+    <span class="n">klass</span><span class="o">.</span><span class="n">__plugin__</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">klass</span></div>
+</pre></div>
 
           </div>
         </div>
@@ -191,14 +239,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../core.html" >core</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../core.html" >core</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

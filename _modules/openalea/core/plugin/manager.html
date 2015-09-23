@@ -36,8 +36,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -61,157 +61,166 @@
 <span class="sd">  - To *list* plugins, see :meth:`PluginManager.plugin` and :meth:`PluginManager.plugins`.</span>
 <span class="sd">  - To *add* plugins dynamically, see :meth:`PluginManager.add_plugin` and :meth:`PluginManager.add_plugins`.</span>
 
-<span class="sd">All plugin are sorted in categories, each category defining a contract.</span>
+<span class="sd">All plugin are sorted in categories, each group defining a contract.</span>
 <span class="sd">This contract is generally described in an interface class or documentation.</span>
 
 <span class="sd">If you want to use third party plugins that doesn&#39;t fit perfectly to your contract,</span>
 <span class="sd">you can embed its in plugin proxies.</span>
-<span class="sd">To do that, you can specify a proxy class for an entire category or for one plugin.</span>
+<span class="sd">To do that, you can specify a proxy class for an entire group or for one plugin.</span>
 <span class="sd">See :meth:`PluginManager.set_proxy` and &quot;plugin_proxy&quot; parameter in :meth:`PluginManager.add_plugin`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
-<span class="kn">from</span> <span class="nn">openalea.core.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
+
 <span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">openalea.core.manager</span> <span class="kn">import</span> <span class="n">GenericManager</span>
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.plugin</span> <span class="kn">import</span> <span class="n">PluginDef</span>
 <span class="kn">from</span> <span class="nn">openalea.core.service.introspection</span> <span class="kn">import</span> <span class="n">name</span>
+<span class="kn">from</span> <span class="nn">openalea.core.util</span> <span class="kn">import</span> <span class="n">camel_case_to_lower</span>
+
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">iter_entry_points</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PluginManager&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="PluginManager"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager">[docs]</a><span class="k">class</span> <span class="nc">PluginManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">UnknownItemError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
 
-    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">Singleton</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugins</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param plugins: list of plugins you want to add manually</span>
-<span class="sd">        :param plugin_proxy: proxy class to use by default</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># dict category -&gt; plugin name -&gt; Plugin class or Plugin proxy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">def</span> <span class="nf">get_criteria</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
+    <span class="n">criteria</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">criterion</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">criterion</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">criterion</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;implementation&#39;</span><span class="p">,</span> <span class="s">&#39;name_conversion&#39;</span><span class="p">,</span> <span class="s">&#39;identifier&#39;</span><span class="p">,</span> <span class="s">&#39;tags&#39;</span><span class="p">,</span> <span class="s">&#39;criteria&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">criteria</span><span class="p">[</span><span class="n">criterion</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">criteria</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_proxies</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_proxy</span> <span class="o">=</span> <span class="n">plugin_proxy</span>
+<span class="k">def</span> <span class="nf">get_implementation</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s">&#39;modulename&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s">&#39;objectname&#39;</span><span class="p">):</span>
+        <span class="n">modulename</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">modulename</span>
+        <span class="n">objectname</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">objectname</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">modulename</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="n">objectname</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">objectname</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">plugin</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">plugins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_plugins</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PluginManager.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># dict category -&gt; plugin name -&gt; Plugin class or Plugin proxy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_proxies</span> <span class="o">=</span> <span class="p">{}</span>
-</div>
-<div class="viewcode-block" id="PluginManager.set_proxy"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.set_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">set_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Embed all plugin for given category in plugin_proxy.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_proxy</span>
-</div>
-<div class="viewcode-block" id="PluginManager.add_plugin"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.add_plugin">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">plugin_proxy</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span><span class="p">:</span>
-            <span class="n">plugin_proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_proxy</span><span class="p">[</span><span class="n">category</span><span class="p">]</span>
+<span class="k">def</span> <span class="nf">plugin_name</span><span class="p">(</span><span class="n">plugin</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">plugin</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
 
-        <span class="k">if</span> <span class="n">plugin_proxy</span><span class="p">:</span>
-            <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugin_proxy</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
 
+<span class="k">def</span> <span class="nf">drop_plugin</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;plugin&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">name</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">6</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">name</span>
+
+
+<div class="viewcode-block" id="PluginManager"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager">[docs]</a><span class="k">class</span> <span class="nc">PluginManager</span><span class="p">(</span><span class="n">GenericManager</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PluginManager.generate_item_name"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.generate_item_name">[docs]</a>    <span class="k">def</span> <span class="nf">generate_item_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">__name__</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">{})[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin</span>
-</div>
-<div class="viewcode-block" id="PluginManager.add_plugins"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.add_plugins">[docs]</a>    <span class="k">def</span> <span class="nf">add_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugins</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">plugins</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">plugins</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
-</div>
-    <span class="k">def</span> <span class="nf">_load_entry_point_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">entry_point</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="n">ep</span> <span class="o">=</span> <span class="n">entry_point</span>
-        <span class="n">identifier</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">ep</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">ep</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">plugin_class</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span><span class="p">:</span>
-            <span class="n">plugin_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-                <span class="n">plugin_class</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> load plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_class</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&#39;name_conversion&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">name_conversion</span> <span class="o">==</span> <span class="n">PluginDef</span><span class="o">.</span><span class="n">UNCHANGED</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">name</span>
+            <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">name_conversion</span> <span class="o">==</span> <span class="n">PluginDef</span><span class="o">.</span><span class="n">DROP_PLUGIN</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">drop_plugin</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">plugin_class</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-                <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">: error loading </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="c"># never want a plugin load to kill the test run</span>
-                    <span class="c"># but we can&#39;t log here because the logger is not yet</span>
-                    <span class="c"># configured</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="s">&quot;Unable to load plugin </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ep</span><span class="p">,</span> <span class="n">e</span><span class="p">),</span>
-                         <span class="ne">RuntimeWarning</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> load plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_loaded</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_class</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">add_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">plugin_class</span>
-
-    <span class="k">def</span> <span class="nf">_load_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">iter_entry_points</span>
-        <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">iter_entry_points</span><span class="p">(</span><span class="n">category</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_load_entry_point_plugin</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">ep</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">)</span>
-
-<div class="viewcode-block" id="PluginManager.discover"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.discover">[docs]</a>    <span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_plugins</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">camel_case_to_lower</span><span class="p">(</span><span class="n">drop_plugin</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">name</span>
 </div>
-<div class="viewcode-block" id="PluginManager.plugin"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.plugin">[docs]</a>    <span class="k">def</span> <span class="nf">plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a list of all plugins available for this category.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+<div class="viewcode-block" id="PluginManager.generate_item_id"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.generate_item_id">[docs]</a>    <span class="k">def</span> <span class="nf">generate_item_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">plugin</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">plugin</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="PluginManager.discover"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.discover">[docs]</a>    <span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">item_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&quot;entry_points&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_autoload</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">iter_entry_points</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_entry_point_plugin</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">ep</span><span class="p">,</span> <span class="n">item_proxy</span><span class="o">=</span><span class="n">item_proxy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PluginManager.instantiate"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">item</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PluginManager.patch_item"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.patch_item">[docs]</a>    <span class="k">def</span> <span class="nf">patch_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&quot;name_conversion&quot;</span><span class="p">):</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">name_conversion</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&quot;criteria&quot;</span><span class="p">):</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">criteria</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_criteria</span><span class="p">)</span>
+
+        <span class="n">GenericManager</span><span class="o">.</span><span class="n">patch_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+        <span class="c"># Look in class dict instead of hasattr(item, &#39;implementation&#39;) to avoid loading implementation</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">implementation</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_implementation</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PluginManager.patch_ep_plugin"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.patch_ep_plugin">[docs]</a>    <span class="k">def</span> <span class="nf">patch_ep_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">ep</span><span class="p">):</span>
+        <span class="n">plugin</span><span class="o">.</span><span class="n">plugin_ep</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">plugin</span><span class="o">.</span><span class="n">plugin_modulename</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">module_name</span>
+        <span class="n">plugin</span><span class="o">.</span><span class="n">plugin_dist</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">dist</span>
+</div>
+    <span class="k">def</span> <span class="nf">_is_plugin_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__plugin__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;modulename&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;objectname&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">_add_plugin_from_ep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">ep</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">plugin_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> load plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
+        <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismodule</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">):</span>
+            <span class="n">plugin_classes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">pl_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">):</span>
+                <span class="n">pl</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">,</span> <span class="n">pl_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_plugin_class</span><span class="p">(</span><span class="n">pl</span><span class="p">):</span>
+                    <span class="n">plugin_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">plugin_classes</span> <span class="o">=</span> <span class="n">plugin_class</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plugin_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">plugin_class</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">plugin_class</span> <span class="ow">in</span> <span class="n">plugin_classes</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">plugin_class</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">plugin_class</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ep</span><span class="o">.</span><span class="n">dist</span><span class="o">.</span><span class="n">egg_name</span><span class="p">(),</span> <span class="n">group</span><span class="p">,</span> <span class="n">ep</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">ep</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="s">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">item_proxy</span><span class="o">=</span><span class="n">plugin_proxy</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patch_ep_plugin</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ep</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load_entry_point_plugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">entry_point</span><span class="p">,</span> <span class="n">item_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">ep</span> <span class="o">=</span> <span class="n">entry_point</span>
+        <span class="n">plugin_class</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+            <span class="n">plugin_class</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> load plugin </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_plugin_from_ep</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">ep</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">item_proxy</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">plugins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_load_plugins</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
-                <span class="n">plugins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">]</span>
-
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">plugin_class</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">: error loading </span><span class="si">%s</span><span class="s"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">ep</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_plugin_from_ep</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">ep</span><span class="p">,</span> <span class="n">plugin_class</span><span class="p">,</span> <span class="n">item_proxy</span><span class="p">)</span>
+
 </div>
-    <span class="k">def</span> <span class="nf">_sorted_plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugins</span><span class="p">):</span>
-        <span class="n">plugin_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">plugin_class</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">):</span>
-                <span class="n">plugin_dict</span><span class="p">[</span><span class="n">plugin_class</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">plugin_class</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">plugin_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">plugin_class</span><span class="p">)]</span> <span class="o">=</span> <span class="n">plugin_class</span>
-        <span class="n">sorted_plugins</span> <span class="o">=</span> <span class="p">[</span><span class="n">plugin_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plugin_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
-        <span class="k">return</span> <span class="n">sorted_plugins</span>
-
-<div class="viewcode-block" id="PluginManager.plugins"><a class="viewcode-back" href="../../../../latest/dev/archi/api_pluginmanager.html#openalea.core.plugin.manager.PluginManager.plugins">[docs]</a>    <span class="k">def</span> <span class="nf">plugins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a list of all plugins available for this category.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">plugins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_load_plugins</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_plugins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sorted_plugins</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span>
-
-</div></div>
 <span class="k">class</span> <span class="nc">SimpleClassPluginProxy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -229,26 +238,24 @@
 <span class="sd">    By default, plugin name is &quot;RealClass&quot; name</span>
 
 <span class="sd">    class ThirdPartyProxy(SimpleClassPluginProxy):</span>
-<span class="sd">        alias = property(fget=lambda self: self.klass.title)</span>
+<span class="sd">        label = property(fget=lambda self: self.klass.title)</span>
 
 <span class="sd">    .. warning::</span>
 
 <span class="sd">        You should not use this proxy because the plugin may slow down the entire application:</span>
 <span class="sd">        all code and imports defined in module containing &quot;RealClass&quot; are loaded at first query or listing instead of only when used</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">klass</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-    <span class="n">alias</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+    <span class="n">__plugin__</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">klass</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">klass</span> <span class="o">=</span> <span class="n">klass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">klass</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">class</span> <span class="nc">PluginInstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-            <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">klass</span>
-
-        <span class="k">return</span> <span class="n">PluginInstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">klass</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">implementation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">klass</span>
 </pre></div>
 
           </div>
@@ -282,13 +289,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

@@ -36,9 +36,9 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -49,7 +49,7 @@
             
   <h1>Source code for core.service.data</h1><div class="highlight"><pre>
 <span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_plugins</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">plugins</span>
 <span class="kn">from</span> <span class="nn">openalea.core.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="kn">import</span> <span class="nn">mimetypes</span>
@@ -57,15 +57,15 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;DataFactory&quot;</span><span class="p">,</span> <span class="s">&quot;DataClass&quot;</span><span class="p">,</span> <span class="s">&quot;MimeType&quot;</span><span class="p">,</span> <span class="s">&quot;DataType&quot;</span><span class="p">]</span>
 
 <span class="n">REGISTERY_MIME_CLASS</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="k">for</span> <span class="n">DataClass</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;oalab.dataclass&#39;</span><span class="p">):</span>
-    <span class="n">REGISTERY_MIME_CLASS</span><span class="p">[</span><span class="n">DataClass</span><span class="o">.</span><span class="n">mimetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataClass</span>
+<span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">(</span><span class="s">&#39;openalea.core&#39;</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">implement</span><span class="o">=</span><span class="s">&#39;IData&#39;</span><span class="p">)):</span>
+    <span class="n">REGISTERY_MIME_CLASS</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">mimetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span>
 <span class="c"># for ModelClass in iter_plugins(&#39;oalab.model&#39;):</span>
 <span class="c">#     REGISTERY_MIME_CLASS[ModelClass.mimetype] = ModelClass</span>
 
 <span class="n">REGISTERY_NAME_MIME</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="k">for</span> <span class="n">DataClass</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;oalab.dataclass&#39;</span><span class="p">):</span>
-    <span class="n">REGISTERY_NAME_MIME</span><span class="p">[</span><span class="n">DataClass</span><span class="o">.</span><span class="n">default_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">DataClass</span><span class="o">.</span><span class="n">mimetype</span>
-    <span class="n">REGISTERY_NAME_MIME</span><span class="p">[</span><span class="n">DataClass</span><span class="o">.</span><span class="n">extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">DataClass</span><span class="o">.</span><span class="n">mimetype</span>
+<span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">(</span><span class="s">&#39;openalea.core&#39;</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">implement</span><span class="o">=</span><span class="s">&#39;IData&#39;</span><span class="p">)):</span>
+    <span class="n">REGISTERY_NAME_MIME</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">default_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">mimetype</span>
+    <span class="n">REGISTERY_NAME_MIME</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">mimetype</span>
 
 <span class="c"># for ModelClass in iter_plugins(&#39;oalab.model&#39;):</span>
 <span class="c">#     REGISTERY_NAME_MIME[ModelClass.default_name.lower()] = ModelClass.mimetype</span>
@@ -106,7 +106,7 @@
         <span class="c">#         for ModelClass in iter_plugins(&#39;oalab.model&#39;):</span>
         <span class="c">#             if ModelClass.mimetype == mimetype:</span>
         <span class="c">#                 return ModelClass.default_name</span>
-        <span class="k">for</span> <span class="n">DataClass</span> <span class="ow">in</span> <span class="n">iter_plugins</span><span class="p">(</span><span class="s">&#39;oalab.dataclass&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">DataClass</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">(</span><span class="s">&#39;oalab.dataclass&#39;</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">implement</span><span class="o">=</span><span class="s">&#39;IData&#39;</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">DataClass</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">==</span> <span class="n">mimetype</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">DataClass</span><span class="o">.</span><span class="n">default_name</span>
     <span class="k">else</span><span class="p">:</span>
@@ -122,14 +122,12 @@
 <span class="sd">    if dtype is None, returns all available DataClasses</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">REGISTERY_MIME_CLASS</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">REGISTERY_MIME_CLASS</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">REGISTERY_MIME_CLASS</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span><span class="o">.</span><span class="n">implementation</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Data</span>
 
-<span class="n">DataClass</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">REGISTERY_MIME_CLASS</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="n">Data</span><span class="p">])</span></div>
 
-
-<span class="k">def</span> <span class="nf">arrange_data_args</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mimetype</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">arrange_data_args</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mimetype</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span></div>
     <span class="k">if</span> <span class="n">mimetype</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">dtype</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
@@ -222,14 +220,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../core.html" >core</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../core.html" >core</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

@@ -36,8 +36,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,7 +66,8 @@
 <span class="c">###############################################################################</span>
 <span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QT_API</span><span class="p">,</span> <span class="n">PYSIDE_API</span>
 
 <span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">NodeFactory</span>
 <span class="kn">from</span> <span class="nn">openalea.core.compositenode</span> <span class="kn">import</span> <span class="n">CompositeNodeFactory</span>
@@ -78,17 +79,22 @@
 
 
 <div class="viewcode-block" id="PackageManagerTreeView"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageManagerTreeView">[docs]</a><span class="k">class</span> <span class="nc">PackageManagerTreeView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PackageManagerTreeView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">PackageViewWidget</span><span class="p">(),</span> <span class="s">&quot;Packages&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">PackageCategorieViewWidget</span><span class="p">(),</span> <span class="s">&quot;Packages Categories&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">PackageSearchWidget</span><span class="p">(),</span> <span class="s">&quot;Search Packages&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">QT_API</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PYSIDE_API</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">PackageViewWidget</span><span class="p">(),</span> <span class="s">&quot;Packages&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">PackageCategorieViewWidget</span><span class="p">(),</span> <span class="s">&quot;Packages Categories&quot;</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="PackageViewWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageViewWidget">[docs]</a><span class="k">class</span> <span class="nc">PackageViewWidget</span><span class="p">(</span><span class="n">OALabTreeView</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Widget for Package Manager</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PackageViewWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
@@ -118,16 +124,18 @@
 
 </div></div>
 <div class="viewcode-block" id="PackageCategorieViewWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageCategorieViewWidget">[docs]</a><span class="k">class</span> <span class="nc">PackageCategorieViewWidget</span><span class="p">(</span><span class="n">OALabTreeView</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Widget for Package Manager Categories</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PackageCategorieViewWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
         <span class="c"># category tree view</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cat_model</span> <span class="o">=</span> <span class="n">CategoryModel</span><span class="p">(</span><span class="n">package_manager</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat_model</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_package_manager_focus_change</span><span class="p">)</span>
-        
+
 <div class="viewcode-block" id="PackageCategorieViewWidget.on_package_manager_focus_change"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageCategorieViewWidget.on_package_manager_focus_change">[docs]</a>    <span class="k">def</span> <span class="nf">on_package_manager_focus_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">,</span> <span class="n">mimetype</span> <span class="o">=</span> <span class="n">NodeFactoryView</span><span class="o">.</span><span class="n">get_item_info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkg_id</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">factory_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mimetype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">NodeFactory</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span>
@@ -147,31 +155,33 @@
 
 </div></div>
 <div class="viewcode-block" id="PackageSearchWidget"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageSearchWidget">[docs]</a><span class="k">class</span> <span class="nc">PackageSearchWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use it to find packages.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Same thing as in Visualea.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Widget with line edit (to search) and finding packages.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PackageSearchWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">result_widget</span> <span class="o">=</span> <span class="n">OALabSearchView</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_model</span> <span class="o">=</span> <span class="n">SearchModel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">result_widget</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_model</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">search_lineEdit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">search_lineEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_node</span><span class="p">)</span>
-        
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_lineEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_node</span><span class="p">)</span>
+
         <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_lineEdit</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result_widget</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">result_widget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_package_manager_focus_change</span><span class="p">)</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_node</span><span class="p">()</span>
+
 <div class="viewcode-block" id="PackageSearchWidget.on_package_manager_focus_change"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageSearchWidget.on_package_manager_focus_change">[docs]</a>    <span class="k">def</span> <span class="nf">on_package_manager_focus_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">,</span> <span class="n">mimetype</span> <span class="o">=</span> <span class="n">NodeFactoryView</span><span class="o">.</span><span class="n">get_item_info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkg_id</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">factory_id</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mimetype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">NodeFactory</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span>
@@ -184,7 +194,7 @@
             <span class="n">applet</span> <span class="o">=</span> <span class="n">get_applet</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s">&#39;HelpWidget&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">applet</span><span class="p">:</span>
                 <span class="n">applet</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
-            </div>
+</div>
 <div class="viewcode-block" id="PackageSearchWidget.search_node"><a class="viewcode-back" href="../../../../latest/dev/archi/draft/api_openalealab.html#openalea.oalab.package.widgets.PackageSearchWidget.search_node">[docs]</a>    <span class="k">def</span> <span class="nf">search_node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Activated when search line edit is validated &quot;&quot;&quot;</span>
         <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin1&#39;</span><span class="p">))</span>
@@ -223,13 +233,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

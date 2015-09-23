@@ -36,8 +36,8 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,19 +71,11 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;CommandLineParser&#39;</span><span class="p">]</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
-
-<span class="k">def</span> <span class="nf">print_plugin_name</span><span class="p">(</span><span class="n">ep</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">ep</span><span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="k">print</span> <span class="s">&#39;  - </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ep</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ep</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">print</span> <span class="s">&#39;  - </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ep</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.formatting.text</span> <span class="kn">import</span> <span class="n">list_plugins</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">debug_plugins</span>
 
 
 <div class="viewcode-block" id="CommandLineParser"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.cli.html#openalea.oalab.cli.parser.CommandLineParser">[docs]</a><span class="k">class</span> <span class="nc">CommandLineParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -97,9 +89,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;OALab Command Line&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--extension&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;extension&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span>
                                  <span class="n">help</span><span class="o">=</span><span class="s">&#39;Lab extension to launch&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-v&#39;</span><span class="p">,</span> <span class="s">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Display more information&#39;</span><span class="p">)</span>
         <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">&#39;Plugin development&#39;</span><span class="p">)</span>
         <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--list-plugins&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;category&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
                            <span class="n">help</span><span class="o">=</span><span class="s">&#39;List available plugin for given category. If all, list all plugins. If summary, list only categories&#39;</span><span class="p">)</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--show-plugins&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span>
+                           <span class="n">help</span><span class="o">=</span><span class="s">&#39;Launch plugin explorer&#39;</span><span class="p">)</span>
         <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--debug-plugins&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;category&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
                            <span class="n">help</span><span class="o">=</span><span class="s">&#39;Raise error while loading instead of passing it silently. Use &quot;all&quot; to debug all plugins&#39;</span><span class="p">)</span>
         <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--color&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Color terminal output&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">)</span>
@@ -115,38 +110,18 @@
 
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="kn">import</span> <span class="nn">pkg_resources</span>
-            <span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_groups</span>
+            <span class="n">list_plugins</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;summary&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
-                <span class="n">prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;oalab&#39;</span><span class="p">,</span> <span class="s">&#39;vpltk&#39;</span><span class="p">,</span> <span class="s">&#39;openalea&#39;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">iter_groups</span><span class="p">()):</span>
-                <span class="n">match</span> <span class="o">=</span> <span class="bp">False</span>
-                <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">prefixes</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
-                        <span class="n">match</span> <span class="o">=</span> <span class="bp">True</span>
-                        <span class="k">break</span>
-                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
-                    <span class="n">eps</span> <span class="o">=</span> <span class="p">[</span><span class="n">ep</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">category</span><span class="p">)]</span>
-                    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_plugins</span> <span class="o">==</span> <span class="s">&#39;summary&#39;</span><span class="p">:</span>
-                        <span class="k">print</span> <span class="s">&#39;  - </span><span class="se">\033</span><span class="s">[91m</span><span class="si">%s</span><span class="se">\033</span><span class="s">[0m (</span><span class="si">%d</span><span class="s"> plugins)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eps</span><span class="p">))</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\033</span><span class="s">[91m</span><span class="si">%s</span><span class="se">\033</span><span class="s">[0m&#39;</span> <span class="o">%</span> <span class="n">category</span>
-                        <span class="k">print</span>
-                        <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="n">eps</span><span class="p">:</span>
-                            <span class="n">print_plugin_name</span><span class="p">(</span><span class="n">ep</span><span class="p">)</span>
-                        <span class="k">print</span>
-                        <span class="k">print</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">show_plugins</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="kn">from</span> <span class="nn">openalea.oalab.pluginwidget.explorer</span> <span class="kn">import</span> <span class="n">show_plugins</span>
+            <span class="n">show_plugins</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">debug_plugins</span><span class="p">:</span>
             <span class="n">debug</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">debug_plugins</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="s">&#39;oalab.lab&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">debug</span><span class="p">:</span>
                 <span class="n">debug</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;oalab.lab&#39;</span><span class="p">)</span>
-            <span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">PluginInstanceManager</span>
-            <span class="n">pim</span> <span class="o">=</span> <span class="n">PluginInstanceManager</span><span class="p">()</span>
-            <span class="n">pim</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
+            <span class="n">debug_plugins</span><span class="p">(</span><span class="n">debug</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">extension</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">extension</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span></div></div>
@@ -183,13 +158,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.container.topomesh_txt &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.container.topomesh_txt</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="c">#</span>
+<span class="c">#       Topomesh : container package</span>
+<span class="c">#</span>
+<span class="c">#       Copyright or Â© or Copr. 2006 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       VPlants WebSite : https://gforge.inria.fr/projects/vplants/</span>
+<span class="c">#</span>
+
+<span class="n">__doc__</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">This module provide a simple way to serialize a mesh in a txt file</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span><span class="o">=</span><span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">data_prop</span> <span class="kn">import</span> <span class="n">DataProp</span>
+<span class="kn">from</span> <span class="nn">topomesh</span> <span class="kn">import</span> <span class="n">Topomesh</span>
+<span class="kn">from</span> <span class="nn">utils.utils_txt</span> <span class="kn">import</span> <span class="n">write_description</span><span class="p">,</span><span class="n">read_description</span>
+
+<div class="viewcode-block" id="topomesh_to_txt"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_txt.topomesh_to_txt">[docs]</a><span class="k">def</span> <span class="nf">topomesh_to_txt</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Write the txt representation of a topomesh.</span>
+<span class="sd">    </span>
+<span class="sd">    f: an open file</span>
+<span class="sd">    mesh: a topomesh object</span>
+<span class="sd">    description: a textual description</span>
+<span class="sd">    props: a list of property for each degree</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#create base node</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;BEGIN topomesh degree </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">())</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="c">#description</span>
+    <span class="n">write_description</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">description</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    
+    <span class="c">#write properties</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;BEGIN properties description</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">deg</span><span class="p">,</span><span class="n">deg_props</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">props</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;deg</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">deg</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">prop</span> <span class="ow">in</span> <span class="n">deg_props</span> <span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">prop</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span><span class="n">prop</span><span class="o">.</span><span class="n">unit</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;END properties description</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="c">#write wisps</span>
+    <span class="k">for</span> <span class="n">deg</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">deg</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">props</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">deg_props</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="n">deg</span><span class="p">]</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">deg_props</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;BEGIN wisp degree </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">deg</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;id </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">wid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">prop</span> <span class="ow">in</span> <span class="n">deg_props</span> <span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">prop</span><span class="p">[</span><span class="n">wid</span><span class="p">])</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;END wisp degree </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">deg</span><span class="p">)</span>
+
+    <span class="c">#write links between wisps</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;BEGIN decomposition</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">deg</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">wid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">wisps</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">borders</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;link degree </span><span class="si">%d</span><span class="s"> wid </span><span class="si">%d</span><span class="s"> bid </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">,</span><span class="n">bid</span><span class="p">))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;END decomposition</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;END topomesh</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">f</span>
+</div>
+<div class="viewcode-block" id="txt_to_topomesh"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_txt.txt_to_topomesh">[docs]</a><span class="k">def</span> <span class="nf">txt_to_topomesh</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&quot;set&quot;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retrieve the topomesh structure from txt stream</span>
+<span class="sd">    returns topomesh,description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#create topomesh</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">while</span> <span class="s">&quot;BEGIN topomesh&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">deg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">Topomesh</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">method</span><span class="p">)</span>
+    <span class="c">#read description</span>
+    <span class="n">descr</span> <span class="o">=</span> <span class="n">read_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    
+    <span class="c">#read properties</span>
+    <span class="n">props</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">while</span> <span class="s">&quot;BEGIN properties description&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="k">while</span> <span class="s">&quot;END properties description&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+        <span class="n">gr</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">prop_deg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">gr</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">:])</span>
+        <span class="k">for</span> <span class="n">prop_descr</span> <span class="ow">in</span> <span class="n">gr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span><span class="n">prop</span> <span class="o">=</span> <span class="n">prop_descr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;(&quot;</span><span class="p">)</span>
+            <span class="n">typ</span><span class="p">,</span><span class="n">unit</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">props</span><span class="p">[</span><span class="n">prop_deg</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">DataProp</span><span class="p">(</span><span class="nb">type</span> <span class="o">=</span> <span class="n">typ</span><span class="p">,</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="c">#wisps</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">degree</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">while</span> <span class="s">&quot;BEGIN wisp&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">deg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">while</span> <span class="s">&quot;END wisp&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+            <span class="n">gr</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">wid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">gr</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">add_wisp</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span><span class="n">wid</span><span class="p">)</span>
+            <span class="c">#props</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gr</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="n">props</span><span class="p">[</span><span class="n">deg</span><span class="p">][</span><span class="n">ind</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;str&#39;</span> <span class="p">:</span>
+                    <span class="n">props</span><span class="p">[</span><span class="n">deg</span><span class="p">][</span><span class="n">ind</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">wid</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">else</span> <span class="p">:</span>
+                    <span class="n">props</span><span class="p">[</span><span class="n">deg</span><span class="p">][</span><span class="n">ind</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">wid</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="n">deg</span><span class="p">][</span><span class="n">ind</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span><span class="n">val</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+    <span class="c">#links</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">while</span> <span class="s">&quot;BEGIN decomposition&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="k">while</span> <span class="s">&quot;END decomposition&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">:</span>
+        <span class="n">gr</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">gr</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">gr</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">gr</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="c">#return</span>
+    <span class="k">return</span> <span class="n">mesh</span><span class="p">,</span><span class="n">descr</span><span class="p">,</span><span class="n">props</span>
+</div>
+<div class="viewcode-block" id="write_topomesh"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_txt.write_topomesh">[docs]</a><span class="k">def</span> <span class="nf">write_topomesh</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">props</span> <span class="o">=</span> <span class="p">[])</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    write a topomesh in a file using a txt representation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">topomesh_to_txt</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">description</span><span class="p">,</span><span class="n">props</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="read_topomesh"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.topomesh_txt.read_topomesh">[docs]</a><span class="k">def</span> <span class="nf">read_topomesh</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&quot;set&quot;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    read a topomesh stored in a file as a txt representation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="p">,</span><span class="n">descr</span><span class="p">,</span><span class="n">props</span> <span class="o">=</span> <span class="n">txt_to_topomesh</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">method</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">mesh</span><span class="p">,</span><span class="n">descr</span><span class="p">,</span><span class="n">props</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

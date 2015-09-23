@@ -36,8 +36,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -69,15 +69,32 @@
 <span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span>
+
 
 <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">qt</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt.designer</span> <span class="kn">import</span> <span class="n">generate_pyfile_from_uifile</span><span class="p">,</span> <span class="n">get_data</span>
 <span class="kn">from</span> <span class="nn">openalea.core.compositenode</span> <span class="kn">import</span> <span class="n">CompositeNodeFactory</span>
 <span class="kn">from</span> <span class="nn">openalea.core.pkgmanager</span> <span class="kn">import</span> <span class="n">PackageManager</span>
 <span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">Settings</span><span class="p">,</span> <span class="n">get_userpkg_dir</span>
 <span class="kn">from</span> <span class="nn">openalea.core.interface</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">openalea.core.session</span> <span class="kn">import</span> <span class="n">Session</span>
 <span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">Factory</span><span class="p">,</span> <span class="n">Node</span>
+
+
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span>
+    <span class="s">&quot;ioconfig&quot;</span><span class="p">,</span>
+    <span class="s">&quot;listedit&quot;</span><span class="p">,</span>
+    <span class="s">&quot;newdata&quot;</span><span class="p">,</span>
+    <span class="s">&quot;newgraph&quot;</span><span class="p">,</span>
+    <span class="s">&quot;newpackage&quot;</span><span class="p">,</span>
+    <span class="s">&quot;nodechooser&quot;</span><span class="p">,</span>
+    <span class="s">&quot;preferences&quot;</span><span class="p">,</span>
+    <span class="s">&quot;tableedit&quot;</span><span class="p">,</span>
+    <span class="s">&quot;tofactory&quot;</span><span class="p">,</span>
+<span class="p">]:</span>
+    <span class="n">src</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="s">&quot;openalea.visualea.dialogs&quot;</span><span class="p">,</span> <span class="s">&quot;resources&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.ui&#39;</span>
+    <span class="n">dest</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="s">&quot;openalea.visualea.dialogs&quot;</span><span class="p">,</span> <span class="s">&quot;ui_</span><span class="si">%s</span><span class="s">.py&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">generate_pyfile_from_uifile</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">ui_newgraph</span>
 <span class="kn">import</span> <span class="nn">ui_tofactory</span>
@@ -90,7 +107,8 @@
 <span class="kn">import</span> <span class="nn">ui_newdata</span>
 
 
-<div class="viewcode-block" id="NewGraph"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph">[docs]</a><span class="k">class</span> <span class="nc">NewGraph</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_newgraph</span><span class="o">.</span><span class="n">Ui_NewGraphDialog</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="NewGraph"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph">[docs]</a><span class="k">class</span> <span class="nc">NewGraph</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_newgraph</span><span class="o">.</span><span class="n">Ui_NewGraphDialog</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; New composite node dialog &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">pmanager</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -155,7 +173,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ioButton</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">io</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ioButton</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_io</span><span class="p">)</span>
 
-
 <div class="viewcode-block" id="NewGraph.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accept Dialog result &quot;&quot;&quot;</span>
 
@@ -166,12 +183,10 @@
            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">name</span> <span class="ow">and</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">()</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
            <span class="p">):</span>
-            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span>
-                                            <span class="s">&quot;The Name is already use&quot;</span><span class="p">)</span>
+            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;The Name is already used&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="NewGraph.edit_io"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.edit_io">[docs]</a>    <span class="k">def</span> <span class="nf">edit_io</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Open IO Config Dialog &quot;&quot;&quot;</span>
@@ -182,7 +197,6 @@
         <span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">inputs</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">outputs</span>
-
 </div>
 <div class="viewcode-block" id="NewGraph.get_package"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.get_package">[docs]</a>    <span class="k">def</span> <span class="nf">get_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the selected package &quot;&quot;&quot;</span>
@@ -191,7 +205,6 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">pkgstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packageBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin1&#39;</span><span class="p">))</span>  <span class="c"># Qt api 2</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgmap</span><span class="p">[</span><span class="n">pkgstr</span><span class="p">]</span>
-
 </div>
 <div class="viewcode-block" id="NewGraph.get_data"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -213,25 +226,22 @@
             <span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptionEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin1&#39;</span><span class="p">))</span>  <span class="c"># Qt api 2</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(),</span> <span class="n">category</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
-
-
 </div>
 <div class="viewcode-block" id="NewGraph.create_cnfactory"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.create_cnfactory">[docs]</a>    <span class="k">def</span> <span class="nf">create_cnfactory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkgmanager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create, register and return a new CompositeNodeFactory &quot;&quot;&quot;</span>
 
         <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="n">cat</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
-        <span class="n">newfactory</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">create_user_compositenode</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                                    <span class="n">description</span><span class="o">=</span> <span class="n">desc</span><span class="p">,</span>
-                                                    <span class="n">category</span> <span class="o">=</span> <span class="n">cat</span><span class="p">,</span>
-                                                    <span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span>
-                                                    <span class="n">outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">,</span>
-                                                    <span class="p">)</span>
+        <span class="n">newfactory</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">create_user_compositenode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                   <span class="n">description</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                                                   <span class="n">category</span><span class="o">=</span><span class="n">cat</span><span class="p">,</span>
+                                                   <span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span>
+                                                   <span class="n">outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">,</span>
+                                                   <span class="p">)</span>
 
         <span class="n">pkgmanager</span><span class="o">.</span><span class="n">add_package</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">newfactory</span>
-
 </div>
 <div class="viewcode-block" id="NewGraph.create_nodefactory"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.create_nodefactory">[docs]</a>    <span class="k">def</span> <span class="nf">create_nodefactory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkgmanager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create, register and return a NodeFactory &quot;&quot;&quot;</span>
@@ -248,14 +258,14 @@
         <span class="n">pkgmanager</span><span class="o">.</span><span class="n">add_package</span><span class="p">(</span><span class="n">pkg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ret</span>
-
 </div>
 <div class="viewcode-block" id="NewGraph.update_factory"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewGraph.update_factory">[docs]</a>    <span class="k">def</span> <span class="nf">update_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Update factory with value &quot;&quot;&quot;</span>
         <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="n">cat</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
         <span class="n">factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">factory</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">factory</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="n">oldname</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">name</span>
         <span class="n">factory</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -274,9 +284,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">pmanager</span><span class="o">.</span><span class="n">category</span><span class="p">[</span><span class="n">oldcat</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">factory</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pmanager</span><span class="o">.</span><span class="n">update_category</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>
 
-
 </div></div>
-<div class="viewcode-block" id="NewData"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData">[docs]</a><span class="k">class</span> <span class="nc">NewData</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_newdata</span><span class="o">.</span><span class="n">Ui_NewDataDialog</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="NewData"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData">[docs]</a><span class="k">class</span> <span class="nc">NewData</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_newdata</span><span class="o">.</span><span class="n">Ui_NewDataDialog</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; import data dialog &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">pmanager</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -312,7 +322,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browseButton</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">browse_file</span><span class="p">)</span>
 
-
 <div class="viewcode-block" id="NewData.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accept Dialog result &quot;&quot;&quot;</span>
 
@@ -320,12 +329,10 @@
         <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">()</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
-            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span>
-                                            <span class="s">&quot;The Name is already use&quot;</span><span class="p">)</span>
+            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;The Name is already used&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="NewData.browse_file"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData.browse_file">[docs]</a>    <span class="k">def</span> <span class="nf">browse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Open File browser &quot;&quot;&quot;</span>
@@ -334,10 +341,10 @@
             <span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Import file&quot;</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nameEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-
 </div>
 <div class="viewcode-block" id="NewData.get_package"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData.get_package">[docs]</a>    <span class="k">def</span> <span class="nf">get_package</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the selected package &quot;&quot;&quot;</span>
@@ -347,7 +354,6 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">pkgstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packageBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin1&#39;</span><span class="p">))</span>  <span class="c"># Qt api 2</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgmap</span><span class="p">[</span><span class="n">pkgstr</span><span class="p">]</span>
-
 </div>
 <div class="viewcode-block" id="NewData.get_data"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -362,7 +368,6 @@
             <span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptionEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin1&#39;</span><span class="p">))</span>  <span class="c"># Qt api 2</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(),</span> <span class="n">description</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="NewData.create_datafactory"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewData.create_datafactory">[docs]</a>    <span class="k">def</span> <span class="nf">create_datafactory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkgmanager</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create, register and return a new CompositeNodeFactory &quot;&quot;&quot;</span>
@@ -373,9 +378,9 @@
 
         <span class="k">return</span> <span class="n">newfactory</span>
 
-
 </div></div>
-<div class="viewcode-block" id="NewPackage"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewPackage">[docs]</a><span class="k">class</span> <span class="nc">NewPackage</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_newpackage</span><span class="o">.</span><span class="n">Ui_NewPackageDialog</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="NewPackage"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewPackage">[docs]</a><span class="k">class</span> <span class="nc">NewPackage</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_newpackage</span><span class="o">.</span><span class="n">Ui_NewPackageDialog</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; New package dialog &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkgs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metainfo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -394,10 +399,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathButton</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_clicked</span><span class="p">)</span>
 
         <span class="c">#self.pathEdit.setText(get_userpkg_dir())</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">metainfo</span><span class="p">)</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">metainfo</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pathEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">get_userpkg_dir</span><span class="p">())</span>
-
 
 <div class="viewcode-block" id="NewPackage.path_clicked"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewPackage.path_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">path_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -407,26 +412,22 @@
 
         <span class="k">if</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pathEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="NewPackage.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewPackage.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accept dialog result &quot;&quot;&quot;</span>
         <span class="c"># Test if name is correct</span>
         <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgs</span><span class="p">):</span>
-            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span>
-                                            <span class="s">&quot;The Name is already use&quot;</span><span class="p">)</span>
+            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;The Name is already used&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c"># Test Path</span>
         <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="k">if</span><span class="p">(</span><span class="n">path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
-            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span>
-                                             <span class="s">&quot;Invalid Path&quot;</span><span class="p">)</span>
+            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;Invalid Path&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="NewPackage.set_data"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewPackage.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the dialog data &quot;&quot;&quot;</span>
@@ -445,8 +446,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">authorsEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="s">&#39;authors&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">institutesEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="s">&#39;institutes&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">urlEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="s">&#39;url&#39;</span><span class="p">))</span>
-
-
 </div>
 <div class="viewcode-block" id="NewPackage.get_data"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NewPackage.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -462,13 +461,13 @@
             <span class="n">authors</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">authorsEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
             <span class="n">institutes</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">institutesEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
             <span class="n">url</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">urlEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
-            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
-
 </div></div>
-<div class="viewcode-block" id="EditPackage"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.EditPackage">[docs]</a><span class="k">class</span> <span class="nc">EditPackage</span><span class="p">(</span><span class="n">NewPackage</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="EditPackage"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.EditPackage">[docs]</a><span class="k">class</span> <span class="nc">EditPackage</span><span class="p">(</span><span class="n">NewPackage</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; Edit package dialog &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -480,7 +479,7 @@
 
         <span class="n">path</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">if</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s">&quot;path&quot;</span><span class="p">)):</span>
-           <span class="n">path</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">path</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">path</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pathButton</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nameEdit</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
@@ -488,7 +487,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">package</span><span class="o">.</span><span class="n">metainfo</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">package</span>
-
 
 <div class="viewcode-block" id="EditPackage.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.EditPackage.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accept dialog result &quot;&quot;&quot;</span>
@@ -500,19 +498,18 @@
             <span class="n">authors</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">authorsEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
             <span class="n">institutes</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">institutesEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
             <span class="n">url</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">urlEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
-            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">metainfo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metainfo</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">)):</span>
-           <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-
 </div></div>
-<div class="viewcode-block" id="FactorySelector"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.FactorySelector">[docs]</a><span class="k">class</span> <span class="nc">FactorySelector</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_tofactory</span><span class="o">.</span><span class="n">Ui_FactorySelector</span><span class="p">)</span> <span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Dialog to select a particular CompositeNode factory &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FactorySelector"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.FactorySelector">[docs]</a><span class="k">class</span> <span class="nc">FactorySelector</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_tofactory</span><span class="o">.</span><span class="n">Ui_FactorySelector</span><span class="p">):</span>
 
+    <span class="sd">&quot;&quot;&quot; Dialog to select a particular CompositeNode factory &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -535,7 +532,7 @@
 
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">pkg</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
                 <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">CompositeNodeFactory</span><span class="p">)):</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                     <span class="n">cfactories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">factorymap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
 
@@ -544,45 +541,41 @@
 
         <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">if</span><span class="p">(</span><span class="n">default_factory</span> <span class="ow">and</span> <span class="n">default_factory</span><span class="o">.</span><span class="n">package</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">default_factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">default_factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">default_factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">default_factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newFactoryButton</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_factory</span><span class="p">)</span>
 
-
 <div class="viewcode-block" id="FactorySelector.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.FactorySelector.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accept dialog result &quot;&quot;&quot;</span>
         <span class="c"># Test if name is correct</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
         <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">text</span><span class="p">):</span>
-            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span>
-                                            <span class="s">&quot;Invalid Choice.&quot;</span><span class="p">)</span>
+            <span class="n">mess</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;Invalid Choice.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="FactorySelector.new_factory"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.FactorySelector.new_factory">[docs]</a>    <span class="k">def</span> <span class="nf">new_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create a new composite node &quot;&quot;&quot;</span>
 
         <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="o">.</span><span class="n">package</span><span class="p">):</span>
             <span class="n">pkg_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">else</span> <span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">pkg_id</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">dialog</span> <span class="o">=</span> <span class="n">NewGraph</span><span class="p">(</span><span class="s">&quot;New Composite Node&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">io</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">pkg_id</span><span class="o">=</span><span class="n">pkg_id</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
-        <span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">ret</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">newfactory</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">create_cnfactory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pkgmanager</span><span class="p">)</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">newfactory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">newfactory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newfactory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">newfactory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">factorymap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">newfactory</span>
             <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
 </div>
 <div class="viewcode-block" id="FactorySelector.get_factory"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.FactorySelector.get_factory">[docs]</a>    <span class="k">def</span> <span class="nf">get_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the selected factory &quot;&quot;&quot;</span>
@@ -590,11 +583,9 @@
         <span class="n">text</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;latin1&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorymap</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
 
-
-
-
 </div></div>
-<div class="viewcode-block" id="PreferencesDialog"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferencesDialog">[docs]</a><span class="k">class</span> <span class="nc">PreferencesDialog</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_preferences</span><span class="o">.</span><span class="n">Ui_Preferences</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="PreferencesDialog"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferencesDialog">[docs]</a><span class="k">class</span> <span class="nc">PreferencesDialog</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_preferences</span><span class="o">.</span><span class="n">Ui_Preferences</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; Preferences dialog &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
@@ -647,7 +638,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commandPath</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_editor</span><span class="p">)</span>
 
-
         <span class="c"># UI</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;DoubleClick&quot;</span><span class="p">)</span>
@@ -675,7 +665,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">showCue</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;EvalCue&quot;</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">evalCue</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="n">showCue</span>
-                                            <span class="k">else</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span>
+                                       <span class="k">else</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">evalCue</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span>
 
@@ -697,7 +687,8 @@
             <span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Select python editor&quot;</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span>
 
         <span class="k">if</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">commandStr</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -707,7 +698,6 @@
 
         <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathList</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pathList</span><span class="o">.</span><span class="n">takeItem</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="PreferencesDialog.valid_search_path"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferencesDialog.valid_search_path">[docs]</a>    <span class="k">def</span> <span class="nf">valid_search_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set the search path in the package manager &quot;&quot;&quot;</span>
@@ -721,12 +711,11 @@
             <span class="n">pkgmanager</span><span class="o">.</span><span class="n">add_wralea_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="n">pkgmanager</span><span class="o">.</span><span class="n">user_wralea_path</span><span class="p">)</span>
 
         <span class="n">pkgmanager</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
-
 </div>
 <div class="viewcode-block" id="PreferencesDialog.valid_ui"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferencesDialog.valid_ui">[docs]</a>    <span class="k">def</span> <span class="nf">valid_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Valid UI Parameters &quot;&quot;&quot;</span>
 
-        <span class="n">d</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&quot;run&quot;</span><span class="p">,</span> <span class="s">&quot;open&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;run&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;open&quot;</span><span class="p">],]</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&quot;run&quot;</span><span class="p">,</span> <span class="s">&quot;open&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;run&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;open&quot;</span><span class="p">],</span> <span class="p">]</span>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbclickBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
 
         <span class="n">styles</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Spline&quot;</span><span class="p">,</span> <span class="s">&quot;Polyline&quot;</span><span class="p">,</span> <span class="s">&quot;Line&quot;</span><span class="p">]</span>
@@ -736,7 +725,7 @@
         <span class="n">config</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
         <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;DoubleClick&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
         <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;EdgeStyle&quot;</span><span class="p">,</span> <span class="n">edge_style</span><span class="p">)</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;EvalCue&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalCue</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span><span class="o">==</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">))</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;UI&quot;</span><span class="p">,</span> <span class="s">&quot;EvalCue&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalCue</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span> <span class="o">==</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">))</span>
         <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">edge_style</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_style</span><span class="p">:</span>
@@ -756,7 +745,6 @@
         <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;editor&quot;</span><span class="p">,</span> <span class="s">&quot;use_external&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">use_ext</span><span class="p">))</span>
         <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;editor&quot;</span><span class="p">,</span> <span class="s">&quot;command&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
         <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
-
 </div>
 <div class="viewcode-block" id="PreferencesDialog.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferencesDialog.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Validate dialog results &quot;&quot;&quot;</span>
@@ -769,17 +757,17 @@
 </div>
 <div class="viewcode-block" id="PreferencesDialog.build_gui_for_component"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferencesDialog.build_gui_for_component">[docs]</a>    <span class="k">def</span> <span class="nf">build_gui_for_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">componentName</span><span class="p">,</span> <span class="n">conf</span><span class="p">):</span>
         <span class="n">top</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">inputs</span>  <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">)</span> \
-                        <span class="k">for</span> <span class="n">k</span><span class="p">,(</span><span class="n">i</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">conf</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">)</span> \
-                        <span class="k">for</span> <span class="n">k</span><span class="p">,(</span><span class="n">i</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">conf</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">conf</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">conf</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
         <span class="k">print</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span>
 
         <span class="n">f</span> <span class="o">=</span> <span class="n">Factory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">componentName</span><span class="p">,</span>
-                    <span class="n">nodemodule</span> <span class="o">=</span> <span class="s">&quot;openalea.visualea.dialogs&quot;</span><span class="p">,</span>
-                    <span class="n">nodeclass</span>  <span class="o">=</span> <span class="s">&quot;PreferenceNode&quot;</span><span class="p">,</span>
-                    <span class="n">inputs</span>  <span class="o">=</span> <span class="n">inputs</span><span class="p">,</span>
-                    <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span>
+                    <span class="n">nodemodule</span><span class="o">=</span><span class="s">&quot;openalea.visualea.dialogs&quot;</span><span class="p">,</span>
+                    <span class="n">nodeclass</span><span class="o">=</span><span class="s">&quot;PreferenceNode&quot;</span><span class="p">,</span>
+                    <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+                    <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span>
                     <span class="p">)</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">instantiate_widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">top</span><span class="p">)</span>
         <span class="n">layout</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
@@ -787,12 +775,16 @@
         <span class="n">top</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">componentName</span><span class="p">)</span>
         <span class="n">top</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
 </div></div>
 <div class="viewcode-block" id="PreferenceNode"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.PreferenceNode">[docs]</a><span class="k">class</span> <span class="nc">PreferenceNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">()):</span>
         <span class="k">return</span> <span class="n">inputs</span>
+
 </div>
 <div class="viewcode-block" id="ComboDelegate"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ComboDelegate">[docs]</a><span class="k">class</span> <span class="nc">ComboDelegate</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QItemDelegate</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tool class used in IO editor</span>
 <span class="sd">    It allows to choose an interface from a combobox in a QTable</span>
@@ -801,11 +793,10 @@
 <div class="viewcode-block" id="ComboDelegate.get_interfaces"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ComboDelegate.get_interfaces">[docs]</a>    <span class="k">def</span> <span class="nf">get_interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the list of availble interfaces &quot;&quot;&quot;</span>
 
-        <span class="n">x</span> <span class="o">=</span>  <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">IInterfaceMetaClass</span><span class="o">.</span><span class="n">all</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">IInterfaceMetaClass</span><span class="o">.</span><span class="n">all</span><span class="p">]</span>
         <span class="n">x</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;None&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x</span>
-
 </div>
 <div class="viewcode-block" id="ComboDelegate.createEditor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ComboDelegate.createEditor">[docs]</a>    <span class="k">def</span> <span class="nf">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create the editor &quot;&quot;&quot;</span>
@@ -815,7 +806,6 @@
             <span class="k">return</span> <span class="n">editor</span>
 
         <span class="k">return</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QItemDelegate</span><span class="o">.</span><span class="n">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="ComboDelegate.setEditorData"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ComboDelegate.setEditorData">[docs]</a>    <span class="k">def</span> <span class="nf">setEditorData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accessor &quot;&quot;&quot;</span>
@@ -823,10 +813,9 @@
         <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">())</span>
             <span class="n">i</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="n">editor</span><span class="o">.</span><span class="n">setCurrentIndex</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">editor</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QItemDelegate</span><span class="o">.</span><span class="n">setEditorData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="ComboDelegate.setModelData"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ComboDelegate.setModelData">[docs]</a>    <span class="k">def</span> <span class="nf">setModelData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Accessor &quot;&quot;&quot;</span>
@@ -838,7 +827,8 @@
             <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QItemDelegate</span><span class="o">.</span><span class="n">setModelData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
 
 </div></div>
-<div class="viewcode-block" id="IOConfigDialog"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog">[docs]</a><span class="k">class</span> <span class="nc">IOConfigDialog</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_ioconfig</span><span class="o">.</span><span class="n">Ui_IOConfig</span><span class="p">)</span> <span class="p">:</span>
+<div class="viewcode-block" id="IOConfigDialog"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog">[docs]</a><span class="k">class</span> <span class="nc">IOConfigDialog</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_ioconfig</span><span class="o">.</span><span class="n">Ui_IOConfig</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; IO Configuration dialog &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">(),</span> <span class="n">outputs</span><span class="o">=</span><span class="p">(),</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -856,13 +846,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">([</span><span class="s">&quot;Name&quot;</span><span class="p">,</span> <span class="s">&quot;Interface&quot;</span><span class="p">,</span> <span class="s">&quot;Value&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inTable</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">inTable</span><span class="o">.</span><span class="n">setEditTriggers</span> <span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">AllEditTriggers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inTable</span><span class="o">.</span><span class="n">setEditTriggers</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">AllEditTriggers</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inTable</span><span class="o">.</span><span class="n">setItemDelegate</span><span class="p">(</span><span class="n">delegate</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItemModel</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outputs</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">([</span><span class="s">&quot;Name&quot;</span><span class="p">,</span> <span class="s">&quot;Interface&quot;</span><span class="p">,</span> <span class="s">&quot;Description&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outTable</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outTable</span><span class="o">.</span><span class="n">setEditTriggers</span> <span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">AllEditTriggers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outTable</span><span class="o">.</span><span class="n">setEditTriggers</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">AllEditTriggers</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outTable</span><span class="o">.</span><span class="n">setItemDelegate</span><span class="p">(</span><span class="n">delegate</span><span class="p">)</span>
 
         <span class="c">#self.inTable.setItemDelegateForColumn(1, ComboBoxDeletegate())</span>
@@ -878,12 +868,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">])))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;desc&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">))))</span>
 
-
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addInput</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_input</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delInput</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">del_input</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addOutput</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_output</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delOutput</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;clicked()&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">del_output</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="IOConfigDialog.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Valid IO &quot;&quot;&quot;</span>
@@ -892,10 +880,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">interface_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">val_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">desc_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">interface_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">val_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">desc_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">interface</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">interface_str</span><span class="p">)</span>
@@ -907,17 +895,15 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="bp">None</span>
 
-
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">val</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">desc_str</span><span class="p">))</span>
-
 
         <span class="c"># build output dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">interface_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="n">desc_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">interface_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">desc_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">interface</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">interface_str</span><span class="p">)</span>
@@ -927,35 +913,31 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">desc_str</span><span class="p">))</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="IOConfigDialog.add_input"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog.add_input">[docs]</a>    <span class="k">def</span> <span class="nf">add_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">appendRow</span><span class="p">([</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;IN</span><span class="si">%i</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">,)),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">appendRow</span><span class="p">([</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;IN</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,)),</span>
                                 <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;None&#39;</span><span class="p">),</span>
                                 <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;None&#39;</span><span class="p">),</span>
                                 <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)])</span>
-
 </div>
 <div class="viewcode-block" id="IOConfigDialog.add_output"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog.add_output">[docs]</a>    <span class="k">def</span> <span class="nf">add_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">appendRow</span><span class="p">([</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;OUT</span><span class="si">%i</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">,)),</span>
-                                <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;None&#39;</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">appendRow</span><span class="p">([</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;OUT</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,)),</span>
+                                 <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;None&#39;</span><span class="p">),</span>
                                  <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStandardItem</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)])</span>
-
 </div>
 <div class="viewcode-block" id="IOConfigDialog.del_input"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog.del_input">[docs]</a>    <span class="k">def</span> <span class="nf">del_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">inModel</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">c</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="IOConfigDialog.del_output"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.IOConfigDialog.del_output">[docs]</a>    <span class="k">def</span> <span class="nf">del_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">outModel</span><span class="o">.</span><span class="n">takeRow</span><span class="p">(</span><span class="n">c</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
 </div></div>
 <div class="viewcode-block" id="DictEditor"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.DictEditor">[docs]</a><span class="k">class</span> <span class="nc">DictEditor</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_tableedit</span><span class="o">.</span><span class="n">Ui_TableEditor</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;Dictionnary editor (used for node internals)</span>
 
 <span class="sd">    If accepted :</span>
@@ -977,13 +959,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pdict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
         <span class="n">items</span> <span class="o">=</span> <span class="n">pdict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
 
             <span class="n">item</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
             <span class="n">item</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
-
 
 <div class="viewcode-block" id="DictEditor.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.DictEditor.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1005,6 +986,7 @@
 
 </div></div>
 <div class="viewcode-block" id="ShowPortDialog"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ShowPortDialog">[docs]</a><span class="k">class</span> <span class="nc">ShowPortDialog</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_listedit</span><span class="o">.</span><span class="n">Ui_ListEdit</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Port show status configuration dialog</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1026,12 +1008,11 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">interface</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
 
-
-            <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">desc</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">interface</span><span class="p">)</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">desc</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">interface</span><span class="p">)</span>
             <span class="n">listitem</span> <span class="o">=</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">listWidget</span><span class="p">)</span>
 
             <span class="k">if</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">input_states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&quot;connected&quot;</span><span class="p">):</span>
-                <span class="n">listitem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="o">|</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span><span class="p">)</span>
+                <span class="n">listitem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">listitem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span><span class="p">)</span>
 
@@ -1042,8 +1023,6 @@
                 <span class="n">listitem</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">listitem</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span>
-
-
 
 <div class="viewcode-block" id="ShowPortDialog.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.ShowPortDialog.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Set port status in the node &quot;&quot;&quot;</span>
@@ -1061,17 +1040,13 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">set_port_hidden</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;port_modified&quot;</span><span class="p">,</span> <span class="p">)</span> <span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;port_modified&quot;</span><span class="p">,</span> <span class="p">))</span>
 
         <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-
-
-
-
 </div></div>
 <div class="viewcode-block" id="NodeChooser"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NodeChooser">[docs]</a><span class="k">class</span> <span class="nc">NodeChooser</span><span class="p">(</span><span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">ui_nodechooser</span><span class="o">.</span><span class="n">Ui_NodeChooser</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; Dialog allowing to choose a node (package view) &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
@@ -1084,7 +1059,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pman</span> <span class="o">=</span> <span class="n">PackageManager</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{}</span>
 
-
 <div class="viewcode-block" id="NodeChooser.search"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NodeChooser.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">nb_inputs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_outputs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add node to combo box selector corresponding to request</span>
 <span class="sd">        @param name</span>
@@ -1096,13 +1070,12 @@
         <span class="n">strs</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
             <span class="n">strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
         <span class="n">strs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">strs</span><span class="p">)</span>
-
 </div>
 <div class="viewcode-block" id="NodeChooser.get_selection"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NodeChooser.get_selection">[docs]</a>    <span class="k">def</span> <span class="nf">get_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return selected factory &quot;&quot;&quot;</span>
@@ -1113,7 +1086,6 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">None</span>
-
 </div>
 <div class="viewcode-block" id="NodeChooser.accept"><a class="viewcode-back" href="../../../openalea/visualea/doc/user/autosum.html#openalea.visualea.dialogs.NodeChooser.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Validate result &quot;&quot;&quot;</span>
@@ -1124,8 +1096,8 @@
             <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;Unknown component name&quot;</span><span class="p">)</span>
-</pre></div></div></div>
+            <span class="n">qt</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Error&quot;</span><span class="p">,</span> <span class="s">&quot;Unknown component name&quot;</span><span class="p">)</span></div></div>
+</pre></div>
 
           </div>
         </div>
@@ -1158,13 +1130,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

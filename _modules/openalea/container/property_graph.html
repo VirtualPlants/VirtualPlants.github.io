@@ -1,0 +1,969 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.container.property_graph &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.container.property_graph</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Fred Theveny &lt;frederic.theveny@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite: http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot;This module provide a set of concepts to add properties to graph elements&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">interface.property_graph</span> <span class="kn">import</span> <span class="n">IPropertyGraph</span><span class="p">,</span> <span class="n">PropertyError</span>
+<span class="kn">from</span> <span class="nn">graph</span> <span class="kn">import</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">InvalidVertex</span><span class="p">,</span> <span class="n">InvalidEdge</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">heappop</span><span class="p">,</span> <span class="n">heappush</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">VertexProperty</span><span class="p">,</span> <span class="n">EdgeProperty</span><span class="p">,</span> <span class="n">GraphProperty</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">VertexIdType</span><span class="p">,</span> <span class="n">EdgeIdType</span><span class="p">,</span> <span class="n">ValueType</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PropertyGraph"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph">[docs]</a><span class="k">class</span> <span class="nc">PropertyGraph</span><span class="p">(</span><span class="n">IPropertyGraph</span><span class="p">,</span> <span class="n">Graph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple implementation of IPropertyGraph using</span>
+<span class="sd">    dict as properties and two dictionaries to</span>
+<span class="sd">    maintain these properties</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metavidtypepropertyname</span> <span class="o">=</span> <span class="s">&quot;valueproperty_as_vid&quot;</span>
+    <span class="n">metaeidtypepropertyname</span> <span class="o">=</span> <span class="s">&quot;valueproperty_as_eid&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">Graph</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PropertyGraph.vertex_property_names"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.vertex_property_names">[docs]</a>    <span class="k">def</span> <span class="nf">vertex_property_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span></div>
+    <span class="n">vertex_property_names</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">vertex_property_names</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.vertex_properties"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.vertex_properties">[docs]</a>    <span class="k">def</span> <span class="nf">vertex_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span>
+    <span class="c"># vertex_properties.__doc__ = IPropertyGraph.vertex_properties.__doc__</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.vertex_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">vertex_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">vids</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">vids</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is undefined on vertices&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span></div>
+    <span class="n">vertex_property</span><span class="o">.</span><span class="n">__doc__</span><span class="o">=</span><span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">vertex_property</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.edge_property_names"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.edge_property_names">[docs]</a>    <span class="k">def</span> <span class="nf">edge_property_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span></div>
+    <span class="n">edge_property_names</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">edge_property_names</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.edge_properties"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.edge_properties">[docs]</a>    <span class="k">def</span> <span class="nf">edge_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span>
+    <span class="c">#  edge_properties.__doc__ = IPropertyGraph. edge_properties.__doc__</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.edge_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.edge_property">[docs]</a>    <span class="k">def</span> <span class="nf">edge_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is undefined on edges&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span></div>
+    <span class="n">edge_property</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">edge_property</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.graph_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.graph_property">[docs]</a>    <span class="k">def</span> <span class="nf">graph_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is undefined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span></div>
+    <span class="n">graph_property</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">graph_property</span><span class="o">.</span><span class="n">__doc__</span>
+                                
+<div class="viewcode-block" id="PropertyGraph.graph_properties"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.graph_properties">[docs]</a>    <span class="k">def</span> <span class="nf">graph_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span>
+    
+    </div>
+<div class="viewcode-block" id="PropertyGraph.graph_property_names"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.graph_property_names">[docs]</a>    <span class="k">def</span> <span class="nf">graph_property_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.add_vertex_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.add_vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertex_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is already defined on vertices&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>                                
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span></div>
+    <span class="n">add_vertex_property</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">add_vertex_property</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.extend_vertex_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.extend_vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">extend_vertex_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">values</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo AND TO CHECK AND TEST !!&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Values </span><span class="si">%s</span><span class="s"> is not a type &#39;dict&#39;&quot;</span> <span class="o">%</span> <span class="n">values</span><span class="p">)</span>                                
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;Property </span><span class="si">%s</span><span class="s"> is not defined on vertices&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;Creating vertex property </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">property_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;Vertex id {} already has a value for vertex property {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Vertex id {} doesn&#39;t exist in the graph !!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.remove_vertex_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="s">&#39;units&#39;</span><span class="p">][</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is undefined on vertices&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span></div>
+    <span class="n">remove_vertex_property</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">remove_vertex_property</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.add_edge_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.add_edge_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span>  <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is already defined on edges&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>                                
+        <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span></div>
+    <span class="n">add_edge_property</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">add_edge_property</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.remove_edge_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_edge_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="s">&#39;units&#39;</span><span class="p">][</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is undefined on edges&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span></div>
+    <span class="n">remove_edge_property</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">IPropertyGraph</span><span class="o">.</span><span class="n">remove_edge_property</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.add_graph_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.add_graph_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_graph_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is already defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
+    </div>
+<div class="viewcode-block" id="PropertyGraph.extend_graph_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.extend_graph_property">[docs]</a>    <span class="k">def</span> <span class="nf">extend_graph_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is not defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">property_name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">property_name</span><span class="p">)</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">property_name</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">property_name</span><span class="p">),</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">property_name</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">property_name</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Unable to extend &#39;graph_property&#39; with this type of data: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.remove_graph_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_graph_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_graph_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is undefined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">property_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="s">&#39;units&#39;</span><span class="p">][</span><span class="n">property_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.remove_vertex"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">Graph</span><span class="o">.</span><span class="n">remove_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">)</span></div>
+    <span class="n">remove_vertex</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">Graph</span><span class="o">.</span><span class="n">remove_vertex</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.clear"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">Graph</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="n">clear</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">Graph</span><span class="o">.</span><span class="n">clear</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.remove_edge"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_edge">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">Graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span></div>
+    <span class="n">remove_edge</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">Graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="PropertyGraph.clear_edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.clear_edges">[docs]</a>    <span class="k">def</span> <span class="nf">clear_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">Graph</span><span class="o">.</span><span class="n">clear_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="n">clear_edges</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">Graph</span><span class="o">.</span><span class="n">clear_edges</span><span class="o">.</span><span class="n">__doc__</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_translate_property</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">,</span> <span class="n">key_translation</span> <span class="o">=</span> <span class="n">ValueType</span><span class="p">,</span> <span class="n">value_translation</span> <span class="o">=</span> <span class="n">ValueType</span><span class="p">):</span>
+        <span class="c"># translation function</span>
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+        
+        <span class="n">id_value</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">value</span>
+        
+        <span class="n">trans_vid</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">trans_vid</span><span class="p">)</span>
+        <span class="n">trans_vid</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">def</span> <span class="nf">translate_vid</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">trans_vid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vid</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span> <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">trans_vid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vid</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">trans_vid</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+        
+        <span class="n">trans_eid</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">trans_eid</span><span class="p">)</span>
+        <span class="n">trans_eid</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">def</span> <span class="nf">translate_eid</span><span class="p">(</span><span class="n">eid</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">trans_eid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">eid</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span> <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">trans_eid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">eid</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">trans_eid</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+
+        <span class="n">translator</span> <span class="o">=</span> <span class="p">{</span> <span class="n">ValueType</span> <span class="p">:</span> <span class="n">id_value</span><span class="p">,</span> <span class="n">VertexIdType</span> <span class="p">:</span>  <span class="n">translate_vid</span><span class="p">,</span> <span class="n">EdgeIdType</span> <span class="p">:</span> <span class="n">translate_eid</span> <span class="p">}</span>
+
+        <span class="n">key_translator</span> <span class="o">=</span> <span class="n">translator</span><span class="p">[</span><span class="n">key_translation</span><span class="p">]</span>
+        <span class="n">value_translator</span> <span class="o">=</span> <span class="n">translator</span><span class="p">[</span><span class="n">value_translation</span><span class="p">]</span>
+
+        <span class="c"># translate vid and value</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">key_translator</span><span class="p">(</span><span class="n">vid</span><span class="p">),</span><span class="n">value_translator</span><span class="p">(</span><span class="n">val</span><span class="p">))</span> <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()])</span>
+
+
+    <span class="k">def</span> <span class="nf">_relabel_and_add_vertex_edge_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">graph</span><span class="p">,</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">):</span>
+        
+        <span class="c"># update properties on vertices</span>
+        <span class="k">for</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">vertex_property_names</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prop_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_vertex_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+            <span class="n">value_translator</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_property_value_type</span><span class="p">(</span><span class="n">prop_name</span><span class="p">,</span><span class="n">VertexProperty</span><span class="p">)</span>
+
+            <span class="c"># import property into self. translate vid and value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vertex_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_translate_property</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">vertex_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">),</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">,</span> <span class="n">VertexIdType</span><span class="p">,</span> <span class="n">value_translator</span><span class="p">))</span>
+
+        <span class="c"># update properties on edges</span>
+        <span class="k">for</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edge_property_names</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prop_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_edge_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+            
+            <span class="c"># Check what type of translation is required for value of the property</span>
+            <span class="n">value_translator</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_property_value_type</span><span class="p">(</span><span class="n">prop_name</span><span class="p">,</span><span class="n">EdgeProperty</span><span class="p">)</span>
+            
+            <span class="c"># import property into self. translate vid and value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edge_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_translate_property</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">edge_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">),</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">,</span> <span class="n">EdgeIdType</span><span class="p">,</span> <span class="n">value_translator</span><span class="p">))</span>
+
+<div class="viewcode-block" id="PropertyGraph.translate_graph_property"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.translate_graph_property">[docs]</a>    <span class="k">def</span> <span class="nf">translate_graph_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Translate a graph property according to meta info &quot;&quot;&quot;</span>
+        <span class="n">old_prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">old_prop</span><span class="p">)</span>
+        <span class="n">key_translator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graph_property_key_type</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+        <span class="n">value_translator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property_value_type</span><span class="p">(</span><span class="n">prop_name</span><span class="p">,</span> <span class="n">GraphProperty</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;translate_graph_property&#39;</span><span class="p">,</span><span class="n">prop_name</span><span class="p">,</span> <span class="n">key_translator</span><span class="p">,</span> <span class="n">value_translator</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_translate_property</span><span class="p">(</span><span class="n">old_prop</span><span class="p">,</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">,</span> <span class="n">key_translator</span><span class="p">,</span> <span class="n">value_translator</span><span class="p">)</span>
+    
+    </div>
+<div class="viewcode-block" id="PropertyGraph.extend"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        
+        <span class="c"># add and translate the vertex and edge ids of the second graph</span>
+        <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span> <span class="o">=</span> <span class="n">Graph</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">graph</span><span class="p">)</span>
+        
+        <span class="c"># relabel the edge and vertex property</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__relabel_and_add_vertex_edge_properties</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">)</span>
+        
+        <span class="c"># update properties on graph</span>
+        <span class="c">#gproperties = self.graph_property()</span>
+        <span class="n">newgproperties</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">graph_property_names</span><span class="p">():</span>
+            <span class="n">newgproperty</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">translate_graph_property</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span><span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span><span class="p">)</span>
+            <span class="n">newgproperties</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="n">newgproperty</span>
+
+            <span class="n">prop</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">newgproperties</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">trans_vid</span><span class="p">,</span> <span class="n">trans_eid</span>
+        </div>
+    <span class="n">extend</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">Graph</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">__doc__</span>
+
+
+<div class="viewcode-block" id="PropertyGraph.set_graph_property_value_to_vid_type"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.set_graph_property_value_to_vid_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_graph_property_value_to_vid_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyname</span><span class="p">,</span> <span class="n">property_type</span> <span class="o">=</span> <span class="n">VertexProperty</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Give meta info on property value type. Associate it to Vertex Id type &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metavidtypepropertyname</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_graph_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metavidtypepropertyname</span><span class="p">,([],[],[],[]))</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metavidtypepropertyname</span><span class="p">)[</span><span class="n">property_type</span><span class="p">]</span>
+        <span class="n">prop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">propertyname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.set_graph_property_value_to_eid_type"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.set_graph_property_value_to_eid_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_graph_property_value_to_eid_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyname</span><span class="p">,</span>  <span class="n">property_type</span> <span class="o">=</span> <span class="n">EdgeProperty</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Give meta info on property value type. Associate it to Edge Id type &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaeidtypepropertyname</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_graph_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaeidtypepropertyname</span><span class="p">,([],[],[],[]))</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaeidtypepropertyname</span><span class="p">)[</span><span class="n">property_type</span><span class="p">]</span>
+        <span class="n">prop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">propertyname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.set_graph_property_key_to_vid_type"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.set_graph_property_key_to_vid_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_graph_property_key_to_vid_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Give meta info on graph property key type. Associate it to Vertex Id type&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_graph_property_value_to_vid_type</span><span class="p">(</span><span class="n">propertyname</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.set_graph_property_key_to_eid_type"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.set_graph_property_key_to_eid_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_graph_property_key_to_eid_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Give meta info on graph property key type. Associate it to Edge Id type &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_graph_property_value_to_eid_type</span><span class="p">(</span><span class="n">propertyname</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.get_property_value_type"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.get_property_value_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_property_value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyname</span><span class="p">,</span> <span class="n">property_type</span> <span class="o">=</span> <span class="n">VertexProperty</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return meta info on property value type. &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metavidtypepropertyname</span><span class="p">)[</span><span class="n">property_type</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">propertyname</span> <span class="ow">in</span> <span class="n">prop</span> <span class="p">:</span> <span class="k">return</span> <span class="n">VertexIdType</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph_property</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaeidtypepropertyname</span><span class="p">)[</span><span class="n">property_type</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">propertyname</span> <span class="ow">in</span> <span class="n">prop</span> <span class="p">:</span> <span class="k">return</span> <span class="n">EdgeIdType</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ValueType</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.get_graph_property_key_type"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.get_graph_property_key_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_graph_property_key_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return meta info on graph property key type. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property_value_type</span><span class="p">(</span><span class="n">propertyname</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__to_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">s</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="n">s</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="PropertyGraph.in_neighbors"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.in_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">in_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the in vertices of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `neighbors_list` : the set of parent vertices of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">vid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidVertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">edge_type</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+            <span class="n">neighbors_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edge_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__to_set</span><span class="p">(</span><span class="n">edge_type</span><span class="p">)</span> 
+            <span class="n">edge_type_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="s">&#39;edge_type&#39;</span><span class="p">]</span>
+            <span class="n">neighbors_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">edge_type_property</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="ow">in</span> <span class="n">edge_type</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">neighbors_list</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_in_neighbors"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_in_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">iter_in_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the in vertices of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterator` : an iterator on the set of parent vertices of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.out_neighbors"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.out_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">out_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the out vertices of the vertex vid</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `neighbors_list` : the set of child vertices of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">vid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidVertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">edge_type</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+            <span class="n">neighbors_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edge_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__to_set</span><span class="p">(</span><span class="n">edge_type</span><span class="p">)</span> 
+            <span class="n">edge_type_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="s">&#39;edge_type&#39;</span><span class="p">]</span>
+            <span class="n">neighbors_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">edge_type_property</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="ow">in</span> <span class="n">edge_type</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">neighbors_list</span>
+
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_out_neighbors"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_out_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">iter_out_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the out vertices of the vertex vid</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterator` : an iterator on the set of child vertices of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.neighbors"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the neighbors vertices of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `neighbors_list` : the set of neighobrs vertices of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">)</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_neighbors"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">iter_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the neighbors vertices of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterartor` : iterator on the set of neighobrs vertices of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>
+  
+</div>
+<div class="viewcode-block" id="PropertyGraph.in_edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.in_edges">[docs]</a>    <span class="k">def</span> <span class="nf">in_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return in edges of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `edge_list` : the set of the in edges of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">vid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidVertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">edge_type</span><span class="p">:</span>
+            <span class="n">edge_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="n">eid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edge_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__to_set</span><span class="p">(</span><span class="n">edge_type</span><span class="p">)</span>
+            <span class="n">edge_type_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="s">&#39;edge_type&#39;</span><span class="p">]</span>
+            <span class="n">edge_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="n">eid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">edge_type_property</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="ow">in</span> <span class="n">edge_type</span><span class="p">])</span>
+        <span class="k">return</span>  <span class="n">edge_list</span>
+        </div>
+<div class="viewcode-block" id="PropertyGraph.iter_in_edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_in_edges">[docs]</a>    <span class="k">def</span> <span class="nf">iter_in_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return in edges of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterator` : an iterator on the set of the in edges of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="PropertyGraph.out_edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.out_edges">[docs]</a>    <span class="k">def</span> <span class="nf">out_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return out edges of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider (can be a set)</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `edge_list` : the set of the out edges of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">vid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidVertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">edge_type</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+            <span class="n">edge_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="n">eid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edge_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__to_set</span><span class="p">(</span><span class="n">edge_type</span><span class="p">)</span>
+            <span class="n">edge_type_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span><span class="p">[</span><span class="s">&#39;edge_type&#39;</span><span class="p">]</span>
+            <span class="n">edge_list</span><span class="o">=</span><span class="nb">set</span><span class="p">([</span><span class="n">eid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">edge_type_property</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span> <span class="ow">in</span> <span class="n">edge_type</span><span class="p">])</span>
+        <span class="k">return</span>  <span class="n">edge_list</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_out_edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_out_edges">[docs]</a>    <span class="k">def</span> <span class="nf">iter_out_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return in edges of the vertex vid</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterator` : an iterator on the set of the in edges of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="PropertyGraph.edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.edges">[docs]</a>    <span class="k">def</span> <span class="nf">edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return edges of the vertex vid</span>
+<span class="sd">        If vid=None, return all edges of the graph</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `edge_list` : the set of the edges of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">vid</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_edges</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>       
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">)</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_edges</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_edges"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_edges">[docs]</a>    <span class="k">def</span> <span class="nf">iter_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return in edges of the vertex vid</span>
+<span class="sd">        If vid=None, return all edges of the graph</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : a vertex id</span>
+<span class="sd">        - `edges_type` : type of edges we want to consider</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterator` : an iterator on the set of the edges of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.neighborhood"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.neighborhood">[docs]</a>    <span class="k">def</span> <span class="nf">neighborhood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">max_distance</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the neighborhood of the vertex vid at distance max_distance (the disc, not the circle)</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` : vertex id</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `neighbors_list` : the set of the vertices at distance below max_distance of the vertex vid (including vid)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">topological_distance</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="n">edge_type</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">full_dict</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_neighborhood"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_neighborhood">[docs]</a>    <span class="k">def</span> <span class="nf">iter_neighborhood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the neighborhood of the vertex vid at distance n (the disc, not the circle)</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vids` : a set of vertex id</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `iterator` : an iterator on the set of the vertices at distance n of the vertex vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighborhood</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">))</span>    
+
+</div>
+<div class="viewcode-block" id="PropertyGraph.topological_distance"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.topological_distance">[docs]</a>    <span class="k">def</span> <span class="nf">topological_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">edge_type</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">edge_dist</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">),</span> <span class="n">full_dict</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">return_inf</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the distances of each vertices from the vertex `vid` according a cost function</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `vid` (int) - a vertex id</span>
+<span class="sd">        - `edges_type` (str) - type of edges we want to consider e.g. &#39;s&#39; or &#39;t&#39;</span>
+<span class="sd">        - `edge_dist` (function) - the cost function</span>
+<span class="sd">        - `max_depth` (float) - the maximum depth that we want to reach</span>
+<span class="sd">        - `full_dict` (bool) - if True this function will return the entire dictionary (with inf values)</span>
+<span class="sd">        - `return_inf` (bool) - if True (default) return &#39;inf&#39; values, else &#39;nan&#39;.</span>
+
+<span class="sd">        :Returns:</span>
+<span class="sd">        - `dist_dict` : a dictionary of the distances, key : vid, value : distance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dist</span><span class="o">=</span><span class="p">{}</span>
+        <span class="n">reduced_dist</span><span class="o">=</span><span class="p">{}</span>
+        <span class="n">reduced_dist</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">Q</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="n">infinite_distance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+            <span class="n">dist</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">infinite_distance</span>
+            <span class="n">heappush</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">k</span><span class="p">))</span>
+
+        <span class="n">dist</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">heappush</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">vid</span><span class="p">],</span> <span class="n">vid</span><span class="p">))</span>
+        <span class="n">treated</span><span class="o">=</span><span class="nb">set</span><span class="p">()</span>
+        <span class="n">modif</span><span class="o">=</span><span class="bp">True</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span><span class="p">()</span>
+        <span class="k">while</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">treated</span><span class="p">)</span><span class="o">!=</span><span class="n">n</span> <span class="ow">and</span> <span class="n">modif</span><span class="p">):</span>
+            <span class="n">modif</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">actualVid</span> <span class="o">=</span> <span class="n">heappop</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">actualVid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">treated</span> <span class="ow">and</span> <span class="n">actualVid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">infinite_distance</span><span class="p">:</span>
+                <span class="n">actualVid</span> <span class="o">=</span> <span class="n">heappop</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">actualVid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">infinite_distance</span><span class="p">:</span>
+                <span class="n">actualVid</span> <span class="o">=</span> <span class="n">actualVid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">treated</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">actualVid</span><span class="p">)</span>
+            
+                <span class="k">for</span> <span class="n">neighb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_neighbors</span><span class="p">(</span><span class="n">actualVid</span><span class="p">,</span> <span class="n">edge_type</span><span class="p">):</span>
+                    <span class="n">dist_neighb</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="n">neighb</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="p">(((</span><span class="n">dist_neighb</span> <span class="o">==</span> <span class="n">infinite_distance</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dist_neighb</span> <span class="o">&gt;</span> <span class="n">dist</span><span class="p">[</span><span class="n">actualVid</span><span class="p">]</span> <span class="o">+</span> <span class="n">edge_dist</span><span class="p">(</span><span class="n">neighb</span><span class="p">,</span> <span class="n">actualVid</span><span class="p">)))</span>
+                          <span class="ow">and</span> <span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">actualVid</span><span class="p">]</span> <span class="o">+</span> <span class="n">edge_dist</span><span class="p">(</span><span class="n">neighb</span><span class="p">,</span> <span class="n">actualVid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_depth</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span> <span class="p">):</span>
+                        
+                        <span class="n">dist_neighb</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="n">actualVid</span><span class="p">]</span> <span class="o">+</span> <span class="n">edge_dist</span><span class="p">(</span><span class="n">neighb</span><span class="p">,</span> <span class="n">actualVid</span><span class="p">)</span>
+                        <span class="n">dist</span><span class="p">[</span><span class="n">neighb</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist_neighb</span>
+                        <span class="n">reduced_dist</span><span class="p">[</span><span class="n">neighb</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist_neighb</span>
+                        <span class="n">heappush</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="p">(</span><span class="n">dist_neighb</span><span class="p">,</span> <span class="n">neighb</span><span class="p">))</span>
+                    <span class="n">modif</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c">#~ return (reduced_dist, dist)[full_dict], Q</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">return_inf</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">[(</span><span class="n">k</span><span class="p">,(</span><span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">infinite_distance</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">dist</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">reduced_dist</span><span class="p">,</span> <span class="n">dist</span><span class="p">)[</span><span class="n">full_dict</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="PropertyGraph.adjacency_matrix"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.adjacency_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">adjacency_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_type</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">edge_dist</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">no_edge_val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">oriented</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">reflexive</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">reflexive_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the adjacency matrix of the graph.</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `edge_type` : type of edges we want to consider</span>
+<span class="sd">        - `edge_dist` : cost ot cost function to apply between two edges, default : 1</span>
+<span class="sd">        - `no_edge_val` : cost to put if there is no edge between two vertices, default : 0</span>
+<span class="sd">        - `oriented` : if True, the graph is considered oriented and we always add an edge j -&gt; i if i -&gt; j exists</span>
+<span class="sd">        - `reflexive` : if True, the graph is considered reflexive and we will put the cost or the cost_function `reflexive_value` on the diagonal of the adjacency_matrix, default : 0</span>
+
+<span class="sd">        :Return:</span>
+<span class="sd">        - `numpy.array` : a NxN matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge_dist</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="n">val_edge_dist</span> <span class="o">=</span> <span class="n">edge_dist</span>
+            <span class="n">edge_dist</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">:</span> <span class="n">val_edge_dist</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reflexive_value</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="n">val_reflexive_value</span> <span class="o">=</span> <span class="n">reflexive_value</span>
+            <span class="n">reflexive_value</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">:</span> <span class="n">val_reflexive_value</span>
+        
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span><span class="p">()</span>
+        <span class="n">adjacency_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="p">[</span><span class="n">no_edge_val</span><span class="p">]])</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">edge_type</span><span class="o">=</span><span class="n">edge_type</span><span class="p">):</span>
+            <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_vertices</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+            <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">oriented</span><span class="p">:</span>
+                <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">v2</span><span class="p">,</span> <span class="n">v1</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reflexive</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="p">:</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">reflexive_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">adjacency_matrix</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.floyd_warshall"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.floyd_warshall">[docs]</a>    <span class="k">def</span> <span class="nf">floyd_warshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_type</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">edge_dist</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">oriented</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="n">adjacency_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">(</span><span class="n">edge_type</span><span class="p">,</span> <span class="n">edge_dist</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">),</span> <span class="n">oriented</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                    <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> 
+                                               <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">adjacency_matrix</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">adjacency_matrix</span>
+        
+</div>
+    <span class="k">def</span> <span class="nf">_add_vertex_to_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vids</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add a set of vertices to a region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&quot;regions&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Property &#39;regions&#39; is not defined on vertex. Adding it!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">vids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="n">region_name</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_remove_vertex_from_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vids</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a set of vertices to a region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">vids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">region_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span><span class="o">==</span><span class="p">[]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PropertyGraph.add_vertex_to_region"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.add_vertex_to_region">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertex_to_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vids</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add a set of vertices to a region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="c">#~ raise PropertyError(&quot;property %s is not defined on graph&quot; % region_name)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Property </span><span class="si">%s</span><span class="s"> is not defined for vertices on the graph, adding it...&quot;</span> <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vids</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_vertex_to_region</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__to_set</span><span class="p">(</span><span class="n">vids</span><span class="p">),</span> <span class="n">region_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.remove_vertex_from_region"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_vertex_from_region">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex_from_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vids</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a set of vertices to a region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is not defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_vertex_from_region</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__to_set</span><span class="p">(</span><span class="n">vids</span><span class="p">),</span> <span class="n">region_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.add_region_from_func"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.add_region_from_func">[docs]</a>    <span class="k">def</span> <span class="nf">add_region_from_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create a region of vertices according a function</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `func` : the function to make the region (might return True or False)</span>
+<span class="sd">        - `region_name` : the name of the region</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is already defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&quot;regions&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_vertex_property</span><span class="p">(</span><span class="s">&quot;regions&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_vertex_to_region</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">vid</span><span class="p">]),</span> <span class="n">region_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.add_regions_from_dict"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.add_regions_from_dict">[docs]</a>    <span class="k">def</span> <span class="nf">add_regions_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_regions</span><span class="p">,</span> <span class="n">region_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If one already posses a dict indicating for a list of vertex which region they belong to, it can be given to the graph directly.</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `dict_regions` (dict) - *keys = ids (SpatialImage); *values = intergers indicating the region(s)</span>
+<span class="sd">        - `region_name` (list) - a list containing the name of the region(s)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dict_regions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">region_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_regions</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You didn&#39;t provided the same number of regions and region names.&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&quot;regions&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_vertex_property</span><span class="p">(</span><span class="s">&quot;regions&quot;</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">region</span><span class="p">,</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">region_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is already defined on graph&quot;</span>
+                                    <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">dict_regions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dict_regions</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">==</span> <span class="n">list_regions</span><span class="p">[</span><span class="n">region</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_add_vertex_to_region</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">vid</span><span class="p">]),</span> <span class="n">region_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.iter_region"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.iter_region">[docs]</a>    <span class="k">def</span> <span class="nf">iter_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is not defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.remove_region"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.remove_region">[docs]</a>    <span class="k">def</span> <span class="nf">remove_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove a region </span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        - `region_name` : the name of the region</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is not defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_region</span><span class="p">(</span><span class="n">region_name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">region_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span><span class="o">==</span><span class="p">[]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span><span class="p">[</span><span class="s">&quot;regions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">region_name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PropertyGraph.is_connected_region"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.is_connected_region">[docs]</a>    <span class="k">def</span> <span class="nf">is_connected_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_name</span><span class="p">,</span> <span class="n">edge_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if a region is connected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">region_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&quot;property </span><span class="si">%s</span><span class="s"> is not defined on graph&quot;</span>
+                                <span class="o">%</span> <span class="n">region_name</span><span class="p">)</span>
+        <span class="n">region_sub_graph</span><span class="o">=</span><span class="n">Graph</span><span class="o">.</span><span class="n">sub_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span><span class="p">[</span><span class="n">region_name</span><span class="p">])</span>
+        <span class="n">distances</span><span class="o">=</span><span class="n">region_sub_graph</span><span class="o">.</span><span class="n">topological_distance</span><span class="p">(</span><span class="n">region_sub_graph</span><span class="o">.</span><span class="n">_vertices</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">edge_type</span><span class="o">=</span><span class="n">edge_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;inf&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">distances</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="PropertyGraph.to_networkx"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.to_networkx">[docs]</a>    <span class="k">def</span> <span class="nf">to_networkx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+        <span class="sd">&quot;&quot;&quot; Return a NetworkX Graph from a graph.</span>
+
+<span class="sd">        :Parameters: </span>
+<span class="sd">         - `g` - TemporalPropertyGraph (property graphs temporaly linked)</span>
+
+<span class="sd">        :Returns: </span>
+<span class="sd">         - A NetworkX graph.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">((</span> <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">),</span> <span class="n">g</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">edges</span><span class="p">()))</span>
+
+        <span class="c"># Add graph, vertex and edge properties</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">graph_properties</span><span class="p">()</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="n">vp</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_vertex_property</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">vp</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">vid</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">vp</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        
+        <span class="n">ep</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_edge_property</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">)][</span><span class="n">g</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)][</span><span class="s">&#39;eid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eid</span>
+
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">ep</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ep</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">)][</span><span class="n">g</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)][</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">graph</span> 
+</div>
+<div class="viewcode-block" id="PropertyGraph.from_networkx"><a class="viewcode-back" href="../../../openalea-components/container/doc/user/autosum.html#openalea.container.property_graph.PropertyGraph.from_networkx">[docs]</a>    <span class="k">def</span> <span class="nf">from_networkx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return a Graph from a NetworkX Directed graph.</span>
+<span class="sd">        :Parameters: </span>
+<span class="sd">            - `graph` : A NetworkX graph.</span>
+
+<span class="sd">        :Returns: </span>
+<span class="sd">            - `g`: a :class:`~openalea.container.interface.Graph`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">graph</span><span class="o">.</span><span class="n">is_directed</span><span class="p">():</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">to_directed</span><span class="p">()</span>
+
+        <span class="n">vp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertex_property</span>
+
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes_iter</span><span class="p">():</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">vp</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,{})[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="n">ep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_property</span>
+        <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges_iter</span><span class="p">():</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="n">source</span><span class="p">][</span><span class="n">target</span><span class="p">]</span>
+            <span class="n">eid</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;eid&#39;</span><span class="p">)</span>
+            <span class="n">eid</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s">&#39;eid&#39;</span><span class="p">:</span>
+                    <span class="n">ep</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,{})[</span><span class="n">eid</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="n">gp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_property</span>
+        <span class="n">gp</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">g</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

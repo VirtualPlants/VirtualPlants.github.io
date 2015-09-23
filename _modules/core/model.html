@@ -36,9 +36,9 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -76,7 +76,7 @@
 <span class="sd">A model has inputs, outputs and an internal state.</span>
 <span class="sd">Inputs and outputs are used to allow communication between environnement and models and between models.</span>
 <span class="sd">Internal state is used by the model itself but cannot be reached from outside.</span>
-<span class="sd">This internal step is generally used when user want to execute model step by step, </span>
+<span class="sd">This internal step is generally used when user want to execute model step by step,</span>
 <span class="sd">each step depending on previous one.</span>
 
 <span class="sd">To define model instructions, you need to define at least &quot;step&quot; instructions.</span>
@@ -84,7 +84,7 @@
 
 <span class="sd">    - :meth:`~IModel.set_step_code`</span>
 
-<span class="sd">To use a Model, you also need to define set_code method that is able to extract inputs, outpus and step, init, ... </span>
+<span class="sd">To use a Model, you also need to define set_code method that is able to extract inputs, outpus and step, init, ...</span>
 <span class="sd">from given source code.</span>
 
 <span class="sd">Animate notification are not yet implemented.</span>
@@ -160,7 +160,7 @@
 <span class="sd">                c = a+b</span>
 
 <span class="sd">        you can extract input, output and step function.</span>
-<span class="sd">        So, </span>
+<span class="sd">        So,</span>
 <span class="sd">        m = Model(&quot;m1&quot;)</span>
 <span class="sd">        m.set_code(code)</span>
 
@@ -256,9 +256,10 @@
 
     <span class="k">def</span> <span class="nf">_populate_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c"># add vars defined in init function</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">user_ns</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">user_ns</span><span class="p">)</span>
+        <span class="c">#for k in self.interp.user_ns:</span>
+        <span class="c">#    if k not in self._ns:</span>
+        <span class="c">#        self._ns[k] = self.interp.user_ns[k]</span>
 
     <span class="k">def</span> <span class="nf">_pop_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c"># Restore original namespace</span>
@@ -338,14 +339,17 @@
 </div>
 <div class="viewcode-block" id="Model.run"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.model.Model.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="k">if</span> <span class="s">&#39;run&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_code</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec</span><span class="p">(</span><span class="s">&#39;run&#39;</span><span class="p">)</span>
+            <span class="n">rvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec</span><span class="p">(</span><span class="s">&#39;run&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nstep</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;nstep&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
             <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nstep</span><span class="p">):</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">out</span>
+            <span class="n">rvalues</span> <span class="o">=</span> <span class="n">out</span>
+        <span class="k">if</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;run_in_shell&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="o">.</span><span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rvalues</span>
 </div>
 <div class="viewcode-block" id="Model.eval_value"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.model.Model.eval_value">[docs]</a>    <span class="k">def</span> <span class="nf">eval_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -402,9 +406,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_code</span><span class="p">[</span><span class="s">&#39;step&#39;</span><span class="p">]</span>
 
     <span class="nd">@step_code.setter</span>
-<div class="viewcode-block" id="Model.step_code"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.model.Model.step_code">[docs]</a>    <span class="k">def</span> <span class="nf">step_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_code</span><span class="p">[</span><span class="s">&#39;step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
-</div>
+
     <span class="k">def</span> <span class="nf">_set_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
@@ -417,6 +421,7 @@
 <div class="viewcode-block" id="PythonModel"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.html#core.model.PythonModel">[docs]</a><span class="k">class</span> <span class="nc">PythonModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="s">&#39;Python&#39;</span>
     <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&#39;text/x-python&#39;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&#39;Python&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">Model</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -495,14 +500,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li><a href="../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../core.html" >core</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../core.html" >core</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>
