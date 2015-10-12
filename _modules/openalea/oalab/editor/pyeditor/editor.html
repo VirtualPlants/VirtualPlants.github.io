@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.editor.pyeditor.editor &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.editor.pyeditor.editor</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">pyqode.core</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="kn">from</span> <span class="nn">pyqode.core</span> <span class="kn">import</span> <span class="n">modes</span>
+<span class="kn">from</span> <span class="nn">pyqode.core</span> <span class="kn">import</span> <span class="n">panels</span>
+<span class="kn">from</span> <span class="nn">pyqode.core.api</span> <span class="kn">import</span> <span class="n">ColorScheme</span>
+<span class="kn">from</span> <span class="nn">pyqode.python</span> <span class="kn">import</span> <span class="n">modes</span> <span class="k">as</span> <span class="n">pymodes</span>
+<span class="kn">from</span> <span class="nn">pyqode.python</span> <span class="kn">import</span> <span class="n">panels</span> <span class="k">as</span> <span class="n">pypanels</span>
+<span class="kn">from</span> <span class="nn">pyqode.python.backend</span> <span class="kn">import</span> <span class="n">server</span>
+<span class="kn">from</span> <span class="nn">pyqode.python.folding</span> <span class="kn">import</span> <span class="n">PythonFoldDetector</span>
+<span class="kn">from</span> <span class="nn">pyqode.python.widgets</span> <span class="kn">import</span> <span class="n">PyCodeEditBase</span>
+
+
+<span class="k">class</span> <span class="nc">PyCodeEditor</span><span class="p">(</span><span class="n">PyCodeEditBase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PyCodeEditor"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends PyCodeEditBase with a set of hardcoded modes and panels specifics</span>
+<span class="sd">    to a python code editor widget.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DARK_STYLE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">LIGHT_STYLE</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">mimetypes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;text/x-python&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">server_script</span><span class="o">=</span><span class="n">server</span><span class="o">.</span><span class="n">__file__</span><span class="p">,</span>
+                 <span class="n">interpreter</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">create_default_actions</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">color_scheme</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PyCodeEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">create_default_actions</span><span class="o">=</span><span class="n">create_default_actions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">server_script</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLineWrapMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NoWrap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;pyQode for LPy&quot;</span><span class="p">)</span>
+
+        <span class="c"># panels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panels</span><span class="o">.</span><span class="n">FoldingPanel</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panels</span><span class="o">.</span><span class="n">LineNumberPanel</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panels</span><span class="o">.</span><span class="n">CheckerPanel</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panels</span><span class="o">.</span><span class="n">GlobalCheckerPanel</span><span class="p">(),</span>
+                           <span class="n">panels</span><span class="o">.</span><span class="n">GlobalCheckerPanel</span><span class="o">.</span><span class="n">Position</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_search</span> <span class="o">=</span> <span class="n">panels</span><span class="o">.</span><span class="n">SearchAndReplacePanel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_panel_search</span><span class="p">,</span> <span class="n">panels</span><span class="o">.</span><span class="n">SearchAndReplacePanel</span><span class="o">.</span><span class="n">Position</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panels</span><span class="o">.</span><span class="n">EncodingPanel</span><span class="p">(),</span> <span class="n">api</span><span class="o">.</span><span class="n">Panel</span><span class="o">.</span><span class="n">Position</span><span class="o">.</span><span class="n">TOP</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_separator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pypanels</span><span class="o">.</span><span class="n">QuickDocPanel</span><span class="p">(),</span> <span class="n">api</span><span class="o">.</span><span class="n">Panel</span><span class="o">.</span><span class="n">Position</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">)</span>
+
+        <span class="c"># modes</span>
+
+        <span class="c"># generic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">CaretLineHighlighterMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">FileWatcherMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">RightMarginMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">ZoomMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">SymbolMatcherMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">CodeCompletionMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">OccurrencesHighlighterMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">SmartBackSpaceMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modes</span><span class="o">.</span><span class="n">ExtendedSelectionMode</span><span class="p">())</span>
+
+        <span class="c"># python specifics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">PyAutoIndentMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">PyAutoCompleteMode</span><span class="p">())</span>
+        <span class="c"># self.modes.append(pymodes.FrostedCheckerMode())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">PEP8CheckerMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">CalltipsMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">PyIndenterMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">GoToAssignmentsMode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">CommentsMode</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pymodes</span><span class="o">.</span><span class="n">PythonSH</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">document</span><span class="p">(),</span> <span class="n">color_scheme</span><span class="o">=</span><span class="n">ColorScheme</span><span class="p">(</span><span class="n">color_scheme</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syntax_highlighter</span><span class="o">.</span><span class="n">fold_detector</span> <span class="o">=</span> <span class="n">PythonFoldDetector</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span>
+<div class="viewcode-block" id="PyCodeEditor.clone"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.clone">[docs]</a>            <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(),</span> <span class="n">server_script</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">server_script</span><span class="p">,</span>
+            <span class="n">interpreter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">interpreter</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">color_scheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">syntax_highlighter</span><span class="o">.</span><span class="n">color_scheme</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">clone</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">(path=</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PyCodeEditor.actions"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.actions">[docs]</a><span class="sd">        :return: list of actions to set in the menu.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">mainMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Project&quot;</span></div>
+<div class="viewcode-block" id="PyCodeEditor.mainMenu"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.mainMenu">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span></div>
+<div class="viewcode-block" id="PyCodeEditor.set_text"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.set_text">[docs]</a>
+    <span class="n">set_script</span> <span class="o">=</span> <span class="n">set_text</span>
+</div>
+    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PyCodeEditor.get_text"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.get_text">[docs]</a><span class="sd">        Return a part of the text.</span>
+
+<span class="sd">        :param start: is the begining of what you want to get</span>
+<span class="sd">        :param end: is the end of what you want to get</span>
+<span class="sd">        :return: text which is contained in the editor between &#39;start&#39; and &#39;end&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">txt</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\u2029</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  <span class="c"># replace paragraph separators by new lines</span>
+
+    <span class="k">def</span> <span class="nf">get_selected_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span></div>
+<div class="viewcode-block" id="PyCodeEditor.get_selected_text"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.get_selected_text">[docs]</a>        <span class="n">txt</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">selectedText</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\u2029</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">u&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  <span class="c"># replace paragraph separators by new lines</span>
+
+    <span class="k">def</span> <span class="nf">get_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;sof&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">&#39;eof&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span></div>
+<div class="viewcode-block" id="PyCodeEditor.get_code"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.get_code">[docs]</a>
+    <span class="k">def</span> <span class="nf">replace_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+<div class="viewcode-block" id="PyCodeEditor.replace_tab"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.replace_tab">[docs]</a>
+    <span class="k">def</span> <span class="nf">goto</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+<div class="viewcode-block" id="PyCodeEditor.goto"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.goto">[docs]</a>
+    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_search</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_panel_search</span><span class="o">.</span><span class="n">enabled</span></div>
+<div class="viewcode-block" id="PyCodeEditor.search"><a class="viewcode-back" href="../../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.editor.pyeditor.editor.html#openalea.oalab.editor.pyeditor.editor.PyCodeEditor.search">[docs]</a>        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_search</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_panel_search</span><span class="o">.</span><span class="n">enabled</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -43,6 +43,6 @@ Full API tree has been generated using
 
 .. code-block:: bash
 
-    sphinx-apidoc -f -o latest/dev/archi/apidoc/core openalea/core/src
-    sphinx-apidoc -f -o latest/dev/archi/apidoc/oalab openalea/oalab/src openalea/oalab/src/openalea/oalab/gui openalea/oalab/src/openalea/oalab/legacy
-
+    sphinx-apidoc --separate --no-headings --no-toc --module-first -f -o latest/dev/archi/apidoc/core openalea/core/src
+    sphinx-apidoc --separate --no-headings --no-toc --module-first -f -o latest/dev/archi/apidoc/oalab openalea/oalab/src openalea/oalab/src/openalea/oalab/widget
+    sphinx-apidoc --separate --no-headings --no-toc --module-first -f -o latest/dev/archi/apidoc/image openalea-components/image/src

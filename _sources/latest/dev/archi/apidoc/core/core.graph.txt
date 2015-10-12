@@ -1,6 +1,11 @@
 core.graph package
 ==================
 
+.. automodule:: core.graph
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -11,35 +16,9 @@ Subpackages
 Submodules
 ----------
 
-core.graph.graph module
------------------------
+.. toctree::
 
-.. automodule:: core.graph.graph
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   core.graph.graph
+   core.graph.id_generator
+   core.graph.property_graph
 
-core.graph.id_generator module
-------------------------------
-
-.. automodule:: core.graph.id_generator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-core.graph.property_graph module
---------------------------------
-
-.. automodule:: core.graph.property_graph
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: core.graph
-    :members:
-    :undoc-members:
-    :show-inheritance:

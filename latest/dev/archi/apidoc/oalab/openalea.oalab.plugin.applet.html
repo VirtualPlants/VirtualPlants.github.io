@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Applets &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../../index.html" />
+    <link rel="up" title="openalea.oalab.plugin package" href="openalea.oalab.plugin.html" />
+    <link rel="next" title="OpenAleaLab&#39;s extensions" href="openalea.oalab.plugin.lab.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="openalea.oalab.plugin.oalab.paradigm.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="openalea.oalab.plugin.lab.html" title="OpenAleaLab&#39;s extensions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="openalea.oalab.plugin.oalab.paradigm.html" title="&lt;no title&gt;"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="openalea.oalab.html" >openalea.oalab package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="openalea.oalab.plugin.html" accesskey="U">openalea.oalab.plugin package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-openalea.oalab.plugin.applet"></span><div class="section" id="applets">
+<h1>Applets<a class="headerlink" href="#applets" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<dl class="last docutils">
+<dt>To define an applet plugin, you must</dt>
+<dd><ol class="first last arabic simple">
+<li>write an AppletPlugin class that respects IPluginApplet interface (see below)</li>
+<li>add it to group <em class="dfn">oalab.applet</em></li>
+</ol>
+</dd>
+</dl>
+</div>
+<p>1. Copy paste this code and fill it with right names and instructions.
+(replace all xyz, respecting case, with your applet name).
+For example Xyz -&gt; HelpApplet</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">PluginXyz</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Xyz&#39;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;Xyz&#39;</span>
+    <span class="n">modulename</span> <span class="o">=</span> <span class="s">&#39;mypackage.myapplet&#39;</span>
+    <span class="n">objectname</span> <span class="o">=</span> <span class="s">&#39;MyApplet&#39;</span>
+</pre></div>
+</div>
+<p>2. Once this class has been written, just register it in the setup.py file of
+your python package.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">&#39;oalab.applet&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s">&#39;oalab.applet/mypackage = mypackage.plugin.builtin.applet&#39;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>With <strong>mypackage.plugin.builtin.applet</strong> python module path (equivalent to 'mypackage/plugin/builtin/applet.py').</p>
+</div>
+<div class="section" id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="openalea.oalab.plugin.applet.IApplet">
+<em class="property">class </em><code class="descclassname">openalea.oalab.plugin.applet.</code><code class="descname">IApplet</code><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">openalea.core.interface.IInterface</span></code></p>
+<p>Autonomous Graphical component</p>
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.actions">
+<code class="descname">actions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: list of all actions available for this applet
+See original QtGui.QWidget.actions method.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># instructions written in constructor</span>
+<span class="n">action_new</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&#39;New&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action_new</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.global_toolbar_actions">
+<code class="descname">global_toolbar_actions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.global_toolbar_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.global_toolbar_actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: list of actions to use in main toolbar.
+See toolbar</p>
+<p>..warning:</p>
+<div class="highlight-python"><div class="highlight"><pre>these actions must have a global effect as they are added only one time in application.
+For example, if you add two time applet &quot;Viewer3D&quot;, menu_actions are added only one time.
+
+To get global effects, action cat ...
+    - manipulate core managers directly
+    - manipulate singleton
+    - iter on all applets of same type and apply effect on each
+
+A contextual menu is also generated dynamically for current applet, see toolbar_actions, menu_actions
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional method, called after instantiation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.menu_actions">
+<code class="descname">menu_actions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.menu_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.menu_actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: list of QAction/QMenu to use in contextual menu</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.menus">
+<code class="descname">menus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.menus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.menus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: list of QMenu to use in main menu</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.toolbar_actions">
+<code class="descname">toolbar_actions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.toolbar_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.toolbar_actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: list of actions to use in contextual toolbar</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">toolbar_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">action_new</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;New&quot;</span><span class="p">)</span>
+    <span class="n">action_open</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Open&quot;</span><span class="p">)</span>
+    <span class="n">action_save</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Save&quot;</span><span class="p">)</span>
+
+    <span class="n">action_run</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Run&quot;</span><span class="p">)</span>
+    <span class="n">action_debug</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Debug&quot;</span><span class="p">)</span>
+    <span class="n">menu_run</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;Run&quot;</span><span class="p">)</span>
+    <span class="n">menu_run</span><span class="o">.</span><span class="n">addActions</span><span class="p">([</span><span class="n">action_run</span><span class="p">,</span> <span class="n">action_debug</span><span class="p">])</span>
+
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">menu_run</span><span class="p">,</span> <span class="c"># Menu syntax (generally transformed as toolbutton)</span>
+        <span class="n">action_new</span><span class="p">,</span> <span class="c"># Default syntax</span>
+        <span class="p">{</span><span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="n">action_open</span><span class="p">,</span> <span class="s">&#39;style&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span> <span class="c"># Dict syntax</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">List syntax [&quot;Panel&quot;, &quot;Group&quot;, action, style] is now deprecated.
+Use dict syntax instead</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="openalea.oalab.plugin.applet.IApplet.toolbars">
+<code class="descname">toolbars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IApplet.toolbars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IApplet.toolbars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional: return a list of QToolBar</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="openalea.oalab.plugin.applet.IPluginApplet">
+<em class="property">class </em><code class="descclassname">openalea.oalab.plugin.applet.</code><code class="descname">IPluginApplet</code><a class="reference internal" href="../../../../../_modules/openalea/oalab/plugin/applet.html#IPluginApplet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openalea.oalab.plugin.applet.IPluginApplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Graphical component displayed in main window.
+Component must respect <code class="xref py py-class docutils literal"><span class="pre">IApplet</span></code> interface.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Applets</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#details">Details</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="openalea.oalab.plugin.oalab.paradigm.html"
+                        title="previous chapter">&lt;no title&gt;</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="openalea.oalab.plugin.lab.html"
+                        title="next chapter">OpenAleaLab's extensions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/oalab/openalea.oalab.plugin.applet.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="openalea.oalab.plugin.lab.html" title="OpenAleaLab&#39;s extensions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="openalea.oalab.plugin.oalab.paradigm.html" title="&lt;no title&gt;"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="openalea.oalab.html" >openalea.oalab package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="openalea.oalab.plugin.html" >openalea.oalab.plugin package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

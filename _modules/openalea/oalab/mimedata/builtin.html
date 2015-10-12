@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.mimedata.builtin &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.mimedata.builtin</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2015 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.project</span> <span class="kn">import</span> <span class="n">project_item</span>
+<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.mimedata.qcodec</span> <span class="kn">import</span> <span class="n">QMimeCodec</span>
+
+
+<div class="viewcode-block" id="pyname"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.pyname">[docs]</a><span class="k">def</span> <span class="nf">pyname</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;-&quot;</span><span class="p">,</span> <span class="s">&quot;+&quot;</span><span class="p">,</span> <span class="s">&quot;*&quot;</span><span class="p">,</span> <span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">]:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">sym</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="UrlCodec"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.UrlCodec">[docs]</a><span class="k">class</span> <span class="nc">UrlCodec</span><span class="p">(</span><span class="n">QMimeCodec</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    decoding: text/uri-list -&gt; path</span>
+<span class="sd">    encoding: path -&gt; text/uri-list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="UrlCodec.qtdecode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.UrlCodec.qtdecode">[docs]</a>    <span class="k">def</span> <span class="nf">qtdecode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mimedata</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">mimetype_in</span> <span class="o">==</span> <span class="s">&#39;text/uri-list&#39;</span><span class="p">:</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">toLocalFile</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">mimedata</span><span class="o">.</span><span class="n">urls</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UrlCodec.decode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.UrlCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        raw_data: list of urls</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mimetype_in</span> <span class="o">==</span> <span class="s">&#39;text/uri-list&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="p">:</span>
+                <span class="n">local_file</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">local_file</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">local_file</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">local_file</span><span class="o">.</span><span class="n">namebase</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{}</span>
+
+</div></div>
+<div class="viewcode-block" id="encode_project_item"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.encode_project_item">[docs]</a><span class="k">def</span> <span class="nf">encode_project_item</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+    <span class="c"># openalea://user@localhost:/project/projectname/data/dataname</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s">&quot;package&quot;</span><span class="p">):</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">uri</span> <span class="o">=</span> <span class="s">&#39;openalea://user@localhost:/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s">&#39;openalealab/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">category</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="decode_project_item"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.decode_project_item">[docs]</a><span class="k">def</span> <span class="nf">decode_project_item</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+    <span class="n">pkg_type</span><span class="p">,</span> <span class="n">pkg_name</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">project_item</span><span class="p">(</span><span class="n">pkg_name</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BuiltinModelCodec"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinModelCodec">[docs]</a><span class="k">class</span> <span class="nc">BuiltinModelCodec</span><span class="p">(</span><span class="n">QMimeCodec</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BuiltinModelCodec.encode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinModelCodec.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">encode_project_item</span><span class="p">(</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BuiltinModelCodec.decode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinModelCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mimetype_in</span> <span class="o">!=</span> <span class="s">&#39;openalealab/model&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{}</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">decode_project_item</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">)</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">path</span><span class="o">=</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalealab/model&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">kwds</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/identifier&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">kwds</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/code.oalab.get&quot;</span><span class="p">:</span>
+            <span class="n">pycode</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = get_model(</span><span class="si">%r</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pyname</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">pycode</span><span class="p">,</span> <span class="n">kwds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">mimetype_out</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BuiltinControlCodec"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinControlCodec">[docs]</a><span class="k">class</span> <span class="nc">BuiltinControlCodec</span><span class="p">(</span><span class="n">QMimeCodec</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decode: openalealab/control (mime) -&gt; Control, name, identifier, code oalab, ...</span>
+<span class="sd">    Encode: openalealab/control (Control) -&gt; openalealab/control (mime)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_decode_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        raw_data: str id;name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.service.control</span> <span class="kn">import</span> <span class="n">get_control_by_id</span>
+        <span class="n">identifier</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)</span>
+        <span class="n">control</span> <span class="o">=</span> <span class="n">get_control_by_id</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">control</span>
+
+<div class="viewcode-block" id="BuiltinControlCodec.encode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinControlCodec.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">&#39;openalealab/control&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="BuiltinControlCodec.decode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinControlCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mimetype_in</span> <span class="o">!=</span> <span class="s">&#39;openalealab/control&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{}</span>
+
+        <span class="n">control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_control</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">control</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalealab/control&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">control</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/identifier&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">control</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/code.oalab.get&quot;</span><span class="p">:</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="n">pycode</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = get_control(</span><span class="si">%r</span><span class="s">) #</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">control</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pycode</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/code.oalab.create&quot;</span><span class="p">:</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="n">pycode</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = new_control(</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">control</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">control</span><span class="o">.</span><span class="n">interface</span><span class="p">,</span> <span class="n">control</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pycode</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">control</span><span class="p">,</span> <span class="p">{}</span>
+
+</div></div>
+<div class="viewcode-block" id="BuiltinDataCodec"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinDataCodec">[docs]</a><span class="k">class</span> <span class="nc">BuiltinDataCodec</span><span class="p">(</span><span class="n">QMimeCodec</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BuiltinDataCodec.encode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinDataCodec.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">encode_project_item</span><span class="p">(</span><span class="s">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BuiltinDataCodec.decode"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.mimedata.builtin.html#openalea.oalab.mimedata.builtin.BuiltinDataCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mimetype_in</span> <span class="o">!=</span> <span class="s">&#39;openalealab/data&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="p">{}</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">decode_project_item</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mimetype_in</span><span class="p">,</span> <span class="n">mimetype_out</span><span class="p">)</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">path</span><span class="o">=</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalealab/data&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">kwds</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/identifier&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">kwds</span>
+        <span class="k">elif</span> <span class="n">mimetype_out</span> <span class="o">==</span> <span class="s">&quot;openalea/code.oalab.get&quot;</span><span class="p">:</span>
+            <span class="n">pycode</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = data / </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pyname</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">pycode</span><span class="p">,</span> <span class="n">kwds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">kwds</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

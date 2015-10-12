@@ -1,0 +1,446 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.colormap.colormap_utils &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.colormap.colormap_utils</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       TissueLab</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2015 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Guillaume Cerutti &lt;guillaume.cerutti@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       TissueLab Website : http://virtualplants.github.io/</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="Colormap"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.colormap.colormap_utils.html#openalea.oalab.colormap.colormap_utils.Colormap">[docs]</a><span class="k">class</span> <span class="nc">Colormap</span> <span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color_map</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+<div class="viewcode-block" id="Colormap.get_color"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.colormap.colormap_utils.html#openalea.oalab.colormap.colormap_utils.Colormap.get_color">[docs]</a>    <span class="k">def</span> <span class="nf">get_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">splrep</span><span class="p">,</span> <span class="n">splev</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">splev</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_map</span><span class="p">[</span><span class="n">channel</span><span class="p">],</span> <span class="n">der</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
+</div>
+<div class="viewcode-block" id="Colormap.get_values"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.colormap.colormap_utils.html#openalea.oalab.colormap.colormap_utils.Colormap.get_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_color</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Colormap.add_rgb_point"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.colormap.colormap_utils.html#openalea.oalab.colormap.colormap_utils.Colormap.add_rgb_point">[docs]</a>    <span class="k">def</span> <span class="nf">add_rgb_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">/</span> <span class="mf">255.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">splrep</span><span class="p">,</span> <span class="n">splev</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_color_map</span> <span class="o">=</span> <span class="p">[</span><span class="n">splrep</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span>
+                                      <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">channel</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># return self._color_points.__str__()</span>
+        <span class="n">sorted_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">cmap_string</span> <span class="o">=</span> <span class="s">&quot;{&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_values</span><span class="p">):</span>
+            <span class="n">cmap_string</span> <span class="o">=</span> <span class="n">cmap_string</span> <span class="o">+</span> \
+                <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_points</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">sorted_values</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">cmap_string</span> <span class="o">=</span> <span class="n">cmap_string</span> <span class="o">+</span> <span class="s">&quot;,</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">cmap_string</span> <span class="o">=</span> <span class="n">cmap_string</span> <span class="o">+</span> <span class="s">&quot;}</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">return</span> <span class="n">cmap_string</span>
+
+</div>
+<div class="viewcode-block" id="colormap_from_file"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.colormap.colormap_utils.html#openalea.oalab.colormap.colormap_utils.colormap_from_file">[docs]</a><span class="k">def</span> <span class="nf">colormap_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39; &#39;</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">csv</span>
+
+    <span class="n">colormap</span> <span class="o">=</span> <span class="n">Colormap</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">colormap_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;rU&quot;</span><span class="p">)</span>
+    <span class="n">colormap_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">colormap_file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">)</span>
+    <span class="n">colormap_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">color_line</span> <span class="ow">in</span> <span class="n">colormap_reader</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">color_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;Index&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">colormap_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">color_line</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">colormap_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">colormap_data</span><span class="p">)</span>
+    <span class="n">colormap_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">colormap_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">colormap_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">colormap_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">colormap</span><span class="o">.</span><span class="n">add_rgb_point</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">255.</span><span class="p">,</span> <span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">colormap</span><span class="o">.</span><span class="n">add_rgb_point</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">colormap</span><span class="o">.</span><span class="n">add_rgb_point</span><span class="p">(</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">colormap_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">colormap</span>
+
+</div>
+<span class="n">glasbey</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.713725490196</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.325490196078</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.827450980392</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.623529411765</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.603921568627</span><span class="p">,</span> <span class="mf">0.301960784314</span><span class="p">,</span> <span class="mf">0.258823529412</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.745098039216</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.470588235294</span><span class="p">,</span> <span class="mf">0.247058823529</span><span class="p">,</span> <span class="mf">0.756862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.121568627451</span><span class="p">,</span> <span class="mf">0.588235294118</span><span class="p">,</span> <span class="mf">0.596078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.674509803922</span><span class="p">,</span> <span class="mf">0.992156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.694117647059</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.443137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.945098039216</span><span class="p">,</span> <span class="mf">0.0313725490196</span><span class="p">,</span> <span class="mf">0.360784313725</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.996078431373</span><span class="p">,</span> <span class="mf">0.560784313725</span><span class="p">,</span> <span class="mf">0.258823529412</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.866666666667</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.125490196078</span><span class="p">,</span> <span class="mf">0.101960784314</span><span class="p">,</span> <span class="mf">0.00392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.447058823529</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.333333333333</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.462745098039</span><span class="p">,</span> <span class="mf">0.423529411765</span><span class="p">,</span> <span class="mf">0.58431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0078431372549</span><span class="p">,</span> <span class="mf">0.678431372549</span><span class="p">,</span> <span class="mf">0.141176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.78431372549</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.533333333333</span><span class="p">,</span> <span class="mf">0.423529411765</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.717647058824</span><span class="p">,</span> <span class="mf">0.623529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.521568627451</span><span class="p">,</span> <span class="mf">0.521568627451</span><span class="p">,</span> <span class="mf">0.403921568627</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.63137254902</span><span class="p">,</span> <span class="mf">0.0117647058824</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.078431372549</span><span class="p">,</span> <span class="mf">0.976470588235</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.278431372549</span><span class="p">,</span> <span class="mf">0.619607843137</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.862745098039</span><span class="p">,</span> <span class="mf">0.36862745098</span><span class="p">,</span> <span class="mf">0.576470588235</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.576470588235</span><span class="p">,</span> <span class="mf">0.83137254902</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.298039215686</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.258823529412</span><span class="p">,</span> <span class="mf">0.313725490196</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.223529411765</span><span class="p">,</span> <span class="mf">0.654901960784</span><span class="p">,</span> <span class="mf">0.41568627451</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.933333333333</span><span class="p">,</span> <span class="mf">0.439215686275</span><span class="p">,</span> <span class="mf">0.996078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.670588235294</span><span class="p">,</span> <span class="mf">0.960784313725</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.63137254902</span><span class="p">,</span> <span class="mf">0.572549019608</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.643137254902</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.450980392157</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.807843137255</span><span class="p">,</span> <span class="mf">0.443137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.278431372549</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0823529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.83137254902</span><span class="p">,</span> <span class="mf">0.678431372549</span><span class="p">,</span> <span class="mf">0.772549019608</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.98431372549</span><span class="p">,</span> <span class="mf">0.462745098039</span><span class="p">,</span> <span class="mf">0.435294117647</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.670588235294</span><span class="p">,</span> <span class="mf">0.737254901961</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.458823529412</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.843137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.650980392157</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.603921568627</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.450980392157</span><span class="p">,</span> <span class="mf">0.996078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.647058823529</span><span class="p">,</span> <span class="mf">0.364705882353</span><span class="p">,</span> <span class="mf">0.682352941176</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.38431372549</span><span class="p">,</span> <span class="mf">0.517647058824</span><span class="p">,</span> <span class="mf">0.0078431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.474509803922</span><span class="p">,</span> <span class="mf">0.658823529412</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.513725490196</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.337254901961</span><span class="p">,</span> <span class="mf">0.207843137255</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.623529411765</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.247058823529</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.258823529412</span><span class="p">,</span> <span class="mf">0.176470588235</span><span class="p">,</span> <span class="mf">0.258823529412</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.949019607843</span><span class="p">,</span> <span class="mf">0.733333333333</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.364705882353</span><span class="p">,</span> <span class="mf">0.262745098039</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.988235294118</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.486274509804</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.623529411765</span><span class="p">,</span> <span class="mf">0.749019607843</span><span class="p">,</span> <span class="mf">0.729411764706</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.654901960784</span><span class="p">,</span> <span class="mf">0.329411764706</span><span class="p">,</span> <span class="mf">0.0745098039216</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.290196078431</span><span class="p">,</span> <span class="mf">0.152941176471</span><span class="p">,</span> <span class="mf">0.423529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0627450980392</span><span class="p">,</span> <span class="mf">0.650980392157</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.56862745098</span><span class="p">,</span> <span class="mf">0.305882352941</span><span class="p">,</span> <span class="mf">0.427450980392</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.811764705882</span><span class="p">,</span> <span class="mf">0.58431372549</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.764705882353</span><span class="p">,</span> <span class="mf">0.733333333333</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.992156862745</span><span class="p">,</span> <span class="mf">0.266666666667</span><span class="p">,</span> <span class="mf">0.250980392157</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.258823529412</span><span class="p">,</span> <span class="mf">0.305882352941</span><span class="p">,</span> <span class="mf">0.125490196078</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.41568627451</span><span class="p">,</span> <span class="mf">0.00392156862745</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.709803921569</span><span class="p">,</span> <span class="mf">0.513725490196</span><span class="p">,</span> <span class="mf">0.329411764706</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.517647058824</span><span class="p">,</span> <span class="mf">0.913725490196</span><span class="p">,</span> <span class="mf">0.576470588235</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.376470588235</span><span class="p">,</span> <span class="mf">0.850980392157</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.435294117647</span><span class="p">,</span> <span class="mf">0.827450980392</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.294117647059</span><span class="p">,</span> <span class="mf">0.247058823529</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.996078431373</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.894117647059</span><span class="p">,</span> <span class="mf">0.0117647058824</span><span class="p">,</span> <span class="mf">0.498039215686</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0666666666667</span><span class="p">,</span> <span class="mf">0.780392156863</span><span class="p">,</span> <span class="mf">0.682352941176</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.823529411765</span><span class="p">,</span> <span class="mf">0.505882352941</span><span class="p">,</span> <span class="mf">0.545098039216</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.356862745098</span><span class="p">,</span> <span class="mf">0.462745098039</span><span class="p">,</span> <span class="mf">0.486274509804</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.125490196078</span><span class="p">,</span> <span class="mf">0.23137254902</span><span class="p">,</span> <span class="mf">0.41568627451</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.705882352941</span><span class="p">,</span> <span class="mf">0.329411764706</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.886274509804</span><span class="p">,</span> <span class="mf">0.0313725490196</span><span class="p">,</span> <span class="mf">0.823529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.00392156862745</span><span class="p">,</span> <span class="mf">0.078431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.364705882353</span><span class="p">,</span> <span class="mf">0.517647058824</span><span class="p">,</span> <span class="mf">0.266666666667</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.650980392157</span><span class="p">,</span> <span class="mf">0.980392156863</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.380392156863</span><span class="p">,</span> <span class="mf">0.482352941176</span><span class="p">,</span> <span class="mf">0.788235294118</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.38431372549</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.478431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.494117647059</span><span class="p">,</span> <span class="mf">0.745098039216</span><span class="p">,</span> <span class="mf">0.227450980392</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.235294117647</span><span class="p">,</span> <span class="mf">0.717647058824</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.992156862745</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0274509803922</span><span class="p">,</span> <span class="mf">0.772549019608</span><span class="p">,</span> <span class="mf">0.886274509804</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.705882352941</span><span class="p">,</span> <span class="mf">0.654901960784</span><span class="p">,</span> <span class="mf">0.223529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.580392156863</span><span class="p">,</span> <span class="mf">0.729411764706</span><span class="p">,</span> <span class="mf">0.541176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.733333333333</span><span class="p">,</span> <span class="mf">0.627450980392</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.21568627451</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.192156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.156862745098</span><span class="p">,</span> <span class="mf">0.00392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.588235294118</span><span class="p">,</span> <span class="mf">0.478431372549</span><span class="p">,</span> <span class="mf">0.505882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.152941176471</span><span class="p">,</span> <span class="mf">0.533333333333</span><span class="p">,</span> <span class="mf">0.149019607843</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.807843137255</span><span class="p">,</span> <span class="mf">0.509803921569</span><span class="p">,</span> <span class="mf">0.705882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.588235294118</span><span class="p">,</span> <span class="mf">0.643137254902</span><span class="p">,</span> <span class="mf">0.76862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.705882352941</span><span class="p">,</span> <span class="mf">0.125490196078</span><span class="p">,</span> <span class="mf">0.501960784314</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.43137254902</span><span class="p">,</span> <span class="mf">0.337254901961</span><span class="p">,</span> <span class="mf">0.705882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.576470588235</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.725490196078</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.780392156863</span><span class="p">,</span> <span class="mf">0.188235294118</span><span class="p">,</span> <span class="mf">0.239215686275</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.450980392157</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0588235294118</span><span class="p">,</span> <span class="mf">0.733333333333</span><span class="p">,</span> <span class="mf">0.992156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.674509803922</span><span class="p">,</span> <span class="mf">0.643137254902</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.713725490196</span><span class="p">,</span> <span class="mf">0.458823529412</span><span class="p">,</span> <span class="mf">0.980392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.847058823529</span><span class="p">,</span> <span class="mf">0.862745098039</span><span class="p">,</span> <span class="mf">0.996078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.341176470588</span><span class="p">,</span> <span class="mf">0.552941176471</span><span class="p">,</span> <span class="mf">0.443137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.847058823529</span><span class="p">,</span> <span class="mf">0.333333333333</span><span class="p">,</span> <span class="mf">0.133333333333</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.76862745098</span><span class="p">,</span> <span class="mf">0.403921568627</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.952941176471</span><span class="p">,</span> <span class="mf">0.647058823529</span><span class="p">,</span> <span class="mf">0.411764705882</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.847058823529</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.713725490196</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.00392156862745</span><span class="p">,</span> <span class="mf">0.0941176470588</span><span class="p">,</span> <span class="mf">0.858823529412</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.203921568627</span><span class="p">,</span> <span class="mf">0.258823529412</span><span class="p">,</span> <span class="mf">0.211764705882</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.603921568627</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.341176470588</span><span class="p">,</span> <span class="mf">0.372549019608</span><span class="p">,</span> <span class="mf">0.00392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.776470588235</span><span class="p">,</span> <span class="mf">0.945098039216</span><span class="p">,</span> <span class="mf">0.309803921569</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.372549019608</span><span class="p">,</span> <span class="mf">0.521568627451</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.482352941176</span><span class="p">,</span> <span class="mf">0.674509803922</span><span class="p">,</span> <span class="mf">0.941176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.470588235294</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">,</span> <span class="mf">0.192156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.635294117647</span><span class="p">,</span> <span class="mf">0.521568627451</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.411764705882</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.862745098039</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.776470588235</span><span class="p">,</span> <span class="mf">0.321568627451</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.474509803922</span><span class="p">,</span> <span class="mf">0.101960784314</span><span class="p">,</span> <span class="mf">0.250980392157</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.933333333333</span><span class="p">,</span> <span class="mf">0.274509803922</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.905882352941</span><span class="p">,</span> <span class="mf">0.811764705882</span><span class="p">,</span> <span class="mf">0.270588235294</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.850980392157</span><span class="p">,</span> <span class="mf">0.501960784314</span><span class="p">,</span> <span class="mf">0.913725490196</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.827450980392</span><span class="p">,</span> <span class="mf">0.819607843137</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.819607843137</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.552941176471</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.141176470588</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0117647058824</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.341176470588</span><span class="p">,</span> <span class="mf">0.639215686275</span><span class="p">,</span> <span class="mf">0.756862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.827450980392</span><span class="p">,</span> <span class="mf">0.905882352941</span><span class="p">,</span> <span class="mf">0.788235294118</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.796078431373</span><span class="p">,</span> <span class="mf">0.435294117647</span><span class="p">,</span> <span class="mf">0.309803921569</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.243137254902</span><span class="p">,</span> <span class="mf">0.0941176470588</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.458823529412</span><span class="p">,</span> <span class="mf">0.874509803922</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.439215686275</span><span class="p">,</span> <span class="mf">0.690196078431</span><span class="p">,</span> <span class="mf">0.345098039216</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.819607843137</span><span class="p">,</span> <span class="mf">0.0941176470588</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.117647058824</span><span class="p">,</span> <span class="mf">0.419607843137</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.411764705882</span><span class="p">,</span> <span class="mf">0.78431372549</span><span class="p">,</span> <span class="mf">0.772549019608</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.796078431373</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.913725490196</span><span class="p">,</span> <span class="mf">0.760784313725</span><span class="p">,</span> <span class="mf">0.537254901961</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.749019607843</span><span class="p">,</span> <span class="mf">0.505882352941</span><span class="p">,</span> <span class="mf">0.180392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.270588235294</span><span class="p">,</span> <span class="mf">0.164705882353</span><span class="p">,</span> <span class="mf">0.56862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.670588235294</span><span class="p">,</span> <span class="mf">0.298039215686</span><span class="p">,</span> <span class="mf">0.760784313725</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0549019607843</span><span class="p">,</span> <span class="mf">0.458823529412</span><span class="p">,</span> <span class="mf">0.239215686275</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.117647058824</span><span class="p">,</span> <span class="mf">0.0980392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.462745098039</span><span class="p">,</span> <span class="mf">0.286274509804</span><span class="p">,</span> <span class="mf">0.498039215686</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.662745098039</span><span class="p">,</span> <span class="mf">0.78431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.36862745098</span><span class="p">,</span> <span class="mf">0.21568627451</span><span class="p">,</span> <span class="mf">0.850980392157</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.933333333333</span><span class="p">,</span> <span class="mf">0.901960784314</span><span class="p">,</span> <span class="mf">0.541176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.623529411765</span><span class="p">,</span> <span class="mf">0.211764705882</span><span class="p">,</span> <span class="mf">0.129411764706</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.313725490196</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.580392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.741176470588</span><span class="p">,</span> <span class="mf">0.564705882353</span><span class="p">,</span> <span class="mf">0.501960784314</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.427450980392</span><span class="p">,</span> <span class="mf">0.494117647059</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.345098039216</span><span class="p">,</span> <span class="mf">0.874509803922</span><span class="p">,</span> <span class="mf">0.376470588235</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.278431372549</span><span class="p">,</span> <span class="mf">0.313725490196</span><span class="p">,</span> <span class="mf">0.403921568627</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.00392156862745</span><span class="p">,</span> <span class="mf">0.364705882353</span><span class="p">,</span> <span class="mf">0.623529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.388235294118</span><span class="p">,</span> <span class="mf">0.188235294118</span><span class="p">,</span> <span class="mf">0.235294117647</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0078431372549</span><span class="p">,</span> <span class="mf">0.807843137255</span><span class="p">,</span> <span class="mf">0.580392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.545098039216</span><span class="p">,</span> <span class="mf">0.325490196078</span><span class="p">,</span> <span class="mf">0.145098039216</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.670588235294</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.552941176471</span><span class="p">,</span> <span class="mf">0.164705882353</span><span class="p">,</span> <span class="mf">0.529411764706</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.333333333333</span><span class="p">,</span> <span class="mf">0.325490196078</span><span class="p">,</span> <span class="mf">0.580392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.588235294118</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.596078431373</span><span class="p">,</span> <span class="mf">0.482352941176</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.541176470588</span><span class="p">,</span> <span class="mf">0.796078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.870588235294</span><span class="p">,</span> <span class="mf">0.270588235294</span><span class="p">,</span> <span class="mf">0.78431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.419607843137</span><span class="p">,</span> <span class="mf">0.427450980392</span><span class="p">,</span> <span class="mf">0.901960784314</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.117647058824</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.266666666667</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.678431372549</span><span class="p">,</span> <span class="mf">0.298039215686</span><span class="p">,</span> <span class="mf">0.541176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.525490196078</span><span class="p">,</span> <span class="mf">0.63137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.137254901961</span><span class="p">,</span> <span class="mf">0.235294117647</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.541176470588</span><span class="p">,</span> <span class="mf">0.803921568627</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.435294117647</span><span class="p">,</span> <span class="mf">0.792156862745</span><span class="p">,</span> <span class="mf">0.61568627451</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.882352941176</span><span class="p">,</span> <span class="mf">0.294117647059</span><span class="p">,</span> <span class="mf">0.992156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.690196078431</span><span class="p">,</span> <span class="mf">0.301960784314</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.898039215686</span><span class="p">,</span> <span class="mf">0.909803921569</span><span class="p">,</span> <span class="mf">0.223529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.447058823529</span><span class="p">,</span> <span class="mf">0.0627450980392</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.435294117647</span><span class="p">,</span> <span class="mf">0.321568627451</span><span class="p">,</span> <span class="mf">0.396078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.525490196078</span><span class="p">,</span> <span class="mf">0.537254901961</span><span class="p">,</span> <span class="mf">0.188235294118</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.388235294118</span><span class="p">,</span> <span class="mf">0.149019607843</span><span class="p">,</span> <span class="mf">0.313725490196</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.411764705882</span><span class="p">,</span> <span class="mf">0.149019607843</span><span class="p">,</span> <span class="mf">0.125490196078</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.78431372549</span><span class="p">,</span> <span class="mf">0.43137254902</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.819607843137</span><span class="p">,</span> <span class="mf">0.643137254902</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.776470588235</span><span class="p">,</span> <span class="mf">0.823529411765</span><span class="p">,</span> <span class="mf">0.337254901961</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.309803921569</span><span class="p">,</span> <span class="mf">0.403921568627</span><span class="p">,</span> <span class="mf">0.301960784314</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.682352941176</span><span class="p">,</span> <span class="mf">0.647058823529</span><span class="p">,</span> <span class="mf">0.650980392157</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.666666666667</span><span class="p">,</span> <span class="mf">0.176470588235</span><span class="p">,</span> <span class="mf">0.396078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.780392156863</span><span class="p">,</span> <span class="mf">0.317647058824</span><span class="p">,</span> <span class="mf">0.686274509804</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.349019607843</span><span class="p">,</span> <span class="mf">0.674509803922</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.572549019608</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.305882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.525490196078</span><span class="p">,</span> <span class="mf">0.721568627451</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.435294117647</span><span class="p">,</span> <span class="mf">0.596078431373</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.360784313725</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.623529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.674509803922</span><span class="p">,</span> <span class="mf">0.537254901961</span><span class="p">,</span> <span class="mf">0.698039215686</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.823529411765</span><span class="p">,</span> <span class="mf">0.133333333333</span><span class="p">,</span> <span class="mf">0.38431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.780392156863</span><span class="p">,</span> <span class="mf">0.811764705882</span><span class="p">,</span> <span class="mf">0.576470588235</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.725490196078</span><span class="p">,</span> <span class="mf">0.117647058824</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.980392156863</span><span class="p">,</span> <span class="mf">0.580392156863</span><span class="p">,</span> <span class="mf">0.552941176471</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.192156862745</span><span class="p">,</span> <span class="mf">0.133333333333</span><span class="p">,</span> <span class="mf">0.305882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.996078431373</span><span class="p">,</span> <span class="mf">0.317647058824</span><span class="p">,</span> <span class="mf">0.380392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.996078431373</span><span class="p">,</span> <span class="mf">0.552941176471</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.266666666667</span><span class="p">,</span> <span class="mf">0.211764705882</span><span class="p">,</span> <span class="mf">0.0901960784314</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.788235294118</span><span class="p">,</span> <span class="mf">0.635294117647</span><span class="p">,</span> <span class="mf">0.329411764706</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.780392156863</span><span class="p">,</span> <span class="mf">0.909803921569</span><span class="p">,</span> <span class="mf">0.941176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.266666666667</span><span class="p">,</span> <span class="mf">0.596078431373</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.576470588235</span><span class="p">,</span> <span class="mf">0.674509803922</span><span class="p">,</span> <span class="mf">0.227450980392</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0862745098039</span><span class="p">,</span> <span class="mf">0.294117647059</span><span class="p">,</span> <span class="mf">0.109803921569</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0313725490196</span><span class="p">,</span> <span class="mf">0.329411764706</span><span class="p">,</span> <span class="mf">0.474509803922</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.454901960784</span><span class="p">,</span> <span class="mf">0.176470588235</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.407843137255</span><span class="p">,</span> <span class="mf">0.235294117647</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.250980392157</span><span class="p">,</span> <span class="mf">0.160784313725</span><span class="p">,</span> <span class="mf">0.149019607843</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.643137254902</span><span class="p">,</span> <span class="mf">0.443137254902</span><span class="p">,</span> <span class="mf">0.843137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.811764705882</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.607843137255</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.462745098039</span><span class="p">,</span> <span class="mf">0.00392156862745</span><span class="p">,</span> <span class="mf">0.137254901961</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.325490196078</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.345098039216</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.321568627451</span><span class="p">,</span> <span class="mf">0.909803921569</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.16862745098</span><span class="p">,</span> <span class="mf">0.360784313725</span><span class="p">,</span> <span class="mf">0.341176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.627450980392</span><span class="p">,</span> <span class="mf">0.850980392157</span><span class="p">,</span> <span class="mf">0.572549019608</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.690196078431</span><span class="p">,</span> <span class="mf">0.101960784314</span><span class="p">,</span> <span class="mf">0.898039215686</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.113725490196</span><span class="p">,</span> <span class="mf">0.0117647058824</span><span class="p">,</span> <span class="mf">0.141176470588</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.478431372549</span><span class="p">,</span> <span class="mf">0.227450980392</span><span class="p">,</span> <span class="mf">0.623529411765</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.839215686275</span><span class="p">,</span> <span class="mf">0.819607843137</span><span class="p">,</span> <span class="mf">0.811764705882</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.627450980392</span><span class="p">,</span> <span class="mf">0.392156862745</span><span class="p">,</span> <span class="mf">0.411764705882</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.41568627451</span><span class="p">,</span> <span class="mf">0.61568627451</span><span class="p">,</span> <span class="mf">0.627450980392</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.858823529412</span><span class="p">,</span> <span class="mf">0.443137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.752941176471</span><span class="p">,</span> <span class="mf">0.219607843137</span><span class="p">,</span> <span class="mf">0.811764705882</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.490196078431</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.349019607843</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.58431372549</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.133333333333</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.835294117647</span><span class="p">,</span> <span class="mf">0.635294117647</span><span class="p">,</span> <span class="mf">0.874509803922</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0862745098039</span><span class="p">,</span> <span class="mf">0.513725490196</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.650980392157</span><span class="p">,</span> <span class="mf">0.976470588235</span><span class="p">,</span> <span class="mf">0.270588235294</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.427450980392</span><span class="p">,</span> <span class="mf">0.411764705882</span><span class="p">,</span> <span class="mf">0.380392156863</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.337254901961</span><span class="p">,</span> <span class="mf">0.737254901961</span><span class="p">,</span> <span class="mf">0.305882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.427450980392</span><span class="p">,</span> <span class="mf">0.317647058824</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0117647058824</span><span class="p">,</span> <span class="mf">0.972549019608</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.286274509804</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.792156862745</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.137254901961</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.262745098039</span><span class="p">,</span> <span class="mf">0.427450980392</span><span class="p">,</span> <span class="mf">0.0705882352941</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.917647058824</span><span class="p">,</span> <span class="mf">0.666666666667</span><span class="p">,</span> <span class="mf">0.678431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.749019607843</span><span class="p">,</span> <span class="mf">0.647058823529</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.149019607843</span><span class="p">,</span> <span class="mf">0.172549019608</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.333333333333</span><span class="p">,</span> <span class="mf">0.725490196078</span><span class="p">,</span> <span class="mf">0.0078431372549</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.474509803922</span><span class="p">,</span> <span class="mf">0.713725490196</span><span class="p">,</span> <span class="mf">0.619607843137</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.996078431373</span><span class="p">,</span> <span class="mf">0.925490196078</span><span class="p">,</span> <span class="mf">0.83137254902</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.545098039216</span><span class="p">,</span> <span class="mf">0.647058823529</span><span class="p">,</span> <span class="mf">0.349019607843</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.552941176471</span><span class="p">,</span> <span class="mf">0.996078431373</span><span class="p">,</span> <span class="mf">0.756862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.235294117647</span><span class="p">,</span> <span class="mf">0.16862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.247058823529</span><span class="p">,</span> <span class="mf">0.0666666666667</span><span class="p">,</span> <span class="mf">0.156862745098</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.866666666667</span><span class="p">,</span> <span class="mf">0.964705882353</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.0666666666667</span><span class="p">,</span> <span class="mf">0.101960784314</span><span class="p">,</span> <span class="mf">0.572549019608</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.603921568627</span><span class="p">,</span> <span class="mf">0.258823529412</span><span class="p">,</span> <span class="mf">0.329411764706</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.58431372549</span><span class="p">,</span> <span class="mf">0.61568627451</span><span class="p">,</span> <span class="mf">0.933333333333</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.494117647059</span><span class="p">,</span> <span class="mf">0.509803921569</span><span class="p">,</span> <span class="mf">0.282352941176</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.227450980392</span><span class="p">,</span> <span class="mf">0.0235294117647</span><span class="p">,</span> <span class="mf">0.396078431373</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.741176470588</span><span class="p">,</span> <span class="mf">0.458823529412</span><span class="p">,</span> <span class="mf">0.396078431373</span><span class="p">]</span>
+     <span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

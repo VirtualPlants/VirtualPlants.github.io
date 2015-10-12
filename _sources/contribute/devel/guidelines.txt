@@ -255,7 +255,7 @@ For example:
 
 .. code-block:: text-only
 
-    oalab/plugins/applet.py (contains IPluginApplet)
+    oalab/plugin/applet.py (contains IPluginApplet)
 
 C++ specific Coding Guidelines
 ==============================

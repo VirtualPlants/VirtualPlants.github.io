@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.paradigm.textual &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="openalea.oalab.paradigm" href="../paradigm.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../paradigm.html" accesskey="U">openalea.oalab.paradigm</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.paradigm.textual</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       Python Manager applet</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.editor.highlight</span> <span class="kn">import</span> <span class="n">Highlighter</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.editor.text_editor</span> <span class="kn">import</span> <span class="n">RichTextEditor</span> <span class="k">as</span> <span class="n">Editor</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.paradigm.controller</span> <span class="kn">import</span> <span class="n">ParadigmController</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.help</span> <span class="kn">import</span> <span class="n">display_help</span>
+<span class="kn">from</span> <span class="nn">pygments.lexers</span> <span class="kn">import</span> <span class="n">guess_lexer_for_filename</span>
+<span class="kn">from</span> <span class="nn">pygments.util</span> <span class="kn">import</span> <span class="n">ClassNotFound</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+
+<div class="viewcode-block" id="TextualModelController"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController">[docs]</a><span class="k">class</span> <span class="nc">TextualModelController</span><span class="p">(</span><span class="n">ParadigmController</span><span class="p">):</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;Textual&quot;</span>
+    <span class="n">default_file_name</span> <span class="o">=</span> <span class="s">&quot;file&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="s">&quot;*.*&quot;</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="s">&quot;.txt&quot;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s">&quot;Crystal_Clear_mimetype_txt2.png&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_default_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.editor.plaintext_editor</span> <span class="kn">import</span> <span class="n">PlainTextEditor</span> <span class="k">as</span> <span class="n">Editor</span>
+        <span class="n">editor</span> <span class="o">=</span> <span class="n">Editor</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">editor</span>
+
+<div class="viewcode-block" id="TextualModelController.instantiate_widget"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.instantiate_widget">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_editor</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">openalea.oalab.service.help</span> <span class="kn">import</span> <span class="n">display_help</span>
+
+        <span class="c"># Add method to widget to display help</span>
+        <span class="k">def</span> <span class="nf">_diplay_help</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+                <span class="n">display_help</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_documentation</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">display_help</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">get_documentation</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">display_help</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">_diplay_help</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">applet</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.widget_value"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.widget_value">[docs]</a>    <span class="k">def</span> <span class="nf">widget_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.set_widget_value"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.set_widget_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_widget_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.runnable"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.runnable">[docs]</a>    <span class="k">def</span> <span class="nf">runnable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.execute"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute only selected text.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.run"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.step"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.stop"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.animate"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.animate">[docs]</a>    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="TextualModelController.init"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.textual.html#openalea.oalab.paradigm.textual.TextualModelController.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../paradigm.html" >openalea.oalab.paradigm</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

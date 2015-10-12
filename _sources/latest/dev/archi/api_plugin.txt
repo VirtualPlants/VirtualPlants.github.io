@@ -58,11 +58,11 @@ For the second case, it is very important to keep a plugin light.
 Plugin categories
 =================
 
-  - :mod:`Labs<openalea.core.plugin.lab>` [oalab.lab] New laboratory based on OpenAleaLab
-  - :mod:`Applets<openalea.core.plugin.applet>` [oalab.applet] : Graphical component displayed in main window.
+  - :mod:`Labs<openalea.oalab.plugin.lab>` [oalab.lab] New laboratory based on OpenAleaLab
+  - :mod:`Applets<openalea.oalab.plugin.applet>` [oalab.applet] : Graphical component displayed in main window.
   - :ref:`Controls<label-plugin_control>` [oalab.qt_control, oalab.notebook_control]: Data editors and viewers
   - :mod:`Interfaces <openalea.core.plugin.interface>` [oalab.interface]: Description of data types
-  - :mod:`Imaging algorithms <image.plugin>` [openalea.image.*]: Imaging algorithms
+  - :mod:`Imaging algorithms <image.plugin.algo>` [openalea.image.*]: Imaging algorithms
 
 
 How to define a plugin

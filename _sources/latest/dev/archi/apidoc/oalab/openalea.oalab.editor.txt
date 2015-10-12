@@ -1,70 +1,28 @@
 openalea.oalab.editor package
 =============================
 
-Submodules
-----------
-
-openalea.oalab.editor.completion module
----------------------------------------
-
-.. automodule:: openalea.oalab.editor.completion
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-openalea.oalab.editor.goto module
----------------------------------
-
-.. automodule:: openalea.oalab.editor.goto
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-openalea.oalab.editor.highlight module
---------------------------------------
-
-.. automodule:: openalea.oalab.editor.highlight
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-openalea.oalab.editor.line_number module
-----------------------------------------
-
-.. automodule:: openalea.oalab.editor.line_number
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-openalea.oalab.editor.plaintext_editor module
----------------------------------------------
-
-.. automodule:: openalea.oalab.editor.plaintext_editor
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-openalea.oalab.editor.search module
------------------------------------
-
-.. automodule:: openalea.oalab.editor.search
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-openalea.oalab.editor.text_editor module
-----------------------------------------
-
-.. automodule:: openalea.oalab.editor.text_editor
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
 .. automodule:: openalea.oalab.editor
     :members:
     :undoc-members:
     :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    openalea.oalab.editor.pyeditor
+
+Submodules
+----------
+
+.. toctree::
+
+   openalea.oalab.editor.completion
+   openalea.oalab.editor.goto
+   openalea.oalab.editor.highlight
+   openalea.oalab.editor.line_number
+   openalea.oalab.editor.plaintext_editor
+   openalea.oalab.editor.search
+   openalea.oalab.editor.text_editor
+

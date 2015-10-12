@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.pluginwidget.explorer &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.pluginwidget.explorer</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c"># OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2015 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">openalea.core</span>
+<span class="kn">import</span> <span class="nn">openalea.oalab</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">tempdir</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.formatting.html</span> <span class="kn">import</span> <span class="n">html_section</span>
+<span class="kn">from</span> <span class="nn">openalea.core.formatting.util</span> <span class="kn">import</span> <span class="n">icon_path</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.plugin</span> <span class="kn">import</span> <span class="n">iter_groups</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.formatting.html</span> <span class="kn">import</span> <span class="n">html_header</span><span class="p">,</span> <span class="n">html_footer</span><span class="p">,</span> <span class="n">html_summary</span>
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.formatting.util</span> <span class="kn">import</span> <span class="n">DEFAULT_ICON</span>
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.formatting.text</span> <span class="kn">import</span> <span class="n">format_str</span><span class="p">,</span> <span class="n">format_author</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">plugins</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.manager.explorer</span> <span class="kn">import</span> <span class="n">ManagerExplorer</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.manager.explorer</span> <span class="kn">import</span> <span class="n">ManagerExplorer</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.utils</span> <span class="kn">import</span> <span class="n">qicon_path</span>
+
+<span class="n">QI</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span>
+
+
+<div class="viewcode-block" id="Preview"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.Preview">[docs]</a><span class="k">class</span> <span class="nc">Preview</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This widget displays meta-information about project.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Preview</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span> <span class="o">=</span> <span class="n">tempdir</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">html</span> <span class="o">=</span> <span class="n">html_header</span>
+        <span class="n">html</span> <span class="o">+=</span> <span class="n">html_summary</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">icon_path</span><span class="o">=</span><span class="n">qicon_path</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="p">))</span>
+        <span class="n">html</span> <span class="o">+=</span> <span class="n">html_footer</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Preview.closeEvent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.Preview.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="o">.</span><span class="n">rmtree</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="filter_authors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.filter_authors">[docs]</a><span class="k">def</span> <span class="nf">filter_authors</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">criteria</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;authors&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">author</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">author</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">author</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">author</span>
+
+</div>
+<div class="viewcode-block" id="filter_team"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.filter_team">[docs]</a><span class="k">def</span> <span class="nf">filter_team</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">criteria</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;authors&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">author</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">author</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">author</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;team&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">teams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">author</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;team&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">teams</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">team</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">teams</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="format_label_author"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.format_label_author">[docs]</a><span class="k">def</span> <span class="nf">format_label_author</span><span class="p">(</span><span class="n">author</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">format_author</span><span class="p">(</span><span class="n">author</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="format_label_team"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.format_label_team">[docs]</a><span class="k">def</span> <span class="nf">format_label_team</span><span class="p">(</span><span class="n">author</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">author</span>
+
+</div>
+<div class="viewcode-block" id="PluginExplorer"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.PluginExplorer">[docs]</a><span class="k">class</span> <span class="nc">PluginExplorer</span><span class="p">(</span><span class="n">ManagerExplorer</span><span class="p">):</span>
+
+    <span class="n">criteria</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s">&#39;implement&#39;</span><span class="p">,</span> <span class="s">&#39;Implementation&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;authors&#39;</span><span class="p">,</span> <span class="s">&#39;Authors&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;team&#39;</span><span class="p">,</span> <span class="s">&#39;Team&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;tags&#39;</span><span class="p">,</span> <span class="s">&#39;Tags&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;plugin_ep&#39;</span><span class="p">,</span> <span class="s">&#39;Entry Point&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;plugin_modulename&#39;</span><span class="p">,</span> <span class="s">&#39;Plugin Module&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;plugin_dist&#39;</span><span class="p">,</span> <span class="s">&#39;Python Distribution&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">ManagerExplorer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_explorer</span><span class="o">.</span><span class="n">set_default_item_icon</span><span class="p">(</span><span class="n">DEFAULT_ICON</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_criteria</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">criteria</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_group</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">()</span>
+        <span class="n">prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;openalea&#39;</span><span class="p">,</span> <span class="s">&#39;oalab&#39;</span><span class="p">,</span> <span class="s">&#39;vpltk&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">iter_groups</span><span class="p">()):</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">prefixes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                    <span class="n">match</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cb_group</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb_group</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_group_changed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cb_group</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_group_changed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_on_group_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb_group</span><span class="o">.</span><span class="n">itemText</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_items</span><span class="p">(</span><span class="n">plugins</span><span class="p">(</span><span class="n">group</span><span class="p">))</span>
+
+<div class="viewcode-block" id="PluginExplorer.groupby"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.PluginExplorer.groupby">[docs]</a>    <span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">filter_name</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;filter_name&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filter_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filter_name</span> <span class="o">==</span> <span class="s">&#39;authors&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">filter_authors</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">format_label_author</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">filter_name</span> <span class="o">==</span> <span class="s">&#39;team&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">filter_team</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">format_label_team</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">filter_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filter_box</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="n">filter_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_explorer</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PluginExplorer.set_items"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.PluginExplorer.set_items">[docs]</a>    <span class="k">def</span> <span class="nf">set_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="c">## Add all criteria</span>
+        <span class="c">#criteria = set()</span>
+        <span class="c">#criteria.add((&#39;implement&#39;, &#39;Implementation&#39;))</span>
+        <span class="c">#for item in items:</span>
+        <span class="c">#    criteria = criteria.union([(k, k) for k in item.criteria])</span>
+        <span class="c">#self.set_criteria(list(criteria))</span>
+        <span class="n">ManagerExplorer</span><span class="o">.</span><span class="n">set_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_on_item_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_switcher</span><span class="o">.</span><span class="n">set_widget</span><span class="p">(</span><span class="n">Preview</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="n">item</span>
+
+</div>
+<div class="viewcode-block" id="show_plugins"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.pluginwidget.explorer.html#openalea.oalab.pluginwidget.explorer.show_plugins">[docs]</a><span class="k">def</span> <span class="nf">show_plugins</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s">&quot;oalab.applet&quot;</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+    <span class="n">plugin_selector</span> <span class="o">=</span> <span class="n">PluginExplorer</span><span class="p">()</span>
+    <span class="n">plugin_selector</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">show_plugins</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.about &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.about</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAleaLab</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2015 INRIA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.github.io</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">openalea.core</span>
+<span class="kn">import</span> <span class="nn">openalea.oalab</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.pluginwidget.explorer</span> <span class="kn">import</span> <span class="n">PluginExplorer</span>
+
+<span class="kn">from</span> <span class="nn">openalea.deploy.shared_data</span> <span class="kn">import</span> <span class="n">shared_data</span>
+<span class="kn">from</span> <span class="nn">openalea.core.formatting.util</span> <span class="kn">import</span> <span class="n">icon_path</span>
+<span class="kn">from</span> <span class="nn">openalea.core.formatting.html</span> <span class="kn">import</span> <span class="n">html_section</span><span class="p">,</span> <span class="n">html_list</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QT_API</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.plugin.formatting.text</span> <span class="kn">import</span> <span class="n">format_author</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">authors</span> <span class="k">as</span> <span class="n">auth</span>
+
+<span class="k">if</span> <span class="n">QT_API</span> <span class="o">==</span> <span class="s">&#39;pyqt&#39;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">PyQt4.QtWebKit</span> <span class="kn">import</span> <span class="n">QWebView</span>
+        <span class="n">VIEW</span> <span class="o">=</span> <span class="s">&quot;webkit&quot;</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">QWebView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span>
+        <span class="n">VIEW</span> <span class="o">=</span> <span class="s">&quot;basic&quot;</span>
+<span class="k">elif</span> <span class="n">QT_API</span> <span class="o">==</span> <span class="s">&#39;pyside&#39;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">PySide.QtWebKit</span> <span class="kn">import</span> <span class="n">QWebView</span>
+        <span class="n">VIEW</span> <span class="o">=</span> <span class="s">&quot;webkit&quot;</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">QWebView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span>
+        <span class="n">VIEW</span> <span class="o">=</span> <span class="s">&quot;basic&quot;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">QWebView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextEdit</span>
+    <span class="n">VIEW</span> <span class="o">=</span> <span class="s">&quot;basic&quot;</span>
+
+<span class="n">stylesheet_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">core</span><span class="p">,</span> <span class="s">&#39;stylesheet.css&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">VIEW</span> <span class="o">==</span> <span class="s">&quot;webkit&quot;</span><span class="p">:</span>
+    <span class="n">stylesheet_path</span> <span class="o">=</span> <span class="s">&#39;file://&#39;</span> <span class="o">+</span> <span class="n">stylesheet_path</span>
+
+
+<span class="n">dependencies</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">vtk</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">team</span><span class="o">=</span><span class="s">u&#39;VTK&#39;</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="s">u&#39;vtk.png&#39;</span><span class="p">,</span>
+        <span class="n">website</span><span class="o">=</span><span class="s">u&#39;http://vtk.org&#39;</span>
+    <span class="p">),</span>
+
+    <span class="n">pyqode</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">authors</span><span class="o">=</span><span class="p">[</span><span class="s">u&#39;Colin Duquesnoy&#39;</span><span class="p">],</span>
+        <span class="n">team</span><span class="o">=</span><span class="s">u&#39;PyQode&#39;</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="s">u&#39;pyqode.png&#39;</span><span class="p">,</span>
+        <span class="n">website</span><span class="o">=</span><span class="s">u&#39;http://github.com/pyQode/pyQode&#39;</span><span class="p">,</span>
+        <span class="n">license</span><span class="o">=</span><span class="s">u&#39;MIT&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+
+    <span class="n">qt</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">team</span><span class="o">=</span><span class="s">u&#39;Qt&#39;</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="s">u&#39;qt.png&#39;</span><span class="p">,</span>
+        <span class="n">website</span><span class="o">=</span><span class="s">u&#39;http://qt.io&#39;</span>
+    <span class="p">),</span>
+
+    <span class="n">pyqt</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">team</span><span class="o">=</span><span class="s">u&#39;PyQt&#39;</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="s">u&#39;pyqt.png&#39;</span><span class="p">,</span>
+        <span class="n">website</span><span class="o">=</span><span class="s">u&#39;http://www.riverbankcomputing.com&#39;</span>
+    <span class="p">),</span>
+
+    <span class="n">git</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">team</span><span class="o">=</span><span class="s">u&#39;Git&#39;</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="s">u&#39;git.png&#39;</span><span class="p">,</span>
+        <span class="n">website</span><span class="o">=</span><span class="s">u&#39;https://git-scm.com&#39;</span>
+    <span class="p">),</span>
+
+<span class="p">)</span>
+
+<span class="n">scientific</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ipython&#39;</span><span class="p">,</span> <span class="s">&#39;matplotlib&#39;</span><span class="p">,</span> <span class="s">&#39;numpy&#39;</span><span class="p">,</span> <span class="s">&#39;pandas&#39;</span><span class="p">,</span> <span class="s">&#39;scipy&#39;</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">scientific</span><span class="p">:</span>
+    <span class="n">dependencies</span><span class="p">[</span><span class="n">lib</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">team</span><span class="o">=</span><span class="n">lib</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="n">icon</span><span class="o">=</span><span class="s">u&#39;</span><span class="si">%s</span><span class="s">.png&#39;</span> <span class="o">%</span> <span class="n">lib</span><span class="p">,</span> <span class="n">website</span><span class="o">=</span><span class="s">u&#39;http://</span><span class="si">%s</span><span class="s">.org&#39;</span> <span class="o">%</span> <span class="n">lib</span><span class="p">)</span>
+
+
+<span class="n">dep_order</span> <span class="o">=</span> <span class="s">&#39;python qt pyqt ipython pyqode numpy matplotlib scipy pandas git vtk&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+
+<span class="n">lst</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;openalea&#39;</span><span class="p">,</span>
+    <span class="s">&#39;caribu&#39;</span>
+    <span class="s">&#39;PlantGL&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">submodules</span> <span class="o">=</span> <span class="n">html_list</span><span class="p">(</span><span class="s">&#39;submodule&#39;</span><span class="p">,</span> <span class="n">lst</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">VIEW</span> <span class="o">==</span> <span class="s">&quot;webkit&quot;</span><span class="p">:</span>
+    <span class="n">html_dep</span> <span class="o">=</span> <span class="s">&#39;&lt;br /&gt;&#39;</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dep_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dep_order</span><span class="p">):</span>
+        <span class="n">dep</span> <span class="o">=</span> <span class="n">dependencies</span><span class="p">[</span><span class="n">dep_name</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+        <span class="n">icon_path</span> <span class="o">=</span> <span class="s">&#39;file://&#39;</span> <span class="o">+</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/logo/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">dep</span><span class="p">[</span><span class="s">&quot;icon&quot;</span><span class="p">])</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">i</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">icon_path</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">))</span>
+        <span class="n">html_dep</span> <span class="o">+=</span> <span class="s">&#39;&lt;div style=&quot;width:</span><span class="si">%(width)d</span><span class="s">px; float:left; text-align:center; padding-bottom:10px;&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span>
+        <span class="n">html_dep</span> <span class="o">+=</span> <span class="s">&#39;  &lt;img height=&quot;32px&quot; src=&quot;</span><span class="si">%(icon)s</span><span class="s">&quot; alt=&quot;</span><span class="si">%(team)s</span><span class="s">&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span>
+        <span class="n">html_dep</span> <span class="o">+=</span> <span class="s">&#39;  &lt;br /&gt;&lt;span class=&quot;logo-label&quot;&gt;&lt;a href=&quot;</span><span class="si">%(website)s</span><span class="s">&quot;&gt;</span><span class="si">%(team)s</span><span class="s">&lt;/a&gt;&lt;/span&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span>
+        <span class="n">html_dep</span> <span class="o">+=</span> <span class="s">&#39;&lt;/div&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">html_dep</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="n">deps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dep_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dep_order</span><span class="p">):</span>
+        <span class="n">dep</span> <span class="o">=</span> <span class="n">dependencies</span><span class="p">[</span><span class="n">dep_name</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+        <span class="n">icon_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/logo/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">dep</span><span class="p">[</span><span class="s">&quot;icon&quot;</span><span class="p">])</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">i</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">icon_path</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">))</span>
+        <span class="n">deps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&lt;span class=&quot;logo-label&quot;&gt;&lt;a href=&quot;</span><span class="si">%(website)s</span><span class="s">&quot;&gt;</span><span class="si">%(team)s</span><span class="s">&lt;/a&gt;&lt;/span&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+    <span class="n">html_dep</span> <span class="o">+=</span> <span class="n">html_list</span><span class="p">(</span><span class="s">&#39;dependencies&#39;</span><span class="p">,</span> <span class="n">deps</span><span class="p">)</span>
+
+<span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">stylesheet</span><span class="o">=</span><span class="n">stylesheet_path</span><span class="p">,</span>
+    <span class="n">dependencies</span><span class="o">=</span><span class="n">html_dep</span><span class="p">,</span>
+    <span class="n">submodules</span><span class="o">=</span><span class="n">submodules</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">WELCOME</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+
+<span class="s">&lt;html&gt;</span>
+<span class="s">&lt;head&gt;</span>
+<span class="s">    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;</span><span class="si">%(stylesheet)s</span><span class="s">&quot;&gt;</span>
+<span class="s">&lt;/head&gt;</span>
+
+<span class="s">&lt;body&gt;</span>
+<span class="s">&lt;h2 class=&quot;subtitle&quot;&gt;OpenAleaLab&lt;/h2&gt;</span>
+<span class="s">&lt;p class=&quot;introduction&quot;&gt;</span>
+<span class="s">The OpenAleaLab is an opensource integrated software platform for numerical simulation and especially plant modeling.</span>
+<span class="s">It makes it possible to upload plant models, manipulate them, or create new models by simulation.</span>
+
+<span class="s">&lt;br /&gt;</span>
+<span class="s">Different labs are available, each one responding to scientific field:</span>
+<span class="s">&lt;br /&gt;</span>
+<span class="s">&lt;b&gt;PlantLab&lt;/b&gt; is designed for whole plant modeling. It embeds various tools like MTG standard plant format, L-system programming (L-Py),</span>
+<span class="s">light models (Caribu, muSlim, etc.), ...</span>
+<span class="s">&lt;br /&gt;</span>
+
+<span class="s">&lt;b&gt;TissueLab&lt;/b&gt; is designed for tissue modeling. It embeds various tools like 3D image viewer, mars-alt pipeline, ...</span>
+<span class="s">&lt;br /&gt;</span>
+
+<span class="s">&lt;/p&gt;</span>
+
+
+<span class="s">&lt;h2 class=&quot;subtitle&quot;&gt;OpenAlea&lt;/h2&gt;</span>
+<span class="s">&lt;p class=&quot;introduction&quot;&gt;</span>
+<span class="s">OpenAlea is a distributed collaborative effort to develop Python libraries and tools that address the needs of current</span>
+<span class="s">and future works primarily designed for the plant architecture modeling.</span>
+<span class="s">&lt;/p&gt;</span>
+
+<span class="s">&lt;br /&gt;</span>
+
+<span class="s">&lt;div class=&quot;section-title&quot;&gt;Code is powered by&lt;/div&gt;</span>
+<span class="si">%(dependencies)s</span><span class="s"></span>
+
+
+<span class="s">&lt;/body&gt;</span>
+
+
+
+<span class="s">&lt;/html&gt;</span>
+<span class="s">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">args</span>
+
+
+<span class="n">author_lst</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">gbaty</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">fboudon</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">jchopard</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">tcokelaer</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">dbarbeau</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">sdufourko</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">gcerutti</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">cgodin</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">jcoste</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">emoscardi</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">pfernique</span><span class="p">,</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">cpradal</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">author_lst</span><span class="p">)</span>
+
+<span class="n">authors</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">format_author</span><span class="p">(</span><span class="n">author</span><span class="p">)</span> <span class="k">for</span> <span class="n">author</span> <span class="ow">in</span> <span class="n">author_lst</span><span class="p">])</span>
+<span class="n">args</span><span class="p">[</span><span class="s">&#39;authors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">authors</span>
+
+<span class="n">CREDITS</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">&lt;html&gt;</span>
+<span class="s">&lt;head&gt;</span>
+<span class="s">    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;</span><span class="si">%(stylesheet)s</span><span class="s">&quot;&gt;</span>
+<span class="s">&lt;/head&gt;</span>
+
+<span class="s">&lt;body&gt;</span>
+<span class="s">&lt;h2 class=&quot;subtitle&quot;&gt;OpenAleaLab&lt;/h2&gt;</span>
+<span class="s">&lt;p class=&quot;introduction&quot;&gt;Platform is written by (random order) ... &lt;/p&gt;</span>
+
+<span class="si">%(authors)s</span><span class="s"></span>
+
+<span class="s">&lt;p class=&quot;introduction&quot;&gt;Components are written by numerous authors, see &quot;Plugins&quot; tab for more information&lt;/p&gt;</span>
+
+<span class="s">&lt;/body&gt;</span>
+
+
+
+<span class="s">&lt;/html&gt;</span>
+
+<span class="s">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">args</span>
+
+
+<div class="viewcode-block" id="AboutPage"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab.about.html#openalea.oalab.about.AboutPage">[docs]</a><span class="k">class</span> <span class="nc">AboutPage</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">banner_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">banner_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">banner_path</span> <span class="o">=</span> <span class="n">shared_data</span><span class="p">(</span><span class="n">openalea</span><span class="o">.</span><span class="n">oalab</span><span class="p">,</span> <span class="s">&#39;icons/logo/banner.png&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lay</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_banner</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_banner</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&quot;QLabel { background-color : #ffffff;}&quot;</span><span class="p">)</span>
+        <span class="n">banner</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">banner_path</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">banner</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_banner</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">banner</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content</span> <span class="o">=</span> <span class="n">QWebView</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">,</span> <span class="s">&quot;setReadOnly&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_footer</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_footer</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&quot;QLabel { background-color : #459454;}&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lay</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_banner</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lay</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lay</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_footer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lay</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lay</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="OpenAleaLabSummary"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab.about.html#openalea.oalab.about.OpenAleaLabSummary">[docs]</a><span class="k">class</span> <span class="nc">OpenAleaLabSummary</span><span class="p">(</span><span class="n">AboutPage</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AboutPage</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">WELCOME</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="OpenAleaLabCredits"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab.about.html#openalea.oalab.about.OpenAleaLabCredits">[docs]</a><span class="k">class</span> <span class="nc">OpenAleaLabCredits</span><span class="p">(</span><span class="n">AboutPage</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">AboutPage</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">CREDITS</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="About"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/oalab/openalea.oalab.about.html#openalea.oalab.about.About">[docs]</a><span class="k">class</span> <span class="nc">About</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_welcome</span> <span class="o">=</span> <span class="n">OpenAleaLabSummary</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span> <span class="o">=</span> <span class="n">PluginExplorer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">filter_name</span><span class="o">=</span><span class="s">&quot;dist&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_credits</span> <span class="o">=</span> <span class="n">OpenAleaLabCredits</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_welcome</span><span class="p">,</span> <span class="s">&quot;About&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_credits</span><span class="p">,</span> <span class="s">&quot;Credits&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plugin</span><span class="p">,</span> <span class="s">&quot;Plugins&quot;</span><span class="p">)</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_welcome</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_credits</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="mi">600</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="mi">600</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">instance</span>
+
+    <span class="kn">from</span> <span class="nn">openalea.oalab.utils</span> <span class="kn">import</span> <span class="n">ModalDialog</span>
+
+    <span class="n">about</span> <span class="o">=</span> <span class="n">About</span><span class="p">()</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">ModalDialog</span><span class="p">(</span><span class="n">about</span><span class="p">)</span>
+    <span class="n">dialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

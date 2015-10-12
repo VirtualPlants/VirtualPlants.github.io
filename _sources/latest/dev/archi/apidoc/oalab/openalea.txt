@@ -1,6 +1,11 @@
 openalea package
 ================
 
+.. automodule:: openalea
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -9,10 +14,3 @@ Subpackages
     openalea.oalab
     openalea.oalab_wralea
 
-Module contents
----------------
-
-.. automodule:: openalea
-    :members:
-    :undoc-members:
-    :show-inheritance:

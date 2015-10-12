@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-image.registration.registration"></span><dl class="function">
+<dt id="image.registration.registration.pts2transfo">
+<code class="descclassname">image.registration.registration.</code><code class="descname">pts2transfo</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/image/registration/registration.html#pts2transfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.registration.registration.pts2transfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Infer rigid transformation from control point pairs
+using quaternions.</p>
+<p>The quaternion representation is used to register two point sets with known correspondences.
+It computes the rigid transformation as a solution to a least squares formulation of the problem.</p>
+<p>The rigid transformation, defined by the rotation R and the translation t,
+is optimized by minimizing the following cost function :</p>
+<blockquote>
+<div>C(R,t) = sum ( <a href="#id1"><span class="problematic" id="id2">|</span></a>yi - R.xi - t|^2 )</div></blockquote>
+<p>The optimal translation is given by :</p>
+<blockquote>
+<div><p><a href="#id17"><span class="problematic" id="id18">t_</span></a> = y_b - R.x_b</p>
+<blockquote>
+<div>with x_b and y_b the barycenters of two point sets</div></blockquote>
+</div></blockquote>
+<p>The optimal rotation using quaternions is optimized by minimizing the following cost function :</p>
+<blockquote>
+<div><p>C(q) = sum ( <a href="#id3"><span class="problematic" id="id4">|</span></a>yi'<a href="#id5"><span class="problematic" id="id6">*</span></a>q - q*xi'<a href="#id7"><span class="problematic" id="id8">|</span></a>^2 )</p>
+<blockquote>
+<div>with yi' and xi' converted to barycentric coordinates and identified by quaternions</div></blockquote>
+</div></blockquote>
+<p>With the matrix representations :</p>
+<blockquote>
+<div><p>yi'<a href="#id9"><span class="problematic" id="id10">*</span></a>q - q*xi' = Ai.q</p>
+<p>C(q) = q^T.|sum(A^T.A)|.q = q^T.B.q</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>with A = array([ [       0       ,  (xn_i - yn_i) , (xn_j - yn_j)  ,  (xn_k - yn_k) ],</dt>
+<dd>[-(xn_i - yn_i) ,        0       , (-xn_k - yn_k) ,  (xn_j + yn_j) ],
+[-(xn_j - yn_j) , -(-xn_k - yn_k),      0         ,  (-xn_i - yn_i)],
+[-(xn_k - yn_k) , -(xn_j + yn_j) , -(-xn_i - yn_i),         0      ] ])</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<p>The unit quaternion representing the best rotation is the unit eigenvector
+corresponding to the smallest eigenvalue of the matrix -B :</p>
+<blockquote>
+<div>v = a, b.i, c.j, d.k</div></blockquote>
+<p>The orthogonal matrix corresponding to a rotation by the unit quaternion v = a + bi + cj + dk (with <a href="#id11"><span class="problematic" id="id12">|z|</span></a> = 1) is given by :</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>R = array([ [a*a + b*b - c*c - d*d,       2bc - 2ad      ,       2bd + 2ac      ],</dt>
+<dd>[      2bc + 2ad      , a*a - b*b + c*c - d*d,       2cd - 2ab      ],
+[      2bd - 2ac      ,       2cd + 2ab      , a*a - b*b - c*c + d*d] ])</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><cite>x</cite> (list) - list of points</li>
+<li><cite>y</cite> (list) - list of points</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first docutils">
+<dt>T <span class="classifier-delimiter">:</span> <span class="classifier">array_like (R,t) which correspond to the optimal rotation and translation</span></dt>
+<dd><dl class="first docutils">
+<dt>T = | R t |</dt>
+<dd><div class="first last line-block">
+<div class="line">0 1 |</div>
+</div>
+</dd>
+</dl>
+<p class="last">T.shape(4,4)</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Examples:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openalea.image</span> <span class="kn">import</span> <span class="n">pts2transfo</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># x and y, two point sets with 7 known correspondences</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">238.</span><span class="o">*</span><span class="mf">0.200320</span><span class="p">,</span> <span class="mf">196.</span><span class="o">*</span><span class="mf">0.200320</span><span class="p">,</span> <span class="mf">9.</span><span class="p">],</span>
+<span class="go">         [204.*0.200320, 182.*0.200320, 11.],</span>
+<span class="go">         [180.*0.200320, 214.*0.200320, 12.],</span>
+<span class="go">         [201.*0.200320, 274.*0.200320, 12.],</span>
+<span class="go">         [148.*0.200320, 225.*0.200320, 18.],</span>
+<span class="go">         [248.*0.200320, 252.*0.200320, 8.],</span>
+<span class="go">         [305.*0.200320, 219.*0.200320, 10.]]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">173.</span><span class="o">*</span><span class="mf">0.200320</span><span class="p">,</span> <span class="mf">151.</span><span class="o">*</span><span class="mf">0.200320</span><span class="p">,</span> <span class="mf">17.</span><span class="p">],</span>
+<span class="go">         [147.*0.200320, 179.*0.200320, 16.],</span>
+<span class="go">         [165.*0.200320, 208.*0.200320, 12.],</span>
+<span class="go">         [226.*0.200320, 204.*0.200320, 9.],</span>
+<span class="go">         [170.*0.200320, 254.*0.200320, 10.],</span>
+<span class="go">         [223.*0.200320, 155.*0.200320, 13.],</span>
+<span class="go">         [218.*0.200320, 109.*0.200320, 23.]]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cp2transfo</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>array([[  0.40710149,   0.89363883,   0.18888626, -22.0271968 ],</dt>
+<dd>[ -0.72459862,   0.19007589,   0.66244094,  51.59203463],
+[  0.55608022,  -0.40654742,   0.72490964,  -0.07837002],
+[  0.        ,   0.        ,   0.        ,   1.        ]])</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="image.registration.registration.angles2transfo">
+<code class="descclassname">image.registration.registration.</code><code class="descname">angles2transfo</code><span class="sig-paren">(</span><em>image1</em>, <em>image2</em>, <em>angleX=0</em>, <em>angleY=0</em>, <em>angleZ=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/image/registration/registration.html#angles2transfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.registration.registration.angles2transfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute transformation matrix between 2 images from the angles in each directions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><cite>image1</cite> (<a href="#id13"><span class="problematic" id="id14">|SpatialImage|</span></a>) -</li>
+<li><cite>image2</cite> (<a href="#id15"><span class="problematic" id="id16">|SpatialImage|</span></a>) -</li>
+<li><cite>angleX</cite> (int) - Rotation through angleX (degree)</li>
+<li><cite>angleY</cite> (int) - Rotation through angleY (degree)</li>
+<li><cite>angleZ</cite> (int) - Rotation through angleZ (degree)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="first last simple">
+<li>matrix (numpy array) - Transformation matrix</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/image/image.registration.registration.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

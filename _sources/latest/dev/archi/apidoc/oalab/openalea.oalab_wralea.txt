@@ -1,6 +1,11 @@
 openalea.oalab_wralea package
 =============================
 
+.. automodule:: openalea.oalab_wralea
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -11,19 +16,8 @@ Subpackages
 Submodules
 ----------
 
-openalea.oalab_wralea.oalabnode module
---------------------------------------
+.. toctree::
 
-.. automodule:: openalea.oalab_wralea.oalabnode
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   openalea.oalab_wralea.oalabnode
+   openalea.oalab_wralea.pgl_node
 
-
-Module contents
----------------
-
-.. automodule:: openalea.oalab_wralea
-    :members:
-    :undoc-members:
-    :show-inheritance:

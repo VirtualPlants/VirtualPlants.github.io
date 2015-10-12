@@ -1,0 +1,578 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openalea.oalab.paradigm.container &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="openalea.oalab.paradigm" href="../paradigm.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../paradigm.html" accesskey="U">openalea.oalab.paradigm</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for openalea.oalab.paradigm.container</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c"># -*- coding: utf8 -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2013 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s): Guillaume Bâty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">openalea.core.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">openalea.core.project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.data</span> <span class="kn">import</span> <span class="n">DataFactory</span><span class="p">,</span> <span class="n">DataClass</span><span class="p">,</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">MimeType</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">debug_plugin</span><span class="p">,</span> <span class="n">plugins</span><span class="p">,</span> <span class="n">plugin_instance_exists</span>
+
+<span class="kn">from</span> <span class="nn">openalea.oalab.paradigm.creator</span> <span class="kn">import</span> <span class="n">ParadigmCreator</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.project.dialog</span> <span class="kn">import</span> <span class="n">SelectCategory</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.service.applet</span> <span class="kn">import</span> <span class="n">get_applet</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.utils</span> <span class="kn">import</span> <span class="n">ModalDialog</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.utils</span> <span class="kn">import</span> <span class="n">qicon</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.widget</span> <span class="kn">import</span> <span class="n">resources_rc</span>  <span class="c"># do not remove this import else icon are not drawn</span>
+<span class="kn">from</span> <span class="nn">openalea.oalab.widget.pages</span> <span class="kn">import</span> <span class="n">WelcomePage</span>
+
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">openalea.vpltk.qt.compat</span> <span class="kn">import</span> <span class="n">getopenfilename</span><span class="p">,</span> <span class="n">getsavefilename</span>
+
+
+<div class="viewcode-block" id="ParadigmContainer"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer">[docs]</a><span class="k">class</span> <span class="nc">ParadigmContainer</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Widget to edit and run models.</span>
+
+<span class="sd">    Contains paradigm applets (oalab.paradigm_applet)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">identifier</span> <span class="o">=</span> <span class="s">&quot;WidgetEditorContainer&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;Editor Container&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParadigmContainer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTabsClosable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">applets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm</span> <span class="o">=</span> <span class="n">ParadigmCreator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm</span><span class="o">.</span><span class="n">paradigm_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_paradigm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">welcome_actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;tabCloseRequested(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_close</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;currentChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_display_help</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_default_tab</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fine_tune</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ParadigmContainer.fine_tune"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.fine_tune">[docs]</a>    <span class="k">def</span> <span class="nf">fine_tune</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDocumentMode</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># self.setMinimumSize(100, 100)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAccessibleName</span><span class="p">(</span><span class="s">&quot;Container&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setElideMode</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ElideLeft</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.initialize"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_on_text_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_tab_red</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Convenience method</span>
+    <span class="c">###########################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_data_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;category&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;path&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">filename</span>
+
+    <span class="k">def</span> <span class="nf">_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tab</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tab</span>
+        <span class="k">if</span> <span class="n">tab</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tab</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_tab</span><span class="p">(</span><span class="n">tab</span><span class="p">)]</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Open/Close data</span>
+    <span class="c">###########################################################################</span>
+
+<div class="viewcode-block" id="ParadigmContainer.open_file"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.open_file">[docs]</a>    <span class="k">def</span> <span class="nf">open_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filepath</span> <span class="ow">in</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="n">filepath</span><span class="p">,</span> <span class="n">filters</span> <span class="o">=</span> <span class="n">getopenfilename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">u&quot;Select file&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">normpath</span><span class="p">()</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+
+        <span class="c"># check if a data in container yet correspond to this path</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filepath</span> <span class="o">==</span> <span class="n">data</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">()</span><span class="o">.</span><span class="n">abspath</span><span class="p">():</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="c"># If not, create a new data</span>
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">found</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">DataFactory</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.open_data"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.open_data">[docs]</a>    <span class="k">def</span> <span class="nf">open_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="c"># Check if object is yet open else create applet</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">:</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentWidget</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">applet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm</span><span class="o">.</span><span class="n">applet</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">default_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">applet</span><span class="p">,</span> <span class="s">&#39;textChanged&#39;</span><span class="p">):</span>
+                <span class="n">applet</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_text_changed</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_tab</span><span class="p">(</span><span class="s">&quot;Welcome&quot;</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">applet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_label</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setTabToolTip</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">=</span> <span class="n">applet</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span><span class="p">[</span><span class="n">applet</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.close"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tab</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span><span class="p">[</span><span class="n">tab</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_tabs</span><span class="p">[</span><span class="n">tab</span><span class="p">]</span>
+            <span class="n">tab</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_default_tab</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.close_current"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.close_current">[docs]</a>    <span class="k">def</span> <span class="nf">close_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.close_data"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.close_data">[docs]</a>    <span class="k">def</span> <span class="nf">close_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">:</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_objects</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.auto_close"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.auto_close">[docs]</a>    <span class="k">def</span> <span class="nf">auto_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_tab</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">n_tab</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.close_all"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.close_all">[docs]</a>    <span class="k">def</span> <span class="nf">close_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close_current</span><span class="p">()</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># New</span>
+    <span class="c">###########################################################################</span></div>
+<div class="viewcode-block" id="ParadigmContainer.new_paradigm"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.new_paradigm">[docs]</a>    <span class="k">def</span> <span class="nf">new_paradigm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">filters</span> <span class="o">=</span> <span class="n">getsavefilename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;New file&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">DataFactory</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Apply</span>
+    <span class="c">###########################################################################</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.apply"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tab</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">applet</span> <span class="o">=</span> <span class="n">tab</span><span class="o">.</span><span class="n">applet</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">applet</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.apply_all"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.apply_all">[docs]</a>    <span class="k">def</span> <span class="nf">apply_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save all opened files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">tab</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Save</span>
+    <span class="c">###########################################################################</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.save"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">tab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tab</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">(</span><span class="n">tab</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tab_black</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">tab</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.save_current"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.save_current">[docs]</a>    <span class="k">def</span> <span class="nf">save_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.save_all"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.save_all">[docs]</a>    <span class="k">def</span> <span class="nf">save_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save all opened files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">tab</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Tab coloration</span>
+    <span class="c">###########################################################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">_set_tab_red</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tabBar</span><span class="p">()</span><span class="o">.</span><span class="n">setTabTextColor</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_tab_black</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tabBar</span><span class="p">()</span><span class="o">.</span><span class="n">setTabTextColor</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParadigmContainer.set_all_tab_black"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.set_all_tab_black">[docs]</a>    <span class="k">def</span> <span class="nf">set_all_tab_black</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_tab_black</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Tab management</span>
+    <span class="c">###########################################################################</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.remove_tab"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.remove_tab">[docs]</a>    <span class="k">def</span> <span class="nf">remove_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="s">&quot;Welcome&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove the tab named &quot;tabname&quot;</span>
+
+<span class="sd">        :param tabname: name of the tab to remove. Default: &quot;Welcome&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabText</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">tabname</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.reset"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete all tabs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close_all</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.set_welcome_actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.set_welcome_actions">[docs]</a>    <span class="k">def</span> <span class="nf">set_welcome_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">welcome_actions</span> <span class="o">=</span> <span class="n">actions</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.add_welcome_tab"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.add_welcome_tab">[docs]</a>    <span class="k">def</span> <span class="nf">add_welcome_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_tab</span><span class="p">(</span><span class="s">&quot;Welcome&quot;</span><span class="p">)</span>
+        <span class="n">welcomePage</span> <span class="o">=</span> <span class="n">WelcomePage</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(),</span> <span class="n">style</span><span class="o">=</span><span class="n">WelcomePage</span><span class="o">.</span><span class="n">STYLE_MEDIUM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">welcomePage</span><span class="p">,</span> <span class="s">&quot;Welcome&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.add_default_tab"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.add_default_tab">[docs]</a>    <span class="k">def</span> <span class="nf">add_default_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_welcome_tab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">welcome_actions</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.safe_display_help"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.safe_display_help">[docs]</a>    <span class="k">def</span> <span class="nf">safe_display_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Call focus_change method on widget.applet safely (if it exists well).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s">&quot;display_help&quot;</span><span class="p">):</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">display_help</span><span class="p">()</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># Run models</span>
+    <span class="c">###########################################################################</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.execute"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Execute selected part &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.run"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Run &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.run_in_shell"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.run_in_shell">[docs]</a>    <span class="k">def</span> <span class="nf">run_in_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_in_shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Run &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.animate"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.animate">[docs]</a>    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Animate &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.step"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Step &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.stop"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Stop &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParadigmContainer.init"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ParadigmContainer.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Init &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ModelEditorApplet"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet">[docs]</a><span class="k">class</span> <span class="nc">ModelEditorApplet</span><span class="p">(</span><span class="n">ParadigmContainer</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">ParadigmContainer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_actions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_connections</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_create_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Create actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;run.png&quot;</span><span class="p">),</span> <span class="s">&quot;Run&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRunInShell</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;run.png&quot;</span><span class="p">),</span> <span class="s">&quot;Run in shell&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">menu_run</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;Run&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">menu_run</span><span class="o">.</span><span class="n">addActions</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionRunInShell</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbutton_run</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbutton_run</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="n">menu_run</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolbutton_run</span><span class="o">.</span><span class="n">setDefaultAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;play.png&quot;</span><span class="p">),</span> <span class="s">&quot;Animate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;step.png&quot;</span><span class="p">),</span> <span class="s">&quot;Step&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;pause.png&quot;</span><span class="p">),</span> <span class="s">&quot;Stop&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionInit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;rewind.png&quot;</span><span class="p">),</span> <span class="s">&quot;Init&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRunSelection</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;run.png&quot;</span><span class="p">),</span> <span class="s">&quot;Run subpart&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># File I/O</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseCurrent</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;close_file.png&quot;</span><span class="p">),</span> <span class="s">&quot;Close current tab&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenFile</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;open_file.png&quot;</span><span class="p">),</span> <span class="s">&quot;Open file&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;save_file.png&quot;</span><span class="p">),</span> <span class="s">&quot;Save File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSaveAs</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">qicon</span><span class="p">(</span><span class="s">&quot;save_file.png&quot;</span><span class="p">),</span> <span class="s">&quot;Save As&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Add shortcuts</span>
+        <span class="c">#self.actionInit.setShortcut(&quot;F1&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&quot;F2&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="o">.</span><span class="n">setShortcuts</span><span class="p">([</span><span class="s">&quot;F1&quot;</span><span class="p">,</span> <span class="s">&quot;Ctrl+R&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRunSelection</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Ctrl+E&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&quot;F3&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="s">&quot;F4&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseCurrent</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Ctrl+W&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenFile</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Ctrl+O&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;Ctrl+S&quot;</span><span class="p">))</span>
+        <span class="c">#self.actionSaveAs.setShortcut(self.tr(&quot;Ctrl+Shift+S&quot;))</span>
+
+        <span class="c"># Store actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_run_actions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionInit</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toolbutton_run</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionRunSelection</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Play&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Play&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Play&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Play&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&quot;Project&quot;</span><span class="p">,</span> <span class="s">&quot;Play&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionInit</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_create_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_current_tab_changed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">animate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionInit</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRunInShell</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_in_shell</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRunSelection</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseCurrent</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_current</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenFile</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_current</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelEditorApplet.actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet.actions">[docs]</a>    <span class="k">def</span> <span class="nf">actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: list of actions to set in the menu.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
+</div>
+<div class="viewcode-block" id="ModelEditorApplet.toolbar_actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet.toolbar_actions">[docs]</a>    <span class="k">def</span> <span class="nf">toolbar_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span>
+</div>
+<div class="viewcode-block" id="ModelEditorApplet.toolbars"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet.toolbars">[docs]</a>    <span class="k">def</span> <span class="nf">toolbars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">tb_run</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolBar</span><span class="p">(</span><span class="s">&quot;Run&quot;</span><span class="p">)</span>
+        <span class="n">tb_run</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolbutton_run</span><span class="p">)</span>
+        <span class="n">tb_run</span><span class="o">.</span><span class="n">addActions</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionInit</span><span class="p">,</span>
+        <span class="p">])</span>
+
+        <span class="n">tb_edit</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolBar</span><span class="p">(</span><span class="s">&quot;Edit&quot;</span><span class="p">)</span>
+        <span class="n">tb_edit</span><span class="o">.</span><span class="n">addActions</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenFile</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="p">,</span>
+            <span class="c">#self.actionSaveAs,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseCurrent</span><span class="p">,</span>
+        <span class="p">])</span>
+
+        <span class="c">#tb_paradigm = QtGui.QToolBar(&quot;Paradigms&quot;)</span>
+        <span class="c">#tb_paradigm.addActions(self.paradigm.actions())</span>
+        <span class="c">#return [tb_run, tb_edit, tb_paradigm]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">tb_run</span><span class="p">,</span> <span class="n">tb_edit</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="ModelEditorApplet.menu_actions"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet.menu_actions">[docs]</a>    <span class="k">def</span> <span class="nf">menu_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">menu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">menus</span><span class="p">():</span>
+            <span class="n">actions</span> <span class="o">+=</span> <span class="n">menu</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">actions</span>
+</div>
+<div class="viewcode-block" id="ModelEditorApplet.menus"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet.menus">[docs]</a>    <span class="k">def</span> <span class="nf">menus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">menu_project</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;File&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">menu_project</span><span class="o">.</span><span class="n">addActions</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionOpenFile</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="p">,</span>
+            <span class="c">#self.actionSaveAs,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionCloseCurrent</span><span class="p">,</span>
+        <span class="p">])</span>
+
+        <span class="n">menu_project</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">menu_project</span><span class="o">.</span><span class="n">addActions</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionAnimate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionStep</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionInit</span><span class="p">,</span>
+        <span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">menu_project</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="ModelEditorApplet.on_current_tab_changed"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/oalab/openalea.oalab.paradigm.container.html#openalea.oalab.paradigm.container.ModelEditorApplet.on_current_tab_changed">[docs]</a>    <span class="k">def</span> <span class="nf">on_current_tab_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">runnable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentWidget</span><span class="p">()</span><span class="o">.</span><span class="n">applet</span><span class="o">.</span><span class="n">runnable</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">runnable</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_run_mode</span><span class="p">(</span><span class="n">runnable</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_set_run_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_actions</span><span class="p">:</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+                    <span class="n">act</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../paradigm.html" >openalea.oalab.paradigm</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
