@@ -28,8 +28,8 @@
     <link rel="next" title="&lt;no title&gt;" href="core.observer.html" />
     <link rel="prev" title="&lt;no title&gt;" href="core.model.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,23 +44,797 @@
         <li class="right" >
           <a href="core.model.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-core.node"></span><p>Node and NodeFactory classes.</p>
+<p>A Node is generalized functor which is embeded in a dataflow.
+A Factory build Node from its description. Factories instantiate
+Nodes on demand for the dataflow.</p>
+<dl class="exception">
+<dt id="core.node.InstantiationError">
+<em class="property">exception </em><tt class="descclassname">core.node.</tt><tt class="descname">InstantiationError</tt><a class="reference internal" href="../../../../../_modules/core/node.html#InstantiationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.InstantiationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></a></p>
+<p>todo</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="core.node.RecursionError">
+<em class="property">exception </em><tt class="descclassname">core.node.</tt><tt class="descname">RecursionError</tt><a class="reference internal" href="../../../../../_modules/core/node.html#RecursionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.RecursionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></a></p>
+<p>todo</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.AbstractFactory">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">AbstractFactory</tt><big>(</big><em>name</em>, <em>description=''</em>, <em>category=''</em>, <em>inputs=()</em>, <em>outputs=()</em>, <em>lazy=True</em>, <em>delay=0</em>, <em>view=None</em>, <em>alias=None</em>, <em>authors=None</em>, <em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.grapheditor.observer.Observed</span></tt></p>
+<p>Abstract Factory is Factory base class</p>
+<dl class="method">
+<dt id="core.node.AbstractFactory.clean_files">
+<tt class="descname">clean_files</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.clean_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.clean_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove files depending of factory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.copy">
+<tt class="descname">copy</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy factory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_authors">
+<tt class="descname">get_authors</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_authors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_authors" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns node authors</p>
+<p>if no authors is found within the node, then it takes the authors field
+found in its package.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_documentation">
+<tt class="descname">get_documentation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_documentation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_id">
+<tt class="descname">get_id</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the node factory Id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_pkg">
+<tt class="descname">get_pkg</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_pkg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_pkg" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_python_name">
+<tt class="descname">get_python_name</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_python_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_python_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a valid python variable as name.
+This is used to store the factory into a python list (i.e. __all__).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_tip">
+<tt class="descname">get_tip</tt><big>(</big><em>asRst=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_tip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_tip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the node description</p>
+<p>if no authors is found within the node, then it takes the authors field
+found in its package.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.get_writer">
+<tt class="descname">get_writer</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.get_writer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.get_writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the writer class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.instantiate">
+<tt class="descname">instantiate</tt><big>(</big><em>call_stack=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a node instance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>call_stack</strong> -- the list of NodeFactory id already in call stack
+(in order to avoir infinite recursion)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.instantiate_widget">
+<tt class="descname">instantiate_widget</tt><big>(</big><em>node=None</em>, <em>parent=None</em>, <em>edit=False</em>, <em>autonomous=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.instantiate_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.instantiate_widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the corresponding widget initialised with node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.is_composite_node">
+<tt class="descname">is_composite_node</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.is_composite_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.is_composite_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.is_data">
+<tt class="descname">is_data</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.is_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.is_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.is_node">
+<tt class="descname">is_node</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.is_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.is_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.is_valid">
+<tt class="descname">is_valid</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.is_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.is_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the factory is valid
+else raise an exception</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractFactory.set_pkg">
+<tt class="descname">set_pkg</tt><big>(</big><em>port</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractFactory.set_pkg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractFactory.set_pkg" title="Permalink to this definition">¶</a></dt>
+<dd><p>An openalea package contains factories.
+The factory has a link to this package (weakref).
+The package id is the name of the package when the package is the
+Python object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.AbstractFactory.mimetype">
+<tt class="descname">mimetype</tt><em class="property"> = 'openalea/nodefactory'</em><a class="headerlink" href="#core.node.AbstractFactory.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.AbstractFactory.package">
+<tt class="descname">package</tt><a class="headerlink" href="#core.node.AbstractFactory.package" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.AbstractNode">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">AbstractNode</tt><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.grapheditor.observer.Observed</span></tt>, <a class="reference internal" href="core.metadatadict.html#core.metadatadict.HasAdHoc" title="core.metadatadict.HasAdHoc"><tt class="xref py py-class docutils literal"><span class="pre">core.metadatadict.HasAdHoc</span></tt></a></p>
+<p>An AbstractNode is the atomic entity in a dataflow.</p>
+<p>internal_data contains properties specified by users.
+They can be extended and the number is not fixed.
+We use a dict to distinguish these public properties to the others
+which are used for protected management.</p>
+<dl class="method">
+<dt id="core.node.AbstractNode.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.get_factory">
+<tt class="descname">get_factory</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.get_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.get_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the factory of the node (if any)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.get_id">
+<tt class="descname">get_id</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.get_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.get_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.get_raise_exception">
+<tt class="descname">get_raise_exception</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.get_raise_exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.get_raise_exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidate Node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.reload">
+<tt class="descname">reload</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.reload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset Node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset Node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.set_compositenode">
+<tt class="descname">set_compositenode</tt><big>(</big><em>upper</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.set_compositenode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.set_compositenode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>key</em>, <em>value</em>, <em>notify=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.set_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal node data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.set_factory">
+<tt class="descname">set_factory</tt><big>(</big><em>factory</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.set_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.set_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the factory of the node (if any)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.set_id">
+<tt class="descname">set_id</tt><big>(</big><em>id</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.set_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.set_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractNode.set_raise_exception">
+<tt class="descname">set_raise_exception</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractNode.set_raise_exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractNode.set_raise_exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.AbstractNode.mimetype">
+<tt class="descname">mimetype</tt><em class="property"> = 'openalea/node'</em><a class="headerlink" href="#core.node.AbstractNode.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.AbstractNode.raise_exception">
+<tt class="descname">raise_exception</tt><a class="headerlink" href="#core.node.AbstractNode.raise_exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.AbstractPort">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">AbstractPort</tt><big>(</big><em>vertex</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">openalea.grapheditor.observer.Observed</span></tt>, <a class="reference internal" href="core.metadatadict.html#core.metadatadict.HasAdHoc" title="core.metadatadict.HasAdHoc"><tt class="xref py py-class docutils literal"><span class="pre">core.metadatadict.HasAdHoc</span></tt></a></p>
+<p>The class describing the ports.
+AbstractPort is a dict for historical reason.</p>
+<dl class="method">
+<dt id="core.node.AbstractPort.copy_to">
+<tt class="descname">copy_to</tt><big>(</big><em>other</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.copy_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.copy_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractPort.get_default">
+<tt class="descname">get_default</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.get_default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.get_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractPort.get_desc">
+<tt class="descname">get_desc</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.get_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.get_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets default description</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractPort.get_id">
+<tt class="descname">get_id</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.get_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.get_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractPort.get_interface">
+<tt class="descname">get_interface</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.get_interface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.get_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the interface</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractPort.get_tip">
+<tt class="descname">get_tip</tt><big>(</big><em>current_value=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.get_tip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.get_tip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the tool tip</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.AbstractPort.set_id">
+<tt class="descname">set_id</tt><big>(</big><em>id</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#AbstractPort.set_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.AbstractPort.set_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.Annotation">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">Annotation</tt><a class="reference internal" href="../../../../../_modules/core/node.html#Annotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.node.AbstractNode" title="core.node.AbstractNode"><tt class="xref py py-class docutils literal"><span class="pre">core.node.AbstractNode</span></tt></a></p>
+<dl class="method">
+<dt id="core.node.Annotation.to_script">
+<tt class="descname">to_script</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Annotation.to_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Annotation.to_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Script translation of this node.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Factory">
+<tt class="descclassname">core.node.</tt><tt class="descname">Factory</tt><a class="headerlink" href="#core.node.Factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#core.node.NodeFactory" title="core.node.NodeFactory"><tt class="xref py py-class docutils literal"><span class="pre">NodeFactory</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.FuncNode">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">FuncNode</tt><big>(</big><em>inputs</em>, <em>outputs</em>, <em>func</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#FuncNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.FuncNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.node.Node" title="core.node.Node"><tt class="xref py py-class docutils literal"><span class="pre">core.node.Node</span></tt></a></p>
+<p>Node with external function or function</p>
+<dl class="method">
+<dt id="core.node.FuncNode.get_process_obj">
+<tt class="descname">get_process_obj</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#FuncNode.get_process_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.FuncNode.get_process_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the process obj</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.FuncNode.process_obj">
+<tt class="descname">process_obj</tt><a class="headerlink" href="#core.node.FuncNode.process_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the process obj</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.InputPort">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">InputPort</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#InputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.InputPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.node.AbstractPort" title="core.node.AbstractPort"><tt class="xref py py-class docutils literal"><span class="pre">core.node.AbstractPort</span></tt></a></p>
+<p>The class describing the input ports</p>
+<dl class="method">
+<dt id="core.node.InputPort.get_label">
+<tt class="descname">get_label</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#InputPort.get_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.InputPort.get_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets default label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.InputPort.is_hidden">
+<tt class="descname">is_hidden</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#InputPort.is_hidden"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.InputPort.is_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the port should not be displayed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.Node">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">Node</tt><big>(</big><em>inputs=()</em>, <em>outputs=()</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.node.AbstractNode" title="core.node.AbstractNode"><tt class="xref py py-class docutils literal"><span class="pre">core.node.AbstractNode</span></tt></a></p>
+<p>It is a callable object with typed inputs and outputs.
+Inputs and Outpus are indexed by their position or by a name (str)</p>
+<dl class="method">
+<dt id="core.node.Node.add_input">
+<tt class="descname">add_input</tt><big>(</big><em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.add_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.add_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an input port</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.add_output">
+<tt class="descname">add_output</tt><big>(</big><em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.add_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.add_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an output port</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.clear_inputs">
+<tt class="descname">clear_inputs</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.clear_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.clear_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.clear_outputs">
+<tt class="descname">clear_outputs</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.clear_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.clear_outputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.copy_to">
+<tt class="descname">copy_to</tt><big>(</big><em>other</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.copy_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.copy_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.eval">
+<tt class="descname">eval</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the node by calling __call__
+Return True if the node needs a reevaluation
+and a timed delay if the node needs a reevaluation at a later time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_block">
+<tt class="descname">get_block</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_block"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_caption">
+<tt class="descname">get_caption</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_caption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_caption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the node caption</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_delay">
+<tt class="descname">get_delay</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_input">
+<tt class="descname">get_input</tt><big>(</big><em>index_key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the input value for the specified index/key</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_input_port">
+<tt class="descname">get_input_port</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_input_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_input_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets port by name.</p>
+<p>Long description of the function functionality.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) -- the name of the port</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Input port characterized by name</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">InputPort</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_input_state">
+<tt class="descname">get_input_state</tt><big>(</big><em>index_key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_input_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_input_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_lazy">
+<tt class="descname">get_lazy</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_lazy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_lazy" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_nb_input">
+<tt class="descname">get_nb_input</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_nb_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_nb_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nb of input ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_nb_output">
+<tt class="descname">get_nb_output</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_nb_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_nb_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nb of output ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_output">
+<tt class="descname">get_output</tt><big>(</big><em>index_key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the output for the specified index/key</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_process_obj">
+<tt class="descname">get_process_obj</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_process_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_process_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the process obj</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_tip">
+<tt class="descname">get_tip</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_tip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_tip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.get_user_application">
+<tt class="descname">get_user_application</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.get_user_application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.get_user_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidate node</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="core.node.Node.is_deprecated_event">
+<em class="property">static </em><tt class="descname">is_deprecated_event</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.is_deprecated_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.is_deprecated_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.is_port_hidden">
+<tt class="descname">is_port_hidden</tt><big>(</big><em>index_key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.is_port_hidden"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.is_port_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the hidden state of a port</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.notify_listeners">
+<tt class="descname">notify_listeners</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.notify_listeners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.notify_listeners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.output">
+<tt class="descname">output</tt><big>(</big><em>key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.output" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.reload">
+<tt class="descname">reload</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.reload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.reload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_block">
+<tt class="descname">set_block</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_block"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_caption">
+<tt class="descname">set_caption</tt><big>(</big><em>newcaption</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_caption"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_caption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the node caption</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_delay">
+<tt class="descname">set_delay</tt><big>(</big><em>delay</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_factory">
+<tt class="descname">set_factory</tt><big>(</big><em>factory</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the factory of the node (if any)
+and uptdate caption</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_input">
+<tt class="descname">set_input</tt><big>(</big><em>key</em>, <em>val=None</em>, <em>notify=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the input value for the specified index/key</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_input_state">
+<tt class="descname">set_input_state</tt><big>(</big><em>index_key</em>, <em>state</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_input_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_input_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of the input index/key (state is a string)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_io">
+<tt class="descname">set_io</tt><big>(</big><em>inputs</em>, <em>outputs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_io"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_io" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the number of inputs and outputs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inputs</strong> -- list of dict(name='X', interface=IFloat, value=0)</li>
+<li><strong>outputs</strong> -- list of dict(name='X', interface=IFloat)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_lazy">
+<tt class="descname">set_lazy</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_lazy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_lazy" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_output">
+<tt class="descname">set_output</tt><big>(</big><em>key</em>, <em>val</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the input value for the specified index/key</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_port_hidden">
+<tt class="descname">set_port_hidden</tt><big>(</big><em>index_key</em>, <em>state</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_port_hidden"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_port_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the hidden state of a port.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>index_key</strong> -- the input port index.</li>
+<li><strong>state</strong> -- a boolean value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.set_user_application">
+<tt class="descname">set_user_application</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.set_user_application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.set_user_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.to_script">
+<tt class="descname">to_script</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.to_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.to_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Script translation of this node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.Node.unvalidate_input">
+<tt class="descname">unvalidate_input</tt><big>(</big><em>index_key</em>, <em>notify=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Node.unvalidate_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Node.unvalidate_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unvalidate node and notify listeners.</p>
+<p>This method is called when the input value has changed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Node.block">
+<tt class="descname">block</tt><a class="headerlink" href="#core.node.Node.block" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Node.caption">
+<tt class="descname">caption</tt><a class="headerlink" href="#core.node.Node.caption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the node caption</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Node.delay">
+<tt class="descname">delay</tt><a class="headerlink" href="#core.node.Node.delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Node.lazy">
+<tt class="descname">lazy</tt><a class="headerlink" href="#core.node.Node.lazy" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Node.process_obj">
+<tt class="descname">process_obj</tt><a class="headerlink" href="#core.node.Node.process_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the process obj</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.node.Node.user_application">
+<tt class="descname">user_application</tt><a class="headerlink" href="#core.node.Node.user_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.NodeFactory">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">NodeFactory</tt><big>(</big><em>name</em>, <em>description=''</em>, <em>category=''</em>, <em>inputs=None</em>, <em>outputs=None</em>, <em>nodemodule=''</em>, <em>nodeclass=None</em>, <em>widgetmodule=None</em>, <em>widgetclass=None</em>, <em>search_path=None</em>, <em>authors=None</em>, <em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.node.AbstractFactory" title="core.node.AbstractFactory"><tt class="xref py py-class docutils literal"><span class="pre">core.node.AbstractFactory</span></tt></a></p>
+<p>A Node factory is able to create nodes on demand,
+and their associated widgets.</p>
+<dl class="method">
+<dt id="core.node.NodeFactory.apply_new_src">
+<tt class="descname">apply_new_src</tt><big>(</big><em>newsrc</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.apply_new_src"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.apply_new_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute new src and store the source into the factory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.copy">
+<tt class="descname">copy</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy factory
+:param path: new search path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_classobj">
+<tt class="descname">get_classobj</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_classobj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_classobj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_documentation">
+<tt class="descname">get_documentation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_documentation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_node_file">
+<tt class="descname">get_node_file</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_node_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_node_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the path of the python module.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_node_module">
+<tt class="descname">get_node_module</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_node_module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_node_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the python module object (if available)
+Raise an Import Error if no module is associated</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_node_src">
+<tt class="descname">get_node_src</tt><big>(</big><em>cache=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_node_src"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_node_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string containing the node src
+Return None if src is not available
+If cache is False, return the source on the disk</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_python_name">
+<tt class="descname">get_python_name</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_python_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_python_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a python valid name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.get_writer">
+<tt class="descname">get_writer</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.get_writer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.get_writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the writer class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.instantiate">
+<tt class="descname">instantiate</tt><big>(</big><em>call_stack=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a node instance.
+:param call_stack: the list of NodeFactory id already in call stack
+(in order to avoir infinite recursion)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.instantiate_widget">
+<tt class="descname">instantiate_widget</tt><big>(</big><em>node=None</em>, <em>parent=None</em>, <em>edit=False</em>, <em>autonomous=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.instantiate_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.instantiate_widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the corresponding widget initialised with node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.is_node">
+<tt class="descname">is_node</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.is_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.is_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.node.NodeFactory.save_new_src">
+<tt class="descname">save_new_src</tt><big>(</big><em>newsrc</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#NodeFactory.save_new_src"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.NodeFactory.save_new_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the new source and replace the text into the old file
+containing the source.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.OutputPort">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">OutputPort</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#OutputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.OutputPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.node.AbstractPort" title="core.node.AbstractPort"><tt class="xref py py-class docutils literal"><span class="pre">core.node.AbstractPort</span></tt></a></p>
+<p>The class describing the output ports</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.node.PyNodeFactoryWriter">
+<em class="property">class </em><tt class="descclassname">core.node.</tt><tt class="descname">PyNodeFactoryWriter</tt><big>(</big><em>factory</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#PyNodeFactoryWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.PyNodeFactoryWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>NodeFactory python Writer</p>
+<dl class="attribute">
+<dt id="core.node.PyNodeFactoryWriter.nodefactory_template">
+<tt class="descname">nodefactory_template</tt><em class="property"> = '\n\n$NAME = Factory(name=$PNAME,\n                authors=$AUTHORS,\n                description=$DESCRIPTION,\n                category=$CATEGORY,\n                nodemodule=$NODEMODULE,\n                nodeclass=$NODECLASS,\n                inputs=$LISTIN,\n                outputs=$LISTOUT,\n                widgetmodule=$WIDGETMODULE,\n                widgetclass=$WIDGETCLASS,\n               )\n\n'</em><a class="headerlink" href="#core.node.PyNodeFactoryWriter.nodefactory_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="core.node.Alias">
+<tt class="descclassname">core.node.</tt><tt class="descname">Alias</tt><big>(</big><em>factory</em>, <em>name</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#Alias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.Alias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a alias for factory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.node.gen_port_list">
+<tt class="descclassname">core.node.</tt><tt class="descname">gen_port_list</tt><big>(</big><em>size</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#gen_port_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.gen_port_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a list of port description</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.node.initialise_standard_metadata">
+<tt class="descclassname">core.node.</tt><tt class="descname">initialise_standard_metadata</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/node.html#initialise_standard_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.node.initialise_standard_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declares the standard keys used by the Node structures. Called at the end of this file</p>
+</dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="core.model.html"
@@ -68,14 +842,12 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="core.observer.html"
                         title="next chapter">&lt;no title&gt;</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.node.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.node.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -92,7 +864,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -107,14 +879,14 @@
         <li class="right" >
           <a href="core.model.html" title="&lt;no title&gt;"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" >core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" >core package</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

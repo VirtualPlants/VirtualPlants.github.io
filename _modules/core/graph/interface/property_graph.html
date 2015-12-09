@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.graph.interface.property_graph &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="core" href="../../../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.graph.interface.property_graph</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2007 INRIA - CIRAD - INRA  </span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Fred Theveny &lt;frederic.theveny@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c"># </span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">################################################################################</span>
+<span class="sd">&quot;&quot;&quot;This module provide a set of concepts to add properties to graph elements</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<div class="viewcode-block" id="PropertyError"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.PropertyError">[docs]</a><span class="k">class</span> <span class="nc">PropertyError</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="IPropertyGraph"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph">[docs]</a><span class="k">class</span> <span class="nc">IPropertyGraph</span> <span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Directed graph with properties associated with edges and vertices</span>
+<span class="sd">    Properties may not be defined on all elements</span>
+<span class="sd">    Properties may be empty on some elements</span>
+<span class="sd">    A property is a map between an element id (vid or eid) and a data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="IPropertyGraph.vertex_property_names"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.vertex_property_names">[docs]</a>    <span class="k">def</span> <span class="nf">vertex_property_names</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iter on names of all property maps defined on vertices</span>
+<span class="sd">        return iter of keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.vertex_property"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">vertex_property</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return a map between vid and data for all vertices where</span>
+<span class="sd">        property_name is defined</span>
+<span class="sd">    </span>
+<span class="sd">        :rtype: dict of ``{vid:data}``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.edge_property_names"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.edge_property_names">[docs]</a>    <span class="k">def</span> <span class="nf">edge_property_names</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        iter on names of all property maps defined on edge</span>
+<span class="sd">        return iter of keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.edge_property"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.edge_property">[docs]</a>    <span class="k">def</span> <span class="nf">edge_property</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return a map between eid and data for all edges where</span>
+<span class="sd">        property_name is defined</span>
+<span class="sd">   </span>
+<span class="sd">        :rtype: dict of ``{eid:data}``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="c">###########################################################</span>
+    <span class="c">#</span>
+    <span class="c">#        mutable property concept</span>
+    <span class="c">#</span>
+    <span class="c">###########################################################</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.add_vertex_property"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.add_vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertex_property</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add a new map between vid and a data</span>
+<span class="sd">        do not fill this property for any vertex</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.remove_vertex_property"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.remove_vertex_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex_property</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove the map called property_name from the graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.add_edge_property"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.add_edge_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge_property</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add a new map between eid and a data</span>
+<span class="sd">        do not fill this property for any edge</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    </div>
+<div class="viewcode-block" id="IPropertyGraph.remove_edge_property"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.property_graph.html#core.graph.interface.property_graph.IPropertyGraph.remove_edge_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge_property</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove the map called property_name from the graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

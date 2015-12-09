@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.serialization &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="up" title="core" href="../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.serialization</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2014 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s):</span>
+<span class="c">#           Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#           Christophe Pradal&lt;christophe.pradal@inria.fr&gt;</span>
+<span class="c">#           Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s):</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+
+<div class="viewcode-block" id="ISaver"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ISaver">[docs]</a><span class="k">class</span> <span class="nc">ISaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic interface class for savers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c"># Saver name. If not defined, use class name (ex: &#39;PythonControlSaver&#39;)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># Interface that can be managed by the saver. (ex: &#39;IControl&#39;)</span>
+    <span class="n">protocols</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># supported output mimetypes. First element is used by default (ex: [&#39;text/x-python&#39;])</span>
+    <span class="c"># list of available options (that can be passed in kwds)</span>
+    <span class="c"># ex: [&#39;author&#39;, {&#39;name&#39;:&#39;algorithm&#39;, &#39;interface&#39;:&#39;IStr&#39;, &#39;values&#39;:[&#39;jpg&#39;, &#39;lzw&#39;, &#39;none&#39;]}, &#39;quality:IFloat=0.8&#39;]</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="ISaver.save"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ISaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="ILoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ILoader">[docs]</a><span class="k">class</span> <span class="nc">ILoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c"># Loader name. If not defined, use class name (ex: &#39;PythonControlLoader&#39;)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># Interface that can be output by loader (ex: &#39;IControl&#39;)</span>
+    <span class="n">protocols</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># supported input mimetypes. First element is used by default (ex: [&#39;text/x-python&#39;])</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># list of available options (that can be passed in kwds). (ex: &#39;mode=lazy&#39;)</span>
+
+<div class="viewcode-block" id="ILoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ILoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ILoader.update"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ILoader.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Like &quot;load&quot; but update, if available, an existing object and return it.</span>
+<span class="sd">        If no update is available, method must return new instance.</span>
+
+<span class="sd">        Ex::</span>
+
+<span class="sd">            data = MyData()</span>
+<span class="sd">            loader = MyLoader()</span>
+<span class="sd">            data2 = data.update(&#39;test.dat&#39;, data)</span>
+<span class="sd">            data is data2 # True if update is supported, else False  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="ISerializer"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ISerializer">[docs]</a><span class="k">class</span> <span class="nc">ISerializer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic interface class for savers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c"># Serializer name. If not defined, use class name (ex: &#39;PythonControlSerializer&#39;)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># Interface that can be managed by serializer. (ex: &#39;IControl&#39;)</span>
+    <span class="n">protocols</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># supported output mimetypes. First element is used by default (ex: [&#39;text/x-python&#39;])</span>
+
+    <span class="c"># list of available options (that can be passed in kwds). (ex: &#39;separator:IStr=;&#39; for a CSV serializer)</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="ISerializer.serialize"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.ISerializer.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method must return an iterable object, ideally an iterator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39;iterator&#39;</span>
+
+</div></div>
+<div class="viewcode-block" id="IDeserializer"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.IDeserializer">[docs]</a><span class="k">class</span> <span class="nc">IDeserializer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generic interface class for savers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c"># Deserializer name. If not defined, use class name (ex: &#39;PythonControlDeserializer&#39;)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># Interface that can be output by deserializer. (ex: &#39;IControl&#39;)</span>
+    <span class="n">protocols</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># supported input mimetypes. First element is used by default (ex: [&#39;text/x-python&#39;])</span>
+    <span class="c"># list of available options (that can be passed in kwds). (ex: &#39;separator:IStr=;&#39; for a CSV deserializer)</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="IDeserializer.deserialize"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.IDeserializer.deserialize">[docs]</a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;data&#39;</span>
+</div>
+<div class="viewcode-block" id="IDeserializer.update"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.IDeserializer.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span>  <span class="n">obj</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="AbstractSaver"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractSaver">[docs]</a><span class="k">class</span> <span class="nc">AbstractSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">_open_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
+            <span class="k">print</span> <span class="s">&#39;BUG: filename is a dir&#39;</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">newdir</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">splitpath</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">newdir</span><span class="p">)</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
+                <span class="n">newdir</span><span class="o">.</span><span class="n">makedirs</span><span class="p">()</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_</span>
+
+    <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">file_</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">file_</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">file_</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AbstractSaver.save"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractSaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">file_</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="AbstractLoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractLoader">[docs]</a><span class="k">class</span> <span class="nc">AbstractLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">_iter_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file_</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">line</span>
+        <span class="n">file_</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AbstractLoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractLoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter_file</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deserialize</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="AbstractLoader.update"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractLoader.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="AbstractDeserializer"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractDeserializer">[docs]</a><span class="k">class</span> <span class="nc">AbstractDeserializer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="AbstractDeserializer.deserialize"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractDeserializer.deserialize">[docs]</a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="AbstractDeserializer.update"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.AbstractDeserializer.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="GenericTextSaver"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.GenericTextSaver">[docs]</a><span class="k">class</span> <span class="nc">GenericTextSaver</span><span class="p">(</span><span class="n">AbstractSaver</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classical saver that write str(obj) into file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;GenericSaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*.py&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">,</span> <span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">code</span>
+
+</div>
+<div class="viewcode-block" id="BinarySaver"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BinarySaver">[docs]</a><span class="k">class</span> <span class="nc">BinarySaver</span><span class="p">(</span><span class="n">AbstractSaver</span><span class="p">):</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;BinarySaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*&quot;</span>
+
+<div class="viewcode-block" id="BinarySaver.save"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BinarySaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span> <span class="o">!=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">():</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CPickleSaver"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.CPickleSaver">[docs]</a><span class="k">class</span> <span class="nc">CPickleSaver</span><span class="p">(</span><span class="n">AbstractSaver</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific saver that use cPickle.dump</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;CPickleSaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*&quot;</span>
+
+<div class="viewcode-block" id="CPickleSaver.save"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.CPickleSaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store obj into filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">cPickle</span>
+            <span class="n">cPickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">file_</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install cPickle.&quot;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="BGEOMSaver"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BGEOMSaver">[docs]</a><span class="k">class</span> <span class="nc">BGEOMSaver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific loader that is used to manipulate PlantGL objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;BGEOMSaver&quot;</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="s">&quot;*.BGEOM&quot;</span>
+
+<div class="viewcode-block" id="BGEOMSaver.save"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BGEOMSaver.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store obj into filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">Scene</span>
+            <span class="n">sc</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&quot;BGEOM&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install PlantGL if you want to load a BGEOM object.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Impossible to save the scene for object </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="GenericLoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.GenericLoader">[docs]</a><span class="k">class</span> <span class="nc">GenericLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classical loader that read file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;GenericLoader&quot;</span>
+    <span class="n">input_format</span> <span class="o">=</span> <span class="s">&quot;*.py&quot;</span>
+
+<div class="viewcode-block" id="GenericLoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.GenericLoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param filename: filename to convert into python object</span>
+<span class="sd">        :return: a python object interpreted from string &quot;text&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rU&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">obj</span>
+
+</div></div>
+<div class="viewcode-block" id="BinaryLoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BinaryLoader">[docs]</a><span class="k">class</span> <span class="nc">BinaryLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;BinaryLoader&quot;</span>
+    <span class="n">input_format</span> <span class="o">=</span> <span class="s">&quot;*&quot;</span>
+
+<div class="viewcode-block" id="BinaryLoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BinaryLoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="PythonLoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.PythonLoader">[docs]</a><span class="k">class</span> <span class="nc">PythonLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classical loader that read file and try to eval object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;PythonLoader&quot;</span>
+    <span class="n">input_format</span> <span class="o">=</span> <span class="s">&quot;*.py&quot;</span>
+
+<div class="viewcode-block" id="PythonLoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.PythonLoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param filename: filename to convert into python object</span>
+<span class="sd">        :return: a python object interpreted from string &quot;text&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rU&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">obj</span>
+            <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">obj</span>
+
+</div></div>
+<div class="viewcode-block" id="CPickleLoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.CPickleLoader">[docs]</a><span class="k">class</span> <span class="nc">CPickleLoader</span><span class="p">(</span><span class="n">AbstractLoader</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific loader that use cPickle.loads</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;CPickleLoader&quot;</span>
+    <span class="n">input_format</span> <span class="o">=</span> <span class="s">&quot;*&quot;</span>
+
+<div class="viewcode-block" id="CPickleLoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.CPickleLoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param filename: filename to convert into python object</span>
+<span class="sd">        :return: a python object interpreted from filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">cpik</span> <span class="o">=</span> <span class="s">&quot;False&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">cPickle</span>
+                <span class="n">cpik</span> <span class="o">=</span> <span class="s">&quot;True&quot;</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install cPickle.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cpik</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">file_</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+                    <span class="n">file_</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="n">ret</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;Can&#39;t load file &quot;</span> <span class="o">+</span> <span class="n">filename</span> <span class="o">+</span> <span class="s">&quot; with loader CPickleLoader. &quot;</span>
+                    <span class="k">print</span> <span class="n">e</span>
+
+</div></div>
+<div class="viewcode-block" id="BGEOMLoader"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BGEOMLoader">[docs]</a><span class="k">class</span> <span class="nc">BGEOMLoader</span><span class="p">(</span><span class="n">AbstractLoader</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific loader that is used to manipulate PlantGL objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s">&quot;BGEOMLoader&quot;</span>
+    <span class="n">input_format</span> <span class="o">=</span> <span class="s">&quot;*.BGEOM&quot;</span>
+
+<div class="viewcode-block" id="BGEOMLoader.load"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.serialization.html#core.serialization.BGEOMLoader.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param filename: filename to convert into python object</span>
+<span class="sd">        :return: a python object interpreted from string &quot;text&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">openalea.plantgl.all</span> <span class="kn">import</span> <span class="n">Scene</span>
+                <span class="n">sc</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s">&quot;BGEOM&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">sc</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;You must install PlantGL if you want to load a BGEOM object.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Impossible to load the scene&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

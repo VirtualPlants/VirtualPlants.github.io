@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>image_wralea.serial.serial &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for image_wralea.serial.serial</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       image: image manipulation</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Jerome Chopard &lt;jerome.chopard@sophia.inria.fr&gt;</span>
+<span class="c">#                       Eric Moscardi &lt;eric.moscardi@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module import functions to manipulate images</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span><span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id: __init__.py 2245 2010-02-08 17:11:34Z cokelaer $ &quot;</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">issubdtype</span>
+<span class="kn">from</span> <span class="nn">openalea.image.spatial_image</span> <span class="kn">import</span> <span class="n">SpatialImage</span>
+<span class="kn">from</span> <span class="nn">openalea.image.serial.inrimage</span> <span class="kn">import</span> <span class="n">write_inrimage</span>
+<span class="kn">from</span> <span class="nn">openalea.image.serial.basics</span> <span class="kn">import</span> <span class="n">load</span><span class="p">,</span><span class="n">save</span><span class="p">,</span><span class="n">imread</span><span class="p">,</span> <span class="n">imsave</span>
+
+<div class="viewcode-block" id="wra_load"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/image/image_wralea.serial.serial.html#image_wralea.serial.serial.wra_load">[docs]</a><span class="k">def</span> <span class="nf">wra_load</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mmap_mode</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">return</span> <span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">mmap_mode</span><span class="p">),</span>
+</div>
+<span class="n">wra_load</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="wra_save"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/image/image_wralea.serial.serial.html#image_wralea.serial.serial.wra_save">[docs]</a><span class="k">def</span> <span class="nf">wra_save</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">img</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span><span class="p">,</span>
+</div>
+<span class="n">wra_save</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">save</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="wra_imread"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/image/image_wralea.serial.serial.html#image_wralea.serial.serial.wra_imread">[docs]</a><span class="k">def</span> <span class="nf">wra_imread</span> <span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">return</span> <span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</div>
+<span class="n">wra_imread</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">imread</span><span class="o">.</span><span class="n">__doc__</span>
+
+<div class="viewcode-block" id="wra_imsave"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/image/image_wralea.serial.serial.html#image_wralea.serial.serial.wra_imsave">[docs]</a><span class="k">def</span> <span class="nf">wra_imsave</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">return</span> <span class="n">imsave</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+</div>
+<span class="n">wra_imsave</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">imsave</span><span class="o">.</span><span class="n">__doc__</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

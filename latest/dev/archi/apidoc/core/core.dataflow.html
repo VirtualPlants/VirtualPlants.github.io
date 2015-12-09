@@ -28,8 +28,8 @@
     <link rel="next" title="&lt;no title&gt;" href="core.datapool.html" />
     <link rel="prev" title="&lt;no title&gt;" href="core.data.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,23 +44,354 @@
         <li class="right" >
           <a href="core.data.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-core.dataflow"></span><p>This module provide an implementation of a dataflow</p>
+<dl class="exception">
+<dt id="core.dataflow.PortError">
+<em class="property">exception </em><tt class="descclassname">core.dataflow.</tt><tt class="descname">PortError</tt><a class="reference internal" href="../../../../../_modules/core/dataflow.html#PortError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.PortError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.dataflow.DataFlow">
+<em class="property">class </em><tt class="descclassname">core.dataflow.</tt><tt class="descname">DataFlow</tt><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.core.graph.property_graph.PropertyGraph</span></tt></p>
+<p>Directed graph with connections between in_ports
+of vertices and out_port of vertices
+ports are typed</p>
+<dl class="method">
+<dt id="core.dataflow.DataFlow.actor">
+<tt class="descname">actor</tt><big>(</big><em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.actor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>return actor associated to a given vertex</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.add_actor">
+<tt class="descname">add_actor</tt><big>(</big><em>actor</em>, <em>vid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.add_actor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.add_actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a vertex and the corresponding ports
+and associate it with the given actor
+return: vid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.add_in_port">
+<tt class="descname">add_in_port</tt><big>(</big><em>vid</em>, <em>local_pid</em>, <em>pid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.add_in_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.add_in_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a new in port to vertex pid using local_pid
+use pid as global port id if specified or
+create a new one if None
+raise an error if pid is already used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pid used</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.add_out_port">
+<tt class="descname">add_out_port</tt><big>(</big><em>vid</em>, <em>local_pid</em>, <em>pid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.add_out_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.add_out_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a new out port to vertex pid using local_pid
+use pid as global port id if specified or
+create a new one if None
+raise an error if pid is already used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pid used</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.add_vertex">
+<tt class="descname">add_vertex</tt><big>(</big><em>vid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.add_vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.add_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a vertex to the graph, if vid is not provided create a new vid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vid</strong> (<em>vid</em>) -- the id of the vertex to add, default=None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the id of the created vertex</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">vid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove all vertices and edges
+don't change references to objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.connect">
+<tt class="descname">connect</tt><big>(</big><em>source_pid</em>, <em>target_pid</em>, <em>eid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>connect the out port source_pid with
+the in_port target_pid
+use eid if not None or create a new one
+raise an error if eid is already used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">eid used</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">eid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.connected_edges">
+<tt class="descname">connected_edges</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.connected_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.connected_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate on all edges connected
+to this port
+:rtype: iter of eid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.connected_ports">
+<tt class="descname">connected_ports</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.connected_ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.connected_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate on all ports connected
+to this port
+:rtype: iter of pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.get_all_parent_nodes">
+<tt class="descname">get_all_parent_nodes</tt><big>(</big><em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.get_all_parent_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.get_all_parent_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterator of vextex id corresponding to all the
+parent node of vid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.in_port">
+<tt class="descname">in_port</tt><big>(</big><em>vid</em>, <em>local_pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.in_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.in_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>global port id of a given port
+:rtype: pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.in_ports">
+<tt class="descname">in_ports</tt><big>(</big><em>vid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.in_ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.in_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>iter on all in ports of a given vertex
+iter on all in ports of the dataflow
+if vid is None</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">iter of pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.is_in_port">
+<tt class="descname">is_in_port</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.is_in_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.is_in_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>test whether port refered by pid
+is an in port of its vertex
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.is_out_port">
+<tt class="descname">is_out_port</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.is_out_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.is_out_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>test whether port refered by pid
+is an out port of its vertex
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.local_id">
+<tt class="descname">local_id</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.local_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.local_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>local port identifier of a given port
+specified by its global pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.nb_connections">
+<tt class="descname">nb_connections</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.nb_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.nb_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute number of edges connected to a given port.</p>
+<dl class="docutils">
+<dt>args:</dt>
+<dd><ul class="first last simple">
+<li>pid (pid): id of port</li>
+</ul>
+</dd>
+<dt>return:</dt>
+<dd><ul class="first last simple">
+<li>int</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.out_port">
+<tt class="descname">out_port</tt><big>(</big><em>vid</em>, <em>local_pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.out_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.out_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>global port id of a given port
+:rtype: pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.out_ports">
+<tt class="descname">out_ports</tt><big>(</big><em>vid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.out_ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.out_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>iter on all out ports of a given vertex
+iter on all out ports of the dataflow
+if vid is None</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vid</strong> -- todo</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">iter of pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.port">
+<tt class="descname">port</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.port" title="Permalink to this definition">¶</a></dt>
+<dd><p>port object specified by its global pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.ports">
+<tt class="descname">ports</tt><big>(</big><em>vid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>iter on all ports of a given vertex
+iter on all ports of the dataflow
+if vid is None</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">iter of pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.remove_port">
+<tt class="descname">remove_port</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.remove_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.remove_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove the specified port
+and all connections to this port</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.remove_vertex">
+<tt class="descname">remove_vertex</tt><big>(</big><em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.remove_vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.remove_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove a specified vertex of the graph
+remove all the edges attached to it</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vid</strong> (<em>vid</em>) -- the id of the vertex to remove</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.set_actor">
+<tt class="descname">set_actor</tt><big>(</big><em>vid</em>, <em>actor</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.set_actor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.set_actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>associate an actor to a given vertex</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.source_port">
+<tt class="descname">source_port</tt><big>(</big><em>eid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.source_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.source_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>out port of the source vertex
+of the edge</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eid</strong> -- todo</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.target_port">
+<tt class="descname">target_port</tt><big>(</big><em>eid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.target_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.target_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>in port of the target vertex
+of the edge</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eid</strong> -- todo</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pid</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.dataflow.DataFlow.vertex">
+<tt class="descname">vertex</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#DataFlow.vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.DataFlow.vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the id of the vertex which own the port
+:rtype: vid</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.dataflow.Port">
+<em class="property">class </em><tt class="descclassname">core.dataflow.</tt><tt class="descname">Port</tt><big>(</big><em>vid</em>, <em>local_pid</em>, <em>is_out_port</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#Port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.Port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>simple structure to maintain some port property
+a port is an entry point to a vertex</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.dataflow.SubDataflow">
+<em class="property">class </em><tt class="descclassname">core.dataflow.</tt><tt class="descname">SubDataflow</tt><big>(</big><em>dataflow</em>, <em>algo</em>, <em>node_id</em>, <em>port_index</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/dataflow.html#SubDataflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.dataflow.SubDataflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>Represents a part of a dataflow for a partial evaluation
+A SubDataflow is a callable and absracts a part of a dataflow as a funtion</p>
+</dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="core.data.html"
@@ -68,14 +399,12 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="core.datapool.html"
                         title="next chapter">&lt;no title&gt;</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.dataflow.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.dataflow.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -92,7 +421,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -107,14 +436,14 @@
         <li class="right" >
           <a href="core.data.html" title="&lt;no title&gt;"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" >core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" >core package</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

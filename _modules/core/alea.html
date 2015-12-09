@@ -1,0 +1,458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.alea &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="up" title="core" href="../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.alea</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Samuel Dufour-Kowalski &lt;samuel.dufour@sophia.inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+<span class="sd">&quot;&quot;&quot; a script to run alea dataflow and scripts&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot;$Id$&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+<span class="c">#import threading</span>
+<span class="kn">from</span> <span class="nn">openalea.core.pkgmanager</span> <span class="kn">import</span> <span class="n">PackageManager</span>
+
+
+<div class="viewcode-block" id="start_qt"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.start_qt">[docs]</a><span class="k">def</span> <span class="nf">start_qt</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Start Qt, and open widget of factory, node</span>
+
+<span class="sd">    :param factory: todo</span>
+<span class="sd">    :param node: todo</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+    <span class="c"># CTRL+C binding</span>
+    <span class="kn">import</span> <span class="nn">signal</span>
+    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIG_DFL</span><span class="p">)</span>
+
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">()</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate_widget</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">autonomous</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">dialog</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WA_DeleteOnClose</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">dialog</span><span class="p">)</span>
+
+    <span class="n">vboxlayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">dialog</span><span class="p">)</span>
+    <span class="n">vboxlayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">vboxlayout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">vboxlayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+
+    <span class="n">dialog</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">dialog</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="load_package_manager"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.load_package_manager">[docs]</a><span class="k">def</span> <span class="nf">load_package_manager</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return the package manager</span>
+
+<span class="sd">    :param pkg_id:  package id</span>
+<span class="sd">    :param node_id: node id</span>
+<span class="sd">    :returns: package manager</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">PackageManager</span><span class="p">()</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pm</span>
+
+</div>
+<div class="viewcode-block" id="get_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.get_node">[docs]</a><span class="k">def</span> <span class="nf">get_node</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">pm</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; retrieve a node from its component name and inputs</span>
+
+<span class="sd">    :param component: todo</span>
+<span class="sd">    :param inputs: todo</span>
+<span class="sd">    :param pm: package manager</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pkg_id</span><span class="p">,</span> <span class="n">node_id</span> <span class="o">=</span> <span class="n">component</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pm</span><span class="p">):</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">load_package_manager</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">pm</span><span class="p">[</span><span class="n">pkg_id</span><span class="p">][</span><span class="n">node_id</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Cannot run node </span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pkg_id</span><span class="p">,</span> <span class="n">node_id</span><span class="p">)</span>
+        <span class="n">query</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">pm</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">e</span>
+
+    <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Unknown input </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">)</span>
+                <span class="n">query</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">pm</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+    <span class="k">return</span> <span class="n">factory</span><span class="p">,</span> <span class="n">node</span>
+
+</div>
+<div class="viewcode-block" id="run_and_display"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.run_and_display">[docs]</a><span class="k">def</span> <span class="nf">run_and_display</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">gui</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">pm</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; run component with inputs</span>
+
+<span class="sd">    :param component: todo</span>
+<span class="sd">    :param inputs: todo</span>
+<span class="sd">    :param gui: todo</span>
+<span class="sd">    :param pm: package manager</span>
+<span class="sd">    :type gui: boolean (default is False)</span>
+<span class="sd">    :type pm: package manager</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">factory</span><span class="p">,</span> <span class="n">node</span> <span class="o">=</span> <span class="n">get_node</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">pm</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">gui</span><span class="p">):</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <span class="k">print</span> <span class="n">_outputs</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Error while executing component : &quot;</span><span class="p">,</span> <span class="n">error</span>
+            <span class="k">print</span> <span class="s">&quot;Try with -g flag&quot;</span>
+        <span class="k">return</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_qt</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">pm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Run component with inputs. can exit by exception.</span>
+
+<span class="sd">    If node_id is given, eval the dataflow from that node and return the result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_factory</span><span class="p">,</span> <span class="n">node</span> <span class="o">=</span> <span class="n">get_node</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">pm</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">vtx_id</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">_outputs</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">eval_as_expression</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_outputs</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="query"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.query">[docs]</a><span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">pm</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; show help of component &quot;&quot;&quot;</span>
+
+    <span class="n">pkg_id</span><span class="p">,</span> <span class="n">node_id</span> <span class="o">=</span> <span class="n">component</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pm</span><span class="p">):</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">load_package_manager</span><span class="p">()</span>
+
+    <span class="c"># package not found</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pkg_id</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">pm</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">pkg_id</span><span class="p">)):</span>
+
+        <span class="k">print</span> <span class="s">&quot;Package &#39;</span><span class="si">%s</span><span class="s">&#39; not found.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pkg_id</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Available packages are :&quot;</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;   &quot;</span><span class="p">,</span> <span class="n">p</span>
+
+        <span class="k">return</span>
+
+    <span class="n">pkg</span> <span class="o">=</span> <span class="n">pm</span><span class="p">[</span><span class="n">pkg_id</span><span class="p">]</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">pkg</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">node_id</span><span class="p">)):</span>
+        <span class="k">print</span> <span class="s">&quot;Unknown node &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="p">)</span>
+        <span class="n">node_id</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># query package</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Package&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;-------&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;name : &quot;</span><span class="p">,</span> <span class="n">pkg</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">pkg</span><span class="o">.</span><span class="n">metainfo</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">node_id</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Available nodes are:&quot;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;   &quot;</span><span class="p">,</span> <span class="n">pkg</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span>
+
+    <span class="c"># query node</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">pkg</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">__doc__</span>
+
+        <span class="k">if</span> <span class="n">doc</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">]</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">description</span>
+
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Component&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;---------&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;Name : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;Documentation : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;Inputs:&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_nb_input</span><span class="p">()):</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_input_port</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;  &quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s">&quot;Outputs:&quot;</span>
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">output_desc</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;  &quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">get_tip</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="parse_component"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.parse_component">[docs]</a><span class="k">def</span> <span class="nf">parse_component</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return (pkg_id, node_id) from name &quot;&quot;&quot;</span>
+
+    <span class="n">tname</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tname</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">tname</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tname</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">tname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">elif</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tname</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">tname</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tname</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Component name error :</span><span class="se">\</span>
+<span class="s">            cannot parse &#39;pkg_id:node_id&#39;&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_intput_callback"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.get_intput_callback">[docs]</a><span class="k">def</span> <span class="nf">get_intput_callback</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">opt_str</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">rargs</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">rargs</span>
+    <span class="k">while</span> <span class="n">rargs</span><span class="p">:</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">rargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># Stop if we hit an arg like &quot;--foo&quot;, &quot;-a&quot;, &quot;-fx&quot;, &quot;--file=f&quot;,</span>
+        <span class="c"># etc.  Note that this also stops on &quot;-3&quot; or &quot;-3.0&quot;, so if</span>
+        <span class="c"># your option takes numeric values, you will need to handle</span>
+        <span class="c"># this.</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">arg</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;--&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">or</span>
+            <span class="p">(</span><span class="n">arg</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;-&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&quot;-&quot;</span><span class="p">)):</span>
+            <span class="k">break</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)</span>
+            <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid input </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)))</span>
+
+
+            <span class="n">value</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">rargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="n">value</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="function"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.function">[docs]</a><span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="n">factory</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Return a function which is evaluated like a python function.</span>
+
+<span class="sd">    factory is a NodeFactory.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwds</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+        <span class="n">nb_output</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_output</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">f</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_outputs</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="c">#return node.outputs</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">())]</span>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.alea.html#core.alea.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Parse options &quot;&quot;&quot;</span>
+
+        <span class="c"># options</span>
+    <span class="n">usage</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">%prog [-r|-q] package_id[:node_id] [-i key1=val1 key2=val2 ...]</span>
+<span class="s">or</span>
+<span class="s">%prog [-r|-q] package_id[/node_id] [-i key1=val1 key2=val2 ...]</span>
+<span class="s">&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">(</span><span class="n">usage</span><span class="o">=</span><span class="n">usage</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-q&quot;</span><span class="p">,</span> <span class="s">&quot;--query&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;query&quot;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&quot;Show package/component help.&quot;</span><span class="p">,</span>
+                       <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span>
+                       <span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-r&quot;</span><span class="p">,</span> <span class="s">&quot;--run&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;run&quot;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&quot;Run component.&quot;</span><span class="p">,</span>
+                       <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span>
+                       <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-g&quot;</span><span class="p">,</span> <span class="s">&quot;--gui&quot;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&quot;Open graphical user interface&quot;</span><span class="p">,</span>
+                       <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-l&quot;</span><span class="p">,</span> <span class="s">&quot;--local_data&quot;</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&quot;Data are local (ie in current directory)&quot;</span><span class="p">,</span>
+                       <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span> <span class="s">&quot;--input&quot;</span><span class="p">,</span>
+                       <span class="n">action</span><span class="o">=</span><span class="s">&quot;callback&quot;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">get_intput_callback</span><span class="p">,</span>
+                       <span class="n">help</span><span class="o">=</span><span class="s">&quot;Specify inputs as KEY=VALUE, KEY=VALUE...&quot;</span><span class="p">,</span>
+                       <span class="n">dest</span><span class="o">=</span><span class="s">&quot;input&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span><span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_usage</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s">&quot;Error while parsing args:&quot;</span><span class="p">,</span> <span class="n">error</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Incomplete command : specify a &#39;package_id:node_id&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">component</span> <span class="o">=</span> <span class="n">parse_component</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c"># Execute</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">local_data</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">openalea.core.data</span>
+        <span class="n">openalea</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">PackageData</span><span class="o">.</span><span class="n">__local__</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">run</span><span class="p">):</span>
+        <span class="n">run_and_display</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">gui</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">query</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="p">)</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+
+<span class="c"># this example need to be fixed</span>
+<span class="c">#python alea.py -r -g &quot;adel.macro:6 plot_scene&quot;</span>
+<span class="c">#-i leafdb=&quot;&#39;$OPENALEAPKG/adel/adel/data/leaves1.db&#39;&quot;</span>
+<span class="c"># lsystem=&quot;&#39;$OPENALEAPKG/adel/adel/lsystem/Adel.l&#39;&quot;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

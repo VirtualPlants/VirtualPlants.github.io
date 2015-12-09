@@ -1,0 +1,1323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.compositenode &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../index.html" />
+    <link rel="up" title="core" href="../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.compositenode</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.Core</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2006-2009 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Samuel Dufour-Kowalski &lt;samuel.dufour@sophia.inria.fr&gt;</span>
+<span class="c">#                       Christophe Pradal &lt;christophe.prada@cirad.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">##############################################################################</span>
+<span class="sd">&quot;&quot;&quot;A CompositeNode is a Node that contains other nodes connected in a directed</span>
+<span class="sd">graph. A CompositeNodeFactory instance is a factory that build CompositeNode</span>
+<span class="sd">instances. Different instances of the same factory can coexist and can be</span>
+<span class="sd">modified in a dataflow.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&quot;Cecill-C&quot;</span>
+<span class="n">__revision__</span> <span class="o">=</span> <span class="s">&quot; $Id$ &quot;</span>
+
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">AbstractFactory</span><span class="p">,</span> <span class="n">AbstractPort</span><span class="p">,</span> <span class="n">Node</span>
+<span class="kn">from</span> <span class="nn">openalea.core.node</span> <span class="kn">import</span> <span class="n">RecursionError</span>
+<span class="kn">from</span> <span class="nn">openalea.core.pkgmanager</span> <span class="kn">import</span> <span class="n">PackageManager</span><span class="p">,</span> <span class="n">UnknownPackageError</span>
+<span class="kn">from</span> <span class="nn">openalea.core.package</span> <span class="kn">import</span> <span class="n">UnknownNodeError</span>
+<span class="kn">from</span> <span class="nn">openalea.core.dataflow</span> <span class="kn">import</span> <span class="n">DataFlow</span><span class="p">,</span> <span class="n">InvalidEdge</span><span class="p">,</span> <span class="n">PortError</span>
+<span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">openalea.core.metadatadict</span> <span class="kn">import</span> <span class="n">MetaDataDict</span>
+<span class="kn">import</span> <span class="nn">logger</span>
+
+<span class="n">quantify</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="IncompatibleNodeError"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.IncompatibleNodeError">[docs]</a><span class="k">class</span> <span class="nc">IncompatibleNodeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory">[docs]</a><span class="k">class</span> <span class="nc">CompositeNodeFactory</span><span class="p">(</span><span class="n">AbstractFactory</span><span class="p">):</span>
+
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&quot;openalea/compositenodefactory&quot;</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The CompositeNodeFactory is able to create CompositeNode instances</span>
+<span class="sd">    Each node has an unique id : the element id (elt_id)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        CompositeNodeFactory accept more optional parameters:</span>
+
+<span class="sd">        - inputs: list of dict(name = &#39;&#39;, interface=&#39;&#39;, value=&#39;&#39;)</span>
+<span class="sd">        - outputs: list of dict(name = &#39;&#39;, interface=&#39;&#39;, value=&#39;&#39;)</span>
+<span class="sd">        - doc: documentation</span>
+<span class="sd">        - elt_factory: map of elements with its corresponding factory</span>
+<span class="sd">        - elt_connections: map of ( dst_id , input_port ):(src_id,output_port)</span>
+<span class="sd">        - elt_data: Dictionary containing associated data</span>
+<span class="sd">        - elt_value: Dictionary containing Lists of 2-uples (port, value)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Init parent (name, description, category, doc, node, widget=None)</span>
+        <span class="n">AbstractFactory</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="c"># A CompositeNode is composed by a set of element indexed by an elt_id</span>
+        <span class="c"># Each element is associated to NodeFactory</span>
+        <span class="c"># Each element will generate an node instance in the real CompositeNode</span>
+
+        <span class="c"># Dict mapping elt_id with its corresponding factory</span>
+        <span class="c"># the factory is identified by its unique id (package_id, factory_id)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;elt_factory&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="c"># Dictionnary which contains tuples describing connection</span>
+        <span class="c"># ( source_vid , source_port ) : ( target_vid, target_port )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;elt_connections&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;elt_data&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_value</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;elt_value&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_ad_hoc</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;elt_ad_hoc&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.algo.dataflow_evaluation</span> <span class="kn">import</span> <span class="n">DefaultEvaluation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_algo</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;eval_algo&quot;</span><span class="p">,</span> <span class="n">DefaultEvaluation</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="c"># Documentation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;doc&#39;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span>
+
+<div class="viewcode-block" id="CompositeNodeFactory.is_composite_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.is_composite_node">[docs]</a>    <span class="k">def</span> <span class="nf">is_composite_node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.get_documentation"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.get_documentation">[docs]</a>    <span class="k">def</span> <span class="nf">get_documentation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.clear"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elt_value</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.copy"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Copy factory.</span>
+
+<span class="sd">        :param path: new search path</span>
+<span class="sd">        :param replace_pkg: old and new package names.</span>
+
+<span class="sd">        When replace package is set, change the package id for all the</span>
+<span class="sd">        elt factories.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">AbstractFactory</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># Replace old pkg name to new pkg name</span>
+        <span class="p">(</span><span class="n">old_pkg</span><span class="p">,</span> <span class="n">new_pkg</span><span class="p">)</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;replace_pkg&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">elt_factory</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">pkg_id</span> <span class="o">==</span> <span class="n">old_pkg</span><span class="o">.</span><span class="n">get_id</span><span class="p">()):</span>
+                <span class="n">pkg_id</span> <span class="o">=</span> <span class="n">new_pkg</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.get_writer"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.get_writer">[docs]</a>    <span class="k">def</span> <span class="nf">get_writer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the writer class &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">PyCNFactoryWriter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.instantiate"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_stack</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create a CompositeNode instance and allocate all elements</span>
+<span class="sd">        This function overide default implementation of NodeFactory</span>
+
+<span class="sd">        :param call_stack: the list of NodeFactory id already in recursion stack (in order to avoid infinite loop)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Test for infinite loop</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">call_stack</span><span class="p">):</span>
+            <span class="n">call_stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span> <span class="ow">in</span> <span class="n">call_stack</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RecursionError</span><span class="p">()</span>
+
+        <span class="n">call_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
+
+        <span class="n">new_df</span> <span class="o">=</span> <span class="n">CompositeNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_id</span><span class="p">())</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">eval_algo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_algo</span>
+
+        <span class="n">cont_eval</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="c"># continuous evaluated nodes</span>
+
+        <span class="c"># Instantiate the node with each factory</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instantiate_node</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">call_stack</span><span class="p">)</span>
+
+                <span class="c"># Manage continuous eval</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">user_application</span><span class="p">):</span>
+                    <span class="n">cont_eval</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="p">(</span><span class="n">UnknownNodeError</span><span class="p">,</span> <span class="n">UnknownPackageError</span><span class="p">):</span>
+
+                <span class="k">print</span> <span class="s">&quot;WARNING : The graph is not fully operational &quot;</span>
+                <span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="n">fact</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+                <span class="k">print</span> <span class="s">&quot;-&gt; Cannot find &#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="n">fact</span><span class="p">)</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_fake_node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">raise_exception</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;data_modified&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">))</span>
+
+            <span class="n">new_df</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># Set IO internal data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_ad_hoc_data</span><span class="p">(</span><span class="n">new_df</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">new_df</span><span class="o">.</span><span class="n">id_in</span><span class="p">),</span>
+                                  <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="s">&quot;__in__&quot;</span><span class="p">]),</span>
+                                  <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;__in__&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_ad_hoc_data</span><span class="p">(</span><span class="n">new_df</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">new_df</span><span class="o">.</span><span class="n">id_out</span><span class="p">),</span>
+                                  <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="s">&quot;__out__&quot;</span><span class="p">]),</span>
+                                  <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;__out__&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c"># Create the connections</span>
+        <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="p">(</span><span class="n">source_vid</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">target_vid</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span> <span class="o">=</span> <span class="n">link</span>
+
+            <span class="c"># Replace id for in and out nodes</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">source_vid</span> <span class="o">==</span> <span class="s">&#39;__in__&#39;</span><span class="p">):</span>
+                <span class="n">source_vid</span> <span class="o">=</span> <span class="n">new_df</span><span class="o">.</span><span class="n">id_in</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">target_vid</span> <span class="o">==</span> <span class="s">&#39;__out__&#39;</span><span class="p">):</span>
+                <span class="n">target_vid</span> <span class="o">=</span> <span class="n">new_df</span><span class="o">.</span><span class="n">id_out</span>
+
+            <span class="n">new_df</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source_vid</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">target_vid</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span>
+
+        <span class="c"># Set continuous evaluation</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">cont_eval</span><span class="p">:</span>
+             <span class="n">new_df</span><span class="o">.</span><span class="n">set_continuous_eval</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># Set call stack to its original state</span>
+        <span class="n">call_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="c"># Properties</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># Graph is not modifyied</span>
+
+        <span class="k">return</span> <span class="n">new_df</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.create_fake_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.create_fake_node">[docs]</a>    <span class="k">def</span> <span class="nf">create_fake_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return an empty node with the correct number of inputs</span>
+<span class="sd">        and output &quot;&quot;&quot;</span>
+
+        <span class="c"># Count in and out needed</span>
+        <span class="n">ins</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">outs</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="p">(</span><span class="n">source_vid</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">target_vid</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span> <span class="o">=</span> <span class="n">link</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">source_vid</span> <span class="o">==</span> <span class="n">vid</span><span class="p">):</span>
+                <span class="n">outs</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">outs</span><span class="p">,</span> <span class="n">source_port</span><span class="p">)</span>
+            <span class="k">elif</span><span class="p">(</span><span class="n">target_vid</span> <span class="o">==</span> <span class="n">vid</span><span class="p">):</span>
+                <span class="n">ins</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">()</span>
+
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="n">vid</span><span class="p">])</span>
+        <span class="n">ad_hoc</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_ad_hoc_data</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">ad_hoc</span><span class="p">)</span>
+
+        <span class="c"># copy node input data if any</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="p">()))</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ins</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">add_input</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;In&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">outs</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">add_output</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;Out&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c">#the two first elements are the historical</span>
+                <span class="c">#values : port Id and port value</span>
+                <span class="c">#beyond that are extensions added by gengraph:</span>
+                <span class="c">#the ad_hoc_dict representation is third.</span>
+                <span class="n">port</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vs</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="nb">eval</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+                <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">):</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">MetaDataDict</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">input_desc</span><span class="p">[</span><span class="n">port</span><span class="p">]</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+
+        <span class="k">return</span> <span class="n">node</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.paste"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.paste">[docs]</a>    <span class="k">def</span> <span class="nf">paste</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnode</span><span class="p">,</span> <span class="n">data_modifiers</span><span class="o">=</span><span class="p">[],</span> <span class="n">call_stack</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Paste to an existing CompositeNode instance</span>
+
+<span class="sd">        :param cnode: composite node instance</span>
+<span class="sd">        :param data_modifiers: list of 2-uple (key, function) to apply</span>
+<span class="sd">            to internal data (for instance to move the node)</span>
+<span class="sd">        :param call_stack: the list of NodeFactory id already in recursion</span>
+<span class="sd">            stack (in order to avoid infinite loop)</span>
+
+<span class="sd">        :returns: the list of created id</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># map to convert id</span>
+        <span class="n">idmap</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># Instantiate the node with each factory</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instantiate_node</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">call_stack</span><span class="p">)</span>
+
+            <span class="c"># Apply modifiers (if callable)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_modifiers</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span><span class="p">(</span><span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">)):</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">meta</span><span class="p">):</span>
+                            <span class="n">func</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">n</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">n</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="n">newid</span> <span class="o">=</span> <span class="n">cnode</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">idmap</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newid</span>
+
+        <span class="c"># Create the connections</span>
+        <span class="k">for</span> <span class="n">eid</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="p">(</span><span class="n">source_vid</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">target_vid</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span> <span class="o">=</span> <span class="n">link</span>
+
+            <span class="c"># convert id</span>
+            <span class="n">source_vid</span> <span class="o">=</span> <span class="n">idmap</span><span class="p">[</span><span class="n">source_vid</span><span class="p">]</span>
+            <span class="n">target_vid</span> <span class="o">=</span> <span class="n">idmap</span><span class="p">[</span><span class="n">target_vid</span><span class="p">]</span>
+
+            <span class="n">cnode</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source_vid</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">target_vid</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">idmap</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.load_ad_hoc_data"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.load_ad_hoc_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_ad_hoc_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">elt_data</span><span class="p">,</span> <span class="n">elt_ad_hoc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">elt_ad_hoc</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elt_ad_hoc</span><span class="p">):</span>
+            <span class="c">#reading 0.8+ files.</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">MetaDataDict</span><span class="p">(</span><span class="nb">dict</span><span class="o">=</span><span class="n">elt_ad_hoc</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#extracting ad hoc data from old files.</span>
+            <span class="c">#we parse the Node class&#39; __ad_hoc_from_old_map__</span>
+            <span class="c">#which defines conversions between new ad_hoc_dict keywords</span>
+            <span class="c">#and old internal_data keywords.</span>
+            <span class="c">#These dictionnaries are used to extend ad_hoc_dict of a node with the</span>
+            <span class="c">#data that views expect. See node.initialise_standard_metadata() for an example.</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s">&quot;__ad_hoc_from_old_map__&quot;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">newKey</span><span class="p">,</span> <span class="n">oldKeys</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">__ad_hoc_from_old_map__</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span> <span class="c">#list that stores the new values</span>
+                    <span class="n">_type</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">__ad_hoc_slots__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newKey</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">oldKeys</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">data</span><span class="p">):</span> <span class="c">#?</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">default</span>
+                    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="p">:</span> <span class="k">continue</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="n">newKey</span><span class="p">,</span> <span class="n">_type</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="c">#finally put the internal data (elt_data) where it has always been expected.</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">_init_internal_data</span><span class="p">(</span><span class="n">elt_data</span><span class="p">)</span>
+<span class="c">#        node.internal_data.update(elt_data)</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeFactory.instantiate_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.instantiate_node">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">call_stack</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Partial instantiation</span>
+
+<span class="sd">        instantiate only elt_id in CompositeNode</span>
+
+<span class="sd">        :param call_stack: a list of parent id (to avoid infinite recursion)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">package_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span>
+        <span class="n">pkgmanager</span> <span class="o">=</span> <span class="n">PackageManager</span><span class="p">()</span>
+        <span class="n">pkg</span> <span class="o">=</span> <span class="n">pkgmanager</span><span class="p">[</span><span class="n">package_id</span><span class="p">]</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">get_factory</span><span class="p">(</span><span class="n">factory_id</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span><span class="n">call_stack</span><span class="p">)</span>
+
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="n">vid</span><span class="p">])</span>
+        <span class="n">ad_hoc</span>     <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_ad_hoc_data</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">ad_hoc</span><span class="p">)</span>
+
+        <span class="c"># copy node input data if any</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elt_value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="p">()))</span>
+
+        <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c">#the two first elements are the historical</span>
+                <span class="c">#values : port Id and port value</span>
+                <span class="c">#the values beyond are not used.</span>
+                <span class="n">port</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vs</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="nb">eval</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">input_desc</span><span class="p">[</span><span class="n">port</span><span class="p">]</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="s">&quot;hide&quot;</span><span class="p">,</span>
+                                                                     <span class="n">node</span><span class="o">.</span><span class="n">is_port_hidden</span><span class="p">(</span><span class="n">port</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+        <span class="k">return</span> <span class="n">node</span>
+
+    <span class="c">#########################################################</span>
+    <span class="c"># This shouldn&#39;t be here, it is related to visual stuff #</span>
+    <span class="c">#########################################################</span></div>
+<div class="viewcode-block" id="CompositeNodeFactory.instantiate_widget"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeFactory.instantiate_widget">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+            <span class="n">edit</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">autonomous</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the corresponding widget initialised with node</span>
+
+<span class="sd">        If node is None, the node is allocated else a composite</span>
+<span class="sd">        widget composed with the node sub widget is returned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">edit</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">openalea.visualea.dataflowview</span> <span class="kn">import</span> <span class="n">GraphicalGraph</span>
+            <span class="k">return</span> <span class="n">GraphicalGraph</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">create_view</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">node</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+
+        <span class="kn">from</span> <span class="nn">openalea.visualea.compositenode_widget</span> <span class="kn">import</span> <span class="n">DisplayGraphWidget</span>
+        <span class="k">return</span> <span class="n">DisplayGraphWidget</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">autonomous</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CompositeNode"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode">[docs]</a><span class="k">class</span> <span class="nc">CompositeNode</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">DataFlow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The CompositeNode is a container that interconnect</span>
+<span class="sd">    different node instances between them in directed graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&quot;openalea/compositenode&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">(),</span> <span class="n">outputs</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot; Inputs and outputs are list of</span>
+<span class="sd">        dict(name=&#39;&#39;, interface=&#39;&#39;, value=&#39;&#39;) &quot;&quot;&quot;</span>
+
+        <span class="n">DataFlow</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+        <span class="c"># graph modification status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluating</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_algo</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="CompositeNode.copy_to"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.copy_to">[docs]</a>    <span class="k">def</span> <span class="nf">copy_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.close"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">()):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">Node</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.reset"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reset nodes &quot;&quot;&quot;</span>
+
+        <span class="n">Node</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">()):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.invalidate"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.invalidate">[docs]</a>    <span class="k">def</span> <span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Invalidate nodes &quot;&quot;&quot;</span>
+
+        <span class="n">Node</span><span class="o">.</span><span class="n">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">()):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">invalidate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.set_io"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.set_io">[docs]</a>    <span class="k">def</span> <span class="nf">set_io</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define inputs and outputs</span>
+
+<span class="sd">        Inputs and outputs are list of dict(name=&#39;&#39;, interface=&#39;&#39;, value=&#39;&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># I/O ports</span>
+        <span class="c"># Remove node if nb of input has changed</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+           <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">)</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+           <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">)</span><span class="o">.</span><span class="n">get_nb_input</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Create new io node if necessary</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">CompositeNodeInput</span><span class="p">(</span><span class="n">inputs</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">)</span><span class="o">.</span><span class="n">set_io</span><span class="p">((),</span> <span class="n">inputs</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">CompositeNodeOutput</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">)</span><span class="o">.</span><span class="n">set_io</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="p">())</span>
+
+        <span class="n">Node</span><span class="o">.</span><span class="n">set_io</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.set_input"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.set_input">[docs]</a>    <span class="k">def</span> <span class="nf">set_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_key</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Copy val into input node output ports &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">)</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">index_key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.get_input"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.get_input">[docs]</a>    <span class="k">def</span> <span class="nf">get_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the composite node input&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">)</span><span class="o">.</span><span class="n">get_input</span><span class="p">(</span><span class="n">index_key</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.get_output"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.get_output">[docs]</a>    <span class="k">def</span> <span class="nf">get_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Retrieve values from output node input ports &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">)</span><span class="o">.</span><span class="n">get_output</span><span class="p">(</span><span class="n">index_key</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.set_output"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.set_output">[docs]</a>    <span class="k">def</span> <span class="nf">set_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set a value to an output &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">)</span><span class="o">.</span><span class="n">set_output</span><span class="p">(</span><span class="n">index_key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.get_eval_algo"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.get_eval_algo">[docs]</a>    <span class="k">def</span> <span class="nf">get_eval_algo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the evaluation algo instance &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">algo_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_algo</span>
+
+            <span class="n">algo_str</span> <span class="o">=</span> <span class="n">algo_str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">);</span>
+            <span class="n">algo_str</span> <span class="o">=</span> <span class="n">algo_str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span>
+
+
+            <span class="c"># import module</span>
+            <span class="n">baseimp</span> <span class="o">=</span> <span class="s">&quot;algo.dataflow_evaluation&quot;</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">baseimp</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span> <span class="p">[</span><span class="n">algo_str</span><span class="p">])</span>
+            <span class="n">classobj</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">algo_str</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">classobj</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="kn">from</span>  <span class="nn">openalea.core.algo.dataflow_evaluation</span> <span class="kn">import</span> <span class="n">DefaultEvaluation</span>
+            <span class="k">return</span> <span class="n">DefaultEvaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_algo</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.eval_as_expression"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.eval_as_expression">[docs]</a>    <span class="k">def</span> <span class="nf">eval_as_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate a vtx_id</span>
+
+<span class="sd">        if node_id is None, then all the nodes without sons are evaluated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">time</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluating</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">vtx_id</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_eval_algo</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evaluating</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">algo</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">,</span><span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evaluating</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">quantify</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Evaluation time: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">))</span>
+            <span class="k">print</span> <span class="s">&#39;Evaluation time: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+    <span class="c"># Functions used by the node evaluator</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.eval"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the graph</span>
+
+<span class="sd">        Return True if the node need a reevaluation (like generator)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;status_modified&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modified</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_as_expression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_as_expression</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">()</span>
+
+<div class="viewcode-block" id="CompositeNode.to_script"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.to_script">[docs]</a>    <span class="k">def</span> <span class="nf">to_script</span> <span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Translate the dataflow into a python script.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">algo.dataflow_evaluation</span> <span class="kn">import</span> <span class="n">ToScriptEvaluation</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">ToScriptEvaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">algo</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.node">[docs]</a>    <span class="k">def</span> <span class="nf">node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Convenience function &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.compute_external_io"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.compute_external_io">[docs]</a>    <span class="k">def</span> <span class="nf">compute_external_io</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex_selection</span><span class="p">,</span> <span class="n">new_vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the list of input and output edges to connect the composite</span>
+<span class="sd">        node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ins</span><span class="p">,</span> <span class="n">in_edges</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_inout_connection</span><span class="p">(</span><span class="n">vertex_selection</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">outs</span><span class="p">,</span> <span class="n">out_edges</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_inout_connection</span><span class="p">(</span><span class="n">vertex_selection</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="n">in_edges</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_outside_connection</span><span class="p">(</span><span class="n">vertex_selection</span><span class="p">,</span> <span class="n">in_edges</span><span class="p">,</span> 
+                <span class="n">new_vid</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">out_edges</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_outside_connection</span><span class="p">(</span><span class="n">vertex_selection</span><span class="p">,</span> <span class="n">out_edges</span><span class="p">,</span>
+                <span class="n">new_vid</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">in_edges</span> <span class="o">+</span> <span class="n">out_edges</span>
+</div>
+    <span class="k">def</span> <span class="nf">_compute_outside_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex_selection</span><span class="p">,</span> <span class="n">new_connections</span><span class="p">,</span>
+                                    <span class="n">new_vid</span><span class="p">,</span> <span class="n">is_input</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return external connections of a composite node with input and output</span>
+<span class="sd">        ports.</span>
+
+<span class="sd">        :param vertex_selection: a sorted set of node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">selected_port</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">is_input</span><span class="p">:</span>
+            <span class="n">ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_ports</span>
+            <span class="n">get_vertex_io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+            <span class="n">get_my_vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_ports</span>
+            <span class="n">get_vertex_io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+            <span class="n">get_my_vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+
+        <span class="c"># For each selected vertices</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">vertex_selection</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+                <span class="n">connected_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_edges</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">connected_edges</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">get_vertex_io</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vertex_selection</span><span class="p">:</span>
+                        <span class="n">pname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+                        <span class="n">selected_port</span><span class="o">.</span><span class="n">setdefault</span><span class="p">((</span><span class="n">vid</span><span class="p">,</span> <span class="n">pname</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">new_connections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_input</span><span class="p">:</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;__in__&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">target_id</span><span class="p">,</span> <span class="n">target_port</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">target_id</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span> <span class="ow">in</span> <span class="n">selected_port</span><span class="p">:</span>
+                    <span class="n">target_edges</span> <span class="o">=</span> <span class="n">selected_port</span><span class="p">[(</span><span class="n">target_id</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">target_edges</span><span class="p">:</span>
+                        <span class="n">vid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                        <span class="n">port_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_port</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                        <span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vid</span><span class="p">,</span> <span class="n">port_id</span><span class="p">,</span> <span class="n">new_vid</span><span class="p">,</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;__out__&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">source_id</span><span class="p">,</span> <span class="n">source_port</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">source_port</span><span class="p">)</span> <span class="ow">in</span> <span class="n">selected_port</span><span class="p">:</span>
+                    <span class="n">source_edges</span> <span class="o">=</span> <span class="n">selected_port</span><span class="p">[(</span><span class="n">source_id</span><span class="p">,</span> <span class="n">source_port</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">source_edges</span><span class="p">:</span>
+                        <span class="n">vid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                        <span class="n">port_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_port</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                        <span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_vid</span><span class="p">,</span> <span class="n">edge</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">vid</span><span class="p">,</span> <span class="n">port_id</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">connections</span>
+
+    <span class="k">def</span> <span class="nf">_compute_inout_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex_selection</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return internal connections of a composite node with input or</span>
+<span class="sd">        output port.</span>
+
+<span class="sd">            - vertex_selection is a sorted set of node.</span>
+<span class="sd">            - is_input is a boolean indicated if connection have to be</span>
+<span class="sd">                created with input or output ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># just to select unique name</span>
+        <span class="n">name_port</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">is_input</span><span class="p">:</span>
+            <span class="n">ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_ports</span>
+            <span class="n">get_vertex_io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+            <span class="n">io_desc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">input_desc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_ports</span>
+            <span class="n">get_vertex_io</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+            <span class="n">io_desc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">output_desc</span>
+
+        <span class="c"># For each input port</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">vertex_selection</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+                <span class="n">connected_edges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connected_edges</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
+
+                <span class="n">is_io</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">connected_edges</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">get_vertex_io</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vertex_selection</span><span class="p">:</span>
+                        <span class="n">is_io</span> <span class="o">=</span> <span class="bp">True</span>
+
+                <span class="k">if</span> <span class="n">connected_edges</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_io</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                <span class="n">pname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+                <span class="n">desc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">io_desc</span><span class="p">(</span><span class="n">n</span><span class="p">)[</span><span class="n">pname</span><span class="p">])</span>
+
+                <span class="n">caption</span><span class="o">=</span> <span class="s">&#39;(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">get_caption</span><span class="p">())</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+
+                <span class="k">while</span> <span class="n">name</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="n">caption</span> <span class="ow">in</span> <span class="n">name_port</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="n">desc</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="n">caption</span>
+                <span class="n">name_port</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desc</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">is_input</span><span class="p">:</span>
+                    <span class="c"># set default value on cn input port</span>
+                    <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">pname</span><span class="p">]:</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
+
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="nb">eval</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+                            <span class="n">desc</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+
+                    <span class="k">if</span> <span class="s">&#39;value&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s">&#39;interface&#39;</span> <span class="ow">in</span> <span class="n">desc</span> <span class="ow">and</span> <span class="n">desc</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">]:</span>
+                            <span class="n">desc</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+
+                    <span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__in__&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">vid</span><span class="p">,</span> <span class="n">pname</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span> <span class="c"># output</span>
+                    <span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vid</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="s">&#39;__out__&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)))</span>
+
+                <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">connections</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompositeNode.compute_io"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.compute_io">[docs]</a>    <span class="k">def</span> <span class="nf">compute_io</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return (inputs, outputs, connections)</span>
+
+<span class="sd">        representing the free port of node</span>
+<span class="sd">        v_list is a vertex id list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="n">ins</span><span class="p">,</span> <span class="n">in_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_inout_connection</span><span class="p">(</span><span class="n">v_list</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">outs</span><span class="p">,</span> <span class="n">out_edges</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_inout_connection</span><span class="p">(</span><span class="n">v_list</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">connections</span> <span class="o">=</span> <span class="n">in_edges</span> <span class="o">+</span> <span class="n">out_edges</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">,</span> <span class="n">connections</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.to_factory"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.to_factory">[docs]</a>    <span class="k">def</span> <span class="nf">to_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sgfactory</span><span class="p">,</span> <span class="n">listid</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">auto_io</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update CompositeNodeFactory to fit with the graph</span>
+
+<span class="sd">        listid is a list of element to export. If None, select all id.</span>
+<span class="sd">        if auto_io is true :  inputs and outputs are connected to the free</span>
+<span class="sd">        ports</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Clear the factory</span>
+        <span class="n">sgfactory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c"># Properties</span>
+        <span class="n">sgfactory</span><span class="o">.</span><span class="n">lazy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lazy</span>
+        <span class="n">sgfactory</span><span class="o">.</span><span class="n">eval_algo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_algo</span>
+        <span class="c">#print self.eval_algo</span>
+        <span class="c"># I / O</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">auto_io</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">outs</span><span class="p">,</span> <span class="n">sup_connect</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_io</span><span class="p">(</span><span class="n">listid</span><span class="p">)</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">ins</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">outs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_desc</span><span class="p">]</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_desc</span><span class="p">]</span>
+            <span class="n">sup_connect</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">listid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">listid</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">())</span>
+
+        <span class="c"># Copy Connections</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+
+            <span class="n">src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">tgt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+
+            <span class="k">if</span><span class="p">((</span><span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">listid</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tgt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">listid</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">src</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">):</span>
+                <span class="n">src</span> <span class="o">=</span> <span class="s">&#39;__in__&#39;</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">tgt</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">):</span>
+                <span class="n">tgt</span> <span class="o">=</span> <span class="s">&#39;__out__&#39;</span>
+
+            <span class="n">source_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_port</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span>
+            <span class="n">target_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_port</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">eid</span><span class="p">)]</span> <span class="o">=</span> \
+                <span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">source_port</span><span class="p">,</span> <span class="n">tgt</span><span class="p">,</span> <span class="n">target_port</span><span class="p">)</span>
+
+        <span class="c"># Add supplementary connections</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">sup_connect</span><span class="p">:</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">e</span><span class="p">)]</span> <span class="o">=</span> <span class="n">e</span>
+
+        <span class="c"># Copy node</span>
+        <span class="k">for</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">listid</span><span class="p">:</span>
+
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+            <span class="n">kdata</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">internal_data</span>
+
+            <span class="c"># Do not copy In and Out</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">vid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span><span class="p">):</span>
+                <span class="n">vid</span> <span class="o">=</span> <span class="s">&quot;__in__&quot;</span>
+            <span class="k">elif</span><span class="p">(</span><span class="n">vid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span><span class="p">):</span>
+                <span class="n">vid</span> <span class="o">=</span> <span class="s">&quot;__out__&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pkg_id</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span>
+                <span class="n">factory_id</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">get_id</span><span class="p">()</span>
+                <span class="n">sgfactory</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pkg_id</span><span class="p">,</span> <span class="n">factory_id</span><span class="p">)</span>
+
+            <span class="c"># Copy internal data</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">kdata</span><span class="p">)</span>
+            <span class="c"># Forward compatibility for versions earlier than 0.8.0</span>
+            <span class="c"># We do the exact opposite than in load_ad_hoc_data, have a look there.</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s">&quot;__ad_hoc_from_old_map__&quot;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">newKey</span><span class="p">,</span> <span class="n">oldKeys</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">__ad_hoc_from_old_map__</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">oldKeys</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">()</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">newKey</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">newKey</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">oldKeys</span><span class="p">):</span>
+                        <span class="n">sgfactory</span><span class="o">.</span><span class="n">elt_data</span><span class="p">[</span><span class="n">vid</span><span class="p">][</span><span class="n">newKey</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">data</span>
+
+            <span class="c"># Copy ad_hoc data</span>
+            <span class="n">sgfactory</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_ad_hoc_dict</span><span class="p">())</span>
+
+            <span class="c"># Copy value</span>
+            <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">get_nb_input</span><span class="p">()):</span>
+                <span class="n">sgfactory</span><span class="o">.</span><span class="n">elt_value</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sgfactory</span><span class="o">.</span><span class="n">elt_value</span><span class="p">[</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="p">[(</span><span class="n">port</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_input</span><span class="p">(</span><span class="n">port</span><span class="p">)))</span> <span class="k">for</span> <span class="n">port</span>
+                        <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">inputs</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">input_states</span><span class="p">[</span><span class="n">port</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s">&quot;connected&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># Set node factory if all node have been exported</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">listid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">sgfactory</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.add_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.add_node">[docs]</a>    <span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">vid</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">modify</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a node in the Graph with a particular id</span>
+<span class="sd">        if id is None, autogenrate one</span>
+
+<span class="sd">        :param node: the node instance</span>
+<span class="sd">        :param vid: element id</span>
+
+<span class="sd">        :return: the id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="c"># -- NOOOOOO THE UGLY BACK REFERENCE --</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">set_compositenode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">node</span><span class="o">.</span><span class="n">set_id</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">local_pid</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_nb_input</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_in_port</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">local_pid</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">local_pid</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_out_port</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">local_pid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_actor</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_vertex_addition</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">vid</span><span class="p">)</span>
+
+        <span class="c">#self.id_cpt += 1</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">modify</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;graph_modified&quot;</span><span class="p">,</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="n">vid</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.notify_vertex_addition"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.notify_vertex_addition">[docs]</a>    <span class="k">def</span> <span class="nf">notify_vertex_addition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;vertex&quot;</span>
+        <span class="n">doNotify</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&quot;__graphitem__&quot;</span><span class="p">)):</span> <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;annotation&quot;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="n">CompositeNodeOutput</span><span class="p">):</span>
+            <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;outNode&quot;</span>
+            <span class="n">doNotify</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">input_desc</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="n">CompositeNodeInput</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;inNode&quot;</span>
+            <span class="n">doNotify</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">output_desc</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">doNotify</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;vertex_added&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">vtype</span><span class="p">,</span> <span class="n">vertex</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.notify_vertex_removal"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.notify_vertex_removal">[docs]</a>    <span class="k">def</span> <span class="nf">notify_vertex_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">):</span>
+        <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;vertex&quot;</span>
+        <span class="n">doNotify</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&quot;__graphitem__&quot;</span><span class="p">)):</span> <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;annotation&quot;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="n">CompositeNodeOutput</span><span class="p">):</span> <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;outNode&quot;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="n">CompositeNodeInput</span><span class="p">)</span> <span class="p">:</span> <span class="n">vtype</span> <span class="o">=</span> <span class="s">&quot;inNode&quot;</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;vertex_removed&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">vtype</span><span class="p">,</span> <span class="n">vertex</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.remove_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.remove_node">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        remove a node from the graph</span>
+<span class="sd">        :param vtx_id: element id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vtx_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_in</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="n">vtx_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_out</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_vertex</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_vertex_removal</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;graph_modified&quot;</span><span class="p">,</span> <span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.remove_edge"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.remove_edge">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">):</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">PortError</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">DataFlow</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">port</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_vid</span><span class="p">)</span><span class="o">.</span><span class="n">set_input_state</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_local_pid</span><span class="p">,</span> <span class="s">&quot;disconnected&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;edge_removed&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;default&quot;</span><span class="p">,</span><span class="n">eid</span><span class="p">)</span> <span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="CompositeNode.simulate_destruction_notifications"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.simulate_destruction_notifications">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_destruction_notifications</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;emits messages as if we were adding elements to</span>
+<span class="sd">        the composite node&quot;&quot;&quot;</span>
+        <span class="n">Node</span><span class="o">.</span><span class="n">simulate_destruction_notifications</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eltid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">eltid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_vertex_removal</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+            <span class="p">(</span><span class="n">src_id</span><span class="p">,</span> <span class="n">dst_id</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">eid</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">etype</span><span class="o">=</span><span class="bp">None</span>
+            <span class="n">src_port_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_port</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span>
+            <span class="n">dst_port_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_port</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span>
+
+            <span class="n">nodeSrc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">src_id</span><span class="p">)</span>
+            <span class="n">nodeDst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">dst_id</span><span class="p">)</span>
+            <span class="n">src_port</span> <span class="o">=</span> <span class="n">nodeSrc</span><span class="o">.</span><span class="n">output_desc</span><span class="p">[</span><span class="n">src_port_id</span><span class="p">]</span>
+            <span class="n">dst_port</span> <span class="o">=</span> <span class="n">nodeDst</span><span class="o">.</span><span class="n">input_desc</span><span class="p">[</span><span class="n">dst_port_id</span><span class="p">]</span>
+
+            <span class="c">#don&#39;t notify if the edge is connected to the input or</span>
+            <span class="c">#output nodes.</span>
+            <span class="c"># if(src_id == self.id_in or dst_id == self.id_out):</span>
+                <span class="c"># continue</span>
+
+            <span class="n">edgedata</span> <span class="o">=</span> <span class="s">&quot;default&quot;</span><span class="p">,</span> <span class="n">eid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;edge_removed&quot;</span><span class="p">,</span> <span class="n">edgedata</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.connect"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_id</span><span class="p">,</span> <span class="n">port_src</span><span class="p">,</span> <span class="n">dst_id</span><span class="p">,</span> <span class="n">port_dst</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Connect 2 elements</span>
+
+<span class="sd">        :param src_id: source node id</span>
+<span class="sd">        :param port_src: source output port number</span>
+<span class="sd">        :param dst_id: destination node id</span>
+<span class="sd">        :param port_dst: destination input port number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">source_pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_port</span><span class="p">(</span><span class="n">src_id</span><span class="p">,</span> <span class="n">port_src</span><span class="p">)</span>
+            <span class="n">target_pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_port</span><span class="p">(</span><span class="n">dst_id</span><span class="p">,</span> <span class="n">port_dst</span><span class="p">)</span>
+            <span class="n">eid</span> <span class="o">=</span> <span class="n">DataFlow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_pid</span><span class="p">,</span> <span class="n">target_pid</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Enable to create the edge </span><span class="si">%s</span><span class="s"> </span><span class="si">%d</span><span class="s"> </span><span class="si">%d</span><span class="s"> </span><span class="si">%d</span><span class="s"> </span><span class="si">%d</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>  <span class="n">src_id</span><span class="p">,</span> <span class="n">port_src</span><span class="p">,</span> <span class="n">dst_id</span><span class="p">,</span> <span class="n">port_dst</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">dst_id</span><span class="p">)</span><span class="o">.</span><span class="n">set_input_state</span><span class="p">(</span><span class="n">port_dst</span><span class="p">,</span> <span class="s">&quot;connected&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;connection_modified&quot;</span><span class="p">,</span> <span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_eval_listeners</span><span class="p">(</span><span class="n">src_id</span><span class="p">)</span>
+        <span class="n">nodeSrc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">src_id</span><span class="p">)</span>
+        <span class="n">nodeDst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">dst_id</span><span class="p">)</span>
+        <span class="n">src_port</span> <span class="o">=</span> <span class="n">nodeSrc</span><span class="o">.</span><span class="n">output_desc</span><span class="p">[</span><span class="n">port_src</span><span class="p">]</span>
+        <span class="n">dst_port</span> <span class="o">=</span> <span class="n">nodeDst</span><span class="o">.</span><span class="n">input_desc</span><span class="p">[</span><span class="n">port_dst</span><span class="p">]</span>
+
+        <span class="n">edgedata</span> <span class="o">=</span> <span class="s">&quot;default&quot;</span><span class="p">,</span> <span class="n">eid</span><span class="p">,</span> <span class="n">src_port</span><span class="p">,</span> <span class="n">dst_port</span>
+        <span class="c">#connected ports cannot be hidden:</span>
+        <span class="c">#nodeSrc.set_port_hidden(port_src, False)</span>
+        <span class="n">nodeDst</span><span class="o">.</span><span class="n">set_port_hidden</span><span class="p">(</span><span class="n">port_dst</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;edge_added&quot;</span><span class="p">,</span> <span class="n">edgedata</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.disconnect"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_id</span><span class="p">,</span> <span class="n">port_src</span><span class="p">,</span> <span class="n">dst_id</span><span class="p">,</span> <span class="n">port_dst</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Deconnect 2 elements</span>
+
+<span class="sd">        :param src_id: source node id</span>
+<span class="sd">        :param port_src: source output port number</span>
+<span class="sd">        :param dst_id: destination node id</span>
+<span class="sd">        :param port_dst: destination input port number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">source_pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_port</span><span class="p">(</span><span class="n">src_id</span><span class="p">,</span> <span class="n">port_src</span><span class="p">)</span>
+        <span class="n">target_pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_port</span><span class="p">(</span><span class="n">dst_id</span><span class="p">,</span> <span class="n">port_dst</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_edges</span><span class="p">(</span><span class="n">source_pid</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_port</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span> <span class="o">==</span> <span class="n">target_pid</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;edge_removed&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;default&quot;</span><span class="p">,</span><span class="n">eid</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">dst_id</span><span class="p">)</span><span class="o">.</span><span class="n">set_input_state</span><span class="p">(</span><span class="n">port_dst</span><span class="p">,</span> <span class="s">&quot;disconnected&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&quot;connection_modified&quot;</span><span class="p">,</span> <span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">graph_modified</span> <span class="o">=</span> <span class="bp">True</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_eval_listeners</span><span class="p">(</span><span class="n">src_id</span><span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="k">raise</span> <span class="n">InvalidEdge</span><span class="p">(</span><span class="s">&quot;Edge not found&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.replace_node"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.replace_node">[docs]</a>    <span class="k">def</span> <span class="nf">replace_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">newnode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Replace the node vid by newnode &quot;&quot;&quot;</span>
+
+        <span class="n">oldnode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="n">newnode</span><span class="o">.</span><span class="n">caption</span>
+        <span class="n">newnode</span><span class="o">.</span><span class="n">_init_internal_data</span><span class="p">(</span><span class="n">oldnode</span><span class="o">.</span><span class="n">internal_data</span><span class="p">)</span>
+        <span class="c"># newnode.internal_data.update(oldnode.internal_data)</span>
+        <span class="n">newnode</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">caption</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">oldnode</span><span class="o">.</span><span class="n">get_nb_input</span><span class="p">()</span> <span class="o">!=</span> <span class="n">newnode</span><span class="o">.</span><span class="n">get_nb_input</span><span class="p">()</span> <span class="ow">or</span>
+            <span class="n">oldnode</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()</span> <span class="o">!=</span> <span class="n">newnode</span><span class="o">.</span><span class="n">get_nb_output</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="n">IncompatibleNodeError</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_actor</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="n">newnode</span><span class="p">)</span>
+
+    <span class="c"># Continuous eval functions</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.set_continuous_eval"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.set_continuous_eval">[docs]</a>    <span class="k">def</span> <span class="nf">set_continuous_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; set vid as a continuous evaluated node &quot;&quot;&quot;</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">user_application</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">state</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c"># Remove previous listener</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">user_application</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s">&#39;continuous_listener&#39;</span><span class="p">)):</span>
+            <span class="n">listener</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">continuous_listener</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">continuous_listener</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">listener</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">listener</span>
+
+        <span class="n">node</span><span class="o">.</span><span class="n">user_application</span> <span class="o">=</span> <span class="n">state</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+            <span class="n">listener</span> <span class="o">=</span> <span class="n">ContinuousEvalListener</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">continuous_listener</span> <span class="o">=</span> <span class="n">listener</span>
+
+            <span class="c"># Add node as observed in all parent node</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_parent_nodes</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">continuous_eval</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="n">listener</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CompositeNode.update_eval_listeners"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNode.update_eval_listeners">[docs]</a>    <span class="k">def</span> <span class="nf">update_eval_listeners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update continuous evaluation listener for node vid &quot;&quot;&quot;</span>
+
+        <span class="n">src_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">vid</span><span class="p">)</span>
+        <span class="n">src_node</span><span class="o">.</span><span class="n">continuous_eval</span><span class="o">.</span><span class="n">listeners</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c"># For each output</span>
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_ports</span><span class="p">(</span><span class="n">vid</span><span class="p">):</span>
+
+            <span class="c"># For each connected node</span>
+            <span class="k">for</span> <span class="n">npid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_ports</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+                <span class="n">dst_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">npid</span><span class="p">)</span>
+
+                <span class="n">dst_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">dst_id</span><span class="p">)</span>
+                <span class="n">listeners</span> <span class="o">=</span> <span class="n">dst_node</span><span class="o">.</span><span class="n">continuous_eval</span><span class="o">.</span><span class="n">listeners</span>
+                <span class="n">src_node</span><span class="o">.</span><span class="n">continuous_eval</span><span class="o">.</span><span class="n">listeners</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">listeners</span><span class="p">)</span>
+</div></div>
+<span class="kn">from</span> <span class="nn">openalea.core.observer</span> <span class="kn">import</span> <span class="n">AbstractListener</span>
+
+
+<div class="viewcode-block" id="ContinuousEvalListener"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.ContinuousEvalListener">[docs]</a><span class="k">class</span> <span class="nc">ContinuousEvalListener</span><span class="p">(</span><span class="n">AbstractListener</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; When notified this listener reexecute a dataflow on a particular vid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataflow</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; dataflow, vid : dataflow.eval_as_expression(vid)&quot;&quot;&quot;</span>
+        <span class="n">AbstractListener</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataflow</span> <span class="o">=</span> <span class="n">dataflow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">vid</span>
+
+<div class="viewcode-block" id="ContinuousEvalListener.notify"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.ContinuousEvalListener.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Notification &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataflow</span><span class="o">.</span><span class="n">eval_as_expression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CompositeNodeInput"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeInput">[docs]</a><span class="k">class</span> <span class="nc">CompositeNodeInput</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dummy node to represent the composite node inputs&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        inputs : list of dict(name=&#39;&#39;, interface=&#39;&#39;, value&#39;&#39;,...)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="s">&#39;caption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;In&quot;</span>
+
+<div class="viewcode-block" id="CompositeNodeInput.set_input"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeInput.set_input">[docs]</a>    <span class="k">def</span> <span class="nf">set_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_pid</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Define input value &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_index_out</span><span class="p">[</span><span class="n">input_pid</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeInput.get_input"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeInput.get_input">[docs]</a>    <span class="k">def</span> <span class="nf">get_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the input value &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_index_out</span><span class="p">[</span><span class="n">input_pid</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeInput.eval"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeInput.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeInput.to_script"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeInput.to_script">[docs]</a>    <span class="k">def</span> <span class="nf">to_script</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&quot;</span>
+
+</div></div>
+<div class="viewcode-block" id="CompositeNodeOutput"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeOutput">[docs]</a><span class="k">class</span> <span class="nc">CompositeNodeOutput</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dummy node to represent the composite node outputs&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        outputs : list of dict(name=&#39;&#39;, interface=&#39;&#39;, value&#39;&#39;,...)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Node</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">internal_data</span><span class="p">[</span><span class="s">&#39;caption&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;Out&quot;</span>
+
+<div class="viewcode-block" id="CompositeNodeOutput.get_output"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeOutput.get_output">[docs]</a>    <span class="k">def</span> <span class="nf">get_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return Output value &quot;&quot;&quot;</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_index_in</span><span class="p">[</span><span class="n">output_pid</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeOutput.set_output"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeOutput.set_output">[docs]</a>    <span class="k">def</span> <span class="nf">set_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_pid</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Define output &quot;&quot;&quot;</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_index_in</span><span class="p">[</span><span class="n">output_pid</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeOutput.eval"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeOutput.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="CompositeNodeOutput.to_script"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.CompositeNodeOutput.to_script">[docs]</a>    <span class="k">def</span> <span class="nf">to_script</span> <span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&quot;</span>
+
+</div></div>
+<div class="viewcode-block" id="PyCNFactoryWriter"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.PyCNFactoryWriter">[docs]</a><span class="k">class</span> <span class="nc">PyCNFactoryWriter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; CompositeNodeFactory python Writer &quot;&quot;&quot;</span>
+
+    <span class="n">sgfactory_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+
+<span class="s">$NAME = CompositeNodeFactory(name=$PNAME,</span>
+<span class="s">                             description=$DESCRIPTION,</span>
+<span class="s">                             category=$CATEGORY,</span>
+<span class="s">                             doc=$DOC,</span>
+<span class="s">                             inputs=$INPUTS,</span>
+<span class="s">                             outputs=$OUTPUTS,</span>
+<span class="s">                             elt_factory=$ELT_FACTORY,</span>
+<span class="s">                             elt_connections=$ELT_CONNECTIONS,</span>
+<span class="s">                             elt_data=$ELT_DATA,</span>
+<span class="s">                             elt_value=$ELT_VALUE,</span>
+<span class="s">                             elt_ad_hoc=$ELT_AD_HOC,</span>
+<span class="s">                             lazy=$LAZY,</span>
+<span class="s">                             eval_algo=$EVALALGO,</span>
+<span class="s">                             )</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">factory</span>
+
+<div class="viewcode-block" id="PyCNFactoryWriter.pprint_repr"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.PyCNFactoryWriter.pprint_repr">[docs]</a>    <span class="k">def</span> <span class="nf">pprint_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Pretty print repr &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the python string representation &quot;&quot;&quot;</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
+        <span class="n">fstr</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgfactory_template</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_python_name</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fstr</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">NAME</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="n">PNAME</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                                      <span class="n">DESCRIPTION</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">description</span><span class="p">),</span>
+                                      <span class="n">CATEGORY</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">category</span><span class="p">),</span>
+                                      <span class="n">DOC</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">doc</span><span class="p">),</span>
+                                      <span class="n">INPUTS</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">inputs</span><span class="p">),</span>
+                                      <span class="n">OUTPUTS</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">outputs</span><span class="p">),</span>
+                                      <span class="n">ELT_FACTORY</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">elt_factory</span><span class="p">),</span>
+                                      <span class="n">ELT_CONNECTIONS</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">connections</span><span class="p">),</span>
+                                      <span class="n">ELT_DATA</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">elt_data</span><span class="p">),</span>
+                                      <span class="n">ELT_VALUE</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">elt_value</span><span class="p">),</span>
+                                      <span class="n">ELT_AD_HOC</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="p">),</span>
+                                      <span class="n">LAZY</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lazy</span><span class="p">),</span>
+                                      <span class="n">EVALALGO</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pprint_repr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">eval_algo</span><span class="p">),</span>
+                                      <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+<span class="kn">import</span> <span class="nn">json</span>
+<div class="viewcode-block" id="JSONCNFactoryWriter"><a class="viewcode-back" href="../../latest/dev/archi/apidoc/core/core.compositenode.html#core.compositenode.JSONCNFactoryWriter">[docs]</a><span class="k">class</span> <span class="nc">JSONCNFactoryWriter</span><span class="p">(</span><span class="n">PyCNFactoryWriter</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span>
+
+        <span class="n">minx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;position&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])[</span><span class="s">&quot;position&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">miny</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">itervalues</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;position&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">])[</span><span class="s">&quot;position&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">print</span> <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span>
+
+        <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">elt</span><span class="p">[</span><span class="s">&quot;position&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">minx</span>
+            <span class="n">elt</span><span class="p">[</span><span class="s">&quot;position&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">miny</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;CompositeNodeFactory&quot;</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                 <span class="n">description</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                 <span class="n">category</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
+                 <span class="n">doc</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">doc</span><span class="p">,</span>
+                 <span class="c">#inputs=f.inputs,</span>
+                 <span class="c">#outputs=f.outputs,</span>
+                 <span class="c">#elt_factory=f.elt_factory,</span>
+                 <span class="n">elt_connections</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">connections</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()),</span>
+                 <span class="c">#elt_data=f.elt_data,</span>
+                 <span class="c">#elt_value=f.elt_value,</span>
+                 <span class="n">elt_ad_hoc</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">elt_ad_hoc</span><span class="p">,</span>
+                 <span class="n">lazy</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">lazy</span><span class="p">,</span>
+                 <span class="n">eval_algo</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">eval_algo</span><span class="p">,</span>
+                 <span class="p">)</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

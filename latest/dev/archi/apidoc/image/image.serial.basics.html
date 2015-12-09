@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="OpenAlea community website" href="../../../../../index.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -35,30 +35,208 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-image.serial.basics"></span><p>This module redefine load and save to account for spatial images</p>
+<dl class="function">
+<dt id="image.serial.basics.save">
+<tt class="descclassname">image.serial.basics.</tt><tt class="descname">save</tt><big>(</big><em>filename</em>, <em>img</em>, <em>is_vectorial=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/image/serial/basics.html#save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.serial.basics.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save an array to a binary file in numpy format with a <a href="#id7"><span class="problematic" id="id8">|SpatialImage|</span></a> header.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">There is no way to distinguish a 2D RGB[A] image from a 3D scalar image.
+If img is a 2D RGB[A] image, make sure its shape is similar to (SX,SY,1,3) for RGB or
+(SX,SY,1,4) for RGBA.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last">
+<li><dl class="first docutils">
+<dt><cite>filename</cite> (file or str) - Filename to which the data is saved.</dt>
+<dd><p class="first last">If the filename does not already have a &quot;.npy&quot;
+extension, it is added.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><cite>img</cite> (array)</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>is_vectorial</cite> (bool) - specifically deal with img as if it was</dt>
+<dd><p class="first last">a 2D vectorial (RGB[A]) image so that it saves it as a 3D RGBA image
+and conforms to the contract.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image.serial.basics.load">
+<tt class="descclassname">image.serial.basics.</tt><tt class="descname">load</tt><big>(</big><em>file</em>, <em>mmap_mode=None</em>, <em>is_vectorial=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/image/serial/basics.html#load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.serial.basics.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a pickled, <tt class="docutils literal"><span class="pre">.npy</span></tt>, or <tt class="docutils literal"><span class="pre">.npz</span></tt> binary file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first">
+<li><p class="first"><cite>file</cite> (file or str)</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>mmap_mode</cite> (None, 'r+', 'r', 'w+', 'c') - optional</dt>
+<dd><p class="first last">If not None, then memory-map the file, using the given mode
+(see <cite>numpy.memmap</cite>).  The mode has no effect for pickled or
+zipped files.
+A memory-mapped array is stored on disk, and not directly loaded
+into memory.  However, it can be accessed and sliced like any
+ndarray.  Memory mapping is especially useful for accessing
+small fragments of large files without reading the entire file
+into memory.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><cite>is_vectorial</cite> (bool) - specifically deal with file as if it was</dt>
+<dd><p class="first last">a 2D vectorial (RGB[A]) image so that it returns a 3D RGBA image
+and conforms to the contract.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Type:</th><td class="field-body"><p class="first last"><a href="#id9"><span class="problematic" id="id10">|SpatialImage|</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image.serial.basics.read_sequence">
+<tt class="descclassname">image.serial.basics.</tt><tt class="descname">read_sequence</tt><big>(</big><em>directory</em>, <em>grayscale=True</em>, <em>number_images=None</em>, <em>start=0</em>, <em>increment=1</em>, <em>filename_contains=''</em>, <em>voxels_size=None</em>, <em>verbose=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/image/serial/basics.html#read_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.serial.basics.read_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a sequence of images in a folder as a numpy array.
+The images must all be the same size and type.
+They can be in TIFF, .... format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><cite>grayscale</cite> (bool) - convert the image to grayscale</li>
+<li><cite>number_images</cite> (int) - specify how many images to open</li>
+<li><cite>start</cite> (int) - used to start with the nth image in the folder (default = 0 for the first image)</li>
+<li><cite>increment</cite> (int) - set to &quot;n&quot; to open every &quot;n&quot; image (default = 1 for opening all images)</li>
+<li><cite>filename_contains</cite> (str) - only files whose name contains that string are opened</li>
+<li><a href="#id1"><span class="problematic" id="id2">`</span></a>voxels_size (tuple) - specify voxels size</li>
+<li><cite>verbose</cite> (bool) - verbose mode</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image.serial.basics.imread">
+<tt class="descclassname">image.serial.basics.</tt><tt class="descname">imread</tt><big>(</big><em>filename</em>, <em>dimension=3</em><big>)</big><a class="reference internal" href="../../../../../_modules/image/serial/basics.html#imread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.serial.basics.imread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads an image file completely into memory.</p>
+<p>It uses the file extension to determine how to read the file. It first tries
+some specific readers for volume images (Inrimages, TIFFs, LSMs, NPY) or falls
+back on PIL readers for common formats if installed.</p>
+<p>In all cases the returned image is 3D (2D is upgraded to single slice 3D).
+If it has colour or is a vector field it is even 4D.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><cite>filename</cite> (str)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Type:</th><td class="field-body"><p class="first last"><a href="#id11"><span class="problematic" id="id12">|SpatialImage|</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image.serial.basics.imsave">
+<tt class="descclassname">image.serial.basics.</tt><tt class="descname">imsave</tt><big>(</big><em>filename</em>, <em>img</em><big>)</big><a class="reference internal" href="../../../../../_modules/image/serial/basics.html#imsave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.serial.basics.imsave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a <a href="#id13"><span class="problematic" id="id14">|SpatialImage|</span></a> to filename.</p>
+<p>The filewriter is choosen according to the file extension. However all file extensions
+will not match the data held by img, in dimensionnality or encoding, and might raise <a href="#id3"><span class="problematic" id="id4">`</span></a>IOError`s.</p>
+<p>For real volume data, Inrimage and NPY are currently supported.
+For <a href="#id5"><span class="problematic" id="id6">|</span></a>SpatialImage|s that are actually 2D, PNG, BMP, JPG among others are supported if PIL is installed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><cite>filename</cite> (str)</li>
+<li><cite>img</cite> (<a href="#id15"><span class="problematic" id="id16">|SpatialImage|</span></a>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image.serial.basics.lazy_image_or_path">
+<tt class="descclassname">image.serial.basics.</tt><tt class="descname">lazy_image_or_path</tt><big>(</big><em>image</em><big>)</big><a class="reference internal" href="../../../../../_modules/image/serial/basics.html#lazy_image_or_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image.serial.basics.lazy_image_or_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an image or a path to an image and returns the image.</p>
+<p>Extensively used in other functions to make them accept images given as paths.
+If <cite>image</cite> is already a <a href="#id17"><span class="problematic" id="id18">|SpatialImage|</span></a> this method is a pass-thru. If it looks
+like a path, it will load the image at that path and return it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><cite>image</cite> (<a href="#id19"><span class="problematic" id="id20">|SpatialImage|</span></a>, str) - [Path] or image.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="first simple">
+<li>image or imread(image)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns Type:</th><td class="field-body"><p class="first last"><a href="#id21"><span class="problematic" id="id22">|SpatialImage|</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/image/image.serial.basics.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/image/image.serial.basics.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -75,7 +253,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -84,12 +262,12 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

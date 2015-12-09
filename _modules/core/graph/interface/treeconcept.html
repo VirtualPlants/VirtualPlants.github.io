@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.graph.interface.treeconcept &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="core" href="../../../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.graph.interface.treeconcept</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Tree Concept.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">graphconcept</span> <span class="kn">import</span> <span class="o">*</span> <span class="c">#IGNORE:W0614</span>
+
+
+<div class="viewcode-block" id="RootedTreeConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept">[docs]</a><span class="k">class</span> <span class="nc">RootedTreeConcept</span><span class="p">(</span><span class="n">VertexListGraphConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rooted Tree interface.</span>
+<span class="sd"> </span>
+<span class="sd">    depth(vid), depth() and sub_tree(vid) can be extenal algorithms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RootedTreeConcept.set_root"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.set_root">[docs]</a>    <span class="k">def</span> <span class="nf">set_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the tree root.</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="RootedTreeConcept.get_root"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.get_root">[docs]</a>    <span class="k">def</span> <span class="nf">get_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot; Return the tree root.</span>
+
+<span class="sd">        :returns: vertex identifier</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+    <span class="n">root</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span> <span class="n">get_root</span><span class="p">,</span> <span class="n">set_root</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="RootedTreeConcept.parent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the parent of `vtx_id`.</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+<span class="sd">        :returns: vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="RootedTreeConcept.children"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.children">[docs]</a>    <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a vertex iterator</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+<span class="sd">        :returns: iter of vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="RootedTreeConcept.nb_children"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.nb_children">[docs]</a>    <span class="k">def</span> <span class="nf">nb_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of children</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="RootedTreeConcept.siblings"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.siblings">[docs]</a>    <span class="k">def</span> <span class="nf">siblings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an iterator of vtx_id siblings.</span>
+<span class="sd">        vtx_id is not include in siblings.</span>
+
+<span class="sd">        :param vtx_id: The vertex identifier.</span>
+<span class="sd">        :returns: iter of vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="RootedTreeConcept.nb_siblings"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.nb_siblings">[docs]</a>    <span class="k">def</span> <span class="nf">nb_siblings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of siblings</span>
+
+<span class="sd">        :returns: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="RootedTreeConcept.is_leaf"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.RootedTreeConcept.is_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if `vtx_id` is a leaf.</span>
+
+<span class="sd">        :returns: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+</div></div>
+<div class="viewcode-block" id="OrderedTreeConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.OrderedTreeConcept">[docs]</a><span class="k">class</span> <span class="nc">OrderedTreeConcept</span><span class="p">(</span><span class="n">RootedTreeConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An ordered tree is a rooted tree where an order relation is </span>
+<span class="sd">    defined between chidren.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="OrderedTreeConcept.first_child"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.OrderedTreeConcept.first_child">[docs]</a>    <span class="k">def</span> <span class="nf">first_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the first child of vid</span>
+
+<span class="sd">        :param vid: The vertex identifier.</span>
+<span class="sd">        :returns: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="OrderedTreeConcept.last_child"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.OrderedTreeConcept.last_child">[docs]</a>    <span class="k">def</span> <span class="nf">last_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the last child of vid</span>
+
+<span class="sd">        :param vid: The vertex identifier.</span>
+<span class="sd">        :returns: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="OrderedTreeConcept.previous_sibling"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.OrderedTreeConcept.previous_sibling">[docs]</a>    <span class="k">def</span> <span class="nf">previous_sibling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return previous sibling</span>
+
+<span class="sd">        :param vid: The vertex identifier.</span>
+
+<span class="sd">        :returns: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="OrderedTreeConcept.next_sibling"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.OrderedTreeConcept.next_sibling">[docs]</a>    <span class="k">def</span> <span class="nf">next_sibling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return next sibling</span>
+
+<span class="sd">        :param vid: The vertex identifier.</span>
+
+<span class="sd">        :returns: vid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="MutableTreeConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.MutableTreeConcept">[docs]</a><span class="k">class</span> <span class="nc">MutableTreeConcept</span><span class="p">(</span><span class="n">RootedTreeConcept</span><span class="p">,</span> <span class="n">MutableVertexGraphConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A mutable rooted tree. </span>
+<span class="sd">    The substitute method is defined outside the interface.</span>
+<span class="sd">    substitute(self,vid,tree)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MutableTreeConcept.add_child"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.MutableTreeConcept.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span> <span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a child at the end of children</span>
+
+<span class="sd">        :param parent: The parent identifier.</span>
+<span class="sd">        :param child: The child identifier.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="MutableTreeConcept.insert_sibling"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.MutableTreeConcept.insert_sibling">[docs]</a>    <span class="k">def</span> <span class="nf">insert_sibling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid1</span><span class="p">,</span> <span class="n">vid2</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert vid2 before vid1.</span>
+
+<span class="sd">        :param vid1: a vertex identifier</span>
+<span class="sd">        :param vid2: the vertex to insert</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span> 
+</div>
+<div class="viewcode-block" id="MutableTreeConcept.insert_parent"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.MutableTreeConcept.insert_parent">[docs]</a>    <span class="k">def</span> <span class="nf">insert_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert parent_id between vtx_id and its actual parent.</span>
+
+<span class="sd">        :param vtx_id: a vertex identifier</span>
+<span class="sd">        :param parent_id: a vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="EditableTreeConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.EditableTreeConcept">[docs]</a><span class="k">class</span> <span class="nc">EditableTreeConcept</span><span class="p">(</span><span class="n">MutableTreeConcept</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EditableTreeConcept.sub_tree"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.EditableTreeConcept.sub_tree">[docs]</a>    <span class="k">def</span> <span class="nf">sub_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a reference of the tree rooted on `vtx_id` in O(1).</span>
+
+<span class="sd">        :returns: Editable Tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="EditableTreeConcept.insert_sibling_tree"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.EditableTreeConcept.insert_sibling_tree">[docs]</a>    <span class="k">def</span> <span class="nf">insert_sibling_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">tree</span> <span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert a tree before the vid.</span>
+<span class="sd">        vid and the root of the tree are siblings.</span>
+<span class="sd">        Complexity have to be O(1) if tree comes from the actual tree</span>
+<span class="sd">        ( tree= sef.sub_tree() )</span>
+
+<span class="sd">        :param vid: vertex identifier</span>
+<span class="sd">        :param tree: a rooted tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span> 
+</div>
+<div class="viewcode-block" id="EditableTreeConcept.add_child_tree"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.EditableTreeConcept.add_child_tree">[docs]</a>    <span class="k">def</span> <span class="nf">add_child_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a tree after the children of the parent vertex.</span>
+<span class="sd">        Complexity have to be O(1) if tree == sub_tree()</span>
+
+<span class="sd">        :param parent: vertex identifier</span>
+<span class="sd">        :param tree: a rooted tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="traverse_tree"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.traverse_tree">[docs]</a><span class="k">def</span> <span class="nf">traverse_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">,</span> <span class="n">visitor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Traverse a tree in a prefix or postfix way.</span>
+<span class="sd">  </span>
+<span class="sd">    We call a visitor for each vertex.</span>
+<span class="sd">    This is usefull for printing, cmputing or storing vertices </span>
+<span class="sd">    in a specific order. </span>
+<span class="sd">  </span>
+<span class="sd">    See boost.graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">visitor</span><span class="o">.</span><span class="n">pre_order</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+
+    <span class="n">sons</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sons</span><span class="p">:</span>
+        <span class="n">traverse_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">visitor</span><span class="p">)</span>
+
+    <span class="n">visitor</span><span class="o">.</span><span class="n">post_order</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Visitor"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.Visitor">[docs]</a><span class="k">class</span> <span class="nc">Visitor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Used during a tree traversal. &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Visitor.pre_order"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.Visitor.pre_order">[docs]</a>    <span class="k">def</span> <span class="nf">pre_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="Visitor.post_order"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.treeconcept.html#core.graph.interface.treeconcept.Visitor.post_order">[docs]</a>    <span class="k">def</span> <span class="nf">post_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

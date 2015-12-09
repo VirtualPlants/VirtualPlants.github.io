@@ -1,0 +1,486 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.project.manager &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../index.html" />
+    <link rel="up" title="core" href="../../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.project.manager</h1><div class="highlight"><pre>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea.OALab: Multi-Paradigm GUI</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2014-2015 INRIA - CIRAD - INRA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s): Julien Coste &lt;julien.coste@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       File contributor(s): Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       Distributed under the Cecill-C License.</span>
+<span class="c">#       See accompanying file LICENSE.txt or copy at</span>
+<span class="c">#           http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html</span>
+<span class="c">#</span>
+<span class="c">#       OpenAlea WebSite : http://openalea.gforge.inria.fr</span>
+<span class="c">#</span>
+<span class="c">###############################################################################</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core.manager</span> <span class="kn">import</span> <span class="n">GenericManager</span><span class="p">,</span> <span class="n">UnknownItemError</span>
+
+
+<span class="kn">from</span> <span class="nn">ConfigParser</span> <span class="kn">import</span> <span class="n">NoSectionError</span><span class="p">,</span> <span class="n">NoOptionError</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">openalea.core</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">openalea.core.control.manager</span> <span class="kn">import</span> <span class="n">ControlManager</span>
+<span class="kn">from</span> <span class="nn">openalea.core.path</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">openalea.core.project.project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
+<span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="kn">import</span> <span class="n">plugins</span>
+<span class="kn">from</span> <span class="nn">openalea.core.settings</span> <span class="kn">import</span> <span class="n">get_openalea_tmp_dir</span>
+
+
+<div class="viewcode-block" id="get_criteria"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.get_criteria">[docs]</a><span class="k">def</span> <span class="nf">get_criteria</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
+    <span class="n">criteria</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">criterion</span> <span class="ow">in</span> <span class="n">Project</span><span class="o">.</span><span class="n">DEFAULT_METADATA</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;path&#39;</span><span class="p">]:</span>
+        <span class="n">criteria</span><span class="p">[</span><span class="n">criterion</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">criteria</span>
+
+</div>
+<div class="viewcode-block" id="ProjectManager"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager">[docs]</a><span class="k">class</span> <span class="nc">ProjectManager</span><span class="p">(</span><span class="n">GenericManager</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">item_proxy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;entry_points&#39;</span><span class="p">]):</span>
+        <span class="c"># GenericManager</span>
+        <span class="n">GenericManager</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">item_proxy</span><span class="p">,</span> <span class="n">autoload</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_group</span> <span class="o">=</span> <span class="s">&quot;local&quot;</span>
+
+        <span class="c"># ProjectManager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_openalea_tmp_dir</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="n">ControlManager</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">repositories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span> <span class="o">=</span> <span class="s">&quot;temp&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="ProjectManager.generate_item_id"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.generate_item_id">[docs]</a>    <span class="k">def</span> <span class="nf">generate_item_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.load_items"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.load_items">[docs]</a>    <span class="k">def</span> <span class="nf">load_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.instantiate"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">item</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.patch_item"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.patch_item">[docs]</a>    <span class="k">def</span> <span class="nf">patch_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&quot;label&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&quot;alias&quot;</span><span class="p">):</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">alias</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&quot;criteria&quot;</span><span class="p">):</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">criteria</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_criteria</span><span class="p">)</span>
+        <span class="n">GenericManager</span><span class="o">.</span><span class="n">patch_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.discover"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.discover">[docs]</a>    <span class="k">def</span> <span class="nf">discover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">config_name</span><span class="o">=</span><span class="s">&#39;oaproject.cfg&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discover projects from your disk and put them in self.projects.</span>
+
+<span class="sd">        Projects are not loaded, only metadata are.</span>
+
+<span class="sd">        :use:</span>
+<span class="sd">            &gt;&gt;&gt; project_manager.discover()</span>
+<span class="sd">            &gt;&gt;&gt; list_of_projects = project_manager.projects</span>
+
+<span class="sd">        To discover new projects, you can add path into *self.repositories*</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            project_manager.repositories.append(&#39;path/to/search/projects&#39;)</span>
+<span class="sd">            project_manager.discover()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">repositories</span><span class="p">:</span>
+            <span class="n">_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_path</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="n">config_name</span><span class="p">):</span>
+                <span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_group</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ProjectManager.search_path"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.search_path">[docs]</a>    <span class="k">def</span> <span class="nf">search_path</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of all path containing projects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">repositories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c"># 1. Add default user project dir</span>
+        <span class="n">repositories</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">()))</span>
+
+        <span class="c"># 2. Add project repositories defined by packages</span>
+        <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugins</span><span class="p">(</span><span class="s">&#39;oalab.plugin&#39;</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">implement</span><span class="o">=</span><span class="s">&quot;ProjectRepositoryList&quot;</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">repository</span> <span class="ow">in</span> <span class="n">plugin</span><span class="p">():</span>
+                <span class="n">repositories</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repository</span><span class="p">)</span>
+
+        <span class="c"># 3. Read repositories defined by users and saved in config</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">repositories</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Path&quot;</span><span class="p">)</span>
+            <span class="n">lst</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="n">NoSectionError</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Path&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]))</span>
+        <span class="k">except</span> <span class="n">NoOptionError</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Path&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">repo</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+            <span class="n">repositories</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+
+        <span class="c"># Remove all paths to directories that don&#39;t exist</span>
+        <span class="n">final_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">repositories</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="n">final_list</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">final_list</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ProjectManager.defaultdir"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.defaultdir">[docs]</a>    <span class="k">def</span> <span class="nf">defaultdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get_project_dir</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.load_settings"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.load_settings">[docs]</a>    <span class="k">def</span> <span class="nf">load_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">NoSectionError</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">):</span>
+            <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.write_settings"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.write_settings">[docs]</a>    <span class="k">def</span> <span class="nf">write_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add a new path to the settings. &quot;&quot;&quot;</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repositories</span><span class="p">))</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">lst</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">Settings</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Path&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoSectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">settings</span><span class="o">.</span><span class="n">NoOptionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s">&quot;ProjectManager&quot;</span><span class="p">,</span> <span class="s">&quot;Last Project&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span><span class="p">))</span>
+
+        <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+    <span class="c">###########################################################################</span>
+    <span class="c"># TO CLEAN</span>
+    <span class="c">###########################################################################</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.default"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: a default empty project</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO: should define a generic &quot;create&quot; method that returns a patched item.</span>
+        <span class="c"># for the moment, patch it manually</span>
+        <span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultdir</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">_path</span> <span class="o">/</span> <span class="s">&quot;temp&quot;</span><span class="p">)</span>
+        <span class="n">proj</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;Temporary Project&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">proj</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&quot;&quot;&quot;</span>
+<span class="s">OpenAlea Lab editor</span>
+<span class="s">This temporary script is saved in temporary project in</span>
+<span class="si">%s</span><span class="s"></span>
+
+<span class="s">You can rename/move this project thanks to the button &quot;Save As&quot; in menu.</span>
+<span class="s">&quot;&quot;&quot;&#39;&#39;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">proj</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">proj</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;model&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;model.py&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">txt</span><span class="p">)</span>
+            <span class="n">proj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">proj</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.create"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create new project and return it.</span>
+
+<span class="sd">        :use:</span>
+<span class="sd">            &gt;&gt;&gt; project1 = project_manager.create(&#39;project1&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; project2 = project_manager.create(&#39;project2&#39;, &#39;/path/to/project&#39;)</span>
+
+<span class="sd">        :param name: name of project to create (str)</span>
+<span class="sd">        :param path: path where project will be saved.</span>
+<span class="sd">                     By default, path is the user path of all projects ($HOME/.openalea/projects/).</span>
+<span class="sd">        :return: Project</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">projectdir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">projectdir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultdir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">projectdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">projectdir</span><span class="p">)</span><span class="o">.</span><span class="n">abspath</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">projectdir</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">repositories</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">repositories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">projectdir</span><span class="p">)</span>
+
+        <span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">projectdir</span> <span class="o">/</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_item</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">project</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.load_default"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.load_default">[docs]</a>    <span class="k">def</span> <span class="nf">load_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discover</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_settings</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">previous_project</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">UnknownItemError</span><span class="p">:</span>
+            <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">project</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.load"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load existing project</span>
+
+<span class="sd">        :use:</span>
+<span class="sd">            &gt;&gt;&gt; project1 = project_manager.load(&#39;project1&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; project2 = project_manager.load(&#39;project2&#39;, &#39;/path/to/project&#39;) # doctest: +SKIP</span>
+
+<span class="sd">        :param name: name of project to load. Must be a string.</span>
+<span class="sd">        :param projectdir: path of project to load. Must be a path (see module path.py).</span>
+<span class="sd">                           By default, try to guess with name only.</span>
+<span class="sd">                           If there are various projects with the same name, return the first.</span>
+<span class="sd">        :return: Project</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="s">&#39;proj_path&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">projectdir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;proj_path&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s">&#39;path&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">projectdir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;path&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">projectdir</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">UnknownItemError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">projectdir</span><span class="p">)</span> <span class="o">/</span> <span class="n">name</span>
+            <span class="k">if</span> <span class="n">full_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;Project </span><span class="si">%s</span><span class="s"> in repository </span><span class="si">%s</span><span class="s"> does not exist&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">projectdir</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">project</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="n">project</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.close"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">proj_path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close current project.</span>
+
+<span class="sd">        :TODO: not yet implemented</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO: cleaner!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">UnknownItemError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="ProjectManager.clear"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear the list of projects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">GenericManager</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cproject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.notify"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.notify">[docs]</a>    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">signal</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="n">signal</span> <span class="o">==</span> <span class="s">&#39;project_changed&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_updated&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_close_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;close_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">unregister_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_closed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
+
+    <span class="nd">@cproject.setter</span>
+<div class="viewcode-block" id="ProjectManager.cproject"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.cproject">[docs]</a>    <span class="k">def</span> <span class="nf">cproject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">project</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;start_project&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+                <span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">shell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_started&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close_project</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_close_project</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span> <span class="o">=</span> <span class="n">project</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
+                <span class="n">project</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">shell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
+            <span class="n">project</span><span class="o">.</span><span class="n">register_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notify_listeners</span><span class="p">((</span><span class="s">&#39;project_changed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.clear_namespace"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.clear_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">clear_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_syspath</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">ns</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;world&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;project&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="kn">from</span> <span class="nn">openalea.core.world</span> <span class="kn">import</span> <span class="n">World</span>
+        <span class="n">world</span> <span class="o">=</span> <span class="n">World</span><span class="p">()</span>
+        <span class="n">world</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProjectManager.update_namespace"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.ProjectManager.update_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpreter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Definition: Update namespace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;lib&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">/</span> <span class="s">&#39;lib&#39;</span><span class="p">))</span>
+            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">ns</span><span class="p">)</span>
+            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;project&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span>
+            <span class="n">interpreter</span><span class="o">.</span><span class="n">user_ns</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cproject</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s">&#39;data&#39;</span>
+            <span class="kn">from</span> <span class="nn">openalea.core.world</span> <span class="kn">import</span> <span class="n">World</span>
+            <span class="n">world</span> <span class="o">=</span> <span class="n">World</span><span class="p">()</span>
+            <span class="n">world</span><span class="o">.</span><span class="n">update_namespace</span><span class="p">(</span><span class="n">interpreter</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../latest/dev/archi/apidoc/core/core.project.manager.html#core.project.manager.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">openalea.vpltk.qt</span> <span class="kn">import</span> <span class="n">QtGui</span>
+    <span class="kn">from</span> <span class="nn">openalea.core.service.ipython</span> <span class="kn">import</span> <span class="n">interpreter</span>
+    <span class="kn">from</span> <span class="nn">openalea.oalab.shell</span> <span class="kn">import</span> <span class="n">ShellWidget</span>
+
+    <span class="c"># Create Window with IPython shell</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">interp</span> <span class="o">=</span> <span class="n">interpreter</span><span class="p">()</span>
+    <span class="n">shellwdgt</span> <span class="o">=</span> <span class="n">ShellWidget</span><span class="p">(</span><span class="n">interp</span><span class="p">)</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">shellwdgt</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c"># Create Project Manager</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">()</span>
+
+    <span class="c"># Create or load project</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;project_test&quot;</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="p">(</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">):</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

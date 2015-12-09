@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="OpenAlea community website" href="../../../../../index.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -35,30 +35,155 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-image_wralea.serial.serial"></span><p>This module import functions to manipulate images</p>
+<dl class="function">
+<dt id="image_wralea.serial.serial.wra_imread">
+<tt class="descclassname">image_wralea.serial.serial.</tt><tt class="descname">wra_imread</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../../../_modules/image_wralea/serial/serial.html#wra_imread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image_wralea.serial.serial.wra_imread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads an image file completely into memory.</p>
+<p>It uses the file extension to determine how to read the file. It first tries
+some specific readers for volume images (Inrimages, TIFFs, LSMs, NPY) or falls
+back on PIL readers for common formats if installed.</p>
+<p>In all cases the returned image is 3D (2D is upgraded to single slice 3D).
+If it has colour or is a vector field it is even 4D.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><cite>filename</cite> (str)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Type:</th><td class="field-body"><p class="first last"><a href="#id5"><span class="problematic" id="id6">|SpatialImage|</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image_wralea.serial.serial.wra_imsave">
+<tt class="descclassname">image_wralea.serial.serial.</tt><tt class="descname">wra_imsave</tt><big>(</big><em>filename</em>, <em>img</em><big>)</big><a class="reference internal" href="../../../../../_modules/image_wralea/serial/serial.html#wra_imsave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image_wralea.serial.serial.wra_imsave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a <a href="#id7"><span class="problematic" id="id8">|SpatialImage|</span></a> to filename.</p>
+<p>The filewriter is choosen according to the file extension. However all file extensions
+will not match the data held by img, in dimensionnality or encoding, and might raise <a href="#id1"><span class="problematic" id="id2">`</span></a>IOError`s.</p>
+<p>For real volume data, Inrimage and NPY are currently supported.
+For <a href="#id3"><span class="problematic" id="id4">|</span></a>SpatialImage|s that are actually 2D, PNG, BMP, JPG among others are supported if PIL is installed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><cite>filename</cite> (str)</li>
+<li><cite>img</cite> (<a href="#id9"><span class="problematic" id="id10">|SpatialImage|</span></a>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image_wralea.serial.serial.wra_load">
+<tt class="descclassname">image_wralea.serial.serial.</tt><tt class="descname">wra_load</tt><big>(</big><em>filename</em>, <em>mmap_mode</em><big>)</big><a class="reference internal" href="../../../../../_modules/image_wralea/serial/serial.html#wra_load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image_wralea.serial.serial.wra_load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a pickled, <tt class="docutils literal"><span class="pre">.npy</span></tt>, or <tt class="docutils literal"><span class="pre">.npz</span></tt> binary file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first">
+<li><p class="first"><cite>file</cite> (file or str)</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>mmap_mode</cite> (None, 'r+', 'r', 'w+', 'c') - optional</dt>
+<dd><p class="first last">If not None, then memory-map the file, using the given mode
+(see <cite>numpy.memmap</cite>).  The mode has no effect for pickled or
+zipped files.
+A memory-mapped array is stored on disk, and not directly loaded
+into memory.  However, it can be accessed and sliced like any
+ndarray.  Memory mapping is especially useful for accessing
+small fragments of large files without reading the entire file
+into memory.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><cite>is_vectorial</cite> (bool) - specifically deal with file as if it was</dt>
+<dd><p class="first last">a 2D vectorial (RGB[A]) image so that it returns a 3D RGBA image
+and conforms to the contract.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Type:</th><td class="field-body"><p class="first last"><a href="#id11"><span class="problematic" id="id12">|SpatialImage|</span></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="image_wralea.serial.serial.wra_save">
+<tt class="descclassname">image_wralea.serial.serial.</tt><tt class="descname">wra_save</tt><big>(</big><em>filename</em>, <em>img</em><big>)</big><a class="reference internal" href="../../../../../_modules/image_wralea/serial/serial.html#wra_save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#image_wralea.serial.serial.wra_save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save an array to a binary file in numpy format with a <a href="#id13"><span class="problematic" id="id14">|SpatialImage|</span></a> header.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">There is no way to distinguish a 2D RGB[A] image from a 3D scalar image.
+If img is a 2D RGB[A] image, make sure its shape is similar to (SX,SY,1,3) for RGB or
+(SX,SY,1,4) for RGBA.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last">
+<li><dl class="first docutils">
+<dt><cite>filename</cite> (file or str) - Filename to which the data is saved.</dt>
+<dd><p class="first last">If the filename does not already have a &quot;.npy&quot;
+extension, it is added.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><cite>img</cite> (array)</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>is_vectorial</cite> (bool) - specifically deal with img as if it was</dt>
+<dd><p class="first last">a 2D vectorial (RGB[A]) image so that it saves it as a 3D RGBA image
+and conforms to the contract.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/image/image_wralea.serial.serial.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/image/image_wralea.serial.serial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -75,7 +200,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -84,12 +209,12 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

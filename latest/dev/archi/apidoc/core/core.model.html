@@ -28,8 +28,8 @@
     <link rel="next" title="&lt;no title&gt;" href="core.node.html" />
     <link rel="prev" title="&lt;no title&gt;" href="core.metadatadict.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,23 +44,290 @@
         <li class="right" >
           <a href="core.metadatadict.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-core.model"></span><p>A Model is an object that can be run.
+It is generally used to define algorithms or process.</p>
+<p>A model has inputs, outputs and an internal state.
+Inputs and outputs are used to allow communication between environnement and models and between models.
+Internal state is used by the model itself but cannot be reached from outside.
+This internal step is generally used when user want to execute model step by step,
+each step depending on previous one.</p>
+<p>To define model instructions, you need to define at least &quot;step&quot; instructions.
+To do that, you can use:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#core.model.IModel.set_step_code" title="core.model.IModel.set_step_code"><tt class="xref py py-meth docutils literal"><span class="pre">set_step_code()</span></tt></a></li>
+</ul>
+</div></blockquote>
+<p>To use a Model, you also need to define set_code method that is able to extract inputs, outpus and step, init, ...
+from given source code.</p>
+<p>Animate notification are not yet implemented.</p>
+<p>To reset internal state, use <a class="reference internal" href="../../api_model.html#openalea.core.model.IModel.init" title="openalea.core.model.IModel.init"><tt class="xref py py-meth docutils literal"><span class="pre">init()</span></tt></a> method.
+To run one step, use <a class="reference internal" href="../../api_model.html#openalea.core.model.IModel.step" title="openalea.core.model.IModel.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a> method.</p>
+<p>Two convenience methods, see <a class="reference internal" href="../../api_model.html#openalea.core.model.IModel.run" title="openalea.core.model.IModel.run"><tt class="xref py py-meth docutils literal"><span class="pre">run()</span></tt></a> and &quot;call&quot;
+can be used to reset internal state and run a given number of step (one by default)</p>
+<p>By default, functions are generated for &quot;init&quot;, &quot;run&quot; and &quot;animate&quot;</p>
+<dl class="class">
+<dt id="core.model.IModel">
+<em class="property">class </em><tt class="descclassname">core.model.</tt><tt class="descname">IModel</tt><big>(</big><em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="method">
+<dt id="core.model.IModel.animate">
+<tt class="descname">animate</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.animate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.animate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like run but send notification at each step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.init">
+<tt class="descname">init</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset internal state, fill namespace and run &quot;init code&quot; if defined.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.run">
+<tt class="descname">run</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Init model and run &quot;nstep&quot; step(s).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.set_code">
+<tt class="descname">set_code</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.set_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.set_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>extract and set inputs, outputs and functions from code.
+For example, if &quot;code&quot; is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">input = a, b:int=5</span>
+<span class="sd">output = c</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="k">def</span> <span class="nf">step</span><span class="p">():</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span>
+</pre></div>
+</div>
+<p>you can extract input, output and step function.
+So,
+m = Model(&quot;m1&quot;)
+m.set_code(code)</p>
+<p>is equivalent to</p>
+<p>m = Model(&quot;m1&quot;)
+m.set_func_code(&quot;step&quot;, &quot;c=a+b&quot;)
+m.inputs_info = [InputObj('a'), InputObj('b:int=5')]
+m.outputs_info = [OutputObj('c')]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.set_func_code">
+<tt class="descname">set_func_code</tt><big>(</big><em>fname</em>, <em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.set_func_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.set_func_code" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fname</strong> -- function name: &quot;step&quot;, &quot;init&quot;, &quot;animate&quot;, ...</li>
+<li><strong>code</strong> -- python source code</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.set_step_code">
+<tt class="descname">set_step_code</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.set_step_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.set_step_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>convenience method equivalent to set_func_code(&quot;step&quot;, code)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.step">
+<tt class="descname">step</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>run &quot;step code&quot; if defined.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.IModel.stop">
+<tt class="descname">stop</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#IModel.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.IModel.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop execution.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.IModel.dtype">
+<tt class="descname">dtype</tt><em class="property"> = None</em><a class="headerlink" href="#core.model.IModel.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.IModel.mimetype">
+<tt class="descname">mimetype</tt><em class="property"> = None</em><a class="headerlink" href="#core.model.IModel.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.model.Model">
+<em class="property">class </em><tt class="descclassname">core.model.</tt><tt class="descname">Model</tt><big>(</big><em>name=None</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="method">
+<dt id="core.model.Model.animate">
+<tt class="descname">animate</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.animate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.animate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.eval_value">
+<tt class="descname">eval_value</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.eval_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.eval_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.execute">
+<tt class="descname">execute</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.execute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.get_documentation">
+<tt class="descname">get_documentation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.get_documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.get_documentation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a string with the documentation of the model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.init">
+<tt class="descname">init</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.inputs_from_ns">
+<tt class="descname">inputs_from_ns</tt><big>(</big><em>inputs</em>, <em>ns</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.inputs_from_ns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.inputs_from_ns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.output_from_ns">
+<tt class="descname">output_from_ns</tt><big>(</big><em>namespace</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.output_from_ns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.output_from_ns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get outputs from namespace and set them inside self.outputs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>namespace</strong> -- dict where the model will search the outputs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.repr_code">
+<tt class="descname">repr_code</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.repr_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.repr_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.run">
+<tt class="descname">run</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.run_code">
+<tt class="descname">run_code</tt><big>(</big><em>code</em>, <em>namespace</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.run_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.run_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.set_code">
+<tt class="descname">set_code</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.set_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.set_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.set_func_code">
+<tt class="descname">set_func_code</tt><big>(</big><em>fname</em>, <em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.set_func_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.set_func_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.set_step_code">
+<tt class="descname">set_step_code</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.set_step_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.set_step_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.Model.step">
+<tt class="descname">step</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#Model.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.Model.code">
+<tt class="descname">code</tt><a class="headerlink" href="#core.model.Model.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.Model.icon">
+<tt class="descname">icon</tt><em class="property"> = ''</em><a class="headerlink" href="#core.model.Model.icon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.Model.step_code">
+<tt class="descname">step_code</tt><a class="reference internal" href="../../../../../_modules/core/model.html#Model.step_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.Model.step_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.model.PythonModel">
+<em class="property">class </em><tt class="descclassname">core.model.</tt><tt class="descname">PythonModel</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#PythonModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.PythonModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.model.Model" title="core.model.Model"><tt class="xref py py-class docutils literal"><span class="pre">core.model.Model</span></tt></a></p>
+<dl class="method">
+<dt id="core.model.PythonModel.get_documentation">
+<tt class="descname">get_documentation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#PythonModel.get_documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.PythonModel.get_documentation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a string with the documentation of the model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.model.PythonModel.repr_code">
+<tt class="descname">repr_code</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#PythonModel.repr_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.PythonModel.repr_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.model.PythonModel.set_code">
+<tt class="descname">set_code</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/model.html#PythonModel.set_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.model.PythonModel.set_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.PythonModel.default_name">
+<tt class="descname">default_name</tt><em class="property"> = 'Python'</em><a class="headerlink" href="#core.model.PythonModel.default_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.PythonModel.dtype">
+<tt class="descname">dtype</tt><em class="property"> = 'Python'</em><a class="headerlink" href="#core.model.PythonModel.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.model.PythonModel.mimetype">
+<tt class="descname">mimetype</tt><em class="property"> = 'text/x-python'</em><a class="headerlink" href="#core.model.PythonModel.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="core.metadatadict.html"
@@ -68,14 +335,12 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="core.node.html"
                         title="next chapter">&lt;no title&gt;</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.model.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.model.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -92,7 +357,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -107,14 +372,14 @@
         <li class="right" >
           <a href="core.metadatadict.html" title="&lt;no title&gt;"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" >core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" >core package</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

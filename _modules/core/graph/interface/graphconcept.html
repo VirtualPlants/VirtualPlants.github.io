@@ -1,0 +1,416 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.graph.interface.graphconcept &mdash; OpenAlea community website</title>
+    
+    <link rel="stylesheet" href="../../../../_static/virtualplants.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="OpenAlea community website" href="../../../../index.html" />
+    <link rel="up" title="core" href="../../../core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../core.html" accesskey="U">core</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.graph.interface.graphconcept</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;A graph Interface.&quot;&quot;&quot;</span>
+
+
+<span class="c"># errors definition</span>
+<div class="viewcode-block" id="GraphError"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphError">[docs]</a><span class="k">class</span> <span class="nc">GraphError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="InvalidVertex"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.InvalidVertex">[docs]</a><span class="k">class</span> <span class="nc">InvalidVertex</span><span class="p">(</span><span class="n">GraphError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="InvalidEdge"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.InvalidEdge">[docs]</a><span class="k">class</span> <span class="nc">InvalidEdge</span><span class="p">(</span><span class="n">GraphError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="InvalidGraph"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.InvalidGraph">[docs]</a><span class="k">class</span> <span class="nc">InvalidGraph</span><span class="p">(</span><span class="n">GraphError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="InexistingVertex"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.InexistingVertex">[docs]</a><span class="k">class</span> <span class="nc">InexistingVertex</span><span class="p">(</span><span class="n">GraphError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;todo&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="GraphConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept">[docs]</a><span class="k">class</span> <span class="nc">GraphConcept</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Graph concept or graph interface.</span>
+<span class="sd">    To separate algo and data structures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GraphConcept.source"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept.source">[docs]</a>    <span class="k">def</span> <span class="nf">source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the source vertex of the edge.</span>
+<span class="sd">    </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `edge_id`: The edge identifier.</span>
+
+<span class="sd">        :Types:</span>
+<span class="sd">         - `edge_id`: id</span>
+
+<span class="sd">        :Return: vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="GraphConcept.target"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept.target">[docs]</a>    <span class="k">def</span> <span class="nf">target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the target vertex of the edge.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `edge_id`: The edge identifier.</span>
+
+<span class="sd">        :Return: vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="GraphConcept.edge"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept.edge">[docs]</a>    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the edge identifier or an iterator if the graph is a  </span>
+<span class="sd">        multiplegraph.</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `source`: vtx_id </span>
+<span class="sd">         - `target`: vtx_id</span>
+
+<span class="sd">        :Return: iter of edge_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_vertex</span><span class="p">(</span><span class="n">vtx_id</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GraphConcept.has_vertex"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept.has_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">has_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test the existence of a vertex in the graph.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id`: The vertex identifier.</span>
+
+<span class="sd">        :Return: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="GraphConcept.has_edge"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept.has_edge">[docs]</a>    <span class="k">def</span> <span class="nf">has_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test the existence of an edge in the graph.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `edge_id`: The edge identifier.</span>
+
+<span class="sd">        :Return: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="GraphConcept.is_valid"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.GraphConcept.is_valid">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Is the graph valid?</span>
+
+<span class="sd">        :Return: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="VertexListGraphConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept">[docs]</a><span class="k">class</span> <span class="nc">VertexListGraphConcept</span><span class="p">(</span><span class="n">GraphConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vertex List Graph Concept.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_vertices</span><span class="p">()</span>
+
+<div class="viewcode-block" id="VertexListGraphConcept.nb_vertices"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.nb_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">nb_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of vertices.</span>
+
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.vertices"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.vertices">[docs]</a>    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: iter of vertex_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.nb_in_neighbors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.nb_in_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_in_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.in_neighbors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.in_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">in_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: iter of vertex_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.nb_out_neighbors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.nb_out_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_out_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.out_neighbors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.out_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">out_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: iter of vertex_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.nb_neighbors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.nb_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">nb_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="VertexListGraphConcept.neighbors"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.VertexListGraphConcept.neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: iter of vertex_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="EdgeListGraphConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept">[docs]</a><span class="k">class</span> <span class="nc">EdgeListGraphConcept</span><span class="p">(</span><span class="n">GraphConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Edge List Graph Concept</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EdgeListGraphConcept.nb_edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept.nb_edges">[docs]</a>    <span class="k">def</span> <span class="nf">nb_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vid</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="EdgeListGraphConcept.edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept.edges">[docs]</a>    <span class="k">def</span> <span class="nf">edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an iterator of edge identifier.</span>
+<span class="sd">        If `vtx_id` is specified, return input and output edges of `vtx_id`</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id` </span>
+<span class="sd">        :Return: iter of edge id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>  
+
+</div>
+<div class="viewcode-block" id="EdgeListGraphConcept.nb_in_edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept.nb_in_edges">[docs]</a>    <span class="k">def</span> <span class="nf">nb_in_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="EdgeListGraphConcept.in_edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept.in_edges">[docs]</a>    <span class="k">def</span> <span class="nf">in_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return input edges of `vtx_id`</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id` </span>
+
+<span class="sd">        :Return: iter of edges</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="EdgeListGraphConcept.nb_out_edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept.nb_out_edges">[docs]</a>    <span class="k">def</span> <span class="nf">nb_out_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :Return: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="EdgeListGraphConcept.out_edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.EdgeListGraphConcept.out_edges">[docs]</a>    <span class="k">def</span> <span class="nf">out_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return output edges of `vtx_id`</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `vtx_id` </span>
+
+<span class="sd">        :Return: iter of edges</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="MutableVertexGraphConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableVertexGraphConcept">[docs]</a><span class="k">class</span> <span class="nc">MutableVertexGraphConcept</span><span class="p">(</span><span class="n">VertexListGraphConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mutable Vertex Graph Concept</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MutableVertexGraphConcept.vertex_id"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableVertexGraphConcept.vertex_id">[docs]</a>    <span class="k">def</span> <span class="nf">vertex_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a free vertex identifier</span>
+
+<span class="sd">        :returns: vtx_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div>
+<div class="viewcode-block" id="MutableVertexGraphConcept.add_vertex"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableVertexGraphConcept.add_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="o">=</span> <span class="bp">None</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a vertex to the graph.</span>
+
+<span class="sd">        :param vtx_id: optional vertex identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="MutableVertexGraphConcept.remove_vertex"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableVertexGraphConcept.remove_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">remove_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtx_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove vertex from the graph</span>
+
+<span class="sd">        :param vtx_id: todo</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="MutableVertexGraphConcept.clear"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableVertexGraphConcept.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear vertices and edges of the graph.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="MutableEdgeGraphConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableEdgeGraphConcept">[docs]</a><span class="k">class</span> <span class="nc">MutableEdgeGraphConcept</span><span class="p">(</span><span class="n">EdgeListGraphConcept</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mutable Edge Graph Concept.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MutableEdgeGraphConcept.edge_id"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableEdgeGraphConcept.edge_id">[docs]</a>    <span class="k">def</span> <span class="nf">edge_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a free edge identifier</span>
+
+<span class="sd">        :Return: edge_id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="MutableEdgeGraphConcept.add_edge"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableEdgeGraphConcept.add_edge">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">edge_id</span><span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">create_vertex</span><span class="o">=</span> <span class="bp">False</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an edge to the graph.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `edge`: (vertex id, vertex id)</span>
+<span class="sd">         - `edge_id`: optional edge identifier</span>
+<span class="sd">         - `create_vertex`: optional flag for automatic vertices creation</span>
+<span class="sd">         &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="MutableEdgeGraphConcept.remove_edge"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableEdgeGraphConcept.remove_edge">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_id</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove `edge_id` from the graph</span>
+<span class="sd">   </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `edge_id` : edge identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="MutableEdgeGraphConcept.clear_edges"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.MutableEdgeGraphConcept.clear_edges">[docs]</a>    <span class="k">def</span> <span class="nf">clear_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove all edges.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="CopyConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.CopyConcept">[docs]</a><span class="k">class</span> <span class="nc">CopyConcept</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Copy Concept.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CopyConcept.copy"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.CopyConcept.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a shallow copy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+</div></div>
+<div class="viewcode-block" id="ExtendConcept"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.ExtendConcept">[docs]</a><span class="k">class</span> <span class="nc">ExtendConcept</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extend the actul data structure with an other.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ExtendConcept.extend"><a class="viewcode-back" href="../../../../latest/dev/archi/apidoc/core/core.graph.interface.graphconcept.html#core.graph.interface.graphconcept.ExtendConcept.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extend the actual graph with `graph`</span>
+<span class="sd">        PB: shift vertex id &amp; edge id?</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         - `graph` : a valid graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../core.html" >core</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, INRIA VirtualPlants.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

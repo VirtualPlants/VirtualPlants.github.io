@@ -28,8 +28,8 @@
     <link rel="next" title="&lt;no title&gt;" href="core.data.html" />
     <link rel="prev" title="&lt;no title&gt;" href="core.ctypes_ext.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,23 +44,137 @@
         <li class="right" >
           <a href="core.ctypes_ext.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-core.customexception"></span><dl class="exception">
+<dt id="core.customexception.CustomException">
+<em class="property">exception </em><tt class="descclassname">core.customexception.</tt><tt class="descname">CustomException</tt><big>(</big><em>*args</em>, <em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#CustomException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.CustomException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></a></p>
+<p>CustomException is an extension of builtin Exception.
+Goal is to provide an unique structure for all kind of exceptions to allow
+high-level exception handling.</p>
+<dl class="docutils">
+<dt>For this reason, CustomException always provides :</dt>
+<dd><ul class="first last simple">
+<li>a title (getTitle)</li>
+<li>a message (getMessage)</li>
+<li>a detailed description (getDesc)</li>
+</ul>
+</dd>
+</dl>
+<p>Typicall use is :</p>
+<dl class="docutils">
+<dt>def print_error(error):</dt>
+<dd>&quot;number of error arguments has no importance&quot;
+print_in_red(error.getTitle())
+print_in_blue(error.getMessage())</dd>
+<dt>try :</dt>
+<dd>action</dd>
+<dt>except CustomExceptionNumberOne,error :</dt>
+<dd>print_error(error)</dd>
+<dt>except CustomExceptionNumberTwo,error :</dt>
+<dd>print_error(error)</dd>
+<dt>except CustomExceptionNumberThree,error :</dt>
+<dd>fix the problem</dd>
+</dl>
+<p># CustomExceptionNumberFour isn't intercepted here but for example in GUI classes
+else :</p>
+<blockquote>
+<div>print 'done'</div></blockquote>
+<p>If CustomException takes one argument, you can reach it using &quot;%(value)s&quot;.
+If it takes more than one, you must reimplement _kargs method.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ErrNotMatchingPuzzlePiece</span><span class="p">(</span><span class="n">CustomException</span><span class="p">):</span>
+  <span class="n">title</span> <span class="o">=</span> <span class="s">u&#39;Error: puzzle pieces do not match&#39;</span>
+  <span class="n">message</span> <span class="o">=</span> <span class="s">u&#39;</span><span class="si">%(compass_1)s</span><span class="s"> part of piece </span><span class="si">%(piece_1)%</span><span class="s">s do not match </span><span class="si">%(compass_2)s</span><span class="s"> part of piece </span><span class="si">%(piece_2)%</span><span class="s">s&#39;</span>
+  <span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;This error is raised because ...&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_kargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+      <span class="n">compass_1</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">num</span><span class="p">),</span>
+      <span class="n">piece_1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+      <span class="n">compass_2</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">num</span><span class="p">),</span>
+      <span class="n">piece_2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+      <span class="p">)</span>
+
+<span class="c">#two raise this exception:</span>
+<span class="k">raise</span> <span class="n">ErrNotMatchingPuzzlePiece</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="s">u&#39;North&#39;</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s">u&#39;South&#39;</span><span class="p">)</span>
+<span class="c"># with p1 and p2 two &quot;Piece&quot; objects containing a &quot;num&quot; attribute.</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="core.customexception.CustomException.getDesc">
+<tt class="descname">getDesc</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#CustomException.getDesc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.CustomException.getDesc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.customexception.CustomException.getMessage">
+<tt class="descname">getMessage</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#CustomException.getMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.CustomException.getMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.customexception.CustomException.getTitle">
+<tt class="descname">getTitle</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#CustomException.getTitle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.CustomException.getTitle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.customexception.CustomException.kargs">
+<tt class="descname">kargs</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#CustomException.kargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.CustomException.kargs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.customexception.CustomException.rkargs">
+<tt class="descname">rkargs</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#CustomException.rkargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.CustomException.rkargs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.customexception.CustomException.desc">
+<tt class="descname">desc</tt><em class="property"> = u'No details available'</em><a class="headerlink" href="#core.customexception.CustomException.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.customexception.CustomException.message">
+<tt class="descname">message</tt><em class="property"> = u'An unknown error occurs'</em><a class="headerlink" href="#core.customexception.CustomException.message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="core.customexception.CustomException.title">
+<tt class="descname">title</tt><em class="property"> = u'Unknown Error'</em><a class="headerlink" href="#core.customexception.CustomException.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="core.customexception.UserException">
+<em class="property">exception </em><tt class="descclassname">core.customexception.</tt><tt class="descname">UserException</tt><big>(</big><em>*args</em>, <em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#UserException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.UserException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.customexception.CustomException" title="core.customexception.CustomException"><tt class="xref py py-class docutils literal"><span class="pre">core.customexception.CustomException</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.customexception.cast_error">
+<tt class="descclassname">core.customexception.</tt><tt class="descname">cast_error</tt><big>(</big><em>error</em>, <em>klass</em>, <em>title=True</em>, <em>message=True</em>, <em>desc=True</em>, <em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#cast_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.cast_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.customexception.display_error_color">
+<tt class="descclassname">core.customexception.</tt><tt class="descname">display_error_color</tt><big>(</big><em>e</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/customexception.html#display_error_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.customexception.display_error_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="core.ctypes_ext.html"
@@ -68,14 +182,12 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="core.data.html"
                         title="next chapter">&lt;no title&gt;</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.customexception.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.customexception.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -92,7 +204,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -107,14 +219,14 @@
         <li class="right" >
           <a href="core.ctypes_ext.html" title="&lt;no title&gt;"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" >core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" >core package</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

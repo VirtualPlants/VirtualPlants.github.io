@@ -28,8 +28,8 @@
     <link rel="next" title="&lt;no title&gt;" href="core.ctypes_ext.html" />
     <link rel="prev" title="&lt;no title&gt;" href="core.color_palette.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,23 +44,489 @@
         <li class="right" >
           <a href="core.color_palette.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" accesskey="U">core package</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
-  
+  <span class="target" id="module-core.compositenode"></span><p>A CompositeNode is a Node that contains other nodes connected in a directed
+graph. A CompositeNodeFactory instance is a factory that build CompositeNode
+instances. Different instances of the same factory can coexist and can be
+modified in a dataflow.</p>
+<dl class="exception">
+<dt id="core.compositenode.IncompatibleNodeError">
+<em class="property">exception </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">IncompatibleNodeError</tt><a class="reference internal" href="../../../../../_modules/core/compositenode.html#IncompatibleNodeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.IncompatibleNodeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></a></p>
+<p>todo</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.CompositeNode">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">CompositeNode</tt><big>(</big><em>inputs=()</em>, <em>outputs=()</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.core.node.Node</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">openalea.core.dataflow.DataFlow</span></tt></p>
+<p>The CompositeNode is a container that interconnect
+different node instances between them in directed graph.</p>
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.add_node">
+<tt class="descname">add_node</tt><big>(</big><em>node</em>, <em>vid=None</em>, <em>modify=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.add_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a node in the Graph with a particular id
+if id is None, autogenrate one</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>node</strong> -- the node instance</li>
+<li><strong>vid</strong> -- element id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the id</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.compute_external_io">
+<tt class="descname">compute_external_io</tt><big>(</big><em>vertex_selection</em>, <em>new_vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.compute_external_io"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.compute_external_io" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of input and output edges to connect the composite
+node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.compute_io">
+<tt class="descname">compute_io</tt><big>(</big><em>v_list=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.compute_io"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.compute_io" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return (inputs, outputs, connections)</p>
+<p>representing the free port of node
+v_list is a vertex id list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.connect">
+<tt class="descname">connect</tt><big>(</big><em>src_id</em>, <em>port_src</em>, <em>dst_id</em>, <em>port_dst</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect 2 elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>src_id</strong> -- source node id</li>
+<li><strong>port_src</strong> -- source output port number</li>
+<li><strong>dst_id</strong> -- destination node id</li>
+<li><strong>port_dst</strong> -- destination input port number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.copy_to">
+<tt class="descname">copy_to</tt><big>(</big><em>other</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.copy_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.copy_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.disconnect">
+<tt class="descname">disconnect</tt><big>(</big><em>src_id</em>, <em>port_src</em>, <em>dst_id</em>, <em>port_dst</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deconnect 2 elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>src_id</strong> -- source node id</li>
+<li><strong>port_src</strong> -- source output port number</li>
+<li><strong>dst_id</strong> -- destination node id</li>
+<li><strong>port_dst</strong> -- destination input port number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.eval">
+<tt class="descname">eval</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the graph</p>
+<p>Return True if the node need a reevaluation (like generator)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.eval_as_expression">
+<tt class="descname">eval_as_expression</tt><big>(</big><em>vtx_id=None</em>, <em>step=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.eval_as_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.eval_as_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate a vtx_id</p>
+<p>if node_id is None, then all the nodes without sons are evaluated</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.get_eval_algo">
+<tt class="descname">get_eval_algo</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.get_eval_algo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.get_eval_algo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the evaluation algo instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.get_input">
+<tt class="descname">get_input</tt><big>(</big><em>index_key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.get_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.get_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the composite node input</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.get_output">
+<tt class="descname">get_output</tt><big>(</big><em>index_key</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.get_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.get_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve values from output node input ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.invalidate">
+<tt class="descname">invalidate</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.invalidate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.invalidate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidate nodes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.node">
+<tt class="descname">node</tt><big>(</big><em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.notify_vertex_addition">
+<tt class="descname">notify_vertex_addition</tt><big>(</big><em>vertex</em>, <em>vid=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.notify_vertex_addition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.notify_vertex_addition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.notify_vertex_removal">
+<tt class="descname">notify_vertex_removal</tt><big>(</big><em>vertex</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.notify_vertex_removal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.notify_vertex_removal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.remove_edge">
+<tt class="descname">remove_edge</tt><big>(</big><em>eid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.remove_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.remove_edge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.remove_node">
+<tt class="descname">remove_node</tt><big>(</big><em>vtx_id</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.remove_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove a node from the graph
+:param vtx_id: element id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.replace_node">
+<tt class="descname">replace_node</tt><big>(</big><em>vid</em>, <em>newnode</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.replace_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.replace_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the node vid by newnode</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset nodes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.set_continuous_eval">
+<tt class="descname">set_continuous_eval</tt><big>(</big><em>vid</em>, <em>state=True</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.set_continuous_eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.set_continuous_eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>set vid as a continuous evaluated node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.set_input">
+<tt class="descname">set_input</tt><big>(</big><em>index_key</em>, <em>val=None</em>, <em>*args</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.set_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.set_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy val into input node output ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.set_io">
+<tt class="descname">set_io</tt><big>(</big><em>inputs</em>, <em>outputs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.set_io"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.set_io" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define inputs and outputs</p>
+<p>Inputs and outputs are list of dict(name='', interface='', value='')</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.set_output">
+<tt class="descname">set_output</tt><big>(</big><em>index_key</em>, <em>val</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.set_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.set_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a value to an output</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.simulate_destruction_notifications">
+<tt class="descname">simulate_destruction_notifications</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.simulate_destruction_notifications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.simulate_destruction_notifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>emits messages as if we were adding elements to
+the composite node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.to_factory">
+<tt class="descname">to_factory</tt><big>(</big><em>sgfactory</em>, <em>listid=None</em>, <em>auto_io=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.to_factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.to_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update CompositeNodeFactory to fit with the graph</p>
+<p>listid is a list of element to export. If None, select all id.
+if auto_io is true :  inputs and outputs are connected to the free
+ports</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.to_script">
+<tt class="descname">to_script</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.to_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.to_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate the dataflow into a python script.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNode.update_eval_listeners">
+<tt class="descname">update_eval_listeners</tt><big>(</big><em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNode.update_eval_listeners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNode.update_eval_listeners" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update continuous evaluation listener for node vid</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.compositenode.CompositeNode.mimetype">
+<tt class="descname">mimetype</tt><em class="property"> = 'openalea/compositenode'</em><a class="headerlink" href="#core.compositenode.CompositeNode.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.CompositeNodeFactory">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">CompositeNodeFactory</tt><big>(</big><em>*args</em>, <em>**kargs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.core.node.AbstractFactory</span></tt></p>
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.copy">
+<tt class="descname">copy</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy factory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> -- new search path</li>
+<li><strong>replace_pkg</strong> -- old and new package names.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>When replace package is set, change the package id for all the
+elt factories.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.create_fake_node">
+<tt class="descname">create_fake_node</tt><big>(</big><em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.create_fake_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.create_fake_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an empty node with the correct number of inputs
+and output</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.get_documentation">
+<tt class="descname">get_documentation</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.get_documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.get_documentation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.get_writer">
+<tt class="descname">get_writer</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.get_writer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.get_writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the writer class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.instantiate">
+<tt class="descname">instantiate</tt><big>(</big><em>call_stack=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.instantiate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.instantiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a CompositeNode instance and allocate all elements
+This function overide default implementation of NodeFactory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>call_stack</strong> -- the list of NodeFactory id already in recursion stack (in order to avoid infinite loop)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.instantiate_node">
+<tt class="descname">instantiate_node</tt><big>(</big><em>vid</em>, <em>call_stack=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.instantiate_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.instantiate_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partial instantiation</p>
+<p>instantiate only elt_id in CompositeNode</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>call_stack</strong> -- a list of parent id (to avoid infinite recursion)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.instantiate_widget">
+<tt class="descname">instantiate_widget</tt><big>(</big><em>node=None</em>, <em>parent=None</em>, <em>edit=False</em>, <em>autonomous=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.instantiate_widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.instantiate_widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the corresponding widget initialised with node</p>
+<p>If node is None, the node is allocated else a composite
+widget composed with the node sub widget is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.is_composite_node">
+<tt class="descname">is_composite_node</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.is_composite_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.is_composite_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.load_ad_hoc_data">
+<tt class="descname">load_ad_hoc_data</tt><big>(</big><em>node</em>, <em>elt_data</em>, <em>elt_ad_hoc=None</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.load_ad_hoc_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.load_ad_hoc_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeFactory.paste">
+<tt class="descname">paste</tt><big>(</big><em>cnode</em>, <em>data_modifiers=</em>, <span class="optional">[</span><span class="optional">]</span><em>call_stack=None</em>, <em>meta=False</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeFactory.paste"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.paste" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paste to an existing CompositeNode instance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cnode</strong> -- composite node instance</li>
+<li><strong>data_modifiers</strong> -- list of 2-uple (key, function) to apply
+to internal data (for instance to move the node)</li>
+<li><strong>call_stack</strong> -- the list of NodeFactory id already in recursion
+stack (in order to avoid infinite loop)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the list of created id</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.compositenode.CompositeNodeFactory.mimetype">
+<tt class="descname">mimetype</tt><em class="property"> = 'openalea/compositenodefactory'</em><a class="headerlink" href="#core.compositenode.CompositeNodeFactory.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd><p>The CompositeNodeFactory is able to create CompositeNode instances
+Each node has an unique id : the element id (elt_id)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.CompositeNodeInput">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">CompositeNodeInput</tt><big>(</big><em>inputs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.core.node.Node</span></tt></p>
+<p>Dummy node to represent the composite node inputs</p>
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeInput.eval">
+<tt class="descname">eval</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeInput.eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeInput.eval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeInput.get_input">
+<tt class="descname">get_input</tt><big>(</big><em>input_pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeInput.get_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeInput.get_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the input value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeInput.set_input">
+<tt class="descname">set_input</tt><big>(</big><em>input_pid</em>, <em>val=None</em>, <em>*args</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeInput.set_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeInput.set_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define input value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeInput.to_script">
+<tt class="descname">to_script</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeInput.to_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeInput.to_script" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.CompositeNodeOutput">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">CompositeNodeOutput</tt><big>(</big><em>outputs</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeOutput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.core.node.Node</span></tt></p>
+<p>Dummy node to represent the composite node outputs</p>
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeOutput.eval">
+<tt class="descname">eval</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeOutput.eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeOutput.eval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeOutput.get_output">
+<tt class="descname">get_output</tt><big>(</big><em>output_pid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeOutput.get_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeOutput.get_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Output value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeOutput.set_output">
+<tt class="descname">set_output</tt><big>(</big><em>output_pid</em>, <em>val</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeOutput.set_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeOutput.set_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define output</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.compositenode.CompositeNodeOutput.to_script">
+<tt class="descname">to_script</tt><big>(</big><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#CompositeNodeOutput.to_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.CompositeNodeOutput.to_script" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.ContinuousEvalListener">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">ContinuousEvalListener</tt><big>(</big><em>dataflow</em>, <em>vid</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#ContinuousEvalListener"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.ContinuousEvalListener" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">openalea.grapheditor.observer.AbstractListener</span></tt></p>
+<p>When notified this listener reexecute a dataflow on a particular vid)</p>
+<dl class="method">
+<dt id="core.compositenode.ContinuousEvalListener.notify">
+<tt class="descname">notify</tt><big>(</big><em>sender</em>, <em>event</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#ContinuousEvalListener.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.ContinuousEvalListener.notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notification</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.JSONCNFactoryWriter">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">JSONCNFactoryWriter</tt><big>(</big><em>factory</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#JSONCNFactoryWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.JSONCNFactoryWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.compositenode.PyCNFactoryWriter" title="core.compositenode.PyCNFactoryWriter"><tt class="xref py py-class docutils literal"><span class="pre">core.compositenode.PyCNFactoryWriter</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="core.compositenode.PyCNFactoryWriter">
+<em class="property">class </em><tt class="descclassname">core.compositenode.</tt><tt class="descname">PyCNFactoryWriter</tt><big>(</big><em>factory</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#PyCNFactoryWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.PyCNFactoryWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>CompositeNodeFactory python Writer</p>
+<dl class="method">
+<dt id="core.compositenode.PyCNFactoryWriter.pprint_repr">
+<tt class="descname">pprint_repr</tt><big>(</big><em>obj</em>, <em>indent=3</em><big>)</big><a class="reference internal" href="../../../../../_modules/core/compositenode.html#PyCNFactoryWriter.pprint_repr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.compositenode.PyCNFactoryWriter.pprint_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty print repr</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="core.compositenode.PyCNFactoryWriter.sgfactory_template">
+<tt class="descname">sgfactory_template</tt><em class="property"> = '\n\n$NAME = CompositeNodeFactory(name=$PNAME,\n                             description=$DESCRIPTION,\n                             category=$CATEGORY,\n                             doc=$DOC,\n                             inputs=$INPUTS,\n                             outputs=$OUTPUTS,\n                             elt_factory=$ELT_FACTORY,\n                             elt_connections=$ELT_CONNECTIONS,\n                             elt_data=$ELT_DATA,\n                             elt_value=$ELT_VALUE,\n                             elt_ad_hoc=$ELT_AD_HOC,\n                             lazy=$LAZY,\n                             eval_algo=$EVALALGO,\n                             )\n\n'</em><a class="headerlink" href="#core.compositenode.PyCNFactoryWriter.sgfactory_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="core.color_palette.html"
@@ -68,14 +534,12 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="core.ctypes_ext.html"
                         title="next chapter">&lt;no title&gt;</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.compositenode.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/latest/dev/archi/apidoc/core/core.compositenode.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../../../search.html" method="get">
       <input type="text" name="q" />
@@ -92,7 +556,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -107,14 +571,14 @@
         <li class="right" >
           <a href="core.color_palette.html" title="&lt;no title&gt;"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="core.html" >core package</a> &raquo;</li> 
+        <li><a href="../../../../../index.html">OpenAlea community website</a> &raquo;</li>
+          <li><a href="../../index.html" >OpenAleaLab API and concepts</a> &raquo;</li>
+          <li><a href="core.html" >core package</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, INRIA VirtualPlants.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

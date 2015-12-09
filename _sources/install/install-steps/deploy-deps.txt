@@ -1,21 +1,27 @@
-See `Linux <http://openalea.gforge.inria.fr/dokuwiki/doku.php?id=documentation:user:installation_linux>`_ or `MacOSX <http://openalea.gforge.inria.fr/dokuwiki/doku.php?id=documentation:user:installation_mac>`_ page on  `openalea website <http://openalea.gforge.inria.fr>`_.
-
-Then, if not yet installed, install openalea dependencies: **deploy** and **sconsx**
-
-Open a terminal, go to the directory where you want to install programs, for example
+Open a shell prompt and go to the directory where you want to install programs. For example:
 
 .. code-block:: bash
 
   cd $HOME/development
 
+Then, download OpenAlea dependencies: **deploy** and **sconsx**
+
 .. code-block:: bash
 
   git clone https://github.com/openalea/deploy.git
-  cd deploy
-  python setup.py COMMAND
-  cd -
+  git clone https://github.com/openalea/sconsx.git
 
-COMMAND can be:
+These previous commands clone **deploy** and **sconsx** repositories, and must be executed only one time. Then, install OpenAlea dependencies. For these packages:
+
+  - deploy
+  - sconsx
+
+.. code-block:: bash
+
+  cd package
+  python setup.py COMMAND
+
+where COMMAND can be:
   
   - **develop --user** : to install in developer mode, in your home dir
   - `develop --prefix=$HOME/local` : to install in developer mode in directory of your choice
@@ -25,10 +31,3 @@ COMMAND can be:
 .. warning::
 
   If you don't know exactly what to do, please use: **develop --user**
-
-.. code-block:: bash
-
-  git clone https://github.com/openalea/sconsx.git
-  cd sconsx
-  python setup.py COMMAND
-  cd -
